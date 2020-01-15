@@ -1,0 +1,513 @@
+﻿@model Seaboard.Intranet.Domain.Models.AccountPayables
+
+@{
+    ViewBag.Title = "Transacciones de cuentas por pagar";
+}
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Transacciones de cuentas por pagar</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li>
+                <a href="@Url.Action("Index", "AccountPayables")">Listado de transacciones</a>
+            </li>
+            <li class="active">
+                <strong>Transacciones de cuentas por pagar</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h3>Transacciones de cuentas por pagar</h3>
+                </div>
+
+                <div class="ibox-content">
+                    <div class="form-group">
+                        <div class="col-sm-12 col-sm-offset-1">
+                            <button type="button" class="btn btn-primary" onclick="procesarSolicitud();"><i class="fa fa-add"></i>  Guardar</button>
+                            <button type="button" class="btn btn-default" onclick="limpiarCampos();"><i class="fa fa-refresh"></i>  Borrar</button>
+                        </div>
+                    </div>
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="tabs-container">
+            <ul class="nav nav-tabs">
+                <li class="active"><a data-toggle="tab" href="#tab-1"> Datos Basicos</a></li>
+                <li class=""><a data-toggle="tab" href="#tab-2" onclick="cargarArchivos();"> Adjuntos</a></li>
+            </ul>
+            <div class="tab-content">
+                <div id="tab-1" class="tab-pane active">
+                    @using (Html.BeginForm("Edit", "AccountPayables", FormMethod.Post, new { @id = "AccountPayablesEdit" }))
+                    {
+                        @Html.AntiForgeryToken()
+
+                        <div class="panel-body">
+                            <div class="col-md-6 col-sm-6 col-xs-12">
+
+                                <div class="form-group">
+                                    <label class="col-sm-5 control-label">@Html.LabelFor(m => m.Type, "Tipo de documento"):</label>
+                                    <div class="col-sm-7 input-group">
+                                        @Html.EnumDropDownListFor(m => m.Type, "Seleccione un tipo", new { @class = "form-control" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-5 control-label">@Html.LabelFor(m => m.VoucherNumber, "Num. de comprobante"):</label>
+                                    <div class="col-sm-7 input-group">
+                                        @Html.TextBoxFor(m => m.VoucherNumber, new { @class = "form-control", @readonly = "" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-5 control-label">@Html.LabelFor(m => m.DocumentNumber, "Num. de documento"):</label>
+                                    <div class="col-sm-7 input-group">
+                                        @Html.TextBoxFor(m => m.DocumentNumber, new { @class = "form-control" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-5 control-label">@Html.LabelFor(m => m.Description, "Descripción"):</label>
+                                    <div class="col-sm-7 input-group">
+                                        @Html.TextBoxFor(m => m.Description, new { @class = "form-control" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-5 control-label">@Html.LabelFor(m => m.VendorId, "Proveedor"):</label>
+                                    <div class="col-sm-7 input-group">
+                                        @Html.TextBoxFor(model => model.VendorId, new { @class = "form-control", @readonly = "" })
+                                        <span class="input-group-btn">
+                                            <button type="button" id="lookupProveedor" class="btn btn-primary">
+                                                <i class="fa fa-search"></i>
+                                            </button>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-5 control-label">Nombre:</label>
+                                    <div class="col-sm-7 input-group">
+                                        @Html.TextBoxFor(model => model.VendName, new { @class = "form-control", @readonly = "" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-5 control-label">Fecha:</label>
+                                    <div class='col-sm-7 input-group date'>
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        @Html.TextBoxFor(m => m.DocumentDate, new { @class = "form-control" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-5 control-label">@Html.LabelFor(m => m.PurchaseOrder, "Departmento"):</label>
+                                    <div class='col-sm-7 input-group'>
+                                        @Html.TextBoxFor(m => m.PurchaseOrder, new { @class = "form-control" })
+                                        <span class="input-group-btn">
+                                            <button type="button" id="lookupDepartmento" class="btn btn-primary">
+                                                <i class="fa fa-search"></i>
+                                            </button>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-5 control-label">@Html.LabelFor(m => m.Ncf, "NCF"):</label>
+                                    <div class='col-sm-7 input-group'>
+                                        @Html.TextBoxFor(m => m.Ncf, new { @class = "form-control" })
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6 col-sm-6 col-xs-12">
+
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">@Html.LabelFor(m => m.Currency, "Moneda"):</label>
+                                    <div class="col-sm-8 input-group">
+                                        @Html.TextBoxFor(model => model.Currency, new { @class = "form-control", @readonly = "" })
+                                        <span class="input-group-btn">
+                                            <button type="button" id="lookupMoneda" class="btn btn-primary">
+                                                <i class="fa fa-search"></i>
+                                            </button>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">@Html.LabelFor(m => m.TaxDetailId, "Id. de impuesto"):</label>
+                                    <div class="col-sm-8 input-group">
+                                        @Html.TextBoxFor(model => model.TaxDetailId, new { @class = "form-control", @readonly = "" })
+                                        <span class="input-group-btn">
+                                            <button type="button" id="lookupImpuesto" class="btn btn-primary">
+                                                <i class="fa fa-search"></i>
+                                            </button>
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">@Html.LabelFor(m => m.PurchaseAmount, "Subtotal"):</label>
+                                    <div class="col-sm-8 input-group">
+                                        <span class="input-group-addon">$</span>
+                                        @Html.TextBoxFor(m => m.PurchaseAmount, new { @class = "form-control" })
+                                        <span class="input-group-addon">.00</span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">@Html.LabelFor(m => m.DiscountAmount, "Descuento"):</label>
+                                    <div class="col-sm-8 input-group">
+                                        <span class="input-group-addon">$</span>
+                                        @Html.TextBoxFor(m => m.DiscountAmount, new { @class = "form-control" })
+                                        <span class="input-group-addon">.00</span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">@Html.LabelFor(m => m.FreightAmount, "Flete"):</label>
+                                    <div class="col-sm-8 input-group">
+                                        <span class="input-group-addon">$</span>
+                                        @Html.TextBoxFor(m => m.FreightAmount, new { @class = "form-control" })
+                                        <span class="input-group-addon">.00</span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">@Html.LabelFor(m => m.MiscellaneousAmount, "Miscelaneos"):</label>
+                                    <div class="col-sm-8 input-group">
+                                        <span class="input-group-addon">$</span>
+                                        @Html.TextBoxFor(m => m.MiscellaneousAmount, new { @class = "form-control" })
+                                        <span class="input-group-addon">.00</span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">@Html.LabelFor(m => m.TaxAmount, "Impuesto"):</label>
+                                    <div class="col-sm-8 input-group">
+                                        <span class="input-group-addon">$</span>
+                                        @Html.TextBoxFor(m => m.TaxAmount, new { @class = "form-control"})
+                                        <span class="input-group-addon">.00</span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Total:</label>
+                                    <h2 id="total" name="total" class="font-bold"></h2>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12 col-sm-12 col-xs-12">
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">Nota:</label>
+                                    <div class="col-sm-10">
+                                        @Html.TextAreaFor(m => m.Note, new { @class = "form-control", @rows = "5", @placeholder = "Introduzca la nota" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div id="tab-2" class="tab-pane">
+                    <div class="panel-body">
+                        <div class="row">
+                            <form action="javascript:;" method="post" enctype="multipart/form-data" id="attachmentForm" accept-charset="utf-8">
+                                <div class="col-md-9">
+                                    <div class="fileinput fileinput-new input-group" data-provides="fileinput">
+                                        <div class="form-control" data-trigger="fileinput"><i class="glyphicon glyphicon-file fileinput-exists"></i> <span class="fileinput-filename"></span></div>
+                                        <span class="input-group-addon btn btn-default btn-file"><span class="fileinput-new">Seleccionar archivo</span><span class="fileinput-exists">Cambiar</span><input type="file" name="FileData" id="FileData"></span>
+                                        <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">Borrar</a>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <button type="button" class="btn btn-success" onclick="atacharArchivo();" data-dismiss="modal">Adjuntar</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="hr-line-dashed"></div>
+
+                        <div class="row" id="attachmentFiles">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/plugins/toastr")
+
+    <script type="text/javascript">
+
+        var totalAmount = 0;
+
+        $(document).ready(function () {
+             @Html.Partial("_Scripts")
+
+            if (($('#PurchaseAmount').val().trim() != '' && !isNaN($('#PurchaseAmount').val().trim()))) {
+                totalAmount = parseFloat(totalAmount) + parseFloat($('#PurchaseAmount').val());
+                $('#PurchaseAmount').val(parseFloat($('#PurchaseAmount').val().trim()).toFixed(2).replace(/./g, function (c, i, a) {
+                    return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                }));
+            }
+            if (($('#DiscountAmount').val().trim() != '' && !isNaN($('#DiscountAmount').val().trim()))) {
+                totalAmount = parseFloat(totalAmount) - parseFloat($('#DiscountAmount').val());
+                $('#DiscountAmount').val(parseFloat($('#DiscountAmount').val().trim()).toFixed(2).replace(/./g, function (c, i, a) {
+                    return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                }));
+            }
+            if (($('#FreightAmount').val().trim() != '' && !isNaN($('#FreightAmount').val().trim()))) {
+                totalAmount = parseFloat(totalAmount) + parseFloat($('#FreightAmount').val());
+                $('#FreightAmount').val(parseFloat($('#FreightAmount').val().trim()).toFixed(2).replace(/./g, function (c, i, a) {
+                    return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                }));
+            }
+            if (($('#MiscellaneousAmount').val().trim() != '' && !isNaN($('#MiscellaneousAmount').val().trim()))) {
+                totalAmount = parseFloat(totalAmount) + parseFloat($('#MiscellaneousAmount').val());
+                $('#MiscellaneousAmount').val(parseFloat($('#MiscellaneousAmount').val().trim()).toFixed(2).replace(/./g, function (c, i, a) {
+                    return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                }));
+            }
+            if (($('#TaxAmount').val().trim() != '' && !isNaN($('#TaxAmount').val().trim()))) {
+                totalAmount = parseFloat(totalAmount) + parseFloat($('#TaxAmount').val());
+                $('#TaxAmount').val(parseFloat($('#TaxAmount').val().trim()).toFixed(2).replace(/./g, function (c, i, a) {
+                    return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                }));
+            }
+
+            $('#total').text('$ ' + totalAmount.toFixed(2).replace(/./g, function (c, i, a) {
+                return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+            }));
+
+            $('#PurchaseAmount, #DiscountAmount, #FreightAmount, #MiscellaneousAmount, #TaxAmount').focusout(function () {
+                if (($('#PurchaseAmount').val().trim().replace(/,/g, "") != '' && !isNaN($('#PurchaseAmount').val().trim().replace(/,/g, "")))) {
+                    totalAmount = parseFloat(totalAmount) + parseFloat($('#PurchaseAmount').val().replace(/,/g, ""));
+
+                    $('#PurchaseAmount').val(parseFloat($('#PurchaseAmount').val().replace(/,/g, "")).toFixed(2).replace(/./g, function (c, i, a) {
+                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                    }));
+                }
+                if (($('#DiscountAmount').val().trim().replace(/,/g, "") != '' && !isNaN($('#DiscountAmount').val().trim().replace(/,/g, "")))) {
+                    totalAmount = parseFloat(totalAmount) - parseFloat($('#DiscountAmount').val().replace(/,/g, ""));
+
+                    $('#DiscountAmount').val(parseFloat($('#DiscountAmount').val().replace(/,/g, "")).toFixed(2).replace(/./g, function (c, i, a) {
+                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                    }));
+                }
+                if (($('#FreightAmount').val().trim().replace(/,/g, "") != '' && !isNaN($('#FreightAmount').val().trim().replace(/,/g, "")))) {
+                    totalAmount = parseFloat(totalAmount) + parseFloat($('#FreightAmount').val().replace(/,/g, ""));
+
+                    $('#FreightAmount').val(parseFloat($('#FreightAmount').val().replace(/,/g, "")).toFixed(2).replace(/./g, function (c, i, a) {
+                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                    }));
+                }
+                if (($('#MiscellaneousAmount').val().trim().replace(/,/g, "") != '' && !isNaN($('#MiscellaneousAmount').val().trim().replace(/,/g, "")))) {
+                    totalAmount = parseFloat(totalAmount) + parseFloat($('#MiscellaneousAmount').val().replace(/,/g, ""));
+
+                    $('#MiscellaneousAmount').val(parseFloat($('#MiscellaneousAmount').val().replace(/,/g, "")).toFixed(2).replace(/./g, function (c, i, a) {
+                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                    }));
+                }
+                if (($('#TaxAmount').val().trim().replace(/,/g, "") != '' && !isNaN($('#TaxAmount').val().trim().replace(/,/g, "")))) {
+                    totalAmount = parseFloat(totalAmount) + parseFloat($('#TaxAmount').val().replace(/,/g, ""));
+                    $('#TaxAmount').val(parseFloat($('#TaxAmount').val().replace(/,/g, "")).toFixed(2).replace(/./g, function (c, i, a) {
+                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                    }));
+                }
+
+                $('#total').text('$ ' + totalAmount.toFixed(2).replace(/./g, function (c, i, a) {
+                    return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                }));
+                totalAmount = 0;
+            });
+        });
+
+        function cargarArchivos() {
+            $.ajax({
+                url: '@Url.Action("LoadAttachmentFiles", "AccountPayables")?VoucherNumber=' + $('#VoucherNumber').val().trim(),
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    attachmentFiles = result;
+                    if (attachmentFiles.length > 0) {
+                        var $ul = $('<ul class="list-unstyled file-list" />');
+                        $.each(attachmentFiles, function (i, val) {
+                            var $li = $('<li/>');
+                            var $a = $('<a href="@Url.Action("Download", "AccountPayables")?DocumentId=' + $('#VoucherNumber').val().trim() + '&FileName=' + val.trim() + '" />')
+                            var $delete = $('<a href="#" />')
+                            $a.append($('<i class="fa fa-file-pdf-o" />'));
+                            $delete.html("&nbsp; &nbsp; &nbsp;");
+                            $delete.click(function (e) {
+                                e.preventDefault();
+                                eliminarArchivo(val.trim());
+                            });
+                            $delete.append($('<i class="fa fa-remove fa-2x" />'));
+                            $li.append($a.html("  " + val));
+                            $li.append($delete);
+                            $ul.append($li);
+                        });
+                        $('#attachmentFiles').html($ul);
+                    }
+                    else {
+                        $('#attachmentFiles').html('');
+                    }
+                }
+            });
+        }
+
+        function atacharArchivo() {
+            var data = new FormData();
+            data.append("FileData", document.getElementById("FileData").files[0]);
+            data.append("VoucherNumber", $('#VoucherNumber').val());
+
+            $.ajax({
+                url: '@Url.Action("AttachFile", "AccountPayables")',
+                type: "POST",
+                data: data,
+                dataType: "JSON",
+                contentType: false,
+                processData: false,
+                cache: false,
+                success: function (d) {
+                    if (d.status == true) {
+                        $('#attachmentForm').each(function () {
+                            this.reset();
+                        });
+                        toastr.success('Archivo adjuntado correctamente', 'Adjuntos')
+                        cargarArchivos();
+                    }
+                    else {
+                        alert('Ha ocurrido un error');
+                    }
+                    $('#submit').val('Guardar');
+                },
+                error: function () {
+                    alert('Error. Por favor trate de nuevo.');
+                    $('#submit').val('Guardar');
+                }
+            });
+        }
+
+        function eliminarArchivo(fileName) {
+            if (confirm("Esta seguro que desea eliminar este archivo ?")) {
+                $.ajax({
+                    url: '@Url.Action("DeleteFile", "AccountPayables")?id=' + $('#VoucherNumber').val().trim() + "&fileName=" + fileName,
+                    type: "POST",
+                    dataType: "JSON",
+                    contentType: false,
+                    processData: false,
+                    success: function (d) {
+                        if (d.status == "OK") {
+                            toastr.success('Archivo eliminado correctamente', 'Adjuntos');
+                            cargarArchivos();
+                        }
+                        else {
+                            alert(d.status);
+                        }
+                    }
+                });
+            }
+        }
+
+        function procesarSolicitud() {
+            var isAllValid = true;
+
+            if ($('#DocumentNumber').val().trim() == '') {
+                toastr.error('Debe de especificar un numero de documento', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Description').val().trim() == '') {
+                toastr.error('Debe de especificar una descripción', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#VendorId').val().trim() == '') {
+                toastr.error('Debe de especificar un proveedor', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#PurchaseOrder').val().trim() == '') {
+                toastr.error('Debe de especificar un departamento', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#PurchaseAmount').val().trim() == '') {
+                toastr.error('Debe de especificar un monto', 'Campos requeridos')
+                isAllValid = false;
+            }
+            else {
+                if (parseFloat($('#PurchaseAmount').val()) == 0) {
+                    toastr.error('El monto no puede ser cero', 'Campos requeridos')
+                    isAllValid = false;
+                }
+            }
+
+            if (parseFloat($('#TaxAmount').val()) > 0) {
+                if ($('#TaxDetailId').val().trim() == '') {
+                    toastr.error('Debe de especificar un id de impuesto si el monto del impuesto es mayor que cero', 'Campos requeridos')
+                    isAllValid = false;
+                }
+            }
+
+            if (isAllValid) {
+                $('#PurchaseAmount').val($('#PurchaseAmount').val().replace().replace(/,/g, ""));
+                $('#DiscountAmount').val($('#DiscountAmount').val().replace().replace(/,/g, ""));
+                $('#FreightAmount').val($('#FreightAmount').val().replace().replace(/,/g, ""));
+                $('#MiscellaneousAmount').val($('#MiscellaneousAmount').val().replace().replace(/,/g, ""));
+                $('#TaxAmount').val($('#TaxAmount').val().replace().replace(/,/g, ""));
+                $('#AccountPayablesEdit').submit();
+            }
+        }
+
+        function limpiarCampos() {
+            $('#DocumentNumber').val('');
+            $('#Description').val('');
+            $('#VendorId').val('');
+            $('#VendName').val('');
+            $('#DocumentDate').val('@DateTime.Now.ToShortDateString()');
+            $('#PurchaseOrder').val('');
+            $('#NCF').val('');
+            $('#Currency').val('');
+            $('#TaxDetailId').val('');
+            $('#PurchaseAmount').val('');
+            $('#DiscountAmount').val('0');
+            $('#FreightAmount').val('0');
+            $('#MiscellaneousAmount').val('0');
+            $('#TaxAmount').val('0');
+            $('#total').val('$ 0.00');
+            $('#Note').val('');
+        }
+    </script>
+}

@@ -1,0 +1,41 @@
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Seaboard Intranet\Seaboard.Intranet.Domain\bin\Debug\Seaboard.Intranet.Domain.dll
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Seaboard Intranet\Seaboard.Intranet.Domain\bin\Debug\Seaboard.Intranet.Domain.pdb
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Seaboard Intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.csprojResolveAssemblyReference.cache
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Seaboard Intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.dll
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Seaboard Intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.pdb
+C:\Users\ermes\OneDrive\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard.Intranet.Domain\bin\Debug\Seaboard.Intranet.Domain.dll
+C:\Users\ermes\OneDrive\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard.Intranet.Domain\bin\Debug\Seaboard.Intranet.Domain.pdb
+C:\Users\ermes\OneDrive\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.csprojResolveAssemblyReference.cache
+C:\Users\ermes\OneDrive\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.dll
+C:\Users\ermes\OneDrive\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.pdb
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\bin\Debug\Seaboard.Intranet.Domain.dll
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\bin\Debug\Seaboard.Intranet.Domain.pdb
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.dll
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.pdb
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.csproj.CoreCompileInputs.cache
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.csprojResolveAssemblyReference.cache
+C:\Users\Ermes Cuevas\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\bin\Debug\Seaboard.Intranet.Domain.dll
+C:\Users\Ermes Cuevas\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\bin\Debug\Seaboard.Intranet.Domain.pdb
+C:\Users\Ermes Cuevas\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.csprojAssemblyReference.cache
+C:\Users\Ermes Cuevas\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.csproj.CoreCompileInputs.cache
+C:\Users\Ermes Cuevas\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.dll
+C:\Users\Ermes Cuevas\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.pdb
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\bin\Debug\Seaboard.Intranet.Domain.dll
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\bin\Debug\Seaboard.Intranet.Domain.pdb
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.csproj.CoreCompileInputs.cache
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.dll
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.pdb
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\bin\Debug\Seaboard.Intranet.Domain.dll
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\bin\Debug\Seaboard.Intranet.Domain.pdb
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.csproj.CoreCompileInputs.cache
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.dll
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.pdb
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.csprojAssemblyReference.cache
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\bin\Debug\Seaboard.Intranet.Domain.dll
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\bin\Debug\Seaboard.Intranet.Domain.pdb
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\bin\Debug\Newtonsoft.Json.dll
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\bin\Debug\Newtonsoft.Json.xml
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.csprojAssemblyReference.cache
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.csproj.CopyComplete
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.dll
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.pdb

@@ -1,0 +1,233 @@
+﻿@model IEnumerable<Seaboard.Intranet.Domain.ViewModels.UnDispachtRequestViewModel>
+@{
+    ViewBag.Title = "Solicitudes sin despachar";
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Solicitudes sin despachar</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Listado de solicitudes sin despachar</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>Listado de solicitudes sin despachar</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="ibox-content">
+                    <table class="table table-striped table-bordered table-hover informationTable">
+                        <thead>
+                            <tr>
+                                <th>No. de solicitud</th>
+                                <th>Descripción</th>
+                                <th>Prioridad</th>
+                                <th>Fecha documento</th>
+                                <th>Fecha requerida</th>
+                                <th>Departamento</th>
+                                <th>Solicitante</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@Html.ActionLink(item.RequestId, "DispatchRequest", new { id = @item.RequestId })</td>
+                                    <td>@item.Description</td>
+                                    <td class="text-center">
+                                        @switch (item.Priority.ToLower())
+                                        {
+                                            case "baja":
+                                                <span class="label label-success">Baja</span>
+                                                break;
+                                            case "normal":
+                                                <span class="label label-warning">Normal</span>
+                                                break;
+                                            case "alta":
+                                                <span class="label label-danger">Alta</span>
+                                                break;
+                                            default:
+                                                <span class="label label-success">Baja</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>@item.DocumentDate.ToShortDateString()</td>
+                                    <td>@item.RequiredDate.ToShortDateString()</td>
+                                    <td>@item.DepartmentId</td>
+                                    <td>@item.Requester</td>
+                                    <td>
+                                        <a class="modal-link" href="@Url.Action("Details", "PurchaseRequest", new { id = item.RequestId })"><i class="fa fa-bars"></i></a>
+                                        <a onclick="Print('@item.RequestId');"><i class="fa fa-print"></i></a>
+                                        <a onclick="cerrar('@item.RequestId');"><i class="fa fa-check"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-container" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content animated flipInY">
+            </div>
+        </div>
+    </div>
+</div>
+@section Styles {
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/toastr")
+
+    <script>
+        $(document).ready(function() {
+            $('body').on('click',
+                '.modal-link',
+                function(e) {
+                    e.preventDefault();
+                    $(this).attr('data-target', '#modal-container');
+                    $(this).attr('data-toggle', 'modal');
+                });
+
+            $('#modal-container').on('hidden.bs.modal',
+                function() {
+                    $(this).removeData('bs.modal');
+                });
+
+            $('.informationTable').DataTable({
+                pageLength: 10,
+                dom: '<"html5buttons"B>lTfgitp',
+                order: [[0, "desc"]],
+                language: {
+                    "sProcessing": "Procesando... ",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:  ",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                },
+                oAria: {
+                    "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                },
+                buttons: [
+                    { extend: 'copy' },
+                    { extend: 'csv' },
+                    { extend: 'excel', title: 'ExampleFile' },
+                    { extend: 'pdf', title: 'ExampleFile' },
+                    {
+                        extend: 'print',
+                        customize: function(win) {
+                            $(win.document.body).addClass('white-bg');
+                            $(win.document.body).css('font-size', '10px');
+
+                            $(win.document.body).find('table')
+                                .addClass('compact')
+                                .css('font-size', 'inherit');
+                        }
+                    }
+                ]
+
+            });
+        });
+
+        function procesar(id) {
+            $.ajax({
+                url: '@Url.Action("ProcessPurchaseRequest", "PurchaseRequest")?Id=' + id,
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function(d) {
+                    if (d.status == true) {
+                        window.location.href = "@Url.Action("UnDispachtRequest", "PurchaseRequest")";
+                    } else {
+                        alert('Ha ocurrido un error');
+                    }
+                    $('#submit').val('Guardar');
+                },
+                error: function() {
+                    alert('Error. Por favor trate de nuevo.');
+                    $('#submit').val('Guardar');
+                }
+            });
+        }
+
+        function cerrar(id) {
+            if (confirm("Esta seguro que desea cerrar esta solicitud ?")) {
+                $.ajax({
+                    url: '@Url.Action("ClosePurchaseRequest", "PurchaseRequest")?id=' + id,
+                    type: "POST",
+                    data: "",
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function(d) {
+                        if (d.status === "OK") {
+                            window.location.href = "@Url.Action("UnDispachtRequest", "PurchaseRequest")";
+                        } else {
+                            alert(d.status);
+                        }
+                    }
+                });
+            }
+        }
+
+        function Print(id) {
+            var url = '@Url.Content("~/PDF/Requisicion/")' + id + '.pdf';
+            toastr.info('Estamos procesando su solicitud', 'Por favor espere')
+            $.ajax({
+                url: '@Url.Action("Print", "PurchaseRequest")?id=' + id,
+                type: "POST",
+                data: "",
+                cache: false,
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function(result) {
+                    window.open(url);
+                },
+                error: function(result) {
+                    alert(result.status)
+                }
+            });
+        }
+
+    </script>
+}

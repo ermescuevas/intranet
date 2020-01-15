@@ -1,0 +1,634 @@
+﻿@model IEnumerable<Seaboard.Intranet.Domain.Models.TrainingRequest>
+@{
+    ViewBag.Title = "Solicitud de Capacitación";
+    var employees = (List<Seaboard.Intranet.Domain.ViewModels.Lookup>)ViewBag.Employees;
+    var departments = (List<Seaboard.Intranet.Domain.ViewModels.Lookup>)ViewBag.Departments;
+}
+
+<style>
+    .selected {
+        background-color: #e0f3ff;
+    }
+</style>
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Solicitud de Capacitación</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Solicitud de Capacitación</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox">
+                <div class="ibox-title">
+                    <h5>Solicitud de Capacitación</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                        <a class="close-link">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="ibox-content">
+                    <button class="btn btn-danger" onclick="createTraining(0)">NUEVA SOLICITUD</button>
+                    <hr />
+                    <div class="row table-responsive">
+                        <table class="table table-striped table-bordered table-hover informationTable">
+                            <thead>
+                                <tr>
+                                    <th style="width:10%">Id. de solicitud</th>
+                                    <th style="width:15%">Nombre del curso</th>
+                                    <th style="width:8%">Solicitante</th>
+                                    <th style="width:8%">Departamento</th>
+                                    <th style="width:8%">Duración</th>
+                                    <th style="width:8%">Fecha Inicio</th>
+                                    <th style="width:8%">Costo</th>
+                                    <th style="width:7%">Moneda</th>
+                                    <th style="width:8%">Ubicación</th>
+                                    <th style="width:7%">Estado</th>
+                                    <th style="width:13%">#</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@item.RequestId</td>
+                                        <td>@item.Description</td>
+                                        <td>@item.EmployeeName</td>
+                                        <td>@item.Department</td>
+                                        <td>@item.Duration</td>
+                                        <td>@item.StartDate.ToString("dd/MM/yyyy")</td>
+                                        <td>@item.Cost.ToString("N2")</td>
+                                        <td>
+                                            @if (item.CurrencyId == "1")
+                                            {
+                                                <p>DOP</p>
+                                            }
+                                            else if (item.CurrencyId == "2")
+                                            {
+                                                <p>USD</p>
+                                            }
+                                            else
+                                            {
+                                                <p>EUR</p>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (item.Location == "1")
+                                            {
+                                                <p>Onsite</p>
+                                            }
+                                            else if (item.Location == "2")
+                                            {
+                                                <p>Online</p>
+                                            }
+                                            else if (item.Location == "3")
+                                            {
+                                                <p>Local</p>
+                                            }
+                                            else
+                                            {
+                                                <p>Internacional</p>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (item.Status == 0)
+                                            {
+                                                <i class="badge badge-danger">Creado</i>
+                                            }
+                                            else if (item.Status == 1)
+                                            {
+                                                <i class="badge badge-primary">Enviado</i>
+                                            }
+                                            else if (item.Status == 2)
+                                            {
+                                                <i class="badge badge-info">Aprobado</i>
+                                            }
+                                            else
+                                            {
+                                                <i class="badge badge-info">Rechazado</i>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-primary btn-xs" onclick="createTraining(@item.RowId, @item.Status)">Editar</button>
+                                                <button type="button" class="btn btn-danger btn-xs" onclick="deleteTraining(@item.RowId, @item.Status)">Eliminar</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-CreateHeader" class="modal inmodal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content animated fadeIn">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Nueva solicitud</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="RowId" name="RowId" value="0" />
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Nombre del curso:</label>
+                                <input name="Description" id="Description" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Solicitante:</label>
+                                <select class="selectpicker form-control required" data-live-search="true" id="EmployeeId" name="EmployeeId">
+                                    <option value=""></option>
+                                    @foreach (var item in employees)
+                                    {
+                                        <option value="@item.Id.Trim()">@(item.Id + " - " + item.Descripción)</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Departamento Responsable:</label>
+                                <select class="selectpicker form-control required" data-live-search="true" id="Department" name="Department">
+                                    <option value=""></option>
+                                    @foreach (var item in departments)
+                                    {
+                                        <option value="@item.Id.Trim()">@(item.Descripción)</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Participantes:</label>
+                                <select id="Participants" name="Participants" data-placeholder="Seleccione los participantes..." class="chosen-select" multiple tabindex="4">
+                                    <option value=""></option>
+                                    @foreach (var item in employees)
+                                    {
+                                        <option value="@item.Id.Trim()">@(item.Descripción)</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Suplidor:</label>
+                                <input name="Supplier" id="Supplier" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Duracion:</label>
+                                <input name="Duration" id="Duration" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Fecha Inicio:</label>
+                                <input name="StartDate" id="StartDate" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Costo:</label>
+                                <input name="Cost" id="Cost" class="form-control" value="0.00" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Tipo de Moneda:</label>
+                                <select class="form-control" id="CurrencyId" name="CurrencyId">
+                                    <option value="1">USD</option>
+                                    <option value="2">DOP</option>
+                                    <option value="3">EUR</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Ubicacion:</label>
+                                <select class="form-control" id="Location" name="Location">
+                                    <option value="1">Onsite</option>
+                                    <option value="2">Online</option>
+                                    <option value="3">Local</option>
+                                    <option value="4">Internacional</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Necesidad:</label>
+                                <textarea id="Requirements" rows="1" name="Requirements" class="form-control"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Objetivos:</label>
+                                <textarea id="Objectives" rows="1" name="Objectives" class="form-control"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="checkbox-inline i-checks">
+                                    <input type="checkbox" name="allDocumentation"> Esta toda la documentación ?
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <p>En caso de tener todas las documentaciones de la capacitación, entonces marque el cotejo y someta para el flujo de aprobación, de lo contrario solo someta la capacitación sin poner el cotejo para que Recursos humanos la complete.</p>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="form-actions no-color">
+                        <button type="button" class="ladda-button btn btn-primary" data-style="expand-left" id="saveButton" onclick="saveTraining();"> Guardar y enviar</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    @Styles.Render("~/Content/plugins/iCheck/iCheckStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/plugins/sweetAlertStyles")
+    @Styles.Render("~/plugins/awesomeCheckboxStyles")
+    @Styles.Render("~/Content/plugins/chosen/chosenStyles")
+    @Styles.Render("~/plugins/laddaStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/css/bootstrap-select.min.css">
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/iCheck")
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/sweetAlert")
+    @Scripts.Render("~/plugins/chosen")
+    @Scripts.Render("~/plugins/ladda")
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/bootstrap-select.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/i18n/defaults-en_US.js"></script>
+
+    <script type="text/javascript">
+        var value = "";
+        $(document).ready(function () {
+            $('.informationTable').DataTable({
+                pageLength: 10,
+                order: [[0, "desc"]],
+                dom: '<"html5buttons"B>lTfgitp',
+                language: {
+                    "sProcessing": "Procesando... ",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:  ",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                },
+                oAria: {
+                    "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                },
+                buttons: [
+                    { extend: 'copy' },
+                    { extend: 'csv' },
+                    { extend: 'excel', title: 'ExampleFile' },
+                    { extend: 'pdf', title: 'ExampleFile' },
+
+                    {
+                        extend: 'print',
+                        customize: function (win) {
+                            $(win.document.body).addClass('white-bg');
+                            $(win.document.body).css('font-size', '10px');
+
+                            $(win.document.body).find('table')
+                                .addClass('compact')
+                                .css('font-size', 'inherit');
+                        }
+                    }
+                ]
+
+            });
+            $('.i-checks').iCheck({
+                checkboxClass: 'icheckbox_square-green',
+                radioClass: 'iradio_square-green',
+            });
+            $('#StartDate').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true,
+                format: 'mm/dd/yyyy',
+                minDate: 0
+            });
+            $.formattedDate = function (dateToFormat) {
+                var dateObject = new Date(dateToFormat);
+                var day = dateObject.getDate();
+                var month = dateObject.getMonth() + 1;
+                var year = dateObject.getFullYear();
+                day = day < 10 ? "0" + day : day;
+                month = month < 10 ? "0" + month : month;
+                var formattedDate = month + "/" + day + "/" + year;
+                return formattedDate;
+            };
+            $('.chosen-select').chosen({ width: "100%" });
+            $('.ladda-button').ladda();
+        });
+
+        function createTraining(rowId, status = 0) {
+            if (rowId > 0)
+                getTraining(rowId, status);
+            else {
+                limpiarCampos();
+                $('#modal-CreateHeader').modal({ backdrop: 'static', keyboard: false });
+                $('#RowId').val(0);
+            }
+        }
+
+        function saveTraining() {
+            var isAllValid = true;
+            var isCompleted = false;
+            if ($('input[name="allDocumentation"]').is(":checked"))
+                isCompleted = true;
+
+            if ($('#Description').val() === '') {
+                toastr.error('Por favor debe de especificar una descripcion para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#EmployeeId').val() === '') {
+                toastr.error('Por favor debe de especificar un solicitante para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Department').val() === '') {
+                toastr.error('Por favor debe de especificar un departamento para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Participants').val() === '') {
+                toastr.error('Por favor debe de especificar los participantes para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (isCompleted) {
+                if ($('#StartDate').val() === '') {
+                    toastr.error('Por favor debe de especificar una fecha de inicio para procesar', 'Campos requeridos')
+                    isAllValid = false;
+                }
+
+                if ($('#Duration').val() === '') {
+                    toastr.error('Por favor debe de especificar una duración para procesar', 'Campos requeridos')
+                    isAllValid = false;
+                }
+                if ($('#Objectives').val() === '') {
+                    toastr.error('Por favor debe de especificar los objetivos para procesar', 'Campos requeridos')
+                    isAllValid = false;
+                }
+
+                if ($('#Requirements').val() === '') {
+                    toastr.error('Por favor debe de especificar los requerimientos para procesar', 'Campos requeridos')
+                    isAllValid = false;
+                }
+                if ($('#Cost').val() === '') {
+                    toastr.error('Por favor debe de especificar el costo para procesar', 'Campos requeridos')
+                    isAllValid = false;
+                }
+
+                if ($('#CurrencyId').val() === '') {
+                    toastr.error('Por favor debe de especificar la moneda para procesar', 'Campos requeridos')
+                    isAllValid = false;
+                }
+
+                if ($('#Location').val() === '') {
+                    toastr.error('Por favor debe de especificar una ubicacion para procesar', 'Campos requeridos')
+                    isAllValid = false;
+                }
+
+                if ($('#Supplier').val() === '') {
+                    toastr.error('Por favor debe de especificar un suplidor para procesar', 'Campos requeridos')
+                    isAllValid = false;
+                }
+            }
+
+            if (isAllValid) {
+                $('#saveButton').ladda('start');
+                var data = {
+                    RowId: $('#RowId').val(),
+                    Description: $('#Description').val().trim(),
+                    EmployeeId: $('#EmployeeId').val().trim(),
+                    StartDate: $('#StartDate').val().trim(),
+                    Duration: $('#Duration').val().trim(),
+                    Department: $('#Department').val().trim(),
+                    Cost: $('#Cost').val().trim(),
+                    CurrencyId: $('#CurrencyId').val().trim(),
+                    Location: $('#Location').val().trim(),
+                    Supplier: $('#Supplier').val().trim(),
+                    Objectives: $('#Objectives').val().trim(),
+                    Requirements: $('#Requirements').val().trim(),
+                    Participants: $('#Participants').val().join(','),
+                    IsCompleted: isCompleted
+                }
+                $.ajax({
+                    url: '@Url.Action("SaveTrainingRequest", "HumanResources")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            window.location.reload();
+                        }
+                        else {
+                             $('#saveButton').ladda('stop');
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+                    }
+                });
+            }
+        }
+
+        function deleteTraining(rowId, status) {
+            if (status !== 2) {
+                swal({
+                    title: "Eliminar",
+                    text: "Esta seguro que desea eliminar este registro ?",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Si, eliminar!",
+                    cancelButtonText: "No, cancelar!",
+                    closeOnConfirm: true
+                }, function () {
+                    $.ajax({
+                        url: '@Url.Action("DeleteTrainingRequest", "HumanResources")?rowId=' + rowId,
+                        type: "POST",
+                        data: "",
+                        cache: false,
+                        dataType: "JSON",
+                        contentType: "application/json",
+                        success: function (result) {
+                            if (result.status === "OK") {
+                                window.location.reload();
+                            } else {
+                                swal({
+                                    title: "ERROR",
+                                    text: result.status,
+                                    type: "error"
+                                });
+                            }
+                        }
+                    });
+                });
+            } else {
+                swal({
+                    title: "ERROR",
+                    text: "No puede eliminarse por que esta en estado aprobado",
+                    type: "error"
+                });
+            }
+        }
+
+        function getTraining(rowId, status) {
+            if (status !== 2) {
+                 $('#modal-CreateHeader').modal({ backdrop: 'static', keyboard: false });
+                $('#RowId').val(rowId);
+                $.ajax({
+                    url: '@Url.Action("GetTrainingRequest", "HumanResources")?rowId=' + rowId,
+                    type: "POST",
+                    data: "",
+                    cache: false,
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            $('#Description').val(result.model.Description);
+                            $('#EmployeeId').val(result.model.EmployeeId);
+                            if ($.formattedDate(new Date(parseInt(result.model.StartDate.substr(6)))) != '12/31/1899')
+                                $('#StartDate').val($.formattedDate(new Date(parseInt(result.model.StartDate.substr(6)))));
+
+                            $('#Duration').val(result.model.Duration);
+                            $('#Department').val(result.model.Department);
+                            $('#Objectives').val(result.model.Objectives);
+                            $('#Requirements').val(result.model.Requirements);
+                            $('#Cost').val(result.model.Cost);
+                            $('#CurrencyId').val(result.model.CurrencyId);
+                            $('#Location').val(result.model.Location);
+                            $('#Supplier').val(result.model.Supplier);
+                            if (result.model.IsCompleted === true)
+                                $('input[name="allDocumentation"]').iCheck('check');
+                            $.each(result.model.Participants.split(","), function (i, e) {
+                                $("#Participants option[value='" + e + "']").prop("selected", true);
+                            });
+                            $('.selectpicker').selectpicker('refresh');
+                            $('#Participants').trigger("chosen:updated");
+                        } else {
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+                    }
+                });
+            } else {
+                swal({
+                    title: "ERROR",
+                    text: "No puede editarse  por que esta en estado aprobado",
+                    type: "error"
+                });
+            }
+        }
+
+        function limpiarCampos() {
+            $('#EmployeeId').val('');
+            $('#Description').val('');
+            $('#RowId').html('0');
+            $('#Department').val('');
+            $('#Participants').val('');
+            $('#Supplier').val('');
+            $('#Duration').val('');
+            $('#StartDate').val('');
+            $('#Cost').val('0.00');
+            $('#CurrencyId').val('1');
+            $('#Location').val('1');
+            $('#Requirements').val('');
+            $('#Objectives').val('');
+            $('input[name="allDocumentation"]').iCheck('uncheck');
+            $('#Participants').trigger("chosen:updated");
+            $('.selectpicker').selectpicker('refresh');
+        }
+    </script>
+}

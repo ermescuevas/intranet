@@ -1,0 +1,284 @@
+﻿        $('.input-group.date').datepicker({
+            todayBtn: "linked",
+            keyboardNavigation: false,
+            forceParse: false,
+            calendarWeeks: true,
+            autoclose: true
+        });
+        $("#lookupEmpleado").lookupbox({
+        title: 'Busqueda: ',
+        url: '@Url.Action("ListLookup", "Home")?tipo=18&consulta=',
+        imgLoader: '<img src="~/Images/ajaxloader.gif">',
+        width: 800,
+        height: 1000,
+        onItemSelected: function (data) {
+        $('input[name=EmployeeId]').val(data.EmployeeId);
+        $('input[name=FirstName]').val(data.FirstName);
+        $('input[name=LastName]').val(data.LastName);
+        $('input[name=JobTitle]').val(data.JobTitle);
+        $('input[name=Identification]').val(data.Identification);
+        $('input[name=Email]').val(data.Email);
+        },
+        tableHeader: ['Id. de empleado', 'Nombre', 'Departamento'],
+        hiddenFields: ['FirstName','LastName','JobTitle','Identification','Email']
+        });
+
+        $('#lookupClaseCliente').lookupbox({
+        title: 'Busqueda:',
+        url: '@Url.Action("ListLookup", "Home")?tipo=32&consulta=',
+        imgLoader: '<img src="~/Images/ajaxloader.gif">',
+        width: 800,
+        height: 1000,
+        onItemSelected: function (data) {
+        $('input[name=ClassId]').val(data.Id);
+        },
+        tableHeader: ['Id. de clase', 'Descripción'],
+        hiddenFields: ['DataExtended']
+        });
+
+        $("#lookupLote").lookupbox({
+        title: 'Busqueda: ',
+        url: '@Url.Action("ListLookup", "Home")?tipo=16&consulta=',
+        imgLoader: '<img src="~/Images/ajaxloader.gif">',
+        width: 800,
+        height: 1000,
+        onItemSelected: function (data) {
+        $('input[name=BatchNumber]').val(data.Id);
+        },
+        tableHeader: ['Id. de lote', 'Descripción'],
+        hiddenFields: ['DataExtended']
+        });
+
+        $("#lookupTipoNCF").lookupbox({
+        title: 'Busqueda: ',
+        url: '@Url.Action("ListLookup", "Home")?tipo=41&consulta=',
+        imgLoader: '<img src="~/Images/ajaxloader.gif">',
+        width: 800,
+        height: 1000,
+        onItemSelected: function (data) {
+        $('input[name=NCFType]').val(data.Id);
+        },
+        tableHeader: ['Id. de tipo de NCF', 'Descripción'],
+        hiddenFields: ['DataExtended']
+        });
+
+        $("#lookupDepartamento").lookupbox({
+        title: 'Busqueda: ',
+        url: '@Url.Action("ListLookup", "Home")?tipo=1&consulta=',
+        imgLoader: '<img src="~/Images/ajaxloader.gif">',
+        width: 800,
+        height: 1000,
+        onItemSelected: function(data) {
+        $('input[name=DepartmentId]').val(data.Descripción);
+        $('input[name=PurchaseOrder]').val(data.Descripción);
+        $('input[name=Department]').val(data.Descripción);
+        },
+        tableHeader: ['Id. de departamento', 'Descripción'],
+        hiddenFields: ['DataExtended']
+        });
+
+        $("#lookupDepartament").lookupbox({
+        title: 'Busqueda: ',
+        url: '@Url.Action("ListLookup", "Home")?tipo=1&consulta=',
+        imgLoader: '<img src="~/Images/ajaxloader.gif">',
+        width: 800,
+        height: 1000,
+        onItemSelected: function (data) {
+        $('input[name=Department]').val(data.Descripción);
+        },
+        tableHeader: ['Id. de departamento', 'Descripción'],
+        hiddenFields: ['DataExtended']
+        });
+
+        $("#lookupCargo").lookupbox({
+        title: 'Busqueda: ',
+        url: '@Url.Action("ListLookup", "Home")?tipo=21&consulta=',
+        imgLoader: '<img src="~/Images/ajaxloader.gif">',
+        width: 800,
+        height: 1000,
+        onItemSelected: function (data) {
+        $('input[name=Department]').val(data.Descripción);
+        },
+        tableHeader: ['Id. cargado a', 'Descripción'],
+        hiddenFields: ['DataExtended']
+        });
+
+        $("#lookupAR").lookupbox({
+        title: 'Busqueda: ',
+        url: '@Url.Action("ListLookup", "Home")?tipo=4&consulta=',
+        imgLoader: '<img src="~/Images/ajaxloader.gif">',
+        width: 800,
+        height: 1000,
+        onItemSelected: function (data) {
+        $('input[name=AR]').val(data.Id);
+        $('input[name=ARNumber]').val(data.Id);
+        $('textarea[name=ARDescription]').val(data.Descripción);
+        },
+        tableHeader: ['Id. de A/R', 'Descripción', 'Monto']
+        });
+
+        $("#lookupPrioridad").lookupbox({
+        title: 'Busqueda:',
+        url: '@Url.Action("ListLookup", "Home")?tipo=2&consulta=',
+        imgLoader: '<img src="~/Images/ajaxloader.gif">',
+        width: 800,
+        height: 1000,
+        onItemSelected: function (data) {
+        $('input[name=Priority]').val(data.Descripción);
+        if (data.Descripción.trim() == 'Baja'){
+        $('input[name=RequiredDate]').val('@DateTime.Now.AddDays(10).ToShortDateString()')
+        }
+        else {
+        $('input[name=RequiredDate]').val('@DateTime.Now.AddDays(2).ToShortDateString()')
+        }
+        },
+        tableHeader: ['Id. de Prioridad', 'Descripción'],
+        hiddenFields: ['DataExtended']
+        });
+
+        $("#lookupApprover").lookupbox({
+        title: 'Busqueda:',
+        url: '@Url.Action("ListLookup", "Home")?tipo=3&consulta=',
+        imgLoader: '<img src="~/Images/ajaxloader.gif">',
+        width: 800,
+        height: 1000,
+        onItemSelected: function (data) {
+        $('input[name=Approver]').val(data.Id);
+        },
+        tableHeader: ['Id. de usuario', 'Descripción'],
+        hiddenFields: ['DataExtended']
+        });
+
+        $("#lookupMoneda").lookupbox({
+        title: 'Busqueda:',
+        url: '@Url.Action("ListLookup", "Home")?tipo=5&consulta=',
+        imgLoader: '<img src="~/Images/ajaxloader.gif">',
+        width: 800,
+        height: 1000,
+        onItemSelected: function (data) {
+        $('input[name=Currency]').val(data.Id);
+        },
+        tableHeader: ['Id. de moneda', 'Descripción'],
+        hiddenFields: ['DataExtended']
+        });
+
+        $("#lookupSolicitante").lookupbox({
+        title: 'Busqueda:',
+        url: '@Url.Action("ListLookup", "Home")?tipo=6&consulta=',
+        imgLoader: '<img src="~/Images/ajaxloader.gif">',
+        width: 800,
+        height: 1000,
+        onItemSelected: function (data) {
+        $('input[name=Requester]').val(data.Id);
+        },
+        tableHeader: ['Id. de usuario', 'Nombre'],
+        hiddenFields: ['DataExtended']
+        });
+
+        $("#lookupProveedor").lookupbox({
+        title: 'Busqueda:',
+        url: '@Url.Action("ListLookup", "Home")?tipo=7&consulta=',
+        imgLoader: '<img src="~/Images/ajaxloader.gif">',
+        width: 800,
+        height: 1000,
+        onItemSelected: function (data) {
+        $('input[name=VendorId]').val(data.Id);
+        $('input[name=VendorName]').val(data.Descripción);
+        $('input[name=VendName]').val(data.Descripción);
+        },
+        tableHeader: ['Id. de proveedor', 'Nombre'],
+        hiddenFields: ['DataExtended']
+        });
+
+        $("#lookupCondicionPago").lookupbox({
+        title: 'Busqueda:',
+        url: '@Url.Action("ListLookup", "Home")?tipo=8&consulta=',
+        imgLoader: '<img src="~/Images/ajaxloader.gif">',
+        width: 800,
+        height: 1000,
+        onItemSelected: function (data) {
+        $('input[name=PaymentCondition]').val(data.Descripción);
+        },
+        tableHeader: ['Id. de Condicion de pago', 'Descripción'],
+        hiddenFields: ['DataExtended']
+        });
+
+        $("#lookupAlmacen").lookupbox({
+        title: 'Busqueda:',
+        url: '@Url.Action("ListLookup", "Home")?tipo=9&consulta=',
+        imgLoader: '<img src="~/Images/ajaxloader.gif">',
+        width: 800,
+        height: 1000,
+        onItemSelected: function (data) {
+        $('input[name=Warehouse]').val(data.Id);
+        },
+        tableHeader: ['Id. de almacen', 'Descripción'],
+        hiddenFields: ['DataExtended']
+        });
+
+        $("#lookupCuenta").lookupbox({
+        title: 'Busqueda:',
+        url: '@Url.Action("ListLookup", "Home")?tipo=11&consulta=',
+        imgLoader: '<img src="~/Images/ajaxloader.gif">',
+        width: 800,
+        height: 1000,
+        onItemSelected: function (data) {
+        $('input[name=AccountNum]').val(data.DataExtended);
+        },
+        tableHeader: ['Id. de cuenta', 'Descripción'],
+        hiddenFields: ['DataExtended']
+        });
+
+        $("#lookupProyecto").lookupbox({
+        title: 'Busqueda:',
+        url: '@Url.Action("ListLookup", "Home")?tipo=12&consulta=',
+        imgLoader: '<img src="~/Images/ajaxloader.gif">',
+        width: 800,
+        height: 1000,
+        onItemSelected: function (data) {
+        $('input[name=Charge]').val(data.Descripción);
+        },
+        tableHeader: ['Id. de departamento', 'Descripción'],
+        hiddenFields: ['DataExtended']
+        });
+
+        $("#lookupImpuesto").lookupbox({
+        title: 'Busqueda:',
+        url: '@Url.Action("ListLookup", "Home")?tipo=15&consulta=',
+        imgLoader: '<img src="~/Images/ajaxloader.gif">',
+        width: 800,
+        height: 1000,
+        onItemSelected: function (data) {
+        $('input[name=TaxDetailId]').val(data.Id);
+        },
+        tableHeader: ['Id. de proyecto', 'Descripción'],
+        hiddenFields: ['DataExtended']
+        });
+
+        $("#lookupPlato").lookupbox({
+        title: 'Busqueda:',
+        url: '@Url.Action("ListLookup", "Home")?tipo=13&consulta=',
+        imgLoader: '<img src="~/Images/ajaxloader.gif">',
+        width: 800,
+        height: 1000,
+        onItemSelected: function (data) {
+        $('input[name=FoodId]').val(data.Id);
+        $('input[name=FoodName]').val(data.Descripción);
+        $('input[name=FoodLineScheduleId]').val($('#FoodScheduleId option:selected').text());
+        },
+        tableHeader: ['Id. de plato', 'Descripción'],
+        hiddenFields: ['DataExtended']
+        });
+
+        $("#lookupPurchaseOrder").lookupbox({
+        title: 'Busqueda:',
+        url: '@Url.Action("ListLookup", "Home")?tipo=17&consulta=',
+        imgLoader: '<img src="~/Images/ajaxloader.gif">',
+        width: 800,
+        height: 1000,
+        onItemSelected: function (data) {
+        $('input[name=PaymentPurchaseOrder]').val(data.Id);
+        },
+        tableHeader: ['Orden de compra', 'Proveedor'],
+        hiddenFields: ['DataExtended']
+        });

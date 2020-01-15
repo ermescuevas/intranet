@@ -1,0 +1,231 @@
+﻿@model IEnumerable<Seaboard.Intranet.Domain.Models.User>
+@{
+    ViewBag.Title = "Listado de usuarios";
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Listado de usuarios</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Listado de usuarios</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>Listado de usuarios</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="ibox-content">
+                    @Html.ActionLink("NUEVO USUARIO", "Create", null, new { @class = "btn btn-primary" })
+                    <div class="hr-line-dashed"></div>
+                    <table class="table table-striped table-bordered table-hover informationTable">
+                        <thead>
+                            <tr>
+                                <th>Id. de empleado</th>
+                                <th>Id. de usuario</th>
+                                <th>Nombre</th>
+                                <th>Apellido</th>
+                                <th>Departamento</th>
+                                <th>Cedula</th>
+                                <th>Active Directory</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr class="text-center">
+                                    <td>@Html.ActionLink(item.EmployeeId, "Edit", new { id = @item.EmployeeId })</td>
+                                    <td>@item.UserId</td>
+                                    <td>@item.FirstName</td>
+                                    <td>@item.LastName</td>
+                                    <td>@item.Department</td>
+                                    <td>@item.Identification</td>
+                                    <td>
+                                        @if (item.IsActiveDirectory)
+                                        {
+                                            <label class="badge badge-success">Si</label>
+                                        }
+                                        else
+                                        {
+                                            <label class="badge badge-success">No</label>
+                                        }
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-danger btn-xs" type="button" data-toggle="modal" data-target="#modal-container" onclick="Copiar('@item.UserId','@(item.FirstName + " " + item.LastName)');">Copiar</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-container" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Copiar permisos</h4>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-11">
+                            <label>Copiar desde</label>
+                            <br />
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">Id. de usuario</label>
+                                <div class="col-sm-8 input-group">
+                                    <select data-placeholder="Escoja un usuario..." class="chosen-select" id="users" name="users">
+                                        @foreach (var item in Model)
+                                        {
+                                            <option value="@item.UserId">@(item.FirstName + " " + @item.LastName)</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <label>Copiar hasta</label>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">Id</label>
+                                <div class="col-sm-8 input-group">
+                                    <input type="text" name="UserId" id="UserId" readonly="readonly" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">Nombre</label>
+                                <div class="col-sm-8 input-group">
+                                    <input type="text" name="Name" id="Name" readonly="readonly" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="form-actions no-color">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="CopiarPermisos();"> Copiar</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Styles {
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/Content/plugins/chosen/chosenStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/chosen")
+    @Scripts.Render("~/plugins/toastr")
+
+    <script>
+        $(document).ready(function () {
+            $('.informationTable').DataTable({
+                pageLength: 10,
+                dom: '<"html5buttons"B>lTfgitp',
+                order: [[0, "desc"]],
+                language: {
+                    "sProcessing": "Procesando... ",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:  ",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                },
+                oAria: {
+                    "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                },
+                buttons: [
+                    { extend: 'copy' },
+                    { extend: 'csv' },
+                    { extend: 'excel', title: 'ExampleFile' },
+                    { extend: 'pdf', title: 'ExampleFile' },
+
+                    {
+                        extend: 'print',
+                        customize: function (win) {
+                            $(win.document.body).addClass('white-bg');
+                            $(win.document.body).css('font-size', '10px');
+
+                            $(win.document.body).find('table')
+                                    .addClass('compact')
+                                    .css('font-size', 'inherit');
+                        }
+                    }
+                ]
+            });
+            $('.chosen-select').chosen({ width: "100%" });
+        });
+
+        function Copiar(userId, name) {
+            $('#UserId').val(userId);
+            $('#Name').val(name);
+        }
+
+        function CopiarPermisos() {
+            if ($('#users').val().length > 0) {
+                $.ajax({
+                    url: '@Url.Action("CopyPermission", "Account")?UserIdFrom=' + $('#users').val() + '&UserIdTo=' + $('#UserId').val(),
+                    type: "POST",
+                    data: "",
+                    dataType: "JSON",
+                    cache: false,
+                    contentType: "application/json",
+                    success: function (result) {
+                        toastr.info("Copiado de permisos procesado correctamente");
+                    }
+                });
+            }
+        }
+
+    </script>
+}

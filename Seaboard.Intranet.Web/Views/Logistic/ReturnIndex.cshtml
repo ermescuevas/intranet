@@ -1,0 +1,198 @@
+﻿@model IEnumerable<Seaboard.Intranet.Domain.ViewModels.DispachtHeaderViewModel>
+@{
+    ViewBag.Title = "Devoluciones";
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Devoluciones</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Devoluciones</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>Devoluciones</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="ibox-content">
+                    @Html.ActionLink("NUEVA DEVOLUCION", "Return", "Logistic", null, new { @class = "btn btn-primary" })
+                    <div class="hr-line-dashed"></div>
+                    <table class="table table-striped table-bordered table-hover informationTable">
+                        <thead>
+                            <tr>
+                                <th style="width:15%">Despacho</th>
+                                <th style="width:15%">Requisicion</th>
+                                <th style="width:10%">Departamento</th>
+                                <th style="width:10%">Fecha</th>
+                                <th style="width:12%">Almacen</th>
+                                <th style="width:8%">Estado</th>
+                                <th style="width:5%">#</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@Html.ActionLink(item.DispachtId, "ReturnEdit", new { id = @item.DispachtId })</td>
+                                    <td>@item.RequestId</td>
+                                    <td>@item.DepartmentId</td>
+                                    <td>@item.DocumentDate.ToShortDateString()</td>
+                                    <td>@item.WarehouseId</td>
+                                    <td>
+                                        @switch (item.Status)
+                                        {
+                                            case "No enviado":
+                                                <i class="badge badge-danger">@item.Status</i>
+                                                break;
+                                            case "Enviada":
+                                                <i class="badge badge-warning-light">@item.Status</i>
+                                                break;
+                                            case "En Proceso":
+                                                <i class="badge badge-primary">@item.Status</i>
+                                                break;
+                                            case "Anulado":
+                                                <i class="badge badge-warning">@item.Status</i>
+                                                break;
+                                            case "Aprobado":
+                                                <i class="badge badge-info">@item.Status</i>
+                                                break;
+                                            case "Cerrada":
+                                                <i class="badge badge-success">@item.Status</i>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a class="modal-link" href="@Url.Action("ReturnDetails", "Logistic", new { id = item.DispachtId })"><i class="fa fa-bars"></i></a>
+                                            <a onclick="Print('@item.DispachtId');"><i class="fa fa-print"></i></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-container" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content animated flipInY">
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/toastr")
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('body').on('click', '.modal-link', function (e) {
+                e.preventDefault();
+                $(this).attr('data-target', '#modal-container');
+                $(this).attr('data-toggle', 'modal');
+            });
+
+            $('#modal-container').on('hidden.bs.modal', function () {
+                $(this).removeData('bs.modal');
+            });
+
+            $('.informationTable').DataTable({
+                pageLength: 10,
+                order: [[0, "desc"]],
+                dom: '<"html5buttons"B>lTfgitp',
+                language: {
+                    "sProcessing": "Procesando... ",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:  ",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                },
+                oAria: {
+                    "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                },
+                buttons: [
+                    { extend: 'copy' },
+                    { extend: 'csv' },
+                    { extend: 'excel', title: 'ExampleFile' },
+                    { extend: 'pdf', title: 'ExampleFile' },
+
+                    {
+                        extend: 'print',
+                        customize: function (win) {
+                            $(win.document.body).addClass('white-bg');
+                            $(win.document.body).css('font-size', '10px');
+
+                            $(win.document.body).find('table')
+                                    .addClass('compact')
+                                    .css('font-size', 'inherit');
+                        }
+                    }
+                ]
+
+            });
+        });
+
+        function Print(id) {
+            var url = '@Url.Content("~/PDF/Despacho/")' + id + '.pdf';
+            toastr.info('Estamos procesando su solicitud', 'Por favor espere')
+            $.ajax({
+                url: '@Url.Action("Print", "Logistic")?id=' + id + '&DocType=3',
+                type: "POST",
+                data: "",
+                cache: false,
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    window.open(url);
+                },
+                error: function (result) {
+                    alert(result.status)
+                }
+            });
+        }
+
+    </script>
+}

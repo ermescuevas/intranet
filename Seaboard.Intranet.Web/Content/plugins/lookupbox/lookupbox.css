@@ -1,0 +1,42 @@
+@import url("https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700");
+@import url("https://fonts.googleapis.com/css?family=Roboto:400,300,500,700");
+
+#lookupbox-search-key {
+	width:300px;
+    font-family: 'Open Sans', sans-serif;
+}
+#lookupbox-search-result {
+	margin-top: 10px;
+	height: 250px;
+	overflow: auto;
+    font-family: 'Open Sans', sans-serif;
+}
+
+.lookupbox-result{
+	width: 100%;
+    font-family: 'Open Sans', sans-serif;
+}
+
+.ui-dialog-titlebar{
+      border-radius:15px;
+}
+
+.lookupbox-result-header {
+	background-color: #b9d1ea;
+    font-family: 'Open Sans', sans-serif;
+}
+
+.lookupbox-result-row.odd {
+	background-color: #ffffff;
+    font-family: 'Open Sans', sans-serif;
+}
+
+.lookupbox-result-row.even {
+	background-color: #d7e4f2;
+    font-family: 'Open Sans', sans-serif;
+}
+
+tr.lookupbox-result-row:hover {
+	background-color: #b2c5db;
+    font-family: 'Open Sans', sans-serif;
+}

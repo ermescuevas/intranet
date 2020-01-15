@@ -1,0 +1,199 @@
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.BusinessLogic.dll.config
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.BusinessLogic.dll
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.BusinessLogic.pdb
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\CrystalDecisions.CrystalReports.Engine.dll
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\CrystalDecisions.Data.AdoDotNetInterop.dll
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\CrystalDecisions.ReportSource.dll
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\CrystalDecisions.Shared.dll
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\CrystalDecisions.Windows.Forms.dll
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Microsoft.SharePoint.Client.dll
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Microsoft.SharePoint.Client.Runtime.dll
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Data.dll
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Domain.dll
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\EntityFramework.dll
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\stdole.dll
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Data.pdb
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Domain.pdb
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\EntityFramework.xml
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csprojResolveAssemblyReference.cache
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.Properties.Resources.resources
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csproj.GenerateResource.Cache
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.dll
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.pdb
+C:\Users\ermes\OneDrive\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.BusinessLogic.dll.config
+C:\Users\ermes\OneDrive\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.BusinessLogic.dll
+C:\Users\ermes\OneDrive\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.BusinessLogic.pdb
+C:\Users\ermes\OneDrive\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Data.dll
+C:\Users\ermes\OneDrive\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Domain.dll
+C:\Users\ermes\OneDrive\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\EntityFramework.dll
+C:\Users\ermes\OneDrive\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\stdole.dll
+C:\Users\ermes\OneDrive\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Data.pdb
+C:\Users\ermes\OneDrive\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Data.dll.config
+C:\Users\ermes\OneDrive\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Domain.pdb
+C:\Users\ermes\OneDrive\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\EntityFramework.xml
+C:\Users\ermes\OneDrive\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csprojResolveAssemblyReference.cache
+C:\Users\ermes\OneDrive\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.Properties.Resources.resources
+C:\Users\ermes\OneDrive\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csproj.GenerateResource.Cache
+C:\Users\ermes\OneDrive\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.dll
+C:\Users\ermes\OneDrive\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.pdb
+G:\Proyectos\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.BusinessLogic.dll.config
+G:\Proyectos\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.BusinessLogic.dll
+G:\Proyectos\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.BusinessLogic.pdb
+G:\Proyectos\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Data.dll
+G:\Proyectos\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Domain.dll
+G:\Proyectos\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\EntityFramework.dll
+G:\Proyectos\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\stdole.dll
+G:\Proyectos\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Data.pdb
+G:\Proyectos\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Data.dll.config
+G:\Proyectos\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Domain.pdb
+G:\Proyectos\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\EntityFramework.xml
+G:\Proyectos\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csprojResolveAssemblyReference.cache
+G:\Proyectos\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.Properties.Resources.resources
+G:\Proyectos\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csproj.GenerateResource.Cache
+G:\Proyectos\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.dll
+G:\Proyectos\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.pdb
+C:\Users\ermes\OneDrive\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\itextsharp.dll
+C:\Users\ermes\OneDrive\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\itextsharp.xml
+C:\Users\ermes\Desktop\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.BusinessLogic.dll.config
+C:\Users\ermes\Desktop\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.BusinessLogic.dll
+C:\Users\ermes\Desktop\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.BusinessLogic.pdb
+C:\Users\ermes\Desktop\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\CrystalDecisions.CrystalReports.Engine.dll
+C:\Users\ermes\Desktop\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\CrystalDecisions.Data.AdoDotNetInterop.dll
+C:\Users\ermes\Desktop\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\CrystalDecisions.ReportSource.dll
+C:\Users\ermes\Desktop\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\CrystalDecisions.Shared.dll
+C:\Users\ermes\Desktop\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\CrystalDecisions.Windows.Forms.dll
+C:\Users\ermes\Desktop\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\itextsharp.dll
+C:\Users\ermes\Desktop\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Data.dll
+C:\Users\ermes\Desktop\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Domain.dll
+C:\Users\ermes\Desktop\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\EntityFramework.dll
+C:\Users\ermes\Desktop\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\stdole.dll
+C:\Users\ermes\Desktop\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Data.pdb
+C:\Users\ermes\Desktop\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Data.dll.config
+C:\Users\ermes\Desktop\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Domain.pdb
+C:\Users\ermes\Desktop\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\itextsharp.xml
+C:\Users\ermes\Desktop\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\EntityFramework.xml
+C:\Users\ermes\Desktop\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csprojResolveAssemblyReference.cache
+C:\Users\ermes\Desktop\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.Properties.Resources.resources
+C:\Users\ermes\Desktop\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csproj.GenerateResource.Cache
+C:\Users\ermes\Desktop\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.dll
+C:\Users\ermes\Desktop\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.pdb
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.BusinessLogic.dll.config
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.BusinessLogic.dll
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.BusinessLogic.pdb
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\itextsharp.dll
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Microsoft.SharePoint.Client.dll
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Microsoft.SharePoint.Client.Runtime.dll
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Data.dll
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Domain.dll
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\EntityFramework.dll
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Data.pdb
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Data.dll.config
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Domain.pdb
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\itextsharp.xml
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\EntityFramework.xml
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csprojResolveAssemblyReference.cache
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.Properties.Resources.resources
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csproj.GenerateResource.Cache
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.dll
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.pdb
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\stdole.dll
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csproj.CoreCompileInputs.cache
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csproj.CopyComplete
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\RestSharp.dll
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\System.ValueTuple.dll
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\System.ValueTuple.xml
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll
+C:\Users\User01\Documents\Visual Studio 2017\Projects\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
+C:\Users\Ermes Cuevas\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.BusinessLogic.dll.config
+C:\Users\Ermes Cuevas\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.BusinessLogic.dll
+C:\Users\Ermes Cuevas\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.BusinessLogic.pdb
+C:\Users\Ermes Cuevas\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\itextsharp.dll
+C:\Users\Ermes Cuevas\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll
+C:\Users\Ermes Cuevas\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\RestSharp.dll
+C:\Users\Ermes Cuevas\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Data.dll
+C:\Users\Ermes Cuevas\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Domain.dll
+C:\Users\Ermes Cuevas\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\System.ValueTuple.dll
+C:\Users\Ermes Cuevas\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\EntityFramework.dll
+C:\Users\Ermes Cuevas\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Data.pdb
+C:\Users\Ermes Cuevas\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Data.dll.config
+C:\Users\Ermes Cuevas\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Domain.pdb
+C:\Users\Ermes Cuevas\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\itextsharp.xml
+C:\Users\Ermes Cuevas\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
+C:\Users\Ermes Cuevas\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\System.ValueTuple.xml
+C:\Users\Ermes Cuevas\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\EntityFramework.xml
+C:\Users\Ermes Cuevas\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csprojAssemblyReference.cache
+C:\Users\Ermes Cuevas\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.Properties.Resources.resources
+C:\Users\Ermes Cuevas\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csproj.GenerateResource.cache
+C:\Users\Ermes Cuevas\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csproj.CoreCompileInputs.cache
+C:\Users\Ermes Cuevas\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csproj.CopyComplete
+C:\Users\Ermes Cuevas\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.dll
+C:\Users\Ermes Cuevas\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.pdb
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.BusinessLogic.dll.config
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.BusinessLogic.dll
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.BusinessLogic.pdb
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\itextsharp.dll
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\RestSharp.dll
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Data.dll
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Domain.dll
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\System.ValueTuple.dll
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Data.pdb
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Data.dll.config
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Domain.pdb
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\itextsharp.xml
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\System.ValueTuple.xml
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csprojAssemblyReference.cache
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.Properties.Resources.resources
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csproj.GenerateResource.cache
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csproj.CoreCompileInputs.cache
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csproj.CopyComplete
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.dll
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.pdb
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.BusinessLogic.dll.config
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.BusinessLogic.dll
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.BusinessLogic.pdb
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\itextsharp.dll
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\RestSharp.dll
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Data.dll
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Domain.dll
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\System.ValueTuple.dll
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Data.pdb
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Data.dll.config
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Domain.pdb
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\itextsharp.xml
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\System.ValueTuple.xml
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csprojAssemblyReference.cache
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.Properties.Resources.resources
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csproj.GenerateResource.cache
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csproj.CoreCompileInputs.cache
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csproj.CopyComplete
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.dll
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.pdb
+C:\Users\ermes\Documents\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\stdole.dll
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csprojAssemblyReference.cache
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.Properties.Resources.resources
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csproj.GenerateResource.cache
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.BusinessLogic.dll.config
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.BusinessLogic.dll
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.BusinessLogic.pdb
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\itextsharp.dll
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Newtonsoft.Json.dll
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\RestSharp.dll
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Data.dll
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Domain.dll
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\System.ValueTuple.dll
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\stdole.dll
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Data.pdb
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Data.dll.config
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Domain.pdb
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\itextsharp.xml
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Newtonsoft.Json.xml
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\System.ValueTuple.xml
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csproj.CopyComplete
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.dll
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.pdb

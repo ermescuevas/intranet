@@ -1,0 +1,259 @@
+﻿@{
+    Layout = "~/Views/Shared/_BillingLayout.cshtml";
+    ViewBag.Title = "Contabilización de lotes";
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-sm-4">
+        <h2>Contabilización de lotes</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Contabilización de lotes</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="wrapper wrapper-content animated fadeInUp">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="ibox float-e-margins" id="buttonPanel">
+                        <div class="ibox-title">
+                            <h3>Contabilización de lotes</h3>
+                        </div>
+                        <div class="ibox-content">
+                            <div class="sk-spinner sk-spinner-wave">
+                                <div class="sk-rect1"></div>
+                                <div class="sk-rect2"></div>
+                                <div class="sk-rect3"></div>
+                                <div class="sk-rect4"></div>
+                                <div class="sk-rect5"></div>
+                            </div>
+                            <div class="col-sm-12 col-sm-offset-1">
+                                <button class="btn btn-primary" type="button" onclick="contabilizar();"><i class="fa fa-money"></i> Contabilizar</button>
+                                <button class="btn btn-success" type="button" onclick="borrar();"><i class="fa fa-eraser"></i> Borrar</button>
+                                <br/>
+                            </div>
+                            <br/>
+                            <br/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ibox" id="headerPanel">
+                <div class="ibox-content">
+                    <div class="sk-spinner sk-spinner-wave">
+                        <div class="sk-rect1"></div>
+                        <div class="sk-rect2"></div>
+                        <div class="sk-rect3"></div>
+                        <div class="sk-rect4"></div>
+                        <div class="sk-rect5"></div>
+                    </div>
+                    <div class="hr-line-dashed"></div>
+                    <div class="row">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">Modulo:</label>
+                            <div class="col-sm-3">
+                                <select class="form-control m-b" name="module" id="module">
+                                    <option value="3">Ventas</option>
+                                    <option value="4">Compras</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">Origen:</label>
+                            <div class="col-sm-3">
+                                <select class="form-control m-b" name="source" id="source"></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hr-line-dashed"></div>
+                    <br />
+                    <div class="row">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">Id. de lote:</label>
+                            <div class="col-sm-2 input-group">
+                                <input type="text" name="bachNumber" id="bachNumber" class="form-control" readonly="readonly" />
+                                <span class="input-group-btn">
+                                    <button id="lookupIdLote" type="button" onclick="idLoteLookup();" class="btn btn-primary">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">Descripción:</label>
+                            <div class="col-sm-4 input-group">
+                                <input type="text" name="bachDescription" id="bachDescription" class="form-control" readonly="readonly" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hr-line-dashed"></div>
+                    <div class="row">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">Monto total:</label>
+                            <div class="col-sm-2 input-group">
+                                <input type="text" name="amount" id="amount" class="form-control" readonly="readonly" />
+                            </div>
+                            <label class="col-sm-2 control-label">Num. trans:</label>
+                            <div class="col-sm-2 input-group">
+                                <input type="text" name="number" id="number" class="form-control" readonly="readonly" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles{
+    @Styles.Render("~/Content/plugins/iCheck/iCheckStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/textSpinnersStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/iCheck")
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+
+    <script>
+        $(document).ready(function () {
+            $('#source')
+                .find('option')
+                .remove()
+                .end()
+                .append('<option value="0">Escoja la opción</option>')
+                .val('0');
+            $('#source').append($('<option>', {
+                value: "RM_Sales",
+                text: 'Transacciones de cuentas por cobrar'
+            }));
+            $('#source').append($('<option>', {
+                value: "RM_Cash",
+                text: 'Recibos de ingresos'
+            }));
+            $('#module').change(function() {
+                if ($('#module').val() === "3") {
+                    $('#source')
+                        .find('option')
+                        .remove()
+                        .end()
+                        .append('<option value="0">Escoja la opción</option>')
+                        .val('0');
+                    $('#source').append($('<option>', {
+                        value: "RM_Sales",
+                        text: 'Transacciones de cuentas por cobrar'
+                    }));
+                    $('#source').append($('<option>', {
+                        value: "RM_Cash",
+                        text: 'Recibos de ingresos'
+                    }));
+                } else {
+                    $('#source')
+                        .find('option')
+                        .remove()
+                        .end()
+                        .append('<option value="0">Escoja la opción</option>')
+                        .val('0');
+                    $('#source').append($('<option>', {
+                        value: "PM_Trxent",
+                        text: 'Transacciones de cuentas por pagar'
+                    }));
+                    $('#source').append($('<option>', {
+                        value: "PM_Payment",
+                        text: 'Cheques'
+                    }));
+                    $('#source').append($('<option>', {
+                        value: "Rcvg Trx Entry",
+                        text: 'Recepciones de compras'
+                    }));
+                }
+            });
+        });
+
+        function contabilizar() {
+            var isAllValid = true;
+            
+            if ($('input[name=bachNumber]').val() === '') {
+                isAllValid = false;
+                toastr.error('Debe de especificar un Id. de lote', 'Campo requerido');
+            };
+
+            if ($('input[name=source]').val() === '0') {
+                isAllValid = false;
+                toastr.error('Debe de especificar un origen', 'Campo requerido');
+            }
+            if (isAllValid) {
+                var data = {
+                    bachNumber: $('#bachNumber').val().trim(),
+                    bachSource: $('#source').val().trim()
+                }
+
+                toastr.info('Estamos procesando su solicitud', 'Por favor espere');
+                $('#buttonPanel').children('.ibox-content').toggleClass('sk-loading');
+                $('#headerPanel').children('.ibox-content').toggleClass('sk-loading');
+                $.ajax({
+                    url: '@Url.Action("PostBatch", "AccountReceivables")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function(d) {
+                        if (d.status === "OK") {
+                            $('#buttonPanel').children('.ibox-content').removeClass('sk-loading');
+                            $('#headerPanel').children('.ibox-content').removeClass('sk-loading');
+                            toastr.success('Id. de lote contabilizado correctamente', 'Campo requerido');
+                            borrar();
+                        } else {
+                            $('#buttonPanel').children('.ibox-content').removeClass('sk-loading');
+                            $('#headerPanel').children('.ibox-content').removeClass('sk-loading');
+                            alert(d.status);
+                        }
+                    }
+                });
+            }
+        }
+
+        function idLoteLookup() {
+            if ($('input[name=source]').val() === '0') {
+                toastr.error('Debe de especificar un origen', 'Campo requerido');
+                return;
+            }
+            $('#lookupIdLote').lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookup", "Home")?tipo=37&consultaExtra=' + $('#source').val() + '&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function(data) {
+                    $('input[name=bachNumber]').val(data.ItemId);
+                    $('input[name=bachDescription]').val(data.ItemNam);
+                    $('input[name=amount]').val(data.DataExtended);
+                    $('input[name=number]').val(data.DataPlus);
+                },
+                tableHeader: ['Id. de lote', 'Descripción'],
+                hiddenFields: ['DataExtended', 'ItemDesc', 'DataPlus', 'Posted']
+            });
+        }
+
+        function borrar() {
+            $('input[name=bachNumber]').val('');
+            $('input[name=bachDescription]').val('');
+            $('input[name=number]').val('');
+            $('input[name=amount]').val('');
+        }
+    </script>
+}

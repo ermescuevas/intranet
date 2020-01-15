@@ -1,0 +1,736 @@
+﻿@model Seaboard.Intranet.Domain.Models.MemBillingHead
+@{
+    Layout = "~/Views/Shared/_BillingLayout.cshtml";
+    ViewBag.Title = "Configuración NCF";
+}
+
+<style>
+    .selected {
+        background-color: #e0f3ff;
+    }
+</style>
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Configuración NCF</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Configuración NCF</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <p>
+            Creación de las clasificaciones de comprobantes fiscales y sus detalles.
+        </p>
+        <div class="col-lg-5">
+            <div class="ibox">
+                <div class="ibox-title">
+                    <h5>Tipos de NCF</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+
+                        <a class="close-link">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="ibox-content">
+                    <button class="btn btn-danger" onclick="createHeader('','','')">Crear un nuevo tipo de NCF</button>
+                    <hr />
+                    <div class="row table-responsive" id="headerRows">
+                        <table class="table informationTable" id="headerTable">
+                            <thead>
+                                <tr>
+                                    <th style="width:20%">Codigo</th>
+                                    <th style="width:55%">Descripción</th>
+                                    <th style="width:25%">#</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="ibox">
+                <div class="ibox-title">
+                    <h5>Detalles NCF</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+
+                        <a class="close-link">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="ibox-content">
+                    <button class="btn btn-success" onclick="createDetail($('#CodeHeader').val(),'','','','','','')">Crear un nuevo detalle de NCF</button>
+                    <hr />
+                    <div class="row table-responsive" id="detailRows">
+                        <table class="table informationTable">
+                            <thead>
+                                <tr>
+                                    <th style="display: none">Codigo</th>
+                                    <th style="display: none">Codigo Detalle</th>
+                                    <th style="width:15%">Desde</th>
+                                    <th style="width:15%">Hasta</th>
+                                    <th style="width:20%">Sig. Numero</th>
+                                    <th style="width:10%">Restante</th>
+                                    <th style="width:16%">Vencimiento</th>
+                                    <th style="width:10%">Estado</th>
+                                    <th style="width:14%">#</th>
+                                </tr>
+                            </thead>
+
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-CreateHeader" class="modal inmodal" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content animated fadeIn">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Cabecera NCF</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">Id. de NCF:</label>
+                        <div class="col-sm-8 input-group">
+                            <input name="Code" id="Code" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">Descripción:</label>
+                        <div class="col-sm-8 input-group">
+                            <input name="Description" id="Description" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">Tipo de documento:</label>
+                        <div class="col-sm-8 input-group">
+                            <select class="selectpicker" data-live-search="true" id="DocumentType" name="DocumentType">
+                                <option value="">Seleccione un tipo de documento</option>
+                                <option value="10">Factura</option>
+                                <option value="20">Nota de Crédito</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="form-actions no-color">
+                        <button type="button" class="btn btn-primary" onclick="saveNCFHeader();"> Guardar</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-CreateDetail" class="modal inmodal" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content animated fadeIn">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Detalle NCF</h4>
+                </div>
+                <div class="modal-body">
+                    <input name="CodeHeader" id="CodeHeader" class="form-control" type="hidden" />
+                    <input name="CodeDetail" id="CodeDetail" class="form-control" type="hidden" />
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">Desde:</label>
+                        <div class="col-sm-8 input-group">
+                            <input name="FromNumber" id="FromNumber" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">Hasta:</label>
+                        <div class="col-sm-8 input-group">
+                            <input name="ToNumber" id="ToNumber" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">Sig. Numero:</label>
+                        <div class="col-sm-8 input-group">
+                            <input name="NextNumber" id="NextNumber" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">Restante:</label>
+                        <div class="col-sm-8 input-group">
+                            <input name="LeftNumber" id="LeftNumber" class="form-control" readonly="readonly" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">Num. Notificación:</label>
+                        <div class="col-sm-8 input-group">
+                            <input name="AlertNumber" id="AlertNumber" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">Fecha Venc.:</label>
+                        <div class="col-sm-8 input-group date">
+                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                            <input name="DueDate" id="DueDate" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">Estado:</label>
+                        <div class="col-sm-8 input-group">
+                            <select class="selectpicker" data-live-search="true" id="Status" name="Status">
+                                <option value="">Seleccione un estado</option>
+                                <option value="10">Activo</option>
+                                <option value="20">Inactivo</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="form-actions no-color">
+                        <button type="button" class="btn btn-primary" onclick="saveNCFDetail();"> Guardar</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/plugins/sweetAlertStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/css/bootstrap-select.min.css">
+}
+
+@section Scripts {
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/sweetAlert")
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/bootstrap-select.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/i18n/defaults-en_US.js"></script>
+
+    <script type="text/javascript">
+        var value = "";
+        $(document).ready(function () {
+            $('.informationTable').DataTable({
+                pageLength: 6,
+                order: [[0, "desc"]],
+                paging: false,
+                scrollCollapse: true,
+                scrollY: "50vh",
+                language: {
+                    "sProcessing": "Procesando... ",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:  ",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                },
+                oAria: {
+                    "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                }
+            });
+            $('#DueDate').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true,
+                format: 'mm/dd/yyyy'
+            });
+            getConfiguration();
+
+            $.formattedDate = function (dateToFormat) {
+                var dateObject = new Date(dateToFormat);
+                var day = dateObject.getDate();
+                var month = dateObject.getMonth() + 1;
+                var year = dateObject.getFullYear();
+                day = day < 10 ? "0" + day : day;
+                month = month < 10 ? "0" + month : month;
+                var formattedDate = month + "/" + day + "/" + year;
+                return formattedDate;
+            };
+            $('#ToNumber').focusout(function () {
+                if ($('#NextNumber').val() === '') {
+                    $('#NextNumber').val($('#FromNumber').val());
+                    if (!isNaN(parseInt($('#ToNumber').val()) - parseInt($('#NextNumber').val())))
+                        $('#LeftNumber').val(parseInt($('#ToNumber').val()) - parseInt($('#NextNumber').val()));
+                }
+            });
+            $('#NextNumber').focusout(function () {
+                if ($('#NextNumber').val() !== '') {
+                    if (!isNaN(parseInt($('#ToNumber').val()) - parseInt($('#NextNumber').val())))
+                        $('#LeftNumber').val(parseInt($('#ToNumber').val()) - parseInt($('#NextNumber').val()));
+                }
+            });
+        });
+
+        function createHeader(code, description, documentType) {
+            $('#modal-CreateHeader').modal('show');
+            if (code !== '') {
+                $('#Code').prop('readonly', true);
+            } else {
+                $('#Code').prop('readonly', false);
+            }
+            $('#Code').val(code);
+            $('#Description').val(description);
+            $('select[name=DocumentType]').val(documentType);
+            $('.selectpicker').selectpicker('refresh');
+        }
+
+        function createDetail(code, codeDetail, fromNumber, toNumber, nextNumber, dueDate, alertNumber, leftNumber, status) {
+            if (code !== '') {
+                $('#modal-CreateDetail').modal('show');
+                $('#CodeHeader').val(code);
+                $('#CodeDetail').val(codeDetail);
+                $('#FromNumber').val(fromNumber);
+                $('#ToNumber').val(toNumber);
+                $('#NextNumber').val(nextNumber);
+                $('#AlertNumber').val(alertNumber);
+                $('#LeftNumber').val(leftNumber);
+                if (dueDate !== '')
+                    $('#DueDate').val(dueDate);
+                if (fromNumber !== '')
+                    $('#FromNumber').prop('readonly', true)
+                else
+                    $('#FromNumber').prop('readonly', false)
+                if (toNumber !== '')
+                    $('#ToNumber').prop('readonly', true)
+                else
+                    $('#ToNumber').prop('readonly', false)
+                $('select[name=Status]').val(status);
+                $('.selectpicker').selectpicker('refresh');
+            } else {
+                toastr.info("Debe de insertar y elegir un tipo de comprobante antes de usar esta opción")
+            }
+        }
+
+        function getConfiguration() {
+            generateHeaders();
+        }
+
+        function generateHeaders() {
+            $.ajax({
+                url: '@Url.Action("GetNCFHeaders", "Billing")',
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    var $table = $('<table class="table informationTable"/>');
+                    $table.append(
+                        '<thead>' +
+                        '<tr>' +
+                        '<th style="width:20%">Codigo</th>' +
+                        '<th style="width:55%">Descripción</th>' +
+                        '<th style="width:25%">#</th>' +
+                        '</tr>' +
+                        '</thead>');
+                    var $tbody = $('<tbody/>');
+                    if (result.length > 0) {
+                        $.each(result, function (i, val) {
+                            var $row = $('<tr/>');
+                            var $btnGroup = $('<div class="btn-group"/>')
+                            var $edit = $('<button href="#" class="btn btn-success btn-xs">Editar</button>');
+                            var $remove = $('<button href="#"class="btn btn-danger btn-xs">Eliminar</button>');
+                            $row.append($('<td/>').html(val.Code));
+                            $row.append($('<td/>').html(val.Description));
+                            $tbody.append($row);
+                            $($row).click(function () {
+                                $(this).addClass('selected').siblings().removeClass('selected');
+                                value = $(this).find('td:first').html();
+                                $('#CodeHeader').val(value);
+                                generateDetails(value);
+                            });
+                            $remove.click(function (e) {
+                                deleteHeader(val.Code);
+                                e.preventDefault();
+                            });
+                            $edit.click(function (e) {
+                                createHeader(val.Code, val.Description, val.DocumentType);
+                                e.preventDefault();
+                            });
+                            $btnGroup.append($edit);
+                            $btnGroup.append($remove);
+                            $row.append($('<td/>').html($btnGroup));
+                        });
+                    }
+                    $table.append($tbody);
+                    $('#headerRows').html($table);
+                    $($table).DataTable({
+                        pageLength: 8,
+                        dom: '<"html5buttons"B>lTfgitp',
+                        paging: false,
+                        scrollCollapse: true,
+                        scrollY: "50vh",
+                        language: {
+                            "sProcessing": "Procesando... ",
+                            "sLengthMenu": "Mostrar _MENU_ registros",
+                            "sZeroRecords": "No se encontraron resultados",
+                            "sEmptyTable": "Ningún dato disponible en esta tabla",
+                            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                            "sInfoPostFix": "",
+                            "sSearch": "Buscar:  ",
+                            "sUrl": "",
+                            "sInfoThousands": ",",
+                            "sLoadingRecords": "Cargando...",
+                            "oPaginate": {
+                                "sFirst": "Primero",
+                                "sLast": "Último",
+                                "sNext": "Siguiente",
+                                "sPrevious": "Anterior"
+                            }
+                        },
+                        oAria: {
+                            "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                            "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                        },
+                        buttons: [
+                            { extend: 'excel', title: 'Cabecera NCF' },
+                            { extend: 'pdf', title: 'Cabecera NCF' },
+                            {
+                                extend: 'print',
+                                customize: function (win) {
+                                    $(win.document.body).addClass('white-bg');
+                                    $(win.document.body).css('font-size', '10px');
+
+                                    $(win.document.body).find('table')
+                                        .addClass('compact')
+                                        .css('font-size', 'inherit');
+                                }
+                            }
+                        ]
+                    });
+                }
+            });
+        }
+
+        function generateDetails(code) {
+            $.ajax({
+                url: '@Url.Action("GetNCFDetails", "Billing")?code=' + code,
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    var $table = $('<table class="table informationTable"/>');
+                    $table.append(
+                        '<thead>' +
+                        '<tr>' +
+                        '<th style="width:15%">Desde</th>' +
+                        '<th style="width:15%">Hasta</th>' +
+                        '<th style="width:18%">Sig. Numero</th>' +
+                        '<th style="width:10%">Restante</th>' +
+                        '<th style="width:15%">Vencimiento</th>' +
+                        '<th style="width:10%">Estado</th>' +
+                        '<th style="width:17%">#</th>' +
+                        '</tr>' +
+                        '</thead>');
+                    var $tbody = $('<tbody/>');
+                    if (result.length > 0) {
+                        $.each(result, function (i, val) {
+                            var $row = $('<tr/>');
+                            $row.append($('<td/>').html(val.FromNumber));
+                            $row.append($('<td/>').html(val.ToNumber));
+                            $row.append($('<td/>').html(val.NextNumber));
+                            $row.append($('<td/>').html(val.LeftNumber));
+                            $row.append($('<td/>').html($.formattedDate(new Date(parseInt(val.DueDate.substr(6))))));
+                            $row.append($('<td/>').html(val.Status === 10 ? "Activo" : "Inactivo"));
+                            var $btnGroup = $('<div class="btn-group"/>')
+                            var $edit = $('<button href="#" class="btn btn-success btn-xs">Editar</button>');
+                            var $remove = $('<button href="#"class="btn btn-danger btn-xs">Eliminar</button>');
+                            $remove.click(function (e) {
+                                deleteDetail(val.HeaderCode, val.DetailCode);
+                                e.preventDefault();
+                            });
+                            $edit.click(function (e) {
+                                createDetail(val.HeaderCode, val.DetailCode, val.FromNumber, val.ToNumber, val.NextNumber, $.formattedDate(new Date(parseInt(val.DueDate.substr(6)))), val.AlertNumber, val.LeftNumber, val.Status)
+                                e.preventDefault();
+                            });
+                            $btnGroup.append($edit);
+                            $btnGroup.append($remove);
+                            $row.append($('<td/>').html($btnGroup));
+                            $tbody.append($row);
+                        });
+                    }
+                    $table.append($tbody);
+                    $('#detailRows').html($table);
+                    $($table).DataTable({
+                        pageLength: 8,
+                        dom: '<"html5buttons"B>lTfgitp',
+                        paging: false,
+                        scrollCollapse: true,
+                        scrollY: "50vh",
+                        language: {
+                            "sProcessing": "Procesando... ",
+                            "sLengthMenu": "Mostrar _MENU_ registros",
+                            "sZeroRecords": "No se encontraron resultados",
+                            "sEmptyTable": "Ningún dato disponible en esta tabla",
+                            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                            "sInfoPostFix": "",
+                            "sSearch": "Buscar:  ",
+                            "sUrl": "",
+                            "sInfoThousands": ",",
+                            "sLoadingRecords": "Cargando...",
+                            "oPaginate": {
+                                "sFirst": "Primero",
+                                "sLast": "Último",
+                                "sNext": "Siguiente",
+                                "sPrevious": "Anterior"
+                            }
+                        },
+                        oAria: {
+                            "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                            "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                        },
+                        buttons: [
+                            { extend: 'excel', title: 'Detalle de NCF' },
+                            { extend: 'pdf', title: 'Detalle de NCF' },
+                            {
+                                extend: 'print',
+                                customize: function (win) {
+                                    $(win.document.body).addClass('white-bg');
+                                    $(win.document.body).css('font-size', '10px');
+
+                                    $(win.document.body).find('table')
+                                        .addClass('compact')
+                                        .css('font-size', 'inherit');
+                                }
+                            }
+                        ]
+                    });
+                }
+            });
+        }
+
+        function saveNCFHeader() {
+            var isAllValid = true;
+            if ($('#Code').val() === '') {
+                toastr.error('Por favor debe de especificar un producto para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Description').val() === '') {
+                toastr.error('Por favor debe de un identificador de columna', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#DocumentType').val() === '') {
+                toastr.error('Por favor debe de un identificador de columna', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (isAllValid) {
+                var data = {
+                    Code: $('#Code').val().trim(),
+                    Description: $('#Description').val().trim(),
+                    DocumentType: $('#DocumentType').val().trim()
+                }
+                $.ajax({
+                    url: '@Url.Action("SaveNcfHeaderConfiguration", "Billing")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            $('#modal-CreateHeader').modal('hide');
+                            generateHeaders();
+                        }
+                        else {
+                            alert(result.status);
+                        }
+                    }
+                });
+            }
+        }
+
+        function saveNCFDetail() {
+            var isAllValid = true;
+            if ($('#CodeHeader').val() === '') {
+                toastr.error('Por favor debe de especificar un producto para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#FromNumber').val() === '') {
+                toastr.error('Por favor debe de un identificador de columna', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#ToNumber').val() === '') {
+                toastr.error('Por favor debe de un identificador de columna', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#NextNumber').val() === '') {
+                toastr.error('Por favor debe de un identificador de columna', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#DueDate').val() === '') {
+                toastr.error('Por favor debe de un identificador de columna', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Status').val() === '') {
+                toastr.error('Por favor debe de un identificador de columna', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#AlertNumber').val() === '') {
+                toastr.error('Por favor debe de un identificador de columna', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (Number($('#NextNumber').val()) > Number($('#ToNumber').val())) {
+                toastr.error('El numero siguiente no puede ser mayor al numero hasta favor verificar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (isAllValid) {
+                var data = {
+                    HeaderCode: $('#CodeHeader').val().trim(),
+                    DetailCode: $('#CodeDetail').val().trim(),
+                    FromNumber: $('#FromNumber').val().trim(),
+                    ToNumber: $('#ToNumber').val().trim(),
+                    NextNumber: $('#NextNumber').val().trim(),
+                    AlertNumber: $('#AlertNumber').val().trim(),
+                    LeftNumber: $('#LeftNumber').val().trim(),
+                    DueDate: $('#DueDate').val().trim(),
+                    Status: $('#Status').val().trim()
+                }
+                $.ajax({
+                    url: '@Url.Action("SaveNcfDetailConfiguration", "Billing")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            $('#modal-CreateDetail').modal('hide');
+                            generateDetails($('#CodeHeader').val().trim());
+                        }
+                        else {
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+                    }
+                });
+            }
+        }
+
+        function deleteHeader(codeHeader) {
+            swal({
+                title: "Eliminar",
+                text: "Esta seguro que desea eliminar este registro ?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Si, eliminar!",
+                cancelButtonText: "No, cancelar!",
+                closeOnConfirm: true
+            }, function () {
+                $.ajax({
+                    url: '@Url.Action("DeleteNcfHeaderConfiguration", "Billing")?code=' + codeHeader,
+                    type: "POST",
+                    data: "",
+                    cache: false,
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            generateHeaders();
+                        } else {
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+                    }
+                });
+            });
+        }
+
+        function deleteDetail(codeHeader, codeDetail) {
+            swal({
+                title: "Eliminar",
+                text: "Esta seguro que desea eliminar este registro ?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Si, eliminar!",
+                cancelButtonText: "No, cancelar!",
+                closeOnConfirm: true
+            }, function () {
+                $.ajax({
+                    url: '@Url.Action("DeleteNcfDetailConfiguration", "Billing")?codeHeader=' + codeHeader + "&codeDetail=" + codeDetail,
+                    type: "POST",
+                    data: "",
+                    cache: false,
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            generateDetails(codeHeader);
+                        } else {
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+                    }
+                });
+            });
+        }
+    </script>
+}

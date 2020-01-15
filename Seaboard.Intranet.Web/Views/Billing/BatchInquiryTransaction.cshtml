@@ -1,0 +1,907 @@
+﻿@using Seaboard.Intranet.Domain
+@model Seaboard.Intranet.Domain.Models.MemBillingHead
+@{
+    Layout = "~/Views/Shared/_BillingLayout.cshtml";
+    ViewBag.Title = "Documentos";
+    var listInvoices = (List<MemInvoiceHead>)ViewBag.Invoices;
+}
+
+<style>
+    .selected {
+        background-color: #e0f3ff;
+    }
+
+    .notAvailable {
+        background-color: #f5efb5;
+    }
+
+    .bootstrap-select:not([class*=col-]):not([class*=form-control]):not(.input-group-btn) {
+        width: 100%;
+    }
+</style>
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <br />
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li>
+                <a href="@Url.Action("BatchInquiryIndex", "Billing")">Listado de lotes</a>
+            </li>
+            <li class="active">
+                <strong>Documentos</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="wrapper wrapper-content animated fadeInUp">
+                <div class="ibox">
+                    <div class="ibox-content">
+                        <div class="row m-t-sm">
+                            <div class="col-lg-12">
+                                <div class="panel blank-panel">
+                                    <div class="panel-heading">
+                                        <div class="panel-options">
+                                            <ul class="nav nav-tabs">
+                                                <li id="tabButton1" class="active"><a href="#tab-1" data-toggle="tab">Documentos</a></li>
+                                                <li id="tabButton2" class=""><a href="#tab-2" data-toggle="tab">Vista preliminar</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <div class="panel-body">
+                                        <div class="tab-content" id="tabContainer">
+                                            <div class="tab-pane active" id="tab-1">
+                                                <div class="row">
+                                                    <div class="col-lg-12">
+                                                        <div class="m-b-md">
+                                                            <div class="btn-group-xs pull-right">
+                                                                @if (Model.BillingType == Seaboard.Intranet.Domain.Models.BillingType.MEM)
+                                                                {
+                                                                    <button class="btn btn-info btn-xs" onclick="postBatch();">Contabilizar lote</button>
+                                                                    <button class="btn btn-info btn-xs" onclick="editarLoteStep();">Editar por lote</button>
+                                                                }
+                                                                <button class="btn btn-primary btn-xs" onclick="choosePrint(true,'0', false);">Imprimir lote</button>
+                                                            </div>
+                                                            <h2>@Model.BatchDescription</h2>
+                                                        </div>
+                                                        <dl class="dl-horizontal">
+                                                            <dt>Estado:</dt>
+                                                            @if (Model.BillingType == Seaboard.Intranet.Domain.Models.BillingType.MEM)
+                                                            {
+                                                                <dd><span class="label label-primary">Abierto</span></dd>
+                                                            }
+                                                            else
+                                                            {
+                                                                <dd><span class="label label-danger">Contabilizado</span></dd>
+                                                            }
+                                                        </dl>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-lg-5">
+                                                        <dl class="dl-horizontal">
+                                                            <dt>Id. de lote:</dt>
+                                                            <dd>@Model.BatchNumber</dd>
+                                                            <dt>No. transacciones:</dt>
+                                                            <dd>  @Model.NumberOfTransactions</dd>
+                                                            <dt>Total lote:</dt>
+                                                            <dd> @Model.TotalAmount.ToString("C2")</dd>
+                                                        </dl>
+                                                    </div>
+                                                    @*<div class="col-lg-7" id="cluster_info">
+                                                        <dl class="dl-horizontal">
+
+                                                            <dt>Trabajado por:</dt>
+                                                            <dd>@Model.UserId</dd>
+                                                        </dl>
+                                                    </div>*@
+                                                </div>
+                                                <table class="table table-striped informationtable" id="invoiceTable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width:9%">#</th>
+                                                            <th style="width:11%">No. de documento</th>
+                                                            <th style="width:6%">Tipo de doc.</th>
+                                                            <th style="width:9%">Ncf</th>
+                                                            <th style="width:9%">Id. de cliente</th>
+                                                            <th style="width:5%">Moneda</th>
+                                                            <th style="width:22%">Nombre</th>
+                                                            <th style="width:12%">Fecha de doc.</th>
+                                                            <th style="width:13%">Monto</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var item in listInvoices)
+                                                        {
+                                                            <tr>
+                                                            <td><button class="btn btn-primary btn-xs"><i class="fa fa-check"></i> Vista preliminar</button></td>
+                                                            <td>@item.SopNumber</td>
+                                                            <td>
+                                                                @switch (item.DocumentType)
+                                                                {
+                                                                    case Seaboard.Intranet.Domain.Models.DocumentType.Invoice:
+                                                                        <i class="badge badge-success">Factura</i>
+                                                                        break;
+                                                                    case Seaboard.Intranet.Domain.Models.DocumentType.CreditNote:
+                                                                        <i class="badge badge-info">Nota de Crédito</i>
+                                                                        break;
+                                                                    case Seaboard.Intranet.Domain.Models.DocumentType.DebitNote:
+                                                                        <i class="badge badge-primary">Nota de Débito</i>
+                                                                        break;
+                                                                }
+                                                            </td>
+                                                            <td>@item.Ncf</td>
+                                                            <td>@item.CustomerNumber</td>
+                                                            <td>@item.CurrencyId</td>
+                                                            <td>@item.CustomerName</td>
+                                                            <td>@item.DocumentDate.ToString("dd/MM/yyyy")</td>
+                                                            <td>@item.Total.ToString("C2")</td>
+                                                        </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="tab-pane" id="tab-2">
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="m-b-md">
+                                                            <div class="btn-group-xs pull-right">
+                                                                <button class="btn btn-success btn-xs" onclick="saveInvoice();">Guardar</button>
+                                                                <button class="btn btn-danger btn-xs" onclick="choosePrint(false,'0', false);">Imprimir</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="wrapper wrapper-content animated fadeInRight">
+                                                    <div class="row">
+                                                        <div class="col-sm-8">
+                                                            <h1 id="DocumentType"></h1>
+                                                        </div>
+                                                        <div class="col-sm-4 text-right">
+                                                            <h2>No. documento</h2>
+                                                            <h3 class="text-navy" id="SopNumber"></h3>
+                                                            <h4 class="text-navy" id="NCF"></h4>
+                                                            <h5 id="NcfType"></h5>
+                                                            <h5 id="NcfDueDate"></h5>
+                                                            <h5 id="ReferenceInvoice"></h5>
+                                                            <h5 id="ReferenceNcf"></h5>
+                                                        </div>
+                                                    </div>
+                                                    <br />
+                                                    <div class="row">
+                                                        <div class="col-sm-6">
+                                                            <h5>De:</h5>
+                                                            <address>
+                                                                <strong>Transcontinental Capital Corporation, Inc.</strong><br>
+                                                                Av. La Marina, Muelle Timbeque,<br>
+                                                                Santo Domingo<br>
+                                                                Republica Dominicana<br />
+                                                                <abbr title="phone">Tel:</abbr> (809) 687-0101
+                                                            </address>
+                                                        </div>
+
+                                                        <div class="col-sm-6 text-right">
+                                                            <span>Para:</span>
+                                                            <address id="Address"></address>
+                                                            <br />
+                                                            <div class="form-group col-md-4 pull-right">
+                                                                <label>Fecha vencimiento:</label>
+                                                                <div class="input-group">
+                                                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                                    <input id="DueDate" type="text" class="form-control">
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group col-md-4 pull-right">
+                                                                <label>Fecha documento:</label>
+                                                                <div class="input-group">
+                                                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                                    @if (Model.BillingType == Seaboard.Intranet.Domain.Models.BillingType.MEM)
+                                                                    {
+                                                                        <input id="DocumentDate" type="text" class="form-control">
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <input id="DocumentDate" readonly="readonly" type="text" class="form-control">
+                                                                    }
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="form-group col-md-4 pull-right">
+                                                                <label>Tasa:</label>
+                                                                <div class="input-group">
+                                                                    <input id="ExchangeRate" name="ExchangeRate" type="text" class="form-control" readonly="readonly">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="table-responsive m-t" id="itemRows"></div>
+
+                                                    <table class="table invoice-total">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td><strong>Sub Total :</strong></td>
+                                                                <td id="Subtotal"></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><strong>Impuesto :</strong></td>
+                                                                <td id="TaxAmount"></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td><strong>Total :</strong></td>
+                                                                <td id="Total"></td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+
+                                                    <div class="col-lg-8">
+                                                        <label>Nota</label>
+                                                        <div class="form-group">
+                                                            @if (Model.BillingType == Seaboard.Intranet.Domain.Models.BillingType.MEM)
+                                                            {
+                                                                <textarea rows="4" id="Note" class="form-control"></textarea>
+                                                            }
+                                                            else
+                                                            {
+                                                                <textarea rows="4" id="Note" class="form-control" readonly="readonly"></textarea>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modal-EditBatch" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Editar lote</h4>
+            </div>
+
+            <div class="modal-body">
+                <p>Este proceso modifica masivamente las informaciones de los documentos del lote</p>
+                <div class="form-group">
+                    <label>Fecha de documento:</label>
+                    <input name="BatchDocumentDate" id="BatchDocumentDate" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Fecha de vencimiento:</label>
+                    <input name="BatchDueDate" id="BatchDueDate" class="form-control" />
+                </div>
+                <input type="hidden" value="1" name="BatchExchangeRate" id="BatchExchangeRate" class="form-control" />
+                <div class="form-group">
+                    <label>Nota:</label>
+                    <textarea name="BatchNote" id="BatchNote" class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <div class="form-actions no-color">
+                    <button type="button" class="btn btn-primary" onclick="editarLote();"> Editar</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal"> Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modal-Print" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Imprimir</h4>
+            </div>
+
+            <div class="modal-body">
+                <p>Imprimir reporte</p>
+                <div class="form-group">
+                    <label>Opción</label>
+                    <select class="form-control" id="printOption" name="printOption">
+                        <option value="10">Normal</option>
+                        <option value="20">Normal Ingles</option>
+                    </select>
+                </div>
+                <div class="form-group" id="duplicateBlock">
+                    <div class="checkbox checkbox-info">
+                        <input id="ckbDuplicate" type="checkbox">
+                        <label for="ckbDuplicate">
+                            Duplicado
+                        </label>
+                    </div>
+                </div>
+                <input type="hidden" id="printChoice" name="printChoice" />
+                <input type="hidden" id="redirect" name="redirect" />
+                <input type="hidden" id="printPreInvoice" name="printPreInvoice" />
+            </div>
+
+            <div class="modal-footer">
+                <div class="form-actions no-color">
+                    <button type="button" class="btn btn-primary" onclick="imprimir();"> Imprimir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Styles {
+    @Styles.Render("~/plugins/wizardStepsStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/awesomeCheckboxStyles")
+    @Styles.Render("~/plugins/clockpickerStyles")
+    @Styles.Render("~/plugins/dateRangeStyles")
+    @Styles.Render("~/Content/plugins/iCheck/iCheckStyles")
+    @Styles.Render("~/Content/plugins/chosen/chosenStyles")
+    @Styles.Render("~/plugins/switcheryStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/plugins/nouiSliderStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/Content/plugins/ionRangeSlider/ionRangeStyles")
+    @Styles.Render("~/plugins/imagecropperStyles")
+    @Styles.Render("~/Content/plugins/colorpicker/colorpickerStyles")
+    @Styles.Render("~/plugins/select2Styles")
+    @Styles.Render("~/plugins/touchSpinStyles")
+    @Styles.Render("~/plugins/tagInputsStyles")
+    @Styles.Render("~/plugins/duallistStyles")
+    @Styles.Render("~/plugins/sweetAlertStyles")
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/plugins/laddaStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/css/bootstrap-select.min.css">
+}
+
+@section Scripts {
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/wizardSteps")
+    @Scripts.Render("~/plugins/validate")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/iCheck")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/ionRange")
+    @Scripts.Render("~/plugins/nouiSlider")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/plugins/switchery")
+    @Scripts.Render("~/plugins/chosen")
+    @Scripts.Render("~/plugins/knob")
+    @Scripts.Render("~/plugins/imagecropper")
+    @Scripts.Render("~/plugins/colorpicker")
+    @Scripts.Render("~/plugins/clockpicker")
+    @Scripts.Render("~/plugins/dateRange")
+    @Scripts.Render("~/plugins/select2")
+    @Scripts.Render("~/plugins/touchSpin")
+    @Scripts.Render("~/plugins/tagInputs")
+    @Scripts.Render("~/plugins/duallist")
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+    @Scripts.Render("~/plugins/sweetAlert")
+    @Scripts.Render("~/plugins/ladda")
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/bootstrap-select.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/i18n/defaults-en_US.js"></script>
+
+    <script type="text/javascript">
+        var items = [];
+        $(document).ready(function () {
+            $('.informationTable').DataTable({
+                pageLength: 6,
+                order: [[0, "desc"]],
+                paging: false,
+                scrollCollapse: true,
+                scrollY: "50vh",
+                language: {
+                    "sProcessing": "Procesando... ",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:  ",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                },
+                oAria: {
+                    "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                }
+            });
+            $('#BatchDocumentDate').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true
+            });
+            $('#BatchDueDate').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true
+            });
+            $('#DocumentDate').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true
+            });
+            $('#DueDate').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true
+            });
+            $('.ladda-button').ladda();
+            $.formattedDate = function (dateToFormat) {
+                var dateObject = new Date(dateToFormat);
+                var day = dateObject.getDate();
+                var month = dateObject.getMonth() + 1;
+                var year = dateObject.getFullYear();
+                day = day < 10 ? "0" + day : day;
+                month = month < 10 ? "0" + month : month;
+                var formattedDate = month + "/" + day + "/" + year;
+                return formattedDate;
+            };
+            $("#invoiceTable tbody tr td button.btn").click(function () {
+                var value = $(this).closest("tr").find('td:eq(1)').html();
+                getInvoice(value);
+            });
+        });
+
+        function getInvoice(sopNumber) {
+            $.ajax({
+                url: '@Url.Action("GetBatchInquiryInvoice", "Billing")?batchNumber=' +'@Model.BatchNumber'+'&sopNumber=' + sopNumber,
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    if (result.status === "OK") {
+                        $('#tabButton1').removeClass('active');
+                        $('#tabButton2').addClass('active');
+
+                        $('#tab-1').removeClass('active');
+                        $('#tab-2').addClass('active');
+
+                        $('#Address').html('<strong>' + result.invoice.CustomerName + '</strong><br>' + result.invoice.Address + '<br />' + result.invoice.City + '<br />' + result.invoice.Country);
+                        $('#SopNumber').html(result.invoice.SopNumber);
+                        if (result.invoice.DocumentType === 1)
+                            $('#DocumentType').html("Factura");
+                        if (result.invoice.DocumentType === 3)
+                            $('#DocumentType').html("Nota de Débito");
+                        if (result.invoice.DocumentType === 4)
+                            $('#DocumentType').html("Nota de Crédito");
+                        if (result.invoice.DocumentType !== 1) {
+                            $('#ReferenceInvoice').html("Factura referencia: " + result.invoice.ReferenceInvoice);
+                            $('#ReferenceNcf').html("NCF Referencia: " + result.invoice.ReferenceNcf);
+                        }
+                        $('#NCF').html("NCF: " + result.invoice.Ncf);
+                        $('#NcfType').html(result.invoice.NcfType);
+                        $('#NcfDueDate').html("Valida hasta: " + $.formattedDate(new Date(parseInt(result.invoice.NcfDueDate.substr(6)))));
+                        $('#DocumentDate').val($.formattedDate(new Date(parseInt(result.invoice.DocumentDate.substr(6)))));
+                        $('#DueDate').val($.formattedDate(new Date(parseInt(result.invoice.DueDate.substr(6)))));
+                        $('#Note').text(result.invoice.Note);
+                        $('#ExchangeRate').val(parseFloat(result.invoice.ExchangeRate).toFixed(4));
+                        $('#Subtotal').html(parseFloat(result.invoice.Subtotal).toFixed(2).replace(/./g, function (c, i, a) {
+                            return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                        }));
+                        $('#TaxAmount').html(parseFloat(result.invoice.TaxAmount).toFixed(2).replace(/./g, function (c, i, a) {
+                            return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                        }));
+                        $('#Total').html(parseFloat(result.invoice.Total).toFixed(2).replace(/./g, function (c, i, a) {
+                            return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                        }));
+                        var $table = $('<table class="table table-stripped" id="itemTable"/>');
+                        var thead = '<thead>' +
+                            '<tr>' +
+                            '<th style="width:5%">#</th>' +
+                            '<th style="width:12%">Id. de articulo</th>' +
+                            '<th style="width:30%">Descripción</th>' +
+                            '<th style="width:8%">Cantidad</th>' +
+                            '<th style="width:15%">Precio Unit.</th>' +
+                            '<th style="width:10%">Impuesto</th>' +
+                            '<th style="width:20%">Total</th>' +
+                            '</tr>' +
+                            '</thead>';
+                        $table.append(thead);
+                        var $tbody = $('<tbody/>');
+                        $.each(result.invoice.Details,
+                            function (x, item) {
+                                var $row = $('<tr/>');
+                                var $lineNumber = $('<input type="text" class="form-control" readonly="readonly" />');
+                                var $itemNumber = $('<input type="text" class="form-control" readonly="readonly" />');
+                                var $itemDescriptionRead = $('<input type="text" class="form-control" readonly="readonly" />');
+                                var $itemDescription = $('<input type="text" class="form-control" />');
+                                var $itemQuantity = $('<input type="text" class="form-control" readonly="readonly" />');
+                                var $itemUnitPrice = $('<input type="text" class="form-control" readonly="readonly" />');
+                                var $itemTaxAmount = $('<input type="text" class="form-control" readonly="readonly" />');
+                                var $itemTotal = $('<input type="text" class="form-control" readonly="readonly" />');
+                                $row.append($('<td/>').html($lineNumber.val(item.LineNumber)));
+                                $row.append($('<td/>').html($itemNumber.val(item.ItemNumber)));
+                                if ('@Model.BillingType' == '@Seaboard.Intranet.Domain.Models.BillingType.MEM')
+                                    $row.append($('<td/>').html($itemDescription.val(item.ItemDescription)));
+                                else
+                                    $row.append($('<td/>').html($itemDescriptionRead.val(item.ItemDescription)));
+                                $row.append($('<td/>').html($itemQuantity.val(item.Quantity)));
+                                $row.append($('<td/>').html($itemUnitPrice.val(parseFloat(item.Price).toFixed(2).replace(/./g, function (c, i, a) {
+                                    return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                                }))));
+                                $row.append($('<td/>').html($itemTaxAmount.val(parseFloat(item.TaxAmount).toFixed(2).replace(/./g, function (c, i, a) {
+                                    return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                                }))));
+                                $row.append($('<td/>').html($itemTotal.val(parseFloat(item.Total).toFixed(2).replace(/./g, function (c, i, a) {
+                                    return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                                }))));
+                                $tbody.append($row);
+                            });
+                        $table.append($tbody);
+                        $('#itemRows').html($table);
+                    }
+                    else {
+                        swal({
+                            title: "ERROR",
+                            text: result.status,
+                            type: "error"
+                        });
+                    }
+                }
+            });
+        }
+
+        function editarLoteStep() {
+            $('#modal-EditBatch').modal('show');
+            $.ajax({
+                url: '@Url.Action("GetBatchMemInquiry", "Billing")?batchNumber=' +'@Model.BatchNumber',
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    if (result.status === "OK") {
+                        $('#BatchDocumentDate').val($.formattedDate(new Date(parseInt(result.batch.DocumentDate.substr(6)))));
+                        $('#BatchDueDate').val($.formattedDate(new Date(parseInt(result.batch.DueDate.substr(6)))));
+                        $('#BatchNote').val(result.batch.Note);
+                        $('#BatchExchangeRate').val(parseFloat(result.batch.ExchangeRate).toFixed(4));
+                    }
+                    else {
+                        swal({
+                            title: "ERROR",
+                            text: result.status,
+                            type: "error"
+                        });
+                    }
+                }
+            });
+        }
+
+        function editarLote() {
+            var isAllValid = true;
+
+            if ($('#BatchDocumentDate').val() === '') {
+                toastr.error('Por favor debe de una fecha de documento para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#BatchDueDate').val() === '') {
+                toastr.error('Por favor debe de especificar una fecha de vencimiento para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#BatchExchangeRate').val() === '') {
+                $('#BatchExchangeRate').val(0);
+            }
+
+            if (isAllValid) {
+                if ($('#BatchDocumentDate').val().trim() === $('#BatchDueDate').val().trim()) {
+                    swal({
+                        title: "Fecha",
+                        text: "La fecha de vencimiento es la misma que la del dia de hoy esta seguro que desea continuar ?",
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#DD6B55",
+                        confirmButtonText: "Si, proceder!",
+                        cancelButtonText: "No, cancelar!",
+                        closeOnConfirm: true
+                    }, function (isConfirm) {
+                        if (isConfirm) {
+                            var data = {
+                                batchNumber: '@Model.BatchNumber',
+                                documentDate: $('#BatchDocumentDate').val().trim(),
+                                dueDate: $('#BatchDueDate').val().trim(),
+                                note: $('#BatchNote').val().trim()
+                            }
+                            $.ajax({
+                                url: '@Url.Action("UpdateBatchInquiry", "Billing")',
+                                type: "POST",
+                                data: JSON.stringify(data),
+                                dataType: "JSON",
+                                contentType: "application/json",
+                                success: function (result) {
+                                    if (result.status === "OK") {
+                                        $('#modal-EditBatch').modal('hide');
+                                    }
+                                    else {
+                                        swal({
+                                            title: "ERROR",
+                                            text: result.status,
+                                            type: "error"
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    var data = {
+                        batchNumber: '@Model.BatchNumber',
+                        documentDate: $('#BatchDocumentDate').val().trim(),
+                        dueDate: $('#BatchDueDate').val().trim(),
+                        note: $('#BatchNote').val().trim()
+                    }
+                    $.ajax({
+                        url: '@Url.Action("UpdateBatchInquiry", "Billing")',
+                        type: "POST",
+                        data: JSON.stringify(data),
+                        dataType: "JSON",
+                        contentType: "application/json",
+                        success: function (result) {
+                            if (result.status === "OK") {
+                                $('#modal-EditBatch').modal('hide');
+                            }
+                            else {
+                                swal({
+                                    title: "ERROR",
+                                    text: result.status,
+                                    type: "error"
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        function sumLines() {
+            var price = 0;
+            var taxAmount = 0;
+            var total = 0;
+            $('#itemTable > tbody > tr').each(function () {
+                var row = $(this);
+                if (!$(this).find('td:eq(0) input').is(':checked')) {
+                    price += (parseFloat($(this).find('td:eq(4) input').val().trim().replace(/,/g, "")) * parseFloat($(this).find('td:eq(3) input').val().trim().replace(/,/g, "")));
+                    taxAmount += (parseFloat($(this).find('td:eq(5) input').val().trim().replace(/,/g, "")) * parseFloat($(this).find('td:eq(3) input').val().trim().replace(/,/g, "")));
+                    total += parseFloat($(this).find('td:eq(6) input').val().trim().replace(/,/g, ""));
+                }
+            });
+            $('#Subtotal').html(parseFloat(price).toFixed(2).replace(/./g, function (c, i, a) {
+                return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+            }));
+            $('#TaxAmount').html(parseFloat(taxAmount).toFixed(2).replace(/./g, function (c, i, a) {
+                return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+            }));
+            $('#Total').html(parseFloat(total).toFixed(2).replace(/./g, function (c, i, a) {
+                return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+            }));
+        }
+
+        function saveInvoice() {
+            var isAllValid = true;
+            if ($('#DueDate').val() === '') {
+                toastr.error('Por favor debe de una fecha de vencimiento para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#DocumentDate').val() === '') {
+                toastr.error('Por favor debe de especificar una fecha de documento para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            $('#itemTable > tbody > tr').each(function () {
+                items.push({
+                    SopNumber: $('#SopNumber').html(),
+                    LineNumber: parseInt($(this).find('td:eq(0) input').val().trim()),
+                    ItemNumber: $(this).find('td:eq(1) input').val().trim(),
+                    ItemDescription: $(this).find('td:eq(2) input').val().trim(),
+                    Quantity: 0,
+                    Price: 0,
+                    TaxAmount: 0,
+                    Total: 0,
+                    Exclude: 0
+                });
+
+            });
+
+            if (isAllValid) {
+                var data = {
+                    sopNumber: $('#SopNumber').html(),
+                    documentDate: $('#DocumentDate').val().trim(),
+                    dueDate: $('#DueDate').val().trim(),
+                    note: $('#Note').val().trim(),
+                    lines: items
+                }
+                $.ajax({
+                    url: '@Url.Action("SaveInvoiceBatchInquiry", "Billing")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    cache: false,
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            toastr.success("Datos guardados correctamente");
+                        }
+                        else {
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+                    }
+                });
+            }
+        }
+
+        function imprimir() {
+            if ($('#printChoice').val() === '1') {
+                imprimirLote($('#redirect').val(), $('#printOption').val(), $('#printPreInvoice').val())
+            } else {
+                printInvoice($('#redirect').val(), $('#printOption').val(), $('#printPreInvoice').val())
+            }
+        }
+
+        function choosePrint(batch, redirect, preInvoice) {
+            if (batch === true) {
+                $('#printChoice').val('1');
+                $('#duplicateBlock').css('display', 'none');
+            }
+            else {
+                $('#duplicateBlock').css('display', 'block');
+                $('#printChoice').val('0');
+            }
+
+            if (preInvoice === true)
+                $('#printPreInvoice').val('0');
+            else
+                $('#printPreInvoice').val('1');
+
+            $('#redirect').val(redirect);
+            $('#modal-Print').modal('show');
+        }
+
+        function postBatch() {
+            swal({
+                title: "Contabilización",
+                text: "Esta seguro que desea contabilizar este lote ??",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Si, contabilizar!",
+                cancelButtonText: "No, cancelar!",
+                closeOnConfirm: false
+            }, function () {
+                swal({
+                    title: "ESPERE..",
+                    text: "Por favor espere...",
+                    type: "warning",
+                    showConfirmButton: false
+                });
+                $.ajax({
+                    url: '@Url.Action("PostBatch", "AccountReceivables")?bachNumber=' + '@Model.BatchNumber' + '&bachSource=Sales Entry',
+                    type: "POST",
+                    data: "",
+                    cache: false,
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            window.location.href = '@Url.Action("BatchInquiryIndex","Billing")';
+                        }
+                        else {
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+                    }
+                });
+            });
+        }
+
+        function imprimirLote(redirect, choice, preInvoice) {
+            var url = '@Url.Content("~/PDF/Reportes/")BillingInvoiceBatch.pdf';
+            $.ajax({
+                url: '@Url.Action("BillingInvoiceBatchReport", "Billing")?batchNumber=' + '@Model.BatchNumber' + '&choice=' + choice + '&preInvoice=' + preInvoice + '&billingType=30',
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                async: false,
+                cache: false,
+                contentType: "application/json",
+                success: function (result) {
+                    if (result.status === "OK") {
+                        window.open(url);
+                        if (redirect === '1') {
+                            window.location.href = '@Url.Action("BatchInquiryIndex","Billing")';
+                        } else {
+                            $('#modal-Print').modal('hide');
+                        }
+                    }
+                    else {
+                        swal({
+                            title: "ERROR",
+                            text: result.status,
+                            type: "error"
+                        });
+                    }
+                }
+            });
+        }
+
+        function printInvoice(redirect, choice, preInvoice) {
+            var url = '@Url.Content("~/PDF/Reportes/")BillingInvoice.pdf';
+            var duplicate = false;
+            if ($('#ckbDuplicate').is(':checked'))
+                duplicate = true;
+             else
+                duplicate = false;
+
+            $.ajax({
+                url: '@Url.Action("BillingInvoiceReport", "Billing")?sopNumber=' + $('#SopNumber').html() + '&choice=' + choice + '&duplicate=' + duplicate + '&preInvoice=' + preInvoice + '&billingType=30',
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                async: false,
+                cache: false,
+                contentType: "application/json",
+                success: function (result) {
+                    if (result.status === "OK") {
+                        window.open(url);
+                        if (redirect === '1') {
+                            window.location.href = '@Url.Action("BatchInquiryTransaction", "Billing", new { id= Model.BatchNumber})';
+                        } else {
+                            $('#modal-Print').modal('hide');
+                        }
+                    }
+                    else {
+                        swal({
+                            title: "ERROR",
+                            text: result.status,
+                            type: "error"
+                        });
+                    }
+                }
+            });
+        }
+
+    </script>
+}

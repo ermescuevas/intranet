@@ -1,0 +1,320 @@
+﻿@model Seaboard.Intranet.Domain.Models.PurchaseRequest
+@{
+    ViewBag.Title = "Solicitudes de servicio";
+    string status = ViewBag.Status;
+    bool work = ViewBag.Work;
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Solicitudes de servicio</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li>
+                <a href="@Url.Action("Index", "ServiceRequest")">Listado de solicitudes</a>
+            </li>
+            <li class="active">
+                <strong>Solicitudes de servicio</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight ecommerce">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h3>Solicitudes de servicio</h3>
+                </div>
+                <div class="ibox-content">
+                    <div class="form-group">
+                        <div class="col-sm-12 col-sm-offset-1">
+                            <button class="btn btn-success" type="button" onclick="Print();"><i class="fa fa-print"></i> Imprimir</button>
+                            @if (status != "6")
+                            {
+                                @*<button class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-SendRequest"><i class="fa fa-send"></i> Enviar</button>
+                                <button class="btn btn-danger" data-toggle="modal" data-target="#modal-container"><i class="fa fa-remove"></i> Anular</button>*@
+                            }
+                            else
+                            {
+                                if (work)
+                                {
+                                    @*<button class="btn btn-danger" data-toggle="modal" data-target="#modal-container"><i class="fa fa-remove"></i> Anular</button>*@
+                                }
+                            }
+
+                            <br />
+                        </div>
+                    </div>
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="tabs-container">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a data-toggle="tab" href="#tab-1"> Datos Basicos</a></li>
+                    <li class=""><a data-toggle="tab" href="#tab-2"> Lineas</a></li>
+                    <li class=""><a data-toggle="tab" href="#tab-3" onclick="cargarArchivos();"> Adjuntos</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div id="tab-1" class="tab-pane active">
+                        <div class="panel-body">
+                            <fieldset class="form-horizontal">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">No. de solicitud:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(m => m.PurchaseRequestId, new { @class = "form-control", @readonly = "" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Descripción:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(m => m.Description, new { @class = "form-control", @readonly = "" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Departamento:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(model => model.DepartmentId, new { @class = "form-control", @readonly = "" })
+                                                <span class="input-group-btn">
+                                                    <button type="button" class="btn btn-primary">
+                                                        <i class="fa fa-search"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Prioridad:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(model => model.Priority, new { @class = "form-control", @readonly = "" })
+                                                <span class="input-group-btn">
+                                                    <button type="button" class="btn btn-primary">
+                                                        <i class="fa fa-search"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">AR:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(model => model.AR, new { @class = "form-control", @readonly = "" })
+                                                <span class="input-group-btn">
+                                                    <button type="button" class="btn btn-primary">
+                                                        <i class="fa fa-search"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Fecha documento:</label>
+                                            <div class="col-sm-8 input-group date">
+                                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                @Html.TextBoxFor(m => m.DocumentDate, new { @class = "form-control", @readonly = "" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Fecha requerida:</label>
+                                            <div class="col-sm-8 input-group date">
+                                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                @Html.TextBoxFor(m => m.RequiredDate, new { @class = "form-control", @readonly = "" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Aprobado por:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(model => model.Approver, new { @class = "form-control", @readonly = "" })
+                                                <span class="input-group-btn">
+                                                    <button type="button" class="btn btn-primary">
+                                                        <i class="fa fa-search"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Solicitado por:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(model => model.Requester, new { @class = "form-control", @readonly = "" })
+                                                <span class="input-group-btn">
+                                                    <button type="button" class="btn btn-primary">
+                                                        <i class="fa fa-search"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">Nota:</label>
+                                            <div class="col-sm-10">
+                                                @Html.TextAreaFor(m => m.Note, new { @class = "form-control", @rows = "5", @readonly = "" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+
+                    <div id="tab-2" class="tab-pane">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="table-responsive" id="itemsRows">
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="tab-3" class="tab-pane">
+                        <div class="panel-body">
+                            <div class="hr-line-dashed"></div>
+
+                            <div class="row" id="attachmentFiles">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link href="@Url.Content("~/Content/plugins/datatables/datatables.min.css")" rel="stylesheet" type="text/css" />
+     @Styles.Render("~/plugins/toastrStyles") 
+}
+
+@section Scripts {
+
+    @Scripts.Render("~/Scripts/plugins/datatables/datatables.min.js")
+    <link href="@Url.Content("~/Content/plugins/datatables.min.css")" rel="stylesheet" type="text/css" />
+    @Scripts.Render("~/plugins/toastr")
+    <script type="text/javascript">
+
+        var purchaseRequestItems = [];
+
+        window.onload = function () {
+            purchaseRequestItems = @Html.Raw(Json.Encode(@ViewBag.PurchaseRequestItems));
+            GeneratedItemsTable();
+        };
+
+        function enviarFlujo() {
+            $.ajax({
+                url: '@Url.Action("SendWorkFlow", "ServiceRequest")?PurchaseRequestId=' + $('#PurchaseRequestId').val().trim(),
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (d) {
+                    if (d.status == true) {
+                        window.location.href = "@Url.Action("Index", "ServiceRequest")";
+                    }
+                    else {
+                        alert('Ha ocurrido un error');
+                    }
+                },
+                error: function () {
+                    alert('Error. Por favor trate de nuevo.');
+                }
+            });
+        }
+
+        function cargarArchivos() {
+            $.ajax({
+                url: '@Url.Action("LoadAttachmentFiles", "ServiceRequest")?PurchaseRequestId=' + $('#PurchaseRequestId').val().trim(),
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    attachmentFiles = result;
+                    if (attachmentFiles.length > 0) {
+                        var $ul = $('<ul class="list-unstyled file-list" />');
+                        $.each(attachmentFiles, function (i, val) {
+                            var $li = $('<li/>');
+                            var $a = $('<a href="@Url.Action("Download", "ServiceRequest")?DocumentId=' + $('#PurchaseRequestId').val().trim() + '&FileName=' + val.trim() + '"/>')
+                            $a.append($('<i class="fa fa-file-pdf-o" />'));
+                            $li.append($a.html("  " + val));
+                            $ul.append($li);
+                        });
+                        $('#attachmentFiles').html($ul);
+                    }
+                    else {
+                        $('#attachmentFiles').html('');
+                    }
+                }
+            });
+        }
+
+        function GeneratedItemsTable() {
+            if (purchaseRequestItems.length > 0) {
+                var $table = $('<table  class="table table-striped table-bordered table-hover" id="itemsTable"/>');
+                $table.append('<thead><tr><th>Id. de producto</th><th>Descripción</th><th>Unidad</th><th>Cantidad</th><th>Almacen</th><th>Cuenta Gasto</th><th>Cargado a</th></tr></thead>');
+                var $tbody = $('<tbody/>');
+                $.each(purchaseRequestItems, function (i, val) {
+                    var $row = $('<tr/>');
+                    $row.append($('<td/>').html(val.ItemId));
+                    $row.append($('<td/>').html(val.ItemDescription));
+                    $row.append($('<td/>').html(val.UnitId));
+                    $row.append($('<td/>').html(val.Quantity));
+                    $row.append($('<td/>').html(val.Warehouse));
+                    $row.append($('<td/>').html(val.AccountNum));
+                    $row.append($('<td/>').html(val.Charge));
+                    $tbody.append($row);
+                });
+                console.log("current", purchaseRequestItems);
+                $table.append($tbody);
+                $('#itemsRows').html($table);
+
+                $('itemsTable').dataTable();
+            }
+            else {
+                $('#itemsRows').html('');
+            }
+        }
+
+        function Print() {
+            var url = '@Url.Content("~/PDF/Requisicion/")' + $('#PurchaseRequestId').val() + '.pdf';
+            toastr.info('Estamos procesando su solicitud', 'Por favor espere')
+            $.ajax({
+                url: '@Url.Action("Print", "ServiceRequest")?id=' + $('#PurchaseRequestId').val(),
+                type: "POST",
+                data: "",
+                cache: false,
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    $('#loadingPanel').hide();
+                    window.open(url);
+                },
+                error: function (result) {
+                    toastr.error('Ha ocurrido un error en la generación del documento', 'Campos requeridos')
+                }
+            });
+        }
+    </script>
+}

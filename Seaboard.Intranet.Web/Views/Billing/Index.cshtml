@@ -1,0 +1,57 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_BillingLayout.cshtml";
+    ViewBag.Title = "Inicio";
+    string ncfAlert = ViewBag.NcfAlert;
+}
+
+<style>
+    .iframe-container {
+        overflow: hidden;
+        padding-top: 56.25%;
+        position: relative;
+    }
+
+        .iframe-container iframe {
+            border: 0;
+            height: 100%;
+            left: 0;
+            position: absolute;
+            top: 0;
+            width: 100%;
+        }
+
+    .iframe-container-4x3 {
+        padding-top: 75%;
+    }
+</style>
+
+<div class="wrapper wrapper-content">
+    <div class="iframe-container">
+        <iframe src="https://app.powerbi.com/view?r=eyJrIjoiMjc4M2Q0NzAtMDI3MS00Mzg0LTk5ZTQtZjFjZTFmNWQ2ODk2IiwidCI6IjFmMjNkMzhmLWRmYmUtNDg0Yy04MDFhLWNmZjg5Mjg4YzlhYiIsImMiOjF9" allowfullscreen></iframe>
+    </div>
+</div>
+
+@section Styles {
+    @Styles.Render("~/plugins/sweetAlertStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/sweetAlert")
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            if (@ncfAlert.Length > 0) {
+                swal({
+                    title: "INFORMACIÓN",
+                    text: ("@Json.Encode(ncfAlert)").replace("&quot;",""),
+                    type: "warning",
+                    showCancelButton: false,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Entendido!",
+                    closeOnConfirm: false
+                });
+            }
+        });
+    </script>
+}

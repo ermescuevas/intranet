@@ -1,0 +1,347 @@
+﻿@{
+    Layout = "~/Views/Shared/_BillingLayout.cshtml";
+    ViewBag.Title = "Reporte de antiguedad cuentas por cobrar";
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-sm-4">
+        <h2>Reporte de antiguedad cuentas por cobrar</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Reporte de antiguedad cuentas por cobrar</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="wrapper wrapper-content animated fadeInUp">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="ibox float-e-margins">
+                        <div class="ibox-title">
+                            <h3>Reporte de antiguedad cuentas por cobrar</h3>
+                        </div>
+                        <div class="ibox-content">
+                            <div class="col-sm-12 col-sm-offset-1">
+                                <button class="btn btn-success" type="button" onclick="imprimirReporte();"><i class="fa fa-print"></i> Imprimir</button>
+                                <br />
+                            </div>
+                            <br />
+                            <br />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ibox">
+                <div class="ibox-content">
+                    <div class="hr-line-dashed"></div>
+                    <br />
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="col-sm-6 control-label">Fecha de antiguedad:</label>
+                                <div class="col-sm-6 input-group">
+                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                    <input id="Date" name="Date" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label class="checkbox-inline i-checks"> <input type="checkbox" name="detailReport"> Detallado </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hr-line-dashed"></div>
+                    <br />
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="col-sm-6 control-label">Imprimir moneda en:</label>
+                                <div class="col-sm-6 ">
+                                    <div class="radio radio-info radio-inline">
+                                        <input type="radio" id="functionalRb" value="0" name="printCurrency" checked="">
+                                        <label for="functionalRb"> Pesos </label>
+                                    </div>
+                                    <div class="radio radio-inline">
+                                        <input type="radio" id="reportRb" value="1" name="printCurrency">
+                                        <label for="reportRb"> Dólares </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">Tasa de cambio:</label>
+                                <div class="col-sm-6 ">
+                                    <input type="text" name="exchangeRate" id="exchangeRate" class="form-control" value="1.0000" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">&nbsp;</div>
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">Metodo de calculo:</label>
+                                <div class="col-sm-6 ">
+                                    <select class="form-control" name="methodCalc" id="methodCalc" disabled="disabled">
+                                        <option>Dividir</option>
+                                        <option>Multiplicar</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hr-line-dashed"></div>
+                    <br />
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">Excluir:</label>
+                                <div class="col-sm-10 ">
+                                    <div class="form-group">
+                                        <label class="checkbox-inline i-checks"> <input type="checkbox" checked="checked" name="excludeCreditBalance"> Saldo de credito </label>
+                                        <label class="checkbox-inline i-checks"> <input type="checkbox" checked="checked" name="excludeZeroBalance"> Saldo en cero </label>
+                                        <label class="checkbox-inline i-checks"> <input type="checkbox" checked="checked" name="excludeUnpostedAppldCrDocs"> Docs. credito aplicados no contabilizados </label>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="checkbox-inline i-checks"> <input type="checkbox" checked="checked" name="excludeFullyPaidTrxs"> Documentos totalmente pagados </label>
+                                        <label class="checkbox-inline i-checks"> <input type="checkbox" checked="checked" name="excludeNoActivity"> Sin actividad </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hr-line-dashed"></div>
+                    <br />
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="col-sm-6 control-label">Intervalos:</label>
+                                <div class="col-sm-6 ">
+                                    <select class="form-control" name="filterSelect" id="filterSelect">
+                                        <option>Id. de cliente</option>
+                                        <option>Clase de cliente</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hr-line-dashed"></div>
+                    <br />
+                    <div class="row">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">Desde:</label>
+                            <div class="col-sm-2 input-group">
+                                <input type="text" name="filterFrom" id="filterFrom" class="form-control" />
+                                <span class="input-group-btn">
+                                    <button id="lookupDesde" type="button" onclick="filtroDesde();" class="btn btn-primary">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                </span>
+                            </div>
+
+                            <br />
+
+                            <label class="col-sm-2 control-label">Hasta:</label>
+                            <div class="col-sm-2 input-group">
+                                <input type="text" name="filterTo" id="filterTo" class="form-control" />
+                                <span class="input-group-btn">
+                                    <button id="lookupHasta" type="button" onclick="filtroHasta();" class="btn btn-primary">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles{
+    @Styles.Render("~/Content/plugins/iCheck/iCheckStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/awesomeCheckboxStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/iCheck")
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+
+    <script>
+        $(document).ready(function () {
+            $('.i-checks').iCheck({
+                checkboxClass: 'icheckbox_square-green',
+                radioClass: 'iradio_square-green',
+            });
+            $('#Date').datepicker({
+                changeMonth: true,
+                changeYear: true,
+                showButtonPanel: true,
+                dateFormat: 'MM yy',
+                onClose: function (dateText, inst) {
+                    $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
+                }
+            });
+            $('#Date').datepicker().datepicker("setDate", new Date());
+            $('#reportRb').click(function () {
+                if ($(this).is(':checked')) {
+                    $("#exchangeRate").prop('readonly', false);
+                    $("#exchangeRate").val('1.0000');
+                    $("#methodCalc").prop('disabled', false);
+                }
+            });
+            $('#functionalRb').click(function () {
+                if ($(this).is(':checked')) {
+                    $("#exchangeRate").prop('readonly', false);
+                    $("#exchangeRate").val('1.0000');
+                    $("#methodCalc").prop('disabled', false);
+                }
+            });
+        });
+
+        function imprimirReporte() {
+            var detailReport = false;
+            var printCurrency = 0;
+            var excludeNoActivity = 0;
+            var excludeFullyPaidTrxs = 0;
+            var excludeZeroBalance = 0;
+            var excludeCreditBalance = 0;
+            var excludeUnpostedAppldCrDocs = 0;
+
+            if ($('input[name="detailReport"]').is(":checked")) 
+                detailReport = true;
+            if ($('#reportRb').is(":checked")) 
+                printCurrency = 1;
+            if ($('input[name="excludeNoActivity"]').is(":checked"))
+                excludeNoActivity = 1;
+            if ($('input[name="excludeFullyPaidTrxs"]').is(":checked"))
+                excludeFullyPaidTrxs = 1;
+            if ($('input[name="excludeZeroBalance"]').is(":checked"))
+                excludeZeroBalance = 1;
+            if ($('input[name="excludeCreditBalance"]').is(":checked"))
+                excludeCreditBalance = 1;
+            if ($('input[name="excludeUnpostedAppldCrDocs"]').is(":checked"))
+                excludeUnpostedAppldCrDocs = 1;
+            
+            var data = {
+                detailReport: detailReport,
+                filterFrom: $('#filterFrom').val().trim(),
+                filterTo: $('#filterTo').val().trim(),
+                typeFilter: $('#filterSelect').prop("selectedIndex"),
+                methodCalc: $('#methodCalc').prop("selectedIndex"),
+                exchangeRate: parseFloat($("#exchangeRate").val()),
+                printCurrency: printCurrency,
+                date: $('#Date').datepicker('getDate'),
+                excludeNoActivity: excludeNoActivity ,
+                excludeZeroBalance: excludeZeroBalance,
+                excludeFullyPaidTrx: excludeFullyPaidTrxs,
+                excludeCreditBalance: excludeCreditBalance,
+                excludeUnpostedAppldCrDocs: excludeUnpostedAppldCrDocs
+            };
+
+            var url = "";
+
+            if (detailReport) 
+                url = '@Url.Content("~/PDF/Reportes/")AgingAccountReceivablesDetail.pdf';
+             else
+                url = '@Url.Content("~/PDF/Reportes/")AgingAccountReceivablesSummary.pdf';
+
+            toastr.info('Estamos procesando su solicitud', 'Por favor espere');
+            $.ajax({
+                url: '@Url.Action("AgingReport", "AccountReceivables")',
+                type: "POST",
+                data: JSON.stringify(data),
+                dataType: "JSON",
+                async: false,
+                cache: false,
+                contentType: "application/json",
+                success: function (d) {
+                    if (d.status === "OK") {
+                        window.open(url);
+                    }
+                    else {
+                        alert(d.status);
+                    }
+                }
+            });
+        }
+
+        function filtroDesde() {
+            if ($('#filterSelect').prop("selectedIndex") == 0) {
+                $('#lookupDesde').lookupbox({
+                    title: 'Busqueda:',
+                    url: '@Url.Action("ListLookup", "Home")?tipo=30&consulta=',
+                    imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                    width: 800,
+                    height: 1000,
+                    onItemSelected: function (data) {
+                        $('input[name=filterFrom]').val(data.Id);
+                        $('input[name=filterTo]').val(data.Id);
+                    },
+                    tableHeader: ['Id. de cliente', 'Descripción'],
+                    hiddenFields: ['DataExtended']
+                });
+            } else {
+                $('#lookupDesde').lookupbox({
+                    title: 'Busqueda:',
+                    url: '@Url.Action("ListLookup", "Home")?tipo=32&consulta=',
+                    imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                    width: 800,
+                    height: 1000,
+                    onItemSelected: function (data) {
+                        $('input[name=filterFrom]').val(data.Id);
+                        $('input[name=filterTo]').val(data.Id);
+                    },
+                    tableHeader: ['Id. de clase', 'Descripción'],
+                    hiddenFields: ['DataExtended']
+                });
+            }
+        }
+
+        function filtroHasta() {
+            if ($('#filterSelect').prop("selectedIndex") === 0) {
+                $('#lookupHasta').lookupbox({
+                    title: 'Busqueda:',
+                    url: '@Url.Action("ListLookup", "Home")?tipo=30&consulta=',
+                    imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                    width: 800,
+                    height: 1000,
+                    onItemSelected: function (data) {
+                        $('input[name=filterTo]').val(data.Id);
+                    },
+                    tableHeader: ['Id. de cliente', 'Descripción'],
+                    hiddenFields: ['DataExtended']
+                });
+            } else {
+                $('#lookupHasta').lookupbox({
+                    title: 'Busqueda:',
+                    url: '@Url.Action("ListLookup", "Home")?tipo=32&consulta=',
+                    imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                    width: 800,
+                    height: 1000,
+                    onItemSelected: function (data) {
+                        $('input[name=filterTo]').val(data.Id);
+                    },
+                    tableHeader: ['Id. de clase', 'Descripción'],
+                    hiddenFields: ['DataExtended']
+                });
+            }
+        }
+    </script>
+}

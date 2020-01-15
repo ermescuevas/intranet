@@ -1,0 +1,142 @@
+﻿@{
+    ViewBag.Title = "Aprobacion manual de orden de compras";
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Aprobacion manual de orden de compras</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Aprobacion manual de orden de compras</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight ecommerce">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h3>Aprobacion manual de orden de compras</h3>
+                </div>
+
+                <div class="ibox-content">
+                    <div class="form-group">
+                        <div class="col-sm-12 col-sm-offset-1">
+                            <button class="btn btn-primary" type="button" onclick="procesarSolicitud();"><i class="fa fa-save"></i> Enviar</button>
+                            <br />
+                        </div>
+                    </div>
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="tabs-container">
+            <ul class="nav nav-tabs">
+                <li class="active">
+                    <a data-toggle="tab" href="#tab-1"> Base</a>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <div id="tab-1" class="tab-pane active">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div>
+                                <fieldset class="form-horizontal">
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Tipo:</label>
+                                                <div class="col-sm-8 input-group">
+                                                    <select class="form-control" id="Type" name="Type">
+                                                        <option value="7">Orden de Compra</option>
+                                                        <option value="8">Analisis de Compra</option>
+                                                        <option value="9">Solicitud de Proveedor</option>
+                                                        <option value="10">Solicitud de Pago</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Id. de documento:</label>
+                                                <div class="col-sm-8 input-group">
+                                                    <input type="text" name="Code" id="Code" class="form-control" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Styles {
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/plugins/duallistStyles")
+    @Styles.Render("~/Content/plugins/iCheck/iCheckStyles")
+    @Styles.Render("~/plugins/awesomeCheckboxStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+}
+
+@section Scripts {
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/duallist")
+    @Scripts.Render("~/plugins/iCheck")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+
+    <script>
+        function procesarSolicitud() {
+            var isAllValid = true;
+            if ($('#Type').val() === '') {
+                toastr.error("Debe de especificar un tipo");
+                isAllValid = false;
+            }
+            if ($('#Code').val() === '') {
+                toastr.error("Debe de especificar un id. de documento");
+                isAllValid = false;
+            }
+            if (isAllValid) {
+                var data = {
+                    type: $('#Type').val(),
+                    id: $('#Code').val()
+                };
+
+                $.ajax({
+                    url: '@Url.Action("SendWorkflow", "Home")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (d) {
+                        if (d.status === "OK") {
+                            toastr.error("Enviado correctamente");
+                        }
+                        else {
+                            alert(d.status);
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+}

@@ -1,0 +1,72 @@
+﻿@model Seaboard.Intranet.Domain.Models.EmployeeExtension
+
+<div id="modal-container" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Eliminar</h4>
+                <h3>Esta seguro que desea eliminar este registro?</h3>
+            </div>
+
+            <div class="modal-body">
+                <h4>Extension</h4>
+                <hr />
+                <dl class="dl-horizontal">
+                    <dt>
+                        @Html.DisplayName("Descripción")
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.Department.Description)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayName("Nombre")
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.Name)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayName("Apellido")
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.LastName)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayName("Numero de extension")
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.ExtensionNumber)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayName("Numero de flota")
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.CellPhone)
+                    </dd>
+
+                </dl>
+            </div>
+
+            <div class="modal-footer">
+                @using (Html.BeginForm("Delete","EmployeeExtension",FormMethod.Post))
+                {
+                    @Html.HiddenFor(model => model.Id)
+                    @Html.AntiForgeryToken()
+
+                    <div class="form-actions no-color">
+                        <input type="submit" value="Eliminar" class="btn btn-default" />
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,950 @@
+﻿@using Microsoft.AspNet.Identity;
+@using Seaboard.Intranet.BusinessLogic
+@{
+    Layout = null;
+    var birthdayList = (List<Seaboard.Intranet.Domain.ViewModels.HollidayPersonViewModel>)ViewBag.BirthDays;
+    var anniversariesList = (List<Seaboard.Intranet.Domain.ViewModels.HollidayPersonViewModel>)ViewBag.Anniversaries;
+    var menu = (IEnumerable<Seaboard.Intranet.Domain.Models.FoodMenuLine>)ViewBag.Menus;
+    var files = (List<Seaboard.Intranet.Domain.ViewModels.Lookup>)ViewBag.Files;
+    var images = (List<Seaboard.Intranet.Domain.ViewModels.Lookup>)ViewBag.Images;
+    var contador = 0;
+    var currency = (Seaboard.Intranet.Domain.ViewModels.ExchangeRateViewModel)ViewBag.Currency;
+    var user = Account.GetAccount(User.Identity.GetUserName()) == null ? "" : Account.GetAccount(User.Identity.GetUserName()).FirstName + " " + Account.GetAccount(User.Identity.GetUserName()).LastName;
+    var reportPermission = Account.GetAccountPermission(User.Identity.GetUserName()).Any(p => p.Action == "BillingReport" && p.Controller == "Home");
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <title>TCC Intranet - Página de inicio</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+    <meta http-equiv="Content-Script-Type" content="text/javascript" />
+    <meta name="Description" content="Portal interno de la empresa Transcontinental Capital Corporation (TCCB)" />
+    <meta name="keywords" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0088B7" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <link rel="stylesheet" type="text/css" href="~/Content/Home/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="~/Scripts/plugins/jquery-ui/jquery-ui.min.css" />
+    <link rel="stylesheet" type="text/css" href="~/Content/plugins/fullcalendar/fullcalendar.css" />
+    <link rel="stylesheet" type="text/css" href="~/Content/plugins/footable/footable.core.css" />
+    <link rel="stylesheet" type="text/css" href="~/Content/plugins/jasny/jasny-bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="~/Content/Home/portada.css" />
+    <link rel="stylesheet" type="text/css" href="~/Content/plugins/toastr/toastr.min.css" />
+    @Styles.Render("~/font-awesome/css")
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+    <script src="~/Scripts/plugins/html5shiv/html5shiv.js"></script>
+    <![endif]-->
+    <script src="~/Scripts/jquery-3.1.1.min.js"></script>
+</head>
+
+<body>
+
+    <div class="container-fluid">
+        <header>
+            <h1 class="hide">TCC Intranet - Página de inicio</h1>
+            <div class="row-fluid">
+                <div class="span3 cabecera_responsive">
+                    <a href="@Url.Action("Index","Home")" class="logo_inv" title="Ir a la página de inicio"><img id="logo_normal" src="~/Images/LOGO SEABOARD.png" /></a>
+                </div>
+                <div class="span9 cabecera_responsive2">
+                    <div class="navbar pull-right">
+                        <div>
+                            <ul class="nav pull-right">
+                                <li>
+                                    @if (Request.IsAuthenticated)
+                                    {
+                                        <a data-toggle="dropdown" class="dropdown-toggle" href="#">
+                                            <i class="fa fa-user"></i> &nbsp; &nbsp;
+                                            <span class="hidden-phone"> @(user.ToString()) </span>
+                                        </a>
+                                        <ul class="dropdown-menu animated fadeInRight m-t-xs">
+                                            <li><a href="@Url.Action("Index", "PaymentVoucher")">Perfil</a></li>
+                                            <li class="divider"></li>
+                                            <li><a href="@Url.Action("ChangePassword", "Account")">Cambiar contraseña</a></li>
+                                            <li>&nbsp;</li>
+                                        </ul>
+                                    }
+                                    else
+                                    {
+                                        <a><i class="fa fa-user"></i>&nbsp; &nbsp;<span class="hidden-phone"> Usuario anonimo</span></a>
+                                    }
+                                </li>
+
+                                <li class="divider-vertical"></li>
+                                <li>
+                                    @if (Request.IsAuthenticated)
+                                    {
+                                        <a href="@Url.Action("Logoff", "Account")"><i class="fa fa-sign-out"></i><span class="hidden-phone"> Salir</span></a>
+                                    }
+                                    else
+                                    {
+                                        <a href="@Url.Action("Login", "Account")"><i class="fa fa-sign-in"></i><span class="hidden-phone"> Acceder</span></a>
+                                    }
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <ul class="inline menu_superior" id="menu_sup">
+
+                        <li id="menu1">
+                            @if (Seaboard.Intranet.Domain.Helpers.InterCompanyId == "TEST1")
+                            {
+                                <h1>Ambiente de prueba</h1>
+                            }
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+
+        <div class="navbar navbar-inverse navbar-static-top">
+            <div class="navbar-inner">
+                <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </a>
+
+                <div class="nav-collapse collapse">
+                    <ul class="nav">
+                        <li class="dropdown">
+                            <a role="button" href="#" class="dropdown-toggle" data-toggle="dropdown"> Solicitudes <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li><a style="color:black" href="@Url.Action("Index", "PurchaseRequest")">Almacen</a></li>
+                                <li><a style="color:black" href="@Url.Action("Index", "ServiceRequest")">Servicio</a></li>
+                                <li><a style="color:black" href="@Url.Action("Index", "PettyCash")">Caja Chica</a></li>
+                                <li><a style="color:black" href="@Url.Action("Index", "PaymentRequest")">Pago</a></li>
+                                <li><a style="color:black" href="@Url.Action("UserRequest", "HumanResources")">Creación usuario de red</a></li>
+                                <li><a style="color:black" href="@Url.Action("Index", "PurchaseQuotation")">Cotizacion compras</a></li>
+                                <li>&nbsp;</li>
+                            </ul>
+                        </li>
+
+                        <li class="divider-vertical"></li>
+                        <li class="dropdown">
+                            <a role="button" href="#" class="dropdown-toggle" data-toggle="dropdown"> Compras <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li class="dropdown-submenu">
+                                    <a href="#" style="color:black">Almacen</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a style="color: black" href="@Url.Action("UnDispachtRequest", "PurchaseRequest")">Solicitudes de compra</a></li>
+                                        <li><a style="color: black" href="@Url.Action("IndexWarehouse", "ServiceRequest")">Reabastecimiento</a></li>
+                                        <li><a style="color: black" href="@Url.Action("IndexWarehouse", "PurchaseRequest")">Consulta General</a></li>
+                                        <li><a style="color: black" href="@Url.Action("Create", "Inventory")">Req. Automatica</a></li>
+                                        <li><a style="color: black" href="@Url.Action("Edit", "Inventory")">Nivel de reorden</a></li>
+                                        <li>&nbsp;</li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown-submenu">
+                                    <a href="#" style="color: black">Logistica</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a style="color:black" href="@Url.Action("DispachtIndex", "Logistic")">Despacho</a></li>
+                                        <li><a style="color:black" href="@Url.Action("ReturnIndex", "Logistic")">Devolucion</a></li>
+                                        <li><a style="color:black" href="@Url.Action("DepartmentIndex", "Logistic")">Departamento</a></li>
+                                        <li><a style="color:black" href="@Url.Action("UserDepartment", "Logistic")">Asignación usuario</a></li>
+                                        <li><a style="color:black" href="@Url.Action("AccountDepartment", "Logistic")">Asignación clase de artículo</a></li>
+                                        <li><a style="color:black" href="@Url.Action("SiteDepartment", "Logistic")">Asignación sitio</a></li>
+                                        <li>&nbsp;</li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown-submenu">
+                                    <a href="#" style="color:black">Reportes</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a style="color:black" href="@Url.Action("InventoryReport", "Inventory")">Inventario multimoneda</a></li>
+                                        <li><a style="color:black" href="@Url.Action("DepartmentMovementReport", "Inventory")">Gastos por departamento</a></li>
+                                        <li><a style="color:black" href="@Url.Action("InvoiceMovementReport", "Inventory")">Facturas recibidas</a></li>
+                                        <li><a style="color:black" href="@Url.Action("StockReport", "Logistic")">Stock de inventario</a></li>
+                                        <li><a style="color:black" href="@Url.Action("ReorderReport", "Logistic")">Niveles de reorden</a></li>
+                                        <li>&nbsp;</li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown-submenu">
+                                    <a href="#" style="color:black">Consultas</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a style="color:black" href="@Url.Action("InventoryInquiry", "Inventory")">Inventario multimoneda</a></li>
+                                        <li><a style="color:black" href="@Url.Action("DepartmentMovementInquiry", "Inventory")">Gastos por departamento</a></li>
+                                        <li><a style="color:black" href="@Url.Action("InvoiceMovementInquiry", "Inventory")">Facturas recibidas</a></li>
+                                        <li>&nbsp;</li>
+                                    </ul>
+                                </li>
+                                <li>&nbsp;</li>
+                            </ul>
+                        </li>
+
+                        <li class="divider-vertical"></li>
+                        <li class="dropdown">
+                            <a href="@Url.Action("Index", "Billing")" class="dropdown-toggle"> Negocios </a>
+                        </li>
+
+                        <li class="divider-vertical"></li>
+                        <li class="dropdown">
+                            <a aria-expanded="false" role="button" href="#" class="dropdown-toggle" data-toggle="dropdown"> Recursos Humanos <span class="caret"></span></a>
+                            <ul role="menu" class="dropdown-menu">
+                                <li class="dropdown-submenu">
+                                    <a href="#" style="color:black">Solicitudes</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a style="color: black" href="@Url.Action("AbsenceRequest","HumanResources")">Solicitud de ausencias</a></li>
+                                        <li><a style="color: black" href="@Url.Action("Index", "PaymentVoucher")">Volante de pago</a></li>
+                                        <li><a style="color: black" href="@Url.Action("TrainingRequest", "HumanResources")">Solicitud de capacitación</a></li>
+                                        <li><a style="color: black" href="@Url.Action("PayrollView", "PaymentVoucher")">Acceso a nominas</a></li>
+                                        <li>&nbsp;</li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown-submenu">
+                                    <a href="#" style="color:black">Transacciones</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a style="color: black" href="@Url.Action("OvertimeRequest","HumanResources")">Horas Extras</a></li>
+                                        <li><a style="color: black" href="@Url.Action("ExtraOvertimeRequest", "HumanResources")">Horas Extras extraordinarias</a></li>
+                                        <li><a style="color: black" href="@Url.Action("HumanResourcesOvertime", "HumanResources")">Nomina - Horas Extras</a></li>
+                                        <li>&nbsp;</li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown-submenu">
+                                    <a href="#" style="color:black">Consultas</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a style="color: black" href="@Url.Action("AbsenceReport","HumanResources")">Ausencias procesadas</a></li>
+                                        <li><a style="color: black" href="@Url.Action("VacationPendingReport", "HumanResources")">Vacaciones pendientes</a></li>
+                                        <li>&nbsp;</li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown-submenu">
+                                    <a href="#" style="color:black">Configuración</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a style="color: black" href="@Url.Action("AbsenceConfiguration","HumanResources")">Reglas de ausencias</a></li>
+                                        <li><a style="color: black" href="@Url.Action("HolidayConfiguration", "HumanResources")">Dias feriados</a></li>
+                                        <li>&nbsp;</li>
+                                    </ul>
+                                </li>
+                                <li>&nbsp;</li>
+                            </ul>
+                        </li>
+
+                        <li class="divider-vertical"></li>
+                        <li class="dropdown">
+                            <a role="button" href="#" class="dropdown-toggle" data-toggle="dropdown"> Otros <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li class="dropdown-submenu">
+                                    <a href="#" style="color:black">Transacciones</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a style="color:black" href="@Url.Action("Index", "AccountPayables" )">Facturas</a></li>
+                                        <li><a style="color:black" href="@Url.Action("Index", "Ar" )">AR</a></li>
+                                        <li><a style="color:black" href="@Url.Action("Index", "FoodMenu" )">Menu de comida</a></li>
+                                        <li><a style="color:black" href="@Url.Action("Index", "EmployeeExtension" )">Directorio telefonico</a></li>
+                                        <li><a style="color:black" href="@Url.Action("Index", "WtSupplier")">Perfil para el WT del Suplidor</a></li>
+                                        <li><a style="color:black" href="@Url.Action("Index", "PayrollBatch")">Nómina</a></li>
+                                        <li><a style="color:black" href="@Url.Action("PurchaseOrderStatus", "Home")">Aprobacion Manual OC</a></li>
+                                        <li>&nbsp;</li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown-submenu">
+                                    <a href="#" style="color: black">Consultas</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a style="color:black" href="@Url.Action("Index", "PaymentVoucher")">Volante de pago</a></li>
+                                        <li><a style="color:black" href="@Url.Action("Inquiry", "Ar")">AR</a></li>
+                                        <li><a style="color:black" href="@Url.Action("Project", "Ar")">Proyectos</a></li>
+                                        <li><a style="color:black" href="@Url.Action("AR_Consult", "Ar")">Detalle de AR</a></li>
+                                        <li><a style="color:black" href="@Url.Action("AmountItem", "PurchaseRequest")">Cantidad de articulo</a></li>
+                                        <li><a style="color:black" href="@Url.Action("OpenPurchaseOrders", "Home")">Estado ordenes abiertas</a></li>
+                                        <li><a style="color:black" href="@Url.Action("ApprovalHistory", "Home")">Aprobaciones electronicas</a></li>
+                                        <li>&nbsp;</li>
+                                    </ul>
+                                </li>
+                                <li class="dropdown-submenu">
+                                    <a href="#" style="color:black">Configuración</a>
+                                    <ul class="dropdown-menu">
+                                        <li><a style="color:black" href="@Url.Action("Index", "Account")">Usuarios</a></li>
+                                        <li><a style="color:black" href="@Url.Action("UserPermissionReport", "Account")">Permisos de usuarios</a></li>
+                                        <li><a style="color:black" href="@Url.Action("Configuration", "PurchaseQuotation")">Cotizacion de compras</a></li>
+                                        <li>&nbsp;</li>
+                                    </ul>
+                                </li>
+                                <li>&nbsp;</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="row-fluid visible-phone">
+            <div class="span12">
+                <form class="navbar-search" action="" role="search">
+                    <input name="browser_lang" title="idioma" type="hidden" value="es" />
+                    <label for="txt" class="hide">Buscar</label>
+                    <input type="text" placeholder="Buscar" title="Buscador de la página web" name="q" id="q" size="18" />
+                </form>
+            </div>
+        </div>
+
+        <div class="row-fluid">
+            <div class="span3">
+                <div class="panel panel-primary" style="background-color: #F3FFFF">
+                    <div class="panel-heading">
+                        <h4>
+                            <a style="color:whitesmoke"><i class="fa fa-info-circle"></i> Solicitudes</a> <img class="pull-right" src="~/Images/Requests.png" width="65" height="65" />
+                        </h4>
+                    </div>
+                    <div class="panel-body">
+                        <ul class="nav nav-list">
+                            <li><a href="@Url.Action("Index","PurchaseRequest")"><i class="fa fa-bookmark"></i>&nbsp;  Almacen</a></li>
+                            <li class="divider"></li>
+                            <li><a href="@Url.Action("Index","ServiceRequest")"><i class="fa fa-bookmark"></i>&nbsp;  Servicios</a></li>
+                            <li class="divider"></li>
+                            <li><a href="@Url.Action("Index","PettyCash")"><i class="fa fa-bookmark"></i>&nbsp;  Caja chica</a></li>
+                            <li class="divider"></li>
+                            <li><a href="@Url.Action("Index","PaymentRequest")"><i class="fa fa-bookmark"></i>&nbsp;  Pago</a></li>
+                            <li class="divider"></li>
+                            <li><a href="@Url.Action("UserRequest", "HumanResources")"><i class="fa fa-bookmark"></i>&nbsp;  Creación de usuario</a></li>
+                            <li class="divider"></li>
+                            <li><a href="@Url.Action("Index","PurchaseQuotation")"><i class="fa fa-bookmark"></i>&nbsp;  Cotizacion compras</a></li>
+                            <li class="divider"></li>
+                        </ul>
+                    </div>
+                </div>
+                <hr />
+                <div class="row-fluid no-padding" style="background-color: #F3FFFF">
+                    <div class="panel panel-danger">
+                        <div class="panel-heading">
+                            <h4>
+                                <i class="fa fa-info-circle"></i> Tasa del dia <img class="pull-right" src="~/Images/Exchange Rate.png" width="65" height="65" />
+                            </h4>
+                        </div>
+                        <div class="panel-body">
+                            <div class="row-fluid">
+                                <table class="footable table table-condensed toggle-arrow-tiny">
+                                    <thead>
+                                        <tr>
+                                            <th>Compra</th>
+                                            <th>Venta</th>
+                                            <th>Uso TCC</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>@currency.Purchase</td>
+                                            <td>@currency.Sales</td>
+                                            <td>@currency.TccRate</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <h4><a href="https://cdn.bancentral.gov.do/documents/estadisticas/mercado-cambiario/documents/tasaus_mc.pdf?v=1574461752390?v=1574461752404" target="_blank">Ver tasa en el BC</a></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <div class="row-fluid no-padding">
+                    <a href="@Url.Action("ListExtension", "EmployeeExtension")">
+                        <div class="panel panel-success">
+                            <div class="panel-heading">
+                                <h4>
+                                    Directorio telefonico
+                                    <img class="pull-right" src="~/Images/Address Extension.png" width="50" height="50" />
+                                </h4>
+                                <br />
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="span6">
+                <div class="row-fluid no-padding" id="caja_banner" style="background-color: #F3FFFF">
+                    <div class="carousel slide" id="carousel1">
+                        <div class="carousel-inner">
+                            @foreach (var item in images)
+                            {
+                                if (contador == 0)
+                                {
+                                    <div class="item active">
+                                        <img alt="image" class="img-responsive" src="@item.Id" height="250" width="800">
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="item">
+                                        <img alt="image" class="img-responsive" src="@item.Id" height="250" width="800">
+                                    </div>
+                                }
+                                contador++;
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel panel-warning" style="background-color: #F3FFFF">
+                    <div class="panel-heading">
+                        <h3>
+                            <a>Documentos publicos</a><img class="pull-right" src="~/Images/Public Documents.png" width="80" height="70" />
+                        </h3>
+                        <br />
+                        <br />
+                    </div>
+                    <div class="panel-body">
+                        <div class="row-fluid">
+                            <div class="col-md-12" id="publicDocuments">
+
+                                @foreach (var item in files)
+                                {
+                                    <div class="file-box">
+                                        <div class="file">
+                                            <a href="@item.Id" target="_blank" title="@item.DataExtended">
+                                                <span class="corner"></span>
+                                                <div class="icon">
+                                                    <i class="fa fa-file-pdf-o"></i>
+                                                </div>
+                                                <div class="file-name">
+                                                    <small>@item.Descripción</small>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="span3">
+                <div class="pull-right">
+                    &nbsp;
+                </div>
+                <div class="row-fluid no-padding">
+                    <div class="panel panel-success" style="background-color: #F3FFFF">
+                        <div class="panel-heading">
+                            <h5>
+                                <a>Precios de combustibles</a><img class="pull-right" src="~/Images/Fuel.png" width="65" height="65" />
+                            </h5>
+                            <br />
+                            <br />
+                        </div>
+                        <div class="panel-body">
+                            <div class="row-fluid text-center">
+                                <script type="text/javascript" src="https://www.oil-price.net/widgets/brent_crude_price_tiny/gen.php?lang=es"></script>
+                            </div>
+                            <div class="row-fluid text-center">
+                                <script type="text/javascript" src="https://www.oil-price.net/COMMODITIES/gen.php?lang=es"></script>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="destacado-derecha">
+                        <div>
+                            <a href="#" data-toggle="modal" data-target="#sharepointTest">
+                                <img src="~/Images/HelpDesk.jpg" />
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row-fluid">
+            <div class="span9">
+                <div class="row-fluid no-padding" id="noticias_gaur">
+                    <h3>
+                        Novedades
+                        <a class="pull-right" style="padding-right: 20px;"><i class="fa fa-rss "></i></a>
+                    </h3>
+                    <div class="row-fluid"></div>
+                    <div class="row-fluid">
+                        <div class="span5">
+                            <div class="panel panel-danger" style="background-color: #F3FFFF">
+                                <div class="panel-heading">
+                                    <i class="fa fa-info-circle"></i> Necesito...
+                                </div>
+
+                                <div class="panel-body">
+                                    <ul class="nav nav-list">
+                                        <li><a href="@Url.Action("AbsenceRequest","HumanResources")"><img class="img-circle" src="~/Images/Vacations.jpg" width="50" height="50" /> Solicitud de vacaciones</a></li>
+                                        <li><a href="@Url.Action("AbsenceRequest","HumanResources")"><img class="img-circle" src="~/Images/Day Off.png" width="50" height="50" /> Solicitud de ausencias</a></li>
+                                        <li><a href="@Url.Action("Index","PaymentVoucher")"><img class="img-circle" src="~/Images/money.png" width="50" height="50" /> Volante de pago</a></li>
+                                        <li><a href="http://tccsvr02/Cooperativa/index.aspx "><img class="img-circle" src="~/Images/Cooperativa.png" width="50" height="50" /> Consulta de cooperativa</a></li>
+                                        <li><a href="#" onclick="openDgiiModal();"><img class="img-circle" src="~/Images/dger.png" width="50" height="50" /> Consultar RNC</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="span6">
+                            <div class="panel panel-info" style="background-color: #F3FFFF;">
+                                <div class="panel-heading">
+                                    <h5><a>Notas de seguridad</a><img class="pull-right" src="~/Images/Security.png" width="75" height="85" /></h5>
+                                    <br />
+                                </div>
+                                <div class="panel-body">
+                                    <div class="scroll_content">
+                                        <small>Por favor siga estas instrucciones</small>
+                                        <br />
+                                        <br />
+                                        <ul class="tag-list" style="padding:0;">
+                                            <li><a href=""><i class="fa fa-tag"></i> Como detectar un archivo con virus</a></li>
+                                            <li><a href=""><i class="fa fa-tag"></i> Como detectar un spam</a></li>
+                                            <li><a href=""><i class="fa fa-tag"></i> Poner seguro un correo electronico</a></li>
+                                            <li><a href=""><i class="fa fa-tag"></i> Bloquear el Windows</a></li>
+                                        </ul>
+                                        <br />
+                                        <br />
+                                        <br />
+                                        <div class="clearfix"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row-fluid no-padding" id="mas-noticias-portada">
+                        <ul class="media-list"></ul>
+                    </div>
+                </div>
+
+                <div class="row-fluid no-padding" id="videos-youtube" style="background-color: #F3FFFF">
+                    <h3>Media</h3><div>
+                        <script src="https://apis.google.com/js/client.js?onload=googleApiClientReady" gapi_processed="true"></script>
+                        <div class="row-fluid no-padding" id="video-container" style="padding-left: 10px; padding-right: 10px; width: 97%; max-height: 150px; min-height: 150px;">
+                            <div class="span3 thumbnail-youtube text-center"><a href="#"><img width="120" src="~/Images/Youtube.jpg"></a><h4><a href="#">Como hacer una solicitud de compras</a></h4></div>
+                            <div class="span3 thumbnail-youtube text-center"><a href="#"><img width="120" src="~/Images/Youtube.jpg"></a><h4><a href="#">Como hacer una solicitud de almacen</a></h4></div>
+                            <div class="span3 thumbnail-youtube text-center"><a href="#"><img width="120" src="~/Images/Youtube.jpg"></a><h4><a href="#">Como hacer una solicitud de caja chica</a></h4></div>
+                            <div class="span3 thumbnail-youtube text-center"><a href="#"><img width="120" src="~/Images/Youtube.jpg"></a><h4><a href="#">Como hacer una solicitud de pago</a></h4></div>
+                        </div>
+                    </div>
+                </div>
+
+                <br />
+                <br />
+
+                <div class="row-fluid no-padding" id="cabecera-tramites-portada">
+                    <div style="background:url(@Url.Content("~/Images/banner.jpg")) no-repeat; height:100px;">
+                        <h3>Departamentos</h3>
+                    </div>
+
+                </div>
+
+                <div class="row-fluid no-padding" id="tramites-portada">
+                    <ul>
+                        <li class="primerli"><h3>Informatica</h3></li>
+                        <li><h3>Negocios</h3></li>
+                        <li><h3>Recursos humanos</h3></li>
+                        <li><h3>Compras</h3></li>
+                        <li><h3>EDM II</h3></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="span3">
+                <div class="row-fluid no-padding" id="destacado-derecha">
+                    
+                </div>
+
+                <div class="row-fluid no-padding" id="caja_agenda2">
+                    <h3>
+                        <a>Hoy estan de..</a><img class="pull-right" src="~/Images/present.png" width="80" height="80" />
+                    </h3>
+                    <br />
+                    <br />
+                    <br />
+                    <ul class="nav nav-list">
+                        <li class="divider"></li>
+                        <li><h4><strong><i class="fa fa-asterisk"></i> Cumpleaños</strong></h4></li>
+                        <li class="divider"></li>
+                        <li>
+                            <ul>
+                                @foreach (var item in birthdayList)
+                                {
+                                    <li>@(item.FirstName + " " + item.LastName)</li>
+                                }
+                            </ul>
+                        </li>
+                        <li class="divider"></li>
+                        <li><h4><strong><i class="fa fa-asterisk"></i> Aniversario</strong></h4></li>
+                        <li class="divider"></li>
+                        <li>
+                            <ul>
+                                @foreach (var item in anniversariesList)
+                                {
+                                    <li>@(item.FirstName + " " + item.LastName + " ") <small>@(item.Years + " Años")</small></li>
+                                }
+                            </ul>
+                        </li>
+                        <li class="divider"></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <div class="row-fluid">
+                <div id="logo_pie">
+                    &nbsp;
+                </div>
+            </div>
+            <hr />
+
+            <div class="row-fluid  hidden-phone">
+                <div class="span3">
+                    <h4 class="D">
+                        <a href="#">Solicitudes</a>
+                    </h4>
+                    <ul class="unstyled">
+                        <li><a href="@Url.Action("Index","PurchaseRequest")">Solicitud de almacen</a></li>
+                        <li><a href="@Url.Action("Index","PettyCash")">Solicitud de caja chica</a></li>
+                        <li><a href="@Url.Action("Index","ServiceRequest")">Solicitud de servicio</a></li>
+                        <li><a href="@Url.Action("Index","PaymentRequest")">Solicitud de pago</a></li>
+                    </ul>
+                </div>
+
+                <div class="span3">
+                    <h4 class="C">
+                        <a href="#">Autoservicios</a>
+                    </h4>
+                    <ul class="unstyled">
+                        <li><a href="http://tcc/SitePages/Home.aspx">Solicitud de vacaciones</a></li>
+                        <li><a href="http://tcc/SitePages/Home.aspx">Solicitud de ausencias</a></li>
+                        <li><a href="@Url.Action("Index","PaymentRequest")">Volante de pago</a></li>
+                        <li><a href="http://tccsvr02/Cooperativa/index.aspx ">Consulta de cooperativa</a></li>
+                    </ul>
+                </div>
+
+                <div class="span3">
+                    <h4 class="A">
+                        <a href="#">Links</a>
+                    </h4>
+                    <ul class="unstyled">
+                        <li><a href="http://www.oc.org.do/" target="_blank">Organismo coordinador</a></li>
+                    </ul>
+                </div>
+
+                <div class="span3">
+                    <h4 class="B">
+                        <a href="#">Servicios</a>
+                    </h4>
+                    <ul class="unstyled">
+                        <li><a href="@Url.Action("ListExtension","EmployeeExtension")">Listado telefonico</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="row-fluid">
+                <div class="span12">
+                    <ul class="inline pull-right text-right">
+                        <li><a href="#"><img src="~/Images/twitter.png" alt="Twitter"></a></li>
+                        <li><a href="#"><img src="~/Images/facebook.png" alt="Facebook"></a></li>
+                        <li><a href="#"><img src="~/Images/youtube.png" alt="Youtube"></a></li>
+                        <li><a href="#"><img src="~/Images/skype.png" alt="Skype"></a></li>
+                        <br />
+                        <ul class="unstyled inline pull-right"><li><small><a href="#" style="color:white">Todas las redes sociales</a></small></li></ul>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="row-fluid pie_texto">
+                <div class="span3" id="pie_udalinfo">
+                    <a href="#">Todos los derechos reservados</a>
+                </div>
+                <div class="span6">
+                    <p>
+                        &copy; Transcontinental Capital Corporation (TCCB)
+                        <br />
+                        <em>Avenida la Marina, No. 1 Muelle Timbeque, Santo Domingo, Republica Dominicana</em>
+                    </p>
+                </div>
+
+                <div class="span3" id="pie_licencia">
+                    <a href="#">Licencia</a>|<a href="#">Accesibilidad</a>
+                </div>
+            </div>
+        </footer>
+
+        <div id="sharepointTest" class="modal hide fade inmodal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-header text-center">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Cerrar</span></button>
+                <i style="color: #e2e3e3" class="fa fa-laptop fa-4x"></i>
+                <h2 class="modal-title">Crear un ticket</h2>
+                <small class="font-bold">Por favor digite todos los campos para abrir un ticket con su problema.</small>
+            </div>
+            <div class="modal-body">
+                <div class="control-group">
+                    <h4 class="control-label">No. Orden</h4>
+                    <input id="OrdenOC" name="OrdenOC" style="width:500px;" type="text" placeholder="Digite la orden" class="input-lg">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="EnviarLista();">Enviar</button>
+            </div>
+        </div>
+
+        <div id="helpdeskModal" class="modal hide fade inmodal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-header text-center">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Cerrar</span></button>
+                <i style="color: #e2e3e3" class="fa fa-laptop fa-4x"></i>
+                <h2 class="modal-title">Crear un ticket</h2>
+                <small class="font-bold">Por favor digite todos los campos para abrir un ticket con su problema.</small>
+            </div>
+            <div class="modal-body">
+                <div class="control-group"><h4 class="control-label">Email</h4> <input id="Email" name="Email" style="width:500px;" value="@(Account.GetAccount(User.Identity.GetUserName()) == null ? "" : Account.GetAccount(User.Identity.GetUserName()).Email != null ? Account.GetAccount(User.Identity.GetUserName()).Email.Trim() : "")" type="text" placeholder="Digite su email" class="controls"></div>
+                <div class="control-group"><h4 class="control-label">Asunto</h4> <input id="Subject" name="Subject" style="width:500px;" type="text" placeholder="Digite el asunto" class="input-lg"></div>
+                <div class="control-group"><h4 class="control-label">Mensaje</h4> <textarea id="Message" name="Message" style="width:500px;" rows="4" class="controls"></textarea> </div>
+            </div>
+            <div class="modal-footer">
+                <small id="loading" class="pull-left"> Por favor espere...</small>
+                <button type="button" class="btn btn-white" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="EnviarMail();">Enviar</button>
+            </div>
+        </div>
+
+        <div id="foodMenuModal" class="modal hide fade inmodal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-header text-center">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Cerrar</span></button>
+                &nbsp;<i style="color: #e2e3e3" class="fa fa-cutlery fa-4x"></i>
+                <h4 class="modal-title">Menu del dia</h4>
+            </div>
+            <div class="modal-body">
+                @if (menu != null)
+                {
+                    <ul class="nav nav-list">
+                        <li class="divider"></li>
+
+                        @if (menu.Count(m => m.FoodLineScheduleId == Seaboard.Intranet.Domain.Enums.FoodSchedule.Comida) > 0)
+                        {
+                            <li><h4><strong>Comida</strong></h4></li>
+                            <li class="divider"></li>
+                            <li>
+                                <ul>
+                                    @foreach (var item in menu)
+                                    {
+                                        if (item.FoodLineScheduleId == Seaboard.Intranet.Domain.Enums.FoodSchedule.Comida)
+                                        {
+                                            <li><h5>@item.Food.FoodName</h5></li>
+                                        }
+                                    }
+                                </ul>
+                            </li>
+                        }
+                        <li class="divider"></li>
+                        @if (menu.Count(m => m.FoodLineScheduleId == Seaboard.Intranet.Domain.Enums.FoodSchedule.Cena) > 0)
+                        {
+                            <li><h4><strong>Cena</strong></h4></li>
+                            <li class="divider"></li>
+                            <li>
+                                <ul>
+                                    @foreach (var item in menu)
+                                    {
+                                        if (item.FoodLineScheduleId == Seaboard.Intranet.Domain.Enums.FoodSchedule.Cena)
+                                        {
+                                            <li><h5>@item.Food.FoodName</h5></li>
+                                        }
+                                    }
+                                </ul>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <h3>No existen menu registrados para este dia</h3>
+                }
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-white" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+
+        <div id="dgiiInquiryModal" class="modal hide fade inmodal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-header text-center">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Cerrar</span></button>
+                <i style="color: #e2e3e3" class="fa fa-laptop fa-4x"></i>
+                <h2 class="modal-title">Consulta RNC</h2>
+                <small class="font-bold">Por favor digite el RNC o Cedula</small>
+            </div>
+            <div class="modal-body">
+                <div class="control-group">
+                    <h4 class="control-label">RNC o Cedula</h4>
+                    <input id="RNC" name="RNC" style="width:500px;" type="text" placeholder="Digite el RNC o Cedula" class="controls">
+                </div>
+                <br />
+                <div class="table-responsive">
+                    <table id="tableRNC" class="table table-striped table-hover" cellspacing="0">
+                        <tbody>
+                            <tr>
+                                <td style="font-weight:bold;">Razon Social</td>
+                                <td id="razonSocial"></td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight:bold;">Nombre Comercial</td>
+                                <td id="nombreComercial"></td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight:bold;">Estado</td>
+                                <td id="estatus"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <p id="dgiiLoading" class="pull-left"></p>
+                <button type="button" class="btn btn-white" data-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="ConsultaRNC();">Consultar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/Scripts/plugins/jasny/jasny-bootstrap.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/plugins/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/Scripts/plugins/fullcalendar/moment.min.js"></script>
+    <script src="~/Scripts/plugins/fullcalendar/fullcalendar.min.js"></script>
+    <script src="~/Scripts/plugins/footable/footable.all.min.js"></script>
+    <script src="~/Scripts/plugins/toastr/toastr.min.js"></script>
+    <script src="~/Scripts/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+    <script src="~/Scripts/plugins/video/responsible-video.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#loading').hide();
+            $('.footable').footable();
+            $('.carousel').carousel({
+                interval: 4000
+            });
+            $('.scroll_content').slimscroll({
+                height: '200px'
+            });
+            $('#publicDocuments').slimscroll({
+                height: '150px'
+            });
+            $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange', function (e) {
+                $('body').hasClass('fullscreen-video') ? $('body').removeClass('fullscreen-video') : $('body').addClass('fullscreen-video')
+            });
+            $('body').on('hidden.bs.modal', function () {
+                $('#VideoFrame').html("").attr("src", "");
+            });
+        });
+
+        function openDgiiModal() {
+            $('#dgiiInquiryModal').modal({ action: 'show' });
+            $('#tableRNC').css('display', 'none');
+            $('#RNC').val('');
+            $('#dgiiLoading').html('');
+        }
+
+        function EnviarLista() {
+            var isAllValid = true;
+            if (isAllValid) {
+                var data = {
+                    orden: $('#OrdenOC').val().trim()
+                }
+                $.ajax({
+                    url: '@Url.Action("SendLista", "Home")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    cache: false,
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (d) {
+                        if (d.status == "OK") {
+                            alert("Todo bien");
+                        }
+                        else {
+                            alert(d.status);
+                        }
+                    }
+                });
+            }
+        }
+
+        function EnviarMail() {
+            var isAllValid = true;
+            if ($('#Email').val().trim() == '') {
+                isAllValid = false;
+                toastr.error('Debe de especificar un correo', 'Campos requeridos')
+            }
+            if ($('#Subject').val().trim() == '') {
+                isAllValid = false;
+                toastr.error('Debe de especificar un asunto', 'Campos requeridos')
+            }
+            if ($('#Message').val().trim() == '') {
+                isAllValid = false;
+                toastr.error('Debe de especificar un mensaje', 'Campos requeridos')
+            }
+
+            if (isAllValid) {
+                var data = {
+                    from: $('#Email').val().trim(),
+                    subject: $('#Subject').val().trim(),
+                    message: $('#Message').val().trim(),
+                }
+                $('#dgiiLoading').html('Por favor espere...');
+                $.ajax({
+                    url: '@Url.Action("SendMailHelp", "Home")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    cache: false,
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (d) {
+                        if (d.status == "OK") {
+                            $('#Mail').val('');
+                            $('#Subject').val('');
+                            $('#Message').val('');
+                            $('#helpdeskModal').modal('hide');
+                            location.reload(true);
+                        }
+                        else {
+                            alert(status);
+                            $('#dgiiLoading').html('');
+                        }
+                    },
+                    error: function () {
+                        alert('Error. Por favor trate de nuevo.');
+                        $('#loading').hide();
+                    }
+                });
+            }
+        }
+
+        function ConsultaRNC() {
+            var isAllValid = true;
+            if ($('#RNC').val().trim() == '') {
+                isAllValid = false;
+                toastr.error('Debe de especificar un RNC o Cedula', 'Campos requeridos')
+            }
+
+            if (isAllValid) {
+                var data = {
+                    RNC: $('#RNC').val().trim()
+                }
+                $('#dgiiLoading').html('Por favor espere...');
+                $.ajax({
+                    url: '@Url.Action("ConsultaRNC", "Home")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    cache: false,
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (d) {
+                        if (d.status === "OK") {
+                            $('#tableRNC').css('display', '');
+                            $('#razonSocial').html(d.contribuyente.RazonSocial);
+                            $('#nombreComercial').html(d.contribuyente.NombreComercial);
+                            if (d.contribuyente.Estatus === '2')
+                                $('#estatus').html('ACTIVO');
+                            else
+                                $('#estatus').html('INACTIVO');
+                            $('#dgiiLoading').html('');
+                        }
+                        else {
+                            toastr.error(d.status);
+                            $('#tableRNC').css('display', 'none');
+                            $('#dgiiLoading').html('');
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>

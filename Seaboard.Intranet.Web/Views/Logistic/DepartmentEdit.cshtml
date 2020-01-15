@@ -1,0 +1,226 @@
+﻿@model Seaboard.Intranet.Domain.ViewModels.Lookup
+@{
+    ViewBag.Title = "Departamentos";
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Departamentos</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li>
+                <a href="@Url.Action("DepartmentIndex", "Logistic")">Listado de departamentos</a>
+            </li>
+            <li class="active">
+                <strong>Departamentos</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight ecommerce">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h3>Departamentos</h3>
+                </div>
+                <div class="ibox-content">
+                    <div class="form-group">
+                        <div class="col-sm-12 col-sm-offset-1">
+                            <button class="btn btn-primary" type="button" onclick="guardar();"><i class="fa fa-save"></i> Modificar</button>
+                            <button class="btn btn-danger" data-toggle="modal" data-target="#modal-DeleteDepartment"><i class="fa fa-remove"></i> Eliminar</button>
+                            <br />
+                        </div>
+                    </div>
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="tabs-container">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a data-toggle="tab" href="#tab-1"> Datos Basicos</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div id="tab-1" class="tab-pane active">
+                        <div class="panel-body">
+                            <fieldset class="form-horizontal">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Id. de departamento:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(m => m.Id, new { @class = "form-control", @readonly = "" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Descripción:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(m => m.Descripción, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Cuenta por defecto:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(model => model.DataExtended, new { @class = "form-control", @readonly = "" })
+                                                <span class="input-group-btn">
+                                                    <button id="lookupCuenta" type="button" class="btn btn-primary">
+                                                        <i class="fa fa-search"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modal-DeleteDepartment" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Eliminar Departamento</h4>
+                <h3>Esta seguro que desea eliminar este departamento ?</h3>
+            </div>
+
+            <div class="modal-body">
+                <h4>Departamento</h4>
+                <hr />
+
+            </div>
+
+            <div class="modal-footer">
+                <div class="form-actions no-color">
+                    <button type="button" class="btn btn-primary" onclick="eliminar();"> Si</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/plugins/datatables/datatables.min.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#lookupCuenta").lookupbox({
+                title: 'Busqueda: ',
+                url: '@Url.Action("ListLookup", "Home")?tipo=25&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function (data) {
+                        $('input[name=DataExtended]').val(data.Id);
+                },
+                tableHeader: ['Numero de cuenta', 'Descripción', 'Alias']
+            });
+        });
+
+        function eliminar() {
+            var isAllValid = true;
+            if ($('#Id').val().trim().length == 0) {
+                toastr.error('Debe de especificar un id de departamento', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            $.ajax({
+                url: '@Url.Action("DeleteDepartment", "Logistic")?id=' + $('#Id').val().trim(),
+                type: "POST",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (d) {
+                    if (d.status == "OK") {
+                        window.location.href = "@Url.Action("DepartmentIndex", "Logistic")";
+                    }
+                    else {
+                        alert(d.status);
+                    }
+                },
+                error: function () {
+                    alert('Error. Por favor trate de nuevo.');
+                }
+            });
+        }
+
+        function guardar() {
+            var isAllValid = true;
+            if ($('#Id').val().trim().length == 0) {
+                toastr.error('Debe de especificar un id de departamento', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Descripción').val().trim().length == 0) {
+                toastr.error('Debe de especificar una descripción', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#DataExtended').val().trim().length == 0) {
+                toastr.error('Debe de especificar una cuenta por defecto', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (isAllValid) {
+                var data = {
+                    Id: $('#Id').val().trim(),
+                    Descripción: $('#Descripción').val().trim(),
+                    DataExtended: $('#DataExtended').val().trim()
+                }
+                $.ajax({
+                    url: '@Url.Action("SaveDepartment", "Logistic")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (d) {
+                        if (d.status == "OK") {
+                            window.location.href = "@Url.Action("DepartmentIndex", "Logistic")";
+                        }
+                        else {
+                            alert(d.status);
+                        }
+                    },
+                    error: function () {
+                        alert('Error. Por favor trate de nuevo.');
+                    }
+                });
+            }
+        }
+    </script>
+}

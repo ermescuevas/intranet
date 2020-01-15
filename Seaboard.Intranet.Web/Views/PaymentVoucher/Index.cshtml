@@ -1,0 +1,398 @@
+﻿@model Seaboard.Intranet.Domain.ViewModels.EmployeeViewModel
+@{
+    ViewBag.Title = "Volante de pago";
+
+    List<Seaboard.Intranet.Domain.ViewModels.EmployeeDetailViewModel> employeeDetails = ViewBag.EmployeeDetail;
+    List<string> Years = new List<string>();
+
+    for (int i = DateTime.Now.Year; i >= 2012; i--)
+    {
+        Years.Add(i.ToString());
+    }
+
+    var years = Years.Select(x => new SelectListItem() { Value = x, Text = x }).ToList();
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Volante de pago</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Volante de pago</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeIn">
+    <div class="row m-b-lg m-t-lg">
+        <div class="col-md-6">
+
+            <div class="profile-image">
+                <i class="fa fa-user-circle fa-5x"></i>
+            </div>
+
+            <div class="profile-info">
+                <div>
+                    <h2 class="no-margins">
+                        @Model.PersonName
+                    </h2>
+                    <h4>@Model.JobTitle</h4>
+                    <small>
+                        @Model.PersonAddress,
+                        @Model.City,
+                        @Model.Country
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <table class="table small m-b-xs">
+                <tbody>
+                    <tr>
+                        <td>
+                            Fecha de Cumpleaños <strong>@Model.BirthDay.ToShortDateString()</strong>
+                        </td>
+                        <td>
+                            Fecha de entrada <strong>@Model.StartDate.ToShortDateString()</strong>
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <td>
+                            Departamento <br /><strong>@Model.Department</strong>
+                        </td>
+                        <td>
+                            Cedula de Identidad <strong>@Model.PersonId</strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Id de empleado <br /><strong>@Model.EmployeeId</strong>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-md-3">
+            <small>Salario</small>
+            <h2 class="no-margins">@((employeeDetails.Where(a => a.PayrollTransaction == "SALARIO CUENTA BANCO").Sum(a => a.PayrollAmount) * 2).ToString("C2"))</h2>
+            <div id="sparkline1"></div>
+        </div>
+    </div>
+
+    <div class="row m-t-lg">
+        <div class="col-lg-12">
+            <div class="ibox">
+                <div class="ibox-content">
+                    <div class="tabs-container">
+                        <div class="tabs-left">
+                            <ul class="nav nav-tabs">
+                                <li class="active"><a data-toggle="tab" href="#tab-1"> Datos personales</a></li>
+                                <li class=""><a data-toggle="tab" href="#tab-2">Volante historico</a></li>
+                            </ul>
+
+                            <div class="tab-content ">
+                                <div id="tab-1" class="tab-pane active">
+                                    <div class="panel-body">
+                                        <div class="row">
+                                            <div class="col-lg-4">
+                                                <div class="widget style1 navy-bg">
+                                                    <div class="row">
+                                                        <div class="col-xs-4">
+                                                            <i class="fa fa-money fa-3x"></i>
+                                                        </div>
+
+                                                        <div class="col-xs-8 text-right">
+                                                            <span> Ingresos </span>
+                                                            <h3 class="font-bold">@employeeDetails.Where(a => a.PayrollType == 1).Sum(a => a.PayrollAmount).ToString("C2")</h3>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-4">
+                                                <div class="widget red-bg style1">
+                                                    <div class="row">
+                                                        <div class="col-xs-4">
+                                                            <i class="fa fa-money fa-3x"></i>
+                                                        </div>
+                                                        <div class="col-xs-8 text-right">
+                                                            <span> Deducciones </span>
+                                                            <h3 class="font-bold">@employeeDetails.Where(a => a.PayrollType == 0).Sum(a => a.PayrollAmount).ToString("C2")</h3>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-3">
+                                                <div class="widget yellow-bg style1">
+                                                    <div class="row">
+                                                        <div class="col-xs-4">
+                                                            <i class="fa fa-money fa-3x"></i>
+                                                        </div>
+                                                        <div class="col-xs-8 text-right">
+                                                            <span> Total </span>
+                                                            <h3 class="font-bold">@((employeeDetails.Where(a => a.PayrollType == 1).Sum(a => a.PayrollAmount) - employeeDetails.Where(a => a.PayrollType == 0).Sum(a => a.PayrollAmount)).ToString("C2"))</h3>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <br />
+                                        <div class="row">
+                                            <div class="col-lg-4">
+                                                <div class="ibox">
+                                                    <div class="ibox-content">
+                                                        @foreach (var item in employeeDetails.Where(m => m.PayrollType == 1))
+                                                        {
+                                                        <div>
+                                                            <span>@item.PayrollTransaction</span>
+                                                            <small class="pull-right">@item.PayrollAmount.ToString("C2")</small>
+                                                        </div>
+                                                        <div class="progress progress-small">
+                                                            <div style="width: 60%;" class="progress-bar"></div>
+                                                        </div>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-4">
+                                                <div class="ibox">
+                                                    <div class="ibox-content">
+                                                        @foreach (var item in employeeDetails.Where(m => m.PayrollType == 0))
+                                                        {
+                                                        <div>
+                                                            <span>@item.PayrollTransaction</span>
+                                                            <small class="pull-right">@item.PayrollAmount.ToString("C2")</small>
+                                                        </div>
+                                                        <div class="progress progress-small">
+                                                            <div style="width: 60%;" class="progress-bar"></div>
+                                                        </div>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-3">
+                                                <div class="ibox">
+                                                    <div class="ibox-content">
+                                                        <button onclick="Print('@employeeDetails.FirstOrDefault().PayrollId')"><i class="fa fa-print fa-2x"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="tab-2" class="tab-pane">
+                                    <div class="panel-body">
+                                        <div class="row">
+                                            <div class="col-md-8 col-sm-8 col-xs-10">
+                                                <div class="form-group">
+                                                    <label class="col-sm-2 control-label">Desde</label>
+                                                    <div class="col-sm-4 input-group">
+                                                        @Html.DropDownList("from", years, htmlAttributes: new { @class = "form-control" })
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label class="col-sm-2 control-label">Hasta</label>
+                                                    <div class="col-sm-4 input-group">
+                                                        @Html.DropDownList("to", years, htmlAttributes: new { @class = "form-control" })
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label class="col-sm-5 control-label">&nbsp;</label>
+                                                    <div class="col-sm-7 input-group">
+                                                        <input class="btn btn-primary" type="button" onclick="GeneratedPaymentTable();" value="Procesar" />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4 col-sm-4 col-xs-10" id="loadingPanel">
+                                                <div class="h1 m-t-xs text-navy">
+                                                    <span class="loading circle"></span>
+                                                </div>
+                                            </div>
+
+                                            <hr />
+                                            <p>
+                                                Por favor seleccione un rango de fecha y dele click
+                                                a procesar para generar el volante de pago
+                                            </p>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="tabs-container">
+                                                    <div class="tabs-container" id="tabsPayment">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    @Styles.Render("~/plugins/summernoteStyles")
+    @Styles.Render("~/plugins/dateRangeStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/plugins/datatables/datatables.min.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/textSpinnersStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/summernote")
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/Scripts/plugins/datatables/datatables.min.js")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+    @Scripts.Render("~/plugins/dateRange")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/Scripts/plugins/dateformat/jquery-dateFormat.min.js")
+    @Scripts.Render("~/plugins/nestable")
+
+
+    <script>
+        var paymentVouchers = [];
+        var month;
+        var year;
+
+        window.onload = function() {
+            $('#loadingPanel').hide();
+        }
+
+        function GeneratedPaymentTable() {
+            $('#tabsPayment').html('');
+            $.ajax({
+                url: '@Url.Action("ListPayroll", "PaymentVoucher")?from=' + $('select[name=from]').val().trim() + '&to=' + $('select[name=to]').val().trim(),
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                cache: false,
+                contentType: "application/json",
+                success: function (result) {
+                    paymentVouchers = result;
+                    if (paymentVouchers.length > 0) {
+                        var $ul = $('<ul class="nav nav-tabs" />');
+                        var $divContent = $('<div class="tab-content" />');
+                        var $div;
+                        var $divPanel;
+                        var $ul;
+                        
+                        $.each(paymentVouchers, function (i, val) {
+                            console.log(month);
+                            if (month != 'undefined') {
+                                if (month != val.Month) {
+                                    month = val.Month;
+                                    var $li = $('<li class="" />');
+
+                                    var $a = $('<a data-toggle="tab" href="#' + val.Month + '" />').html(val.MonthDescription);
+                                    $li.append($a);
+                                    $ul.append($li);
+                                }
+                            }
+                            else {
+                                month = val.Month;
+                                var $li = $('<li class="active" />');
+                                $li.append($a);
+                                $ul.append($li);
+                            }
+                        });
+
+                        var month;
+
+                        $.each(paymentVouchers, function (i, val) {
+                            
+                            if (month != 'undefined') {
+                                if (month != val.Month) {
+                                    month = val.Month;
+                                    $divContent.append($div);
+                                    month = val.Month;
+                                    $div = $('<div id="' + val.Month + '" class="tab-pane" />');
+
+                                    $divPanel = $('<div class="panel-body /">');
+                                    $div.append($divPanel);
+                                }
+                            }
+                            else {
+                                month = val.Month;
+                                $div = $('<div id="' + val.Month + '" class="tab-pane active" />');
+                                $divPanel = $('<div class="panel-body /">');
+                                $div.append($divPanel);
+                            }
+
+                            if (month != 'undefined') {
+                                if (month != val.Month) {
+                                    $ul = $('<ul />').html(val.Year);
+                                }
+                                var $print = $('<a class="btn btn-success btn-lg" />').html(val.PeriodId);
+                                $print.click(function (e) {
+                                    e.preventDefault();
+                                    Print(val.PayrollId);
+                                });
+                                $divPanel.append($print);
+                                $divPanel.append($('<hr />'));
+                            }
+                            else {
+                                $ul = $('<ul />')
+                            }
+                        });
+
+                        $divContent.append($div);
+
+                        $('#tabsPayment').append($ul);
+                        $('#tabsPayment').append($divContent);
+
+                    }
+                    else {
+                        $('#tabsPayment').html('');
+                    }
+                }
+            });
+        }
+
+        function Print(payrollId) {
+            toastr.info('Estamos procesando su solicitud', 'Por favor espere...')
+            var url = '@Url.Content("~/PDF/Volante/")' + "Volante" + '.pdf';
+            $.ajax({
+                url: '@Url.Action("Print", "PaymentVoucher")?PayrollId=' + payrollId,
+                type: "POST",
+                data: "",
+                cache: false,
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    $('#loadingPanel').hide();
+                    if (result.status == true) {
+                        window.open(url);
+                    }
+                    else {
+                        toastr.error('Ha ocurrido un error en la generación del volante', 'Campos requeridos')
+                    }
+                },
+                error: function (result) {
+                    $('#loadingPanel').hide();
+                    toastr.error('Ha ocurrido un error en la generación del volante', 'Campos requeridos')
+                }
+            });
+        }
+    </script>
+}

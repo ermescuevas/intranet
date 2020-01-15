@@ -1,0 +1,38 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>TCC Intranet | Sin privilegios</title>
+
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet">
+    <link href="~/Fonts/font-awesome/css/font-awesome.css" rel="stylesheet">
+
+    <link href="~/Content/animate.css" rel="stylesheet">
+    <link href="~/Content/style.css" rel="stylesheet">
+
+</head>
+
+<body class="gray-bg">
+
+
+    <div class="middle-box text-center animated fadeInDown">
+        <h1>200</h1>
+        <h3 class="font-bold">Sin privilegios</h3>
+
+        <div class="error-desc">
+            Lo siento, pero no tiene permiso para realizar la accion solicitada por favor de click al boton debajo para volver a la pagina principal.
+            <form class="form-inline m-t" role="form">
+                @Html.ActionLink("Volver al inicio", "Index", "Home", null, new { @class = "btn btn-primary" })
+            </form>
+        </div>
+    </div>
+</body>
+</html>

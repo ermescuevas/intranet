@@ -1,0 +1,268 @@
+﻿@model Seaboard.Intranet.Domain.Models.AccountPayables
+
+@{
+    ViewBag.Title = "Transacciones de cuentas por pagar";
+}
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Transacciones de cuentas por pagar</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li>
+                <a href="@Url.Action("Index", "AccountPayables")">Listado de transacciones</a>
+            </li>
+            <li class="active">
+                <strong>Transacciones de cuentas por pagar</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h3>Transacciones de cuentas por pagar</h3>
+                    </div>
+                    <div class="ibox-content">
+                        <div class="form-group">
+                            <div class="col-sm-12 col-sm-offset-1">
+                            </div>
+                        </div>
+                        <br />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="tabs-container">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a data-toggle="tab" href="#tab-1"> Datos Basicos</a></li>
+                    <li class=""><a data-toggle="tab" href="#tab-2" onclick="cargarArchivos();"> Adjuntos</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div id="tab-1" class="tab-pane active">
+                        <div class="panel-body">
+                            <div class="col-md-6 col-sm-6 col-xs-12">
+
+                                <div class="form-group">
+                                    <label class="col-sm-5 control-label">@Html.LabelFor(m => m.Type, "Tipo de documento"):</label>
+                                    <div class="col-sm-7 input-group">
+                                        @Html.EnumDropDownListFor(m => m.Type, "Seleccione un tipo", new { @class = "form-control", @readonly = "" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-5 control-label">@Html.LabelFor(m => m.VoucherNumber, "Num. de comprobante"):</label>
+                                    <div class="col-sm-7 input-group">
+                                        @Html.TextBoxFor(m => m.VoucherNumber, new { @class = "form-control", @readonly = "" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-5 control-label">@Html.LabelFor(m => m.DocumentNumber, "Num. de documento"):</label>
+                                    <div class="col-sm-7 input-group">
+                                        @Html.TextBoxFor(m => m.DocumentNumber, new { @class = "form-control", @readonly = "" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-5 control-label">@Html.LabelFor(m => m.Description, "Descripción"):</label>
+                                    <div class="col-sm-7 input-group">
+                                        @Html.TextBoxFor(m => m.Description, new { @class = "form-control", @readonly = "" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-5 control-label">@Html.LabelFor(m => m.VendorId, "Proveedor"):</label>
+                                    <div class="col-sm-7 input-group">
+                                        @Html.TextBoxFor(model => model.VendorId, new { @class = "form-control", @readonly = "" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-5 control-label">Nombre:</label>
+                                    <div class="col-sm-7 input-group">
+                                        @Html.TextBoxFor(model => model.VendName, new { @class = "form-control", @readonly = "" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-5 control-label">@Html.LabelFor(m => m.DocumentDate, "Fecha"):</label>
+                                    <div class='col-sm-7 input-group'>
+                                        @Html.TextBoxFor(model => model.DocumentDate, new { @class = "form-control" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-5 control-label">@Html.LabelFor(m => m.PurchaseOrder, "Departmento"):</label>
+                                    <div class='col-sm-7 input-group'>
+                                        @Html.TextBoxFor(m => m.PurchaseOrder, new { @class = "form-control", @readonly = "" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-5 control-label">@Html.LabelFor(m => m.Ncf, "NCF"):</label>
+                                    <div class='col-sm-7 input-group'>
+                                        @Html.TextBoxFor(m => m.Ncf, new { @class = "form-control", @readonly = "" })
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6 col-sm-6 col-xs-12">
+
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">@Html.LabelFor(m => m.Currency, "Moneda"):</label>
+                                    <div class="col-sm-8 input-group">
+                                        @Html.TextBoxFor(model => model.Currency, new { @class = "form-control", @readonly = "" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">@Html.LabelFor(m => m.TaxDetailId, "Id. de impuesto"):</label>
+                                    <div class="col-sm-8 input-group">
+                                        @Html.TextBoxFor(model => model.TaxDetailId, new { @class = "form-control", @readonly = "" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">@Html.LabelFor(m => m.PurchaseAmount, "Subtotal"):</label>
+                                    <div class="col-sm-8 input-group">
+                                        @Html.TextBoxFor(m => m.PurchaseAmount, new { @class = "form-control" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">@Html.LabelFor(m => m.DiscountAmount, "Descuento"):</label>
+                                    <div class="col-sm-8 input-group">
+                                        @Html.TextBoxFor(m => m.DiscountAmount, new { @class = "form-control", @readonly = "" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">@Html.LabelFor(m => m.FreightAmount, "Flete"):</label>
+                                    <div class="col-sm-8 input-group">
+                                        @Html.TextBoxFor(m => m.FreightAmount, new { @class = "form-control", @readonly = "" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">@Html.LabelFor(m => m.MiscellaneousAmount, "Miscelaneos"):</label>
+                                    <div class="col-sm-8 input-group">
+                                        @Html.TextBoxFor(m => m.MiscellaneousAmount, new { @class = "form-control", @readonly = "" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">@Html.LabelFor(m => m.TaxAmount, "Impuesto"):</label>
+                                    <div class="col-sm-8 input-group">
+                                        @Html.TextBoxFor(m => m.TaxAmount, new { @class = "form-control", @readonly = "" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Total:</label>
+                                    <h2 id="total" name="total" class="font-bold"></h2>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12 col-sm-12 col-xs-12">
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">Nota:</label>
+                                    <div class="col-sm-10">
+                                        @Html.TextAreaFor(m => m.Note, new { @class = "form-control", @rows = "5", @readonly = "" })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="tab-2" class="tab-pane">
+                        <div class="panel-body">
+                            <div class="hr-line-dashed"></div>
+
+                            <div class="row" id="attachmentFiles">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+    @section Styles {
+        <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    }
+
+    @section Scripts {
+        @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+        @Scripts.Render("~/plugins/dataPicker")
+        @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+
+        <script type="text/javascript">
+
+        var totalAmount = 0;
+
+        window.onload = function () {
+            $(document).ready(function () {
+                if (($('#PurchaseAmount').val().trim() != '' && !isNaN($('#PurchaseAmount').val().trim()))) {
+                    totalAmount = parseFloat(totalAmount) + parseFloat($('#PurchaseAmount').val());
+                }
+                if (($('#DiscountAmount').val().trim() != '' && !isNaN($('#DiscountAmount').val().trim()))) {
+                    totalAmount = parseFloat(totalAmount) - parseFloat($('#DiscountAmount').val());
+                }
+                if (($('#FreightAmount').val().trim() != '' && !isNaN($('#FreightAmount').val().trim()))) {
+                    totalAmount = parseFloat(totalAmount) + parseFloat($('#FreightAmount').val());
+                }
+                if (($('#MiscellaneousAmount').val().trim() != '' && !isNaN($('#MiscellaneousAmount').val().trim()))) {
+                    totalAmount = parseFloat(totalAmount) + parseFloat($('#MiscellaneousAmount').val());
+                }
+                if (($('#TaxAmount').val().trim() != '' && !isNaN($('#TaxAmount').val().trim()))) {
+                    totalAmount = parseFloat(totalAmount) + parseFloat($('#TaxAmount').val());
+                }
+
+                $('#total').text('$ ' + totalAmount.toFixed(2));
+                totalAmount = 0;
+            });
+        }
+
+        function cargarArchivos() {
+            var data = $('#VoucherNumber').val().trim()
+            $.ajax({
+                url: '@Url.Action("LoadAttachmentFiles", "AccountPayables")',
+                type: "POST",
+                data: data,
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    attachmentFiles = result;
+                    if (attachmentFiles.length > 0) {
+                        var $ul = $('<ul class="list-unstyled file-list" />');
+                        $.each(attachmentFiles, function (i, val) {
+                            var $li = $('<li/>');
+                            var $a = $('<a href="@Url.Action("Download","AccountPayables")?DocumentId=' + $('#VoucherNumber').val().trim() + '&FileName=' + val.trim() + '"/>')
+                            $a.append($('<i class="fa fa-file-pdf-o" />'));
+                            $li.append($a.html("  " + val));
+                            $ul.append($li);
+                        });
+                        $('#attachmentFiles').html($ul);
+                    }
+                    else {
+                        $('#attachmentFiles').html('');
+                    }
+                }
+            });
+        }
+        </script>
+    }

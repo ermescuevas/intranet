@@ -1,0 +1,329 @@
+﻿@using Microsoft.AspNet.Identity;
+@{
+    Layout = "~/Views/Shared/_BillingLayout.cshtml";
+    ViewBag.Title = "Generación documentos cuentas por pagar";
+}
+
+<style>
+    .selected {
+        background-color: #e0f3ff;
+    }
+
+    .notAvailable {
+        background-color: #f5efb5;
+    }
+</style>
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Generación documentos cuentas por pagar</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li>
+                <a href="@Url.Action("TransCreateIndex", "AccountReceivables")">Listado de generación documentos cuentas por pagar</a>
+            </li>
+            <li class="active">
+                <strong>Generación documentos cuentas por pagar</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight ecommerce">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins" id="buttonPanel">
+                <div class="ibox-title">
+                    <h3>Generación documentos cuentas por pagar</h3>
+                </div>
+                <div class="ibox-content">
+                    <div class="sk-spinner sk-spinner-wave">
+                        <div class="sk-rect1"></div>
+                        <div class="sk-rect2"></div>
+                        <div class="sk-rect3"></div>
+                        <div class="sk-rect4"></div>
+                        <div class="sk-rect5"></div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-12 col-sm-offset-1">
+                        </div>
+                    </div>
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins" id="headerPanel">
+                <div class="ibox-content">
+                    <div class="sk-spinner sk-spinner-wave">
+                        <div class="sk-rect1"></div>
+                        <div class="sk-rect2"></div>
+                        <div class="sk-rect3"></div>
+                        <div class="sk-rect4"></div>
+                        <div class="sk-rect5"></div>
+                    </div>
+                    <div class="form-group">
+                        <fieldset class="form-horizontal">
+                            <div class="row">
+                                <div class="col-sm-7">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Id. de Lote:</label>
+                                        <div class="col-sm-4 input-group">
+                                            <input type="text" id="batchId" name="batchId" class="form-control" />
+                                            @*<span class="input-group-btn">
+                                                <button id="lookupbatch" type="button" class="btn btn-primary">
+                                                    <i class="fa fa-search"></i>
+                                                </button>
+                                            </span>*@
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Descripción:</label>
+                                        <div class="col-sm-8 input-group">
+                                            <input type="text" id="description" name="description" class="form-control" />
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Num. de Resolución:</label>
+                                        <div class="col-sm-4 input-group">
+                                            <input type="text" id="resolución" name="resolución" class="form-control" readonly="readonly" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Fecha documento:</label>
+                                        <div class="col-sm-8 input-group date">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                            <input type="text" id="documentDate" name="documentDate" class="form-control" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins" id="detailPanel">
+                <div class="ibox-content">
+                    <div class="sk-spinner sk-spinner-wave">
+                        <div class="sk-rect1"></div>
+                        <div class="sk-rect2"></div>
+                        <div class="sk-rect3"></div>
+                        <div class="sk-rect4"></div>
+                        <div class="sk-rect5"></div>
+                    </div>
+                    <div class="tabs-container">
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a data-toggle="tab" href="#tab-1"> Transacciones</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                            <div id="tab-1" class="tab-pane active">
+                                <div class="panel-body">
+                                    <br />
+                                    <div class="hr-line-dashed"></div>
+                                    <div class="row">
+                                        <div class="table-responsive" id="transRows">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Styles {
+    @Styles.Render("~/plugins/awesomeCheckboxStyles")
+    @Styles.Render("~/plugins/summernoteStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/plugins/textSpinnersStyles")
+    <link href="@Url.Content("~/Content/plugins/datatables/datatables.min.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/footableStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/summernote")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/Scripts/plugins/datatables/datatables.min.js")
+    @Scripts.Render("~/plugins/footable")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#documentDate').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true,
+                format: 'dd/mm/yyyy'
+            });
+
+            $("#lookupbatch").lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookup", "Home")?tipo=29&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function(data) {
+                    $('input[name=batchId]').val(data.ItemId);
+                    $('input[name=description]').val(data.ItemNam);
+                    $('input[name=resolución]').val(data.DataExtended);
+                    if (data.ItemDesc !== '01/01/1900') {
+                        $('input[name=documentDate]').val(data.ItemDesc);
+                    }
+                    obtenerDetalle(data.ItemId);
+                },
+                tableHeader: ['Id. de lote', 'Descripción'],
+                hiddenFields: ['DataExtended','ItemDesc','Posted']
+            });
+
+            $('#transTable').dataTable({
+                pageLength: 10,
+                paging: false,
+                scrollCollapse: true,
+                scrollY: '50vh',
+                language: {
+                    "sProcessing": "Procesando... ",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:  ",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                },
+                oAria: {
+                    "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                }
+            });
+        });
+
+        window.onload = function () {
+            getTrans(@Html.Raw(Json.Encode(ViewBag.BatchNumber)));
+        };
+
+        function getTrans(batchId) {
+            $.ajax({
+                url: '@Url.Action("GetTransCreate", "AccountReceivables")?batchId=' + batchId,
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                cache: false,
+                async: false,
+                contentType: "application/json",
+                success: function (data) {
+                    if (data.registros.ItemId !== '') {
+                        $('input[name=batchId]').val(data.registros.ItemId);
+                        $('input[name=description]').val(data.registros.ItemNam);
+                        $('input[name=resolución]').val(data.registros.DataExtended);
+                        if (data.ItemDesc !== '01/01/1900') {
+                            $('input[name=documentDate]').val(data.registros.ItemDesc);
+                        }
+                        $('#documentDate').prop('readonly', true);
+                        obtenerDetalle(batchId);
+                    }
+                }
+            });
+        }
+
+        function obtenerDetalle(batchId) {
+            $.ajax({
+                url: '@Url.Action("GetBatchTransCreatePostedDetail", "AccountReceivables")?batchId=' + batchId,
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                async: false,
+                cache: false,
+                success: function(result) {
+                    if (result.status === "OK") {
+                        var $table = $('<table  class="table table-stripped table-bordered" id="transTable" />');
+                        var thead =
+                            '<thead><tr>' +
+                                '<th style="width: 2%;">#</th>' +
+                                '<th style="width: 21%;">Suplidor</th>' +
+                                '<th style="width: 11%;">Monto</th>' +
+                                '<th style="width: 11%;">Factura suplidor</th>' +
+                                '<th style="width: 11%;">NCF</th>' +
+                                '<th style="width: 11%;">Tipo de gastos</th>' +
+                                '</tr></thead>';
+                        $table.append(thead);
+                        var $tbody = $('<tbody/>');
+                        $.each(result.registros,
+                            function(x, item) {
+                                var $row = $('<tr/>');
+                                var $inputVendorInvoiceNumber =
+                                    $('<input type="text" readonly="readonly" style="width:100%" maxlength="15" name="vendorInvoiceNumber"/>');
+                                var $inputNcf = $('<input readonly="readonly" type="text" maxlength="19" style="width:100%" name="ncf"/>');
+                                var $select =
+                                    $(
+                                        '<select readonly="readonly" name="tipoGasto">' +
+                                        '<option value="0">GASTOS DE PERSONAL</option>' +
+                                        '<option value="1">GASTOS POR TRABAJOS, SUMINISTROS Y SERVICIOS</option>' +
+                                        '<option value="2">ARRENDAMIENTOS</option>' +
+                                        '<option value="3">GASTOS DE ACTIVOS FIJO</option>' +
+                                        '<option value="4">GASTOS DE REPRESENTACIÓN</option>' +
+                                        '<option value="5">OTRAS DEDUCCIONES ADMITIDAS</option>' +
+                                        '<option value="6">GASTOS FINANCIEROS</option>' +
+                                        '<option value="7">GASTOS EXTRAORDINARIOS</option>' +
+                                        '<option value="8">COMPRAS Y GASTOS QUE FORMARAN PARTE DEL COSTO DE VENTA</option>' +
+                                        '<option value="9">ADQUISICIONES DE ACTIVOS</option>' +
+                                        '<option value="10">GASTOS DE SEGUROS</option>' +
+                                        '</select>');
+                                $row.append($('<td/>').html(''));
+                                $row.append($('<td/>').html(item.Suplidor));
+                                $row.append($('<td/>').html(parseFloat(item.Monto).toFixed(2).replace(/./g,
+                                    function(c, i, a) {
+                                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                                    })));
+                                $('<td/>').append($inputVendorInvoiceNumber.val(item.NumeroProveedor)).appendTo($row);
+                                $('<td/>').append($inputNcf.val(item.Ncf)).appendTo($row);
+                                $('<td/>').append($select.val(item.TipoGastos)).appendTo($row);
+                                $tbody.append($row);
+                            });
+                        $table.append($tbody);
+                        $('#transRows').html($table);
+                    } else {
+                        alert(result.status);
+                    }
+                }
+            });
+        }
+    </script>
+}

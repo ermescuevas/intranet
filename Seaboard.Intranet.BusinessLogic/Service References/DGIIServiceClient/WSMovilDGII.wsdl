@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://dgii.gov.do/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://dgii.gov.do/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://dgii.gov.do/">
+      <s:element name="GetContribuyentes">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="value" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="patronBusqueda" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="inicioFilas" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="filaFilas" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="IMEI" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetContribuyentesResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetContribuyentesResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetContribuyentesCount">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="value" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="IMEI" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetContribuyentesCountResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetContribuyentesCountResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetDocumento">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="codigoBusqueda" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="patronBusqueda" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="IMEI" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetDocumentoResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetDocumentoResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetVehiculoPorDATAMATRIX">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="value" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="IMEI" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetVehiculoPorDATAMATRIXResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetVehiculoPorDATAMATRIXResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetNCF">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="RNC" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="NCF" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="IMEI" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetNCFResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetNCFResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetPlaca">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="RNC" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="Placa" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="IMEI" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetPlacaResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetPlacaResult" type="tns:GetPlacaResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="GetPlacaResult">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="placa" type="tns:PlacaModel" />
+          <s:element minOccurs="0" maxOccurs="1" name="oposiciónes" type="tns:ArrayOfOposiciónModel" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="PlacaModel">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="MARCA_VEHICULO" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="MODELO_VEHICULO" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="COLOR" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ANO_FABRICACION" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="PLACA" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ESTADO" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="RNC_CEDULA_PROPIETARIO" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfOposiciónModel">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="OposiciónModel" nillable="true" type="tns:OposiciónModel" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="OposiciónModel">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="NUMERO_OPOSICION" type="s:long" />
+          <s:element minOccurs="0" maxOccurs="1" name="TIPO_OPOSICION" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="GetContribuyentesSoapIn">
+    <wsdl:part name="parameters" element="tns:GetContribuyentes" />
+  </wsdl:message>
+  <wsdl:message name="GetContribuyentesSoapOut">
+    <wsdl:part name="parameters" element="tns:GetContribuyentesResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetContribuyentesCountSoapIn">
+    <wsdl:part name="parameters" element="tns:GetContribuyentesCount" />
+  </wsdl:message>
+  <wsdl:message name="GetContribuyentesCountSoapOut">
+    <wsdl:part name="parameters" element="tns:GetContribuyentesCountResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetDocumentoSoapIn">
+    <wsdl:part name="parameters" element="tns:GetDocumento" />
+  </wsdl:message>
+  <wsdl:message name="GetDocumentoSoapOut">
+    <wsdl:part name="parameters" element="tns:GetDocumentoResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetVehiculoPorDATAMATRIXSoapIn">
+    <wsdl:part name="parameters" element="tns:GetVehiculoPorDATAMATRIX" />
+  </wsdl:message>
+  <wsdl:message name="GetVehiculoPorDATAMATRIXSoapOut">
+    <wsdl:part name="parameters" element="tns:GetVehiculoPorDATAMATRIXResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetNCFSoapIn">
+    <wsdl:part name="parameters" element="tns:GetNCF" />
+  </wsdl:message>
+  <wsdl:message name="GetNCFSoapOut">
+    <wsdl:part name="parameters" element="tns:GetNCFResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetPlacaSoapIn">
+    <wsdl:part name="parameters" element="tns:GetPlaca" />
+  </wsdl:message>
+  <wsdl:message name="GetPlacaSoapOut">
+    <wsdl:part name="parameters" element="tns:GetPlacaResponse" />
+  </wsdl:message>
+  <wsdl:portType name="WSMovilDGIISoap">
+    <wsdl:operation name="GetContribuyentes">
+      <wsdl:input message="tns:GetContribuyentesSoapIn" />
+      <wsdl:output message="tns:GetContribuyentesSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetContribuyentesCount">
+      <wsdl:input message="tns:GetContribuyentesCountSoapIn" />
+      <wsdl:output message="tns:GetContribuyentesCountSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetDocumento">
+      <wsdl:input message="tns:GetDocumentoSoapIn" />
+      <wsdl:output message="tns:GetDocumentoSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetVehiculoPorDATAMATRIX">
+      <wsdl:input message="tns:GetVehiculoPorDATAMATRIXSoapIn" />
+      <wsdl:output message="tns:GetVehiculoPorDATAMATRIXSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetNCF">
+      <wsdl:input message="tns:GetNCFSoapIn" />
+      <wsdl:output message="tns:GetNCFSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetPlaca">
+      <wsdl:input message="tns:GetPlacaSoapIn" />
+      <wsdl:output message="tns:GetPlacaSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="WSMovilDGIISoap" type="tns:WSMovilDGIISoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetContribuyentes">
+      <soap:operation soapAction="http://dgii.gov.do/GetContribuyentes" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetContribuyentesCount">
+      <soap:operation soapAction="http://dgii.gov.do/GetContribuyentesCount" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetDocumento">
+      <soap:operation soapAction="http://dgii.gov.do/GetDocumento" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetVehiculoPorDATAMATRIX">
+      <soap:operation soapAction="http://dgii.gov.do/GetVehiculoPorDATAMATRIX" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetNCF">
+      <soap:operation soapAction="http://dgii.gov.do/GetNCF" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetPlaca">
+      <soap:operation soapAction="http://dgii.gov.do/GetPlaca" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="WSMovilDGIISoap12" type="tns:WSMovilDGIISoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetContribuyentes">
+      <soap12:operation soapAction="http://dgii.gov.do/GetContribuyentes" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetContribuyentesCount">
+      <soap12:operation soapAction="http://dgii.gov.do/GetContribuyentesCount" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetDocumento">
+      <soap12:operation soapAction="http://dgii.gov.do/GetDocumento" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetVehiculoPorDATAMATRIX">
+      <soap12:operation soapAction="http://dgii.gov.do/GetVehiculoPorDATAMATRIX" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetNCF">
+      <soap12:operation soapAction="http://dgii.gov.do/GetNCF" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetPlaca">
+      <soap12:operation soapAction="http://dgii.gov.do/GetPlaca" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="WSMovilDGII">
+    <wsdl:port name="WSMovilDGIISoap" binding="tns:WSMovilDGIISoap">
+      <soap:address location="http://dgii.gov.do/wsMovilDGII/WSMovilDGII.asmx" />
+    </wsdl:port>
+    <wsdl:port name="WSMovilDGIISoap12" binding="tns:WSMovilDGIISoap12">
+      <soap12:address location="http://dgii.gov.do/wsMovilDGII/WSMovilDGII.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

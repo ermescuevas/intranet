@@ -1,0 +1,717 @@
+﻿@using Microsoft.AspNet.Identity;
+@model Seaboard.Intranet.Domain.Models.ConfigurationModel
+@{
+    Layout = "~/Views/Shared/_BillingLayout.cshtml";
+    ViewBag.Title = "Configuración contable facturación";
+    var customers = (List<Seaboard.Intranet.Domain.ViewModels.Lookup>)ViewBag.Customers;
+    var accounts = (List<Seaboard.Intranet.Domain.ViewModels.Lookup>)ViewBag.Accounts;
+}
+
+<style>
+    .bootstrap-select:not([class*=col-]):not([class*=form-control]):not(.input-group-btn) {
+        width: 100%;
+    }
+
+    .selected {
+        background-color: #e0f3ff;
+    }
+</style>
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Configuración contable facturación</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Configuración contable facturación</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight ecommerce">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h3>Configuración contable facturación</h3>
+                </div>
+                <div class="ibox-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="tabs-container">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a data-toggle="tab" href="#tab-1"> Tipo de ingreso</a></li>
+                    <li class=""><a data-toggle="tab" href="#tab-2"> Retenciones</a></li>
+                    <li class=""><a data-toggle="tab" href="#tab-3"> Asignación de cuentas</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div id="tab-1" class="tab-pane active">
+                        <div class="panel-body">
+                            <fieldset class="form-horizontal">
+                                <div class="row">
+                                    <p>Especificación del tipo de ingreso que se usara para la configuración de la cuenta contable.</p>
+                                   
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">Tipo de ingreso:</label>
+                                            <div class="col-sm-10 input-group">
+                                                <select id="tipoIngreso" name="tipoIngreso" data-placeholder="Seleccione un periodo..." class="chosen-select" tabindex="2">
+                                                    <option value="">Seleccione un tipo de ingreso</option>
+                                                    <option value="1">Ingresos por operaciones (No Financieros)</option>
+                                                    <option value="2">Ingresos financieros</option>
+                                                    <option value="3">Ingresos extraordinarios</option>
+                                                    <option value="4">Ingresos por arrendamientos</option>
+                                                    <option value="5">Ingresos por venta de activo depreciable</option>
+                                                    <option value="6">Otros ingresos</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button class="btn btn-primary" type="button" onclick="saveIncomeTypes();"><i class="fa fa-save"></i> Guardar</button>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <form id="form" action="#" class="wizard-big">
+                                            <br />
+                                        </form>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                    <div id="tab-2" class="tab-pane">
+                        <div class="panel-body">
+                            <div class="row">
+                                <fieldset class="form-horizontal">
+                                    <div class="row">
+                                        <p>
+                                            Establecer el porcentaje de retención que se le aplicara a un cliente para la retención del
+                                            impuesto en el reporte del 607.
+                                        </p>
+                                        <div class="col-sm-12">
+                                            <button class="btn btn-primary" onclick="createCustomer('','')">Agregar una nueva retención</button>
+                                            <div class="hr-line-dashed"></div>
+                                            <div id="customerRows">
+                                                <table class="table table-striped table-bordered table-hover informationTable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width:25%">Id. cliente GP</th>
+                                                            <th style="width:40%">Nombre</th>
+                                                            <th style="width:25%">Porciento de retención</th>
+                                                            <th style="width:10%">#</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="tab-3" class="tab-pane">
+                        <div class="row">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <p>
+                                        Configuración de las cuentas contable de los productos de facturación por clientes.
+                                    </p>
+                                    <div class="hr-line-dashed"></div>
+                                    <div class="col-md-4">
+                                        <div class="ibox">
+                                            <div class="ibox-content">
+                                                <h2>Clientes</h2>
+                                                <table id="customerTable" class="table table-hover informationTable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width:40%">Id. cliente GP</th>
+                                                            <th style="width:60%">Nombre</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var item in customers)
+                                                        {
+                                                            <tr>
+                                                                <td>@item.Id</td>
+                                                                <td>@item.Descripción</td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="ibox">
+                                            <div class="ibox-content">
+                                                <h2>Productos</h2>
+                                                <div class="table-responsive" id="productsRows">
+                                                    <table id="productTable" class="table table-hover">
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="width:30%">Id. articulo</th>
+                                                                <th style="width:50%">Descripción</th>
+                                                                <th style="width:20%">Estado</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody></tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <div class="ibox">
+                                            <div class="ibox-content">
+                                                <h2>Cuentas contables</h2>
+                                                <div class="table-responsive" id="accountRows">
+                                                    <table class="table table-striped table-hover">
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="width:20%">Tipo cuenta</th>
+                                                                <th style="width:50%">Descripción</th>
+                                                                <th style="width:20%">Cuenta</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody></tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-CreateCustomer" class="modal inmodal" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content animated fadeIn">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Asignación de retención</h4>
+                </div>
+
+                <div class="modal-body">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label>Id. de cliente GP:</label>
+                            <select class="selectpicker" data-live-search="true" id="WithHoldingCustomerId" name="WithHoldingCustomerId">
+                                <option value=""></option>
+                                @foreach (var item in customers)
+                                {
+                                    <option value="@item.Id.Trim()">@(item.Id + " - " + item.Descripción)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Porciento de retención:</label>
+                            <input name="WithHoldingPercent" id="WithHoldingPercent" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="form-actions no-color">
+                        <button type="button" class="btn btn-primary" onclick="saveWithHoldingCustomer();"> Guardar</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-Account" class="modal inmodal" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content animated fadeIn">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Asignación de cuenta contable</h4>
+                </div>
+
+                <div class="modal-body">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label>Cuenta contable:</label>
+                            <select class="selectpicker" data-live-search="true" id="AccountId" name="AccountId">
+                                <option value=""></option>
+                                @foreach (var item in accounts)
+                                {
+                                    <option value="@item.DataExtended.Trim()">@(item.Id + " - " + item.Descripción)</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="form-actions no-color">
+                        <button type="button" class="btn btn-primary" onclick="saveAccount();"> Guardar</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Styles {
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/summernoteStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/plugins/touchSpinStyles")
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/css/bootstrap-select.min.css">
+    @Styles.Render("~/plugins/duallistStyles")
+    @Styles.Render("~/Content/plugins/chosen/chosenStyles")
+}
+
+@section Scripts {
+
+    @Scripts.Render("~/plugins/summernote")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/touchSpin")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/bootstrap-select.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/i18n/defaults-en_US.js"></script>
+    @Scripts.Render("~/plugins/duallist")
+    @Scripts.Render("~/plugins/chosen")
+
+    <script type="text/javascript">
+        var products;
+        var customers;
+        var customerCode = '';
+        var productCode = '';
+        var accountType = '';
+        $(document).ready(function () {
+            $('.dual_select').bootstrapDualListbox({
+                selectorMinimalHeight: 160
+            });
+            $('.chosen-select').chosen({ width: "100%" });
+            $('#tipoIngreso').on('change', function (e) {
+                getProducts();
+            });
+            generateCustomers();
+            $('.informationTable').DataTable({
+                pageLength: 20,
+                language: {
+                    "sProcessing": "Procesando... ",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:  ",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                },
+                oAria: {
+                    "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                },
+                buttons: [],
+                "bInfo": false,
+                "bLengthChange": false
+            });
+            $('#customerTable tbody').on('click', 'tr', function () {
+                $(this).addClass('selected').siblings().removeClass('selected');
+                var value = $(this).closest("tr").find('td:eq(0)').html();
+                customerCode = value;
+                productCode = '';
+                generateProducts(value);
+                $('#accountRows').html('');
+            });
+        });
+
+        function getProducts() {
+            $.ajax({
+                url: '@Url.Action("GetIncomeTypes", "Billing")?id=' + $('#tipoIngreso').val().trim(),
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                cache: false,
+                contentType: "application/json",
+                success: function (result) {
+                    if (result.length > 0) {
+                        var $select = $('<select class="form-control dual_select" name="IncomeTypes[]" multiple />');
+                        $.each(result, function (i, val) {
+                            if (val.DataExtended === '1')
+                                var $option = $('<option selected value="' + val.Id + '" />').html(val.Descripción);
+                            else
+                                var $option = $('<option value="' + val.Id + '" />').html(val.Descripción);
+                            $select.append($option);
+                        });
+                        $('#form').html($select);
+                        $('.dual_select').bootstrapDualListbox({
+                            selectorMinimalHeight: 160
+                        });
+                    }
+                    else {
+                        $('#form').html('');
+                    }
+                }
+            });
+        }
+
+        function generateAccounts(customerId, itemCode) {
+            $.ajax({
+                url: '@Url.Action("GetAccounts", "Billing")?customerId=' + customerId + '&productId=' + itemCode,
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    var $table = $('<table class="table table-hover"/>');
+                    $table.append(
+                        '<thead>' +
+                        '<tr>' +
+                        '<th style="width:25%">Tipo cuenta</th>' +
+                        '<th style="width:40%">Descripción</th>' +
+                        '<th style="width:25%">Cuenta</th>' +
+                        '<th style="width:10%">#</th>' +
+                        '</tr>' +
+                        '</thead>');
+                    if (result.length > 0) {
+                        var $tbody = $('<tbody/>');
+                        $.each(result, function (i, val) {
+                            var $row = $('<tr/>');
+                            var $applyButton = $('<button type="button" class="btn btn-primary btn-xs">Agregar</button>');
+                            $row.append($('<td/>').html(val.ItemId));
+                            $row.append($('<td/>').html(val.ItemNam));
+                            $row.append($('<td/>').html(val.ItemDesc));
+                            $row.append($('<td/>').html($applyButton));
+                            $applyButton.click(function () {
+                                accountType = val.DataExtended;
+                                createAccount(val.DataPlus);
+                            });
+                            $tbody.append($row);
+                        });
+                        $table.append($tbody);
+                    }
+                    $('#accountRows').html($table);
+                }
+            });
+        }
+
+        function saveAccount() {
+            var isAllValid = true;
+            if (customerCode === '') {
+                toastr.error('Por favor debe de seleccionar un cliente para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (productCode === '') {
+                toastr.error('Por favor debe de seleccionar un producto para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (accountType === '') {
+                toastr.error('Por favor debe de seleccionar un tipo de cuenta para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (isAllValid) {
+                var data = {
+                    customerCode: customerCode,
+                    productCode: productCode,
+                    accountType: accountType,
+                    account: $('#AccountId').val().trim()
+                }
+                $.ajax({
+                    url: '@Url.Action("SaveAccount", "Billing")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            $('#modal-Account').modal('hide');
+                            generateAccounts(customerCode, productCode);
+                        }
+                        else {
+                            alert(result.status);
+                        }
+                    }
+                });
+            }
+        }
+
+        function generateProducts(value) {
+            $.ajax({
+                url: '@Url.Action("GetAccountProducts", "Billing")?id=' + value,
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    var $table = $('<table class="table table-hover"/>');
+                    $table.append(
+                        '<thead>' +
+                        '<tr>' +
+                        '<th style="width:30%">Id. de articulo</th>' +
+                        '<th style="width:50%">Descripción</th>' +
+                        //'<th style="width:20%">Estado</th>' +
+                        '</tr>' +
+                        '</thead>');
+                    if (result.length > 0) {
+                        var $tbody = $('<tbody/>');
+                        $.each(result, function (i, val) {
+                            var $row = $('<tr/>');
+                            var $badge;
+                            if (val.DataExtended === 'Sin Asignar')
+                                $badge = $('<i class="badge badge-danger">');
+                            else
+                                $badge = $('<i class="badge badge-success">');
+                            $badge.html(val.DataExtended);
+                            $row.append($('<td/>').html(val.Id));
+                            $row.append($('<td/>').html(val.Descripción));
+                            //$row.append($('<td/>').html($badge));
+                            $($row).click(function () {
+                                $(this).addClass('selected').siblings().removeClass('selected');
+                                var value = $(this).closest("tr").find('td:eq(0)').html();
+                                generateAccounts(customerCode, value);
+                                productCode = value;
+                            });
+                            $tbody.append($row);
+                        });
+                        $table.append($tbody);
+                    }
+                    $('#productsRows').html($table);
+                }
+            });
+        }
+
+        function generateCustomers() {
+            $.ajax({
+                url: '@Url.Action("GetWithHoldingCustomers", "Billing")',
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    var $table = $('<table class="table table-striped table-bordered table-hover"/>');
+                    $table.append(
+                        '<thead>' +
+                        '<tr>' +
+                        '<th style="width:25%">Id. cliente</th>' +
+                        '<th style="width:40%">Nombre</th>' +
+                        '<th style="width:25%">Porciento retención</th>' +
+                        '<th style="width:10%">#</th>' +
+                        '</tr>' +
+                        '</thead>');
+                    if (result.length > 0) {
+                        var $tbody = $('<tbody/>');
+                        $.each(result, function (i, val) {
+                            var $row = $('<tr/>');
+                            $row.append($('<td/>').html(val.CustomerId));
+                            $row.append($('<td/>').html(val.CustomerName));
+                            $row.append($('<td/>').html(val.CustomerClass));
+                            var $btnGroup = $('<div class="btn-group"/>')
+                            var $edit = $('<button href="#" class="btn btn-success btn-xs">Editar</button>');
+                            var $remove = $('<button href="#"class="btn btn-danger btn-xs">Eliminar</button>');
+                            $remove.click(function (e) {
+                                deleteCustomer(val.CustomerId);
+                                e.preventDefault();
+                            });
+                            $edit.click(function (e) {
+                                createCustomer(val.CustomerId, val.CustomerClass)
+                                e.preventDefault();
+                            });
+                            $btnGroup.append($edit);
+                            $btnGroup.append($remove);
+                            $row.append($('<td/>').html($btnGroup));
+                            $tbody.append($row);
+                        });
+                        $table.append($tbody);
+                    }
+                    $('#customerRows').html($table);
+                    $($table).DataTable({
+                        pageLength: 10,
+                        order: [[0, "desc"]],
+                        dom: '<"html5buttons"B>lTfgitp',
+                        language: {
+                            "sProcessing": "Procesando... ",
+                            "sLengthMenu": "Mostrar _MENU_ registros",
+                            "sZeroRecords": "No se encontraron resultados",
+                            "sEmptyTable": "Ningún dato disponible en esta tabla",
+                            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                            "sInfoPostFix": "",
+                            "sSearch": "Buscar:  ",
+                            "sUrl": "",
+                            "sInfoThousands": ",",
+                            "sLoadingRecords": "Cargando...",
+                            "oPaginate": {
+                                "sFirst": "Primero",
+                                "sLast": "Último",
+                                "sNext": "Siguiente",
+                                "sPrevious": "Anterior"
+                            }
+                        },
+                        oAria: {
+                            "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                            "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                        },
+                        buttons: [
+                            { extend: 'copy' },
+                            { extend: 'csv' },
+                            { extend: 'excel', title: 'ExampleFile' },
+                            { extend: 'pdf', title: 'ExampleFile' },
+
+                            {
+                                extend: 'print',
+                                customize: function (win) {
+                                    $(win.document.body).addClass('white-bg');
+                                    $(win.document.body).css('font-size', '10px');
+
+                                    $(win.document.body).find('table')
+                                        .addClass('compact')
+                                        .css('font-size', 'inherit');
+                                }
+                            }
+                        ]
+                    });
+                }
+            });
+        }
+
+        function saveIncomeTypes() {
+            var isAllValid = true;
+            if ($('#tipoIngreso').val().trim() === '') {
+                toastr.error('Por favor debe de especificar un cliente para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (isAllValid) {
+                var item = String($('select[name="IncomeTypes[]"]').val());
+                var items = item.split(",");
+                var products = [];
+                for (var i = 0; i < items.length; i++) {
+                    products.push(items[i].trim());
+                }
+                var data = {
+                    incomeType: $('#tipoIngreso').val().trim(),
+                    products: products
+                }
+                $.ajax({
+                    url: '@Url.Action("SaveIncomeType", "Billing")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            toastr.info("Datos guardados correctamente");
+                        }
+                        else {
+                            alert(result.status);
+                        }
+                    }
+                });
+            }
+        }
+
+        function saveWithHoldingCustomer() {
+            var isAllValid = true;
+            if ($('#WithHoldingCustomerId').val() === '') {
+                toastr.error('Por favor debe de especificar un cliente para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#WithHoldingPercent').val() === '') {
+                toastr.error('Por favor debe de un porciento para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (isAllValid) {
+                var data = {
+                    customerId: $('#WithHoldingCustomerId').val().trim(),
+                    percent: $('#WithHoldingPercent').val()
+                }
+                $.ajax({
+                    url: '@Url.Action("SaveWithHoldingCustomer", "Billing")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            $('#modal-CreateCustomer').modal('hide');
+                            generateCustomers();
+                        }
+                        else {
+                            alert(result.status);
+                        }
+                    }
+                });
+            }
+        }
+
+        function createAccount(accountId) {
+            $('#modal-Account').modal('show');
+            $('select[name=AccountId]').val(accountId);
+            $('select[name=AccountId]').selectpicker('refresh');
+        }
+
+        function createCustomer(customerId, percent) {
+            $('#modal-CreateCustomer').modal('show');
+            if (customerId !== '') {
+                $('#WithHoldingCustomerId').prop('readonly', true);
+            } else {
+                $('#WithHoldingCustomerId').prop('readonly', false);
+            }
+            $('#WithHoldingPercent').val(percent);
+            $('select[name=WithHoldingCustomerId]').val(customerId);
+            $('select[name=WithHoldingCustomerId]').selectpicker('refresh');
+        }
+
+        function deleteCustomer(customerId) {
+            if (confirm("Esta seguro que desea eliminar este registro ?")) {
+                $.ajax({
+                    url: '@Url.Action("DeleteWithHoldingCustomer", "Billing")?id=' + customerId,
+                    type: "POST",
+                    data: "",
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        customers = result;
+                        if (result.status !== "OK") {
+                            alert(result.status);
+                        } else {
+                            generateCustomers();
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+}

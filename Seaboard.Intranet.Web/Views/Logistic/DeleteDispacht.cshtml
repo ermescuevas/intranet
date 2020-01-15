@@ -1,0 +1,63 @@
+﻿@model Seaboard.Intranet.Domain.ViewModels.DispachtHeaderViewModel
+
+<div id="modal-container" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Anular</h4>
+                <h3>Esta seguro que desea anular este registro?</h3>
+            </div>
+
+            <div class="modal-body">
+                <h4>Despacho</h4>
+                <hr />
+                <dl class="dl-horizontal">
+                    <dt>
+                        @Html.DisplayName("Id de despacho")
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.DispachtId)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayName("Id. de requisicion")
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.RequestId)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayName("Departamento")
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.DepartmentId)
+                    </dd>
+
+                    <dt>
+                        @Html.DisplayName("Solicitado por")
+                    </dt>
+
+                    <dd>
+                        @Html.DisplayFor(model => model.Requester)
+                    </dd>
+                </dl>
+            </div>
+
+            <div class="modal-footer">
+                @using (Html.BeginForm("DeleteDispacht", "Logistic", FormMethod.Post))
+                {
+                    @Html.HiddenFor(model => model.DispachtId)
+                    @Html.AntiForgeryToken()
+
+                    <div class="form-actions no-color">
+                        <input type="submit" value="Anular" class="btn btn-default" />
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

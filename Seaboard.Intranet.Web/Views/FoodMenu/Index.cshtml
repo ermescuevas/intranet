@@ -1,0 +1,154 @@
+﻿@model List<Seaboard.Intranet.Domain.Models.FoodMenu>
+@{
+    ViewBag.Title = "Listado de menu de comida";
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Listado de menu de comida</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Listado de menu de comida</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>Listado de menu de comida</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="ibox-content">
+                    @Html.ActionLink("NUEVO MENU", "Create", "FoodMenu", null, new { @class = "btn btn-primary" })
+                    <div class="hr-line-dashed"></div>
+                    <table class="table table-striped table-bordered table-hover informationTable">
+                        <thead>
+                            <tr>
+                                <th>Dia</th>
+                                <th>Descripción</th>
+                                <th>Fecha</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr class="text-center">
+                                    <td>
+                                        @switch (item.FoodMenuDate.DayOfWeek)
+                                        {
+                                            case  DayOfWeek.Monday :
+                                                <span class="label label-success">Lunes</span>
+                                                break;
+                                            case DayOfWeek.Tuesday:
+                                                <span class="label label-default">Martes</span>
+                                                break;
+                                            case DayOfWeek.Wednesday:
+                                                <span class="label label-info">Miercoles</span>
+                                                break;
+                                            case DayOfWeek.Thursday:
+                                                <span class="label label-primary">Jueves</span>
+                                                break;
+                                            case DayOfWeek.Friday:
+                                                <span class="label label-warning">Viernes</span>
+                                                break;
+                                            case DayOfWeek.Saturday:
+                                                <span class="label label-danger">Sabado</span>
+                                                break;
+                                            case DayOfWeek.Sunday:
+                                                <span class="label label-success">Domingo</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>@item.FoodMenuDescription</td>
+                                    <td>@item.FoodMenuDate.ToShortDateString()</td>
+                                    <td>
+                                        @Html.ActionLink("Editar", "Edit", "FoodMenu",
+                                            new { id = item.FoodMenuId }, new { @class = "btn btn-success btn-xs" })
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/dataTables")
+
+    <script>
+        $(document).ready(function () {
+
+            $('.informationTable').DataTable({
+                pageLength: 10,
+                dom: '<"html5buttons"B>lTfgitp',
+                language: {
+                    "sProcessing": "Procesando... ",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:  ",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                },
+                oAria: {
+                    "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                },
+                buttons: [
+                    { extend: 'copy' },
+                    { extend: 'csv' },
+                    { extend: 'excel', title: 'ExampleFile' },
+                    { extend: 'pdf', title: 'ExampleFile' },
+
+                    {
+                        extend: 'print',
+                        customize: function (win) {
+                            $(win.document.body).addClass('white-bg');
+                            $(win.document.body).css('font-size', '10px');
+
+                            $(win.document.body).find('table')
+                                    .addClass('compact')
+                                    .css('font-size', 'inherit');
+                        }
+                    }
+                ]
+
+            });
+        });
+    </script>
+}

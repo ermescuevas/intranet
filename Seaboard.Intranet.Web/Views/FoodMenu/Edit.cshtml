@@ -1,0 +1,264 @@
+﻿@model Seaboard.Intranet.Domain.Models.FoodMenu
+@{
+    ViewBag.Title = "Menu de Comida";
+}
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Menu de comida</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li>
+                <a href="@Url.Action("Index", "FoodMenu")">Listado de menus</a>
+            </li>
+            <li class="active">
+                <strong>Menu de comida</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h3>Menu de comida</h3>
+                </div>
+                <div class="ibox-content">
+                    <div class="form-group">
+                        <div class="col-sm-12 col-sm-offset-1">
+                            <button class="btn btn-primary" type="button" onclick="procesarSolicitud();"><i class="fa fa-save"></i> Guardar</button>
+                            <button class="btn btn-white" type="button" onclick="limpiarCampos();"><i class="fa fa-eraser"></i> Borrar</button>
+                        </div>
+                    </div>
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                    </div>
+                </div>
+
+                @Html.HiddenFor(m => m.FoodMenuId)
+
+                <div class="ibox-content">
+                    <div class="row">
+                        <div class="col-sm-4 b-r">
+                            <h3 class="m-t-none m-b">Datos basicos</h3>
+                            <form role="form">
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Fecha:</label>
+                                    <div class="col-sm-8 input-group date">
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        @Html.TextBoxFor(m => m.FoodMenuDate, new { @class = "form-control", @readonly="" })
+                                    </div>
+                                    <span class="error">&nbsp;</span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Horario:</label>
+                                    <div class="col-sm-8 input-group">
+                                        @Html.EnumDropDownListFor(m => m.FoodScheduleId, htmlAttributes: new { @class = "form-control" })
+                                        <span class="error">&nbsp;</span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-sm-4 control-label">Descripción:</label>
+                                    <div class="col-sm-8 input-group">
+                                        @Html.TextAreaFor(m => m.FoodMenuDescription, new { @class = "form-control", @rows = "5", @placeholder = "Introduzca la nota" })
+                                        <span class="error">&nbsp;</span>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="col-sm-8">
+                            <h3 class="m-t-none m-b">Platos</h3>
+                            <form role="form">
+                                <div class="row">
+                                    <div class="form-group">
+                                        <a class="col-sm-2 control-label" data-toggle="modal" data-target="#modal-food">Plato:</a>
+                                        <div class="col-sm-6 input-group">
+                                            <input type="text" id="FoodId" name="FoodId" class="hidden">
+                                            <input type="text" id="FoodName" name="FoodName" class="form-control">
+                                            <input type="text" id="FoodLineScheduleId" name="FoodLineScheduleId" class="hidden">
+                                            <span class="input-group-btn">
+                                                <button type="button" id="lookupPlato" class="btn btn-primary">
+                                                    <i class="fa fa-search"></i>
+                                                </button>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">&nbsp;</label>
+                                        <div class="col-sm-4">
+                                            <button class="btn btn-primary" type="button" onclick="agregarProducto();">Agregar</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row" id="itemsRows">
+
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Styles {
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/plugins/datatables.min.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+}
+
+@section Scripts {
+
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+    @Scripts.Render("~/Scripts/plugins/datatables/datatables.min.js")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+           @Html.Partial("_Scripts")
+        });
+
+        var foodItems = [];
+
+        window.onload = function () {
+            foodItems = @Html.Raw(Json.Encode(@ViewBag.FoodMenuLines));
+            GeneratedItemsTable();
+        };
+
+        function limpiarCampos() {
+            foodItems = [];
+            $('#FoodMenuDate').val('@DateTime.Now.ToShortDateString()');
+            $('#FoodMenuDescription').val('');
+            $('#itemsRows').empty();
+        }
+
+        function agregarProducto() {
+            var isValidItem = true;
+
+            if ($('#FoodName').val().trim() == '') {
+                isValidItem = false;
+                toastr.error('Debe de especificar un plato', 'Campos requeridos')
+            }
+
+            if ($('#FoodScheduleId option:selected').text().trim() == '') {
+                isValidItem = false;
+                toastr.error('Debe de seleccionar un horario de comida', 'Campos requeridos')
+            }
+
+            if (foodItems.length > 0) {
+                $.each(foodItems, function (i, val) {
+                    if (val.FoodId == $('#FoodId').val()) {
+                        isValidItem = false;
+                        toastr.error('No puede haber platos duplicados', 'Campos requeridos')
+                    }
+                });
+            }
+
+            if (isValidItem) {
+                foodItems.push({ FoodId: $('#FoodId').val().trim(), FoodName: $('#FoodName').val().trim(), FoodLineScheduleId: $('#FoodLineScheduleId').val().trim() });
+            }
+
+            $('#FoodName').val('').focus();
+            $('#FoodId', '#FoodLineSchedule').val('');
+
+            GeneratedItemsTable();
+        }
+
+        function GeneratedItemsTable() {
+            if (foodItems.length > 0) {
+                var $table = $('<table class="table table-striped table-bordered table-hover" id="itemsTable"/>');
+                $table.append('<thead><tr><th>Id</th><th>Nombre del plato</th><th>Horario de comida</th><th></th></tr></thead>');
+                var $tbody = $('<tbody/>');
+                $.each(foodItems, function (i, val) {
+                    var $row = $('<tr/>');
+                    $row.append($('<td/>').html(val.FoodId));
+                    $row.append($('<td/>').html(val.FoodName));
+                    $row.append($('<td/>').html(val.FoodLineScheduleId));
+                    var $remove = $('<a href="#" class="btn btn-white btn-xs"><i class="fa fa-trash fa"></a>');
+                    $remove.click(function (e) {
+                        e.preventDefault();
+                        foodItems.splice(i, 1);
+                        GeneratedItemsTable();
+                    });
+
+                    $row.append($('<td/>').html($remove));
+                    $tbody.append($row);
+                });
+                $table.append($tbody);
+                $('#itemsRows').html($table);
+            }
+            else {
+                $('#itemsRows').html('');
+            }
+        }
+
+        function procesarSolicitud() {
+            var isAllValid = true;
+            if (foodItems.length == 0) {
+                toastr.error('Por favor debe de insertar platos para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#FoodScheduleId').val().trim() == '') {
+                toastr.error('Debe de especificar un horario de comida', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (isAllValid) {
+                var data = {
+                    FoodMenuId: $('#FoodMenuId').val().trim(),
+                    FoodMenuDate: $('#FoodMenuDate').val().trim(),
+                    FoodMenuDescription: $('#FoodMenuDescription').val().trim(),
+                    FoodScheduleId: $('#FoodScheduleId').val().trim(),
+                    FoodMenuLines: foodItems
+                }
+
+                $.ajax({
+                    url: '@Url.Action("Save", "FoodMenu")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (d) {
+                        if (d.status == true) {
+                            window.location.href = "@Url.Action("Index","FoodMenu")";
+                        }
+                        else {
+                            alert('Ha ocurrido un error');
+                        }
+                        $('#submit').val('Guardar');
+                    },
+                    error: function () {
+                        alert('Error. Por favor trate de nuevo.');
+                        $('#submit').val('Guardar');
+                    }
+                });
+            }
+        }
+    </script>
+}

@@ -1,0 +1,336 @@
+﻿@{
+    ViewBag.Title = "Historial de Aprobaciones electronicas";
+}
+
+<style>
+    .selected {
+        background-color: #e0f3ff;
+    }
+</style>
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Historial de Aprobaciones electronicas</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Historial de Aprobaciones electronicas</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h3>Historial de Aprobaciones electronicas</h3>
+                </div>
+                <div class="ibox-content">
+                    <div class="col-sm-12 col-sm-offset-1">
+                        <button class="btn btn-success" type="button" onclick="consultar();"><i class="fa fa-search"></i> Consultar</button>
+                        <button class="btn btn-success" type="button" onclick="imprimir();"><i class="fa fa-print"></i> Imprimir</button>
+                        <br />
+                    </div>
+                    <br />
+                </div>
+            </div>
+            <div class="ibox">
+                <div class="ibox-content">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">Modulo:</label>
+                                <div class="col-sm-4 input-group">
+                                    <div class="col-sm-12 input-group">
+                                        <select id="filterType" name="filterType" class="form-control">
+                                            <option value="">Seleccione el modulo</option>
+                                            <option value="1">Almacen</option>
+                                            <option value="2">Articulo</option>
+                                            <option value="3">Servicio</option>
+                                            <option value="4">Caja Chica</option>
+                                            <option value="5">Orden de Compra</option>
+                                            <option value="6">Analisis de Compra</option>
+                                            <option value="7">Pago</option>
+                                            <option value="8">Proveedor</option>
+                                            <option value="9">Ausencias</option>
+                                            <option value="10">Entrenamiento</option>
+                                            <option value="11">Overtime</option>
+                                            <option value="12">Usuario</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">No. de documento:</label>
+                                <div class="col-sm-6 input-group">
+                                    <input type="text" name="filter" id="filter" class="form-control" />
+                                    <span class="input-group-btn">
+                                        <button onclick="filtroDesde();" id="lookupFilter" type="button" class="btn btn-primary">
+                                            <i class="fa fa-search"></i>
+                                        </button>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4" id="details">
+                            <div class="form-group">
+                                <h3 id="statusWorkflowLabel"></h3>
+                                <h2 id="statusWorkflow"></h2>
+                                <h3 id="pendingApproverLabel"></h3>
+                                <h2 id="pendingApprover"></h2>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="hr-line-dashed"></div>
+                    <div class="row table-responsive" id="invoiceRows">
+                        <table class="table table-striped table-bordered table-hover informationTable">
+                            <thead>
+                                <tr>
+                                    <th style="width:16%">Modulo</th>
+                                    <th style="width:16%">Solicitante</th>
+                                    <th style="width:16%">Solicitud</th>
+                                    <th style="width:16%">Aprobador</th>
+                                    <th style="width:16%">Fecha</th>
+                                    <th style="width:16%">Aprobación</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/plugins/sweetAlertStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+}
+
+@section Scripts {
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/sweetAlert")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+
+    <script type="text/javascript">
+        var value = "";
+        $(document).ready(function () {
+            $('.informationTable').DataTable({
+                pageLength: 10,
+                order: [[0, "desc"]],
+                dom: '<"html5buttons"B>lTfgitp',
+                language: {
+                    "sProcessing": "Procesando... ",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:  ",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                },
+                oAria: {
+                    "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                },
+                buttons: [
+                    { extend: 'copy' },
+                    { extend: 'csv' },
+                    { extend: 'excel', title: 'ExampleFile' },
+                    { extend: 'pdf', title: 'ExampleFile' },
+
+                    {
+                        extend: 'print',
+                        customize: function (win) {
+                            $(win.document.body).addClass('white-bg');
+                            $(win.document.body).css('font-size', '10px');
+
+                            $(win.document.body).find('table')
+                                .addClass('compact')
+                                .css('font-size', 'inherit');
+                        }
+                    }
+                ]
+
+            });
+        });
+
+        function consultar() {
+            var isAllValid = true;
+            if ($('#filter').val() === '') {
+                toastr.error("Debe de especificar un numero de documento para procesar");
+                isAllValid = false;
+            }
+            if (isAllValid) {
+                var data = {
+                    modulo: parseInt($('#filterType').val()),
+                    id: $('#filter').val()
+                }
+                toastr.info('Estamos procesando su solicitud', 'Por favor espere');
+                $.ajax({
+                    url: '@Url.Action("ApprovalHistory", "Home")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    async: false,
+                    cache: false,
+                    contentType: "application/json",
+                    success: function (d) {
+                        if (d.status === "OK") {
+                            var $table = $(' <table class="table table-striped table-bordered table-hover informationTable">');
+                            $table.append(
+                                '<thead>' +
+                                '<tr>' +
+                                '<th style="width:16%">Modulo</th>' +
+                                '<th style="width:16%">Solicitante</th>' +
+                                '<th style="width:16%">Solicitud</th>' +
+                                '<th style="width:16%">Aprobador</th>' +
+                                '<th style="width:16%">Fecha</th>' +
+                                '<th style="width:16%">Aprobación</th>' +
+                                '</tr>' +
+                                '</thead>');
+                            if (d.registros.length > 0) {
+                                var $tbody = $('<tbody/>');
+                                $.each(d.registros, function (i, val) {
+                                    var $row = $('<tr/>');
+                                    $row.append($('<td/>').html(val.Module));
+                                    $row.append($('<td/>').html(val.Requester));
+                                    $row.append($('<td/>').html(val.Request));
+                                    $row.append($('<td/>').html(val.Approver));
+                                    $row.append($('<td/>').html(val.DateApproved));
+                                    $row.append($('<td/>').html(val.Status));
+                                    $tbody.append($row);
+                                });
+                            }
+                            $table.append($tbody);
+                            $('#invoiceRows').html($table);
+                            $($table).DataTable({
+                                pageLength: 10,
+                                order: [[0, "asc"]],
+                                dom: '<"html5buttons"B>lTfgitp',
+                                language: {
+                                    "sProcessing": "Procesando... ",
+                                    "sLengthMenu": "Mostrar _MENU_ registros",
+                                    "sZeroRecords": "No se encontraron resultados",
+                                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                                    "sInfoPostFix": "",
+                                    "sSearch": "Buscar:  ",
+                                    "sUrl": "",
+                                    "sInfoThousands": ",",
+                                    "sLoadingRecords": "Cargando...",
+                                    "oPaginate": {
+                                        "sFirst": "Primero",
+                                        "sLast": "Último",
+                                        "sNext": "Siguiente",
+                                        "sPrevious": "Anterior"
+                                    }
+                                },
+                                oAria: {
+                                    "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                                    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                                },
+                                buttons: [
+                                    { extend: 'copy' },
+                                    { extend: 'csv' },
+                                    { extend: 'excel', title: 'Ausencias procesadas' },
+                                    { extend: 'pdfHtml5', title: 'Ausencias procesadas' },
+                                    {
+                                        extend: 'print',
+                                        customize: function (win) {
+                                            $(win.document.body).addClass('white-bg');
+                                            $(win.document.body).css('font-size', '10px');
+
+                                            $(win.document.body).find('table')
+                                                .addClass('compact')
+                                                .css('font-size', 'inherit');
+                                        }
+                                    }
+                                ]
+                            });
+
+                            $('#statusWorkflowLabel').html("Estado: ");
+                            $('#statusWorkflow').html(d.statusWorkflow);
+                            if (d.statusWorkflow === "Pendiente") {
+                                $('#pendingApproverLabel').html("Aprobador pendiente: ");
+                                $('#pendingApprover').html(d.pendingApprover);
+                            } else {
+                                $('#pendingApproverLabel').html("");
+                                $('#pendingApprover').html("");
+                            }
+                        }
+                        else {
+                            alert(d.status);
+                        }
+                    }
+                });
+            }
+        }
+
+        function imprimir() {
+            var data = {
+                modulo: parseInt($('#filterType').val()),
+                id: $('#filter').val()
+            }
+            var url = '@Url.Content("~/PDF/Reportes/")ApprovalHistoryReport.pdf';
+            toastr.info('Estamos procesando su solicitud', 'Por favor espere');
+            $.ajax({
+                url: '@Url.Action("ApprovalHistoryReport", "Home")',
+                type: "POST",
+                data: JSON.stringify(data),
+                dataType: "JSON",
+                cache: false,
+                contentType: "application/json",
+                success: function(d) {
+                    if (d.status == "OK") {
+                        window.open(url);
+                    } else {
+                        alert(d.status);
+                    }
+                }
+            });
+        }
+
+        function filtroDesde() {
+            $('#lookupFilter').lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookupApproval", "Home")?tipo=' + parseInt($('#filterType').val()) + '&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 1100,
+                height: 1000,
+                onItemSelected: function (data) {
+                    $('input[name=filter]').val(data.Id);
+                },
+                tableHeader: ['No. de documento', 'Descripción', 'Departamento', 'Fecha']
+            });
+        }
+    </script>
+}

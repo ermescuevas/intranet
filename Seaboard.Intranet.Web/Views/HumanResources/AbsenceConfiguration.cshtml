@@ -1,0 +1,499 @@
+﻿@model IEnumerable<Seaboard.Intranet.Domain.Models.AbsenceRule>
+@{
+    ViewBag.Title = "Configuración Ausencias";
+}
+
+<style>
+    .selected {
+        background-color: #e0f3ff;
+    }
+</style>
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Configuración Ausencias</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Configuración Ausencias</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox">
+                <div class="ibox-title">
+                    <h5>Reglas Ausencias</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                        <a class="close-link">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="ibox-content">
+                    <button class="btn btn-danger" onclick="createRule(0)">Crear una nueva regla</button>
+                    <hr />
+                    <div class="row table-responsive">
+                        <table class="table table-striped table-bordered table-hover informationTable">
+                            <thead>
+                                <tr>
+                                    <th style="width:20%">Descripción</th>
+                                    <th style="width:9%">Desde</th>
+                                    <th style="width:9%">Hasta</th>
+                                    <th style="width:8%">Dias</th>
+                                    <th style="width:10%">Clase</th>
+                                    <th style="width:8%">Tipo</th>
+                                    <th style="width:7%">Genero</th>
+                                    <th style="width:9%">Minimo dias</th>
+                                    <th style="width:7%">Fracciones</th>
+                                    <th style="width:13%">#</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@item.Description</td>
+                                        <td>@item.FromYear</td>
+                                        <td>@item.ToYear</td>
+                                        <td>@item.UnitDays</td>
+                                        @switch (item.ClassId)
+                                        {
+                                            case 1:
+                                                <td>Administrativo</td>
+                                                break;
+                                            case 2:
+                                                <td>Operativo</td>
+                                                break;
+                                            case 3:
+                                                <td>Extranjero</td>
+                                                break;
+                                        }
+                                        <td>@item.AbsenceType.ToString()</td>
+                                        @switch (item.Gender)
+                                        {
+                                            case 1:
+                                                <td>Masculino</td>
+                                                break;
+                                            case 2:
+                                                <td>Femenino</td>
+                                                break;
+                                            case 3:
+                                                <td>Ambos</td>
+                                                break;
+                                        }
+                                        <td>@item.MinimunDays</td>
+                                        <td>@item.Fractions</td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-primary btn-xs" onclick="createRule(@item.RowId)">Editar</button>
+                                                <button type="button" class="btn btn-danger btn-xs" onclick="deleteRule(@item.RowId)">Eliminar</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-CreateHeader" class="modal inmodal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content animated fadeIn">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Reglas ausencia</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="RowId" name="RowId" value="0" />
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">Descripción:</label>
+                                <div class="col-sm-10 input-group">
+                                    <input name="Description" id="Description" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">Desde:</label>
+                                <div class="col-sm-8 input-group">
+                                    <input name="FromYear" id="FromYear" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">Hasta:</label>
+                                <div class="col-sm-8 input-group">
+                                    <input name="ToYear" id="ToYear" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">Dias:</label>
+                                <div class="col-sm-8 input-group">
+                                    <input name="UnitDays" id="UnitDays" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">Minimo de dias:</label>
+                                <div class="col-sm-8 input-group">
+                                    <input type="text" id="MinimunDays" name="MinimunDays" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">Tipo ausencia:</label>
+                                <div class="col-sm-8 input-group">
+                                    <select class="form-control" id="AbsenceType" name="AbsenceType">
+                                        <option value="1">Vacaciones</option>
+                                        <option value="2">Permiso</option>
+                                        <option value="3">Duelo</option>
+                                        <option value="4">Paternidad</option>
+                                        <option value="5">Maternidad</option>
+                                        <option value="6">Matrimonio</option>
+                                        <option value="7">Cumpleaños</option>
+                                        <option value="8">Licencia Medica</option>
+                                        <option value="9">Cita Medica</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">Genero:</label>
+                                <div class="col-sm-8 input-group">
+                                    <select class="form-control" id="Gender" name="Gender">
+                                        <option value="1">Masculino</option>
+                                        <option value="2">Femenino</option>
+                                        <option value="3">Ambos</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">Clase:</label>
+                                <div class="col-sm-8 input-group">
+                                    <select class="form-control" id="ClassId" name="ClassId">
+                                        <option value="1">Administrativo</option>
+                                        <option value="2">Operativo</option>
+                                        <option value="3">Extranjero</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">Fracciones:</label>
+                                <div class="col-sm-8 input-group">
+                                    <input type="text" id="Fractions" name="Fractions" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">Incluir fines de semana:</label>
+                                <div class="col-sm-8 input-group">
+                                    <input type="checkbox" id="IncludeWeekends" name="IncludeWeekends" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">Incluir dias feriados:</label>
+                                <div class="col-sm-8 input-group">
+                                    <input type="checkbox" id="IncludeHolidays" name="IncludeHolidays" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="form-actions no-color">
+                        <button type="button" class="btn btn-primary" onclick="saveRule();"> Guardar</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/plugins/sweetAlertStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/css/bootstrap-select.min.css">
+}
+
+@section Scripts {
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/sweetAlert")
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/bootstrap-select.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/i18n/defaults-en_US.js"></script>
+
+    <script type="text/javascript">
+        var value = "";
+        $(document).ready(function () {
+            $('.informationTable').DataTable({
+                pageLength: 10,
+                order: [[0, "desc"]],
+                dom: '<"html5buttons"B>lTfgitp',
+                language: {
+                    "sProcessing": "Procesando... ",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:  ",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                },
+                oAria: {
+                    "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                },
+                buttons: [
+                    { extend: 'copy' },
+                    { extend: 'csv' },
+                    { extend: 'excel', title: 'ExampleFile' },
+                    { extend: 'pdf', title: 'ExampleFile' },
+
+                    {
+                        extend: 'print',
+                        customize: function (win) {
+                            $(win.document.body).addClass('white-bg');
+                            $(win.document.body).css('font-size', '10px');
+
+                            $(win.document.body).find('table')
+                                .addClass('compact')
+                                .css('font-size', 'inherit');
+                        }
+                    }
+                ]
+
+            });
+        });
+
+        function createRule(rowId) {
+            $('#modal-CreateHeader').modal('show');
+            if (rowId > 0)
+                getRule(rowId);
+            else
+                $('#RowId').val(0);
+        }
+
+        function saveRule() {
+            var isAllValid = true;
+            if ($('#Description').val() === '') {
+                toastr.error('Por favor debe de especificar una descripcion para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#FromYear').val() === '') {
+                toastr.error('Por favor debe de especificar un valor desde desde para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#ToYear').val() === '') {
+                toastr.error('Por favor debe de especificar un valor hasta desde para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#UnitDays').val() === '') {
+                toastr.error('Por favor debe de especificar una cantidad de dias procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#MinimunDays').val() === '') {
+                toastr.error('Por favor debe de especificar los dias minimos para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#AbsenceType').val() === '') {
+                toastr.error('Por favor debe de especificar el tipo de ausencia para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#ClassId').val() === '') {
+                toastr.error('Por favor debe de especificar una clase para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Gender').val() === '') {
+                toastr.error('Por favor debe de especificar un genero para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Fractions').val() === '') {
+                toastr.error('Por favor debe de especificar las fracciones para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (isAllValid) {
+                var data = {
+                    RowId: $('#RowId').val(),
+                    Description: $('#Description').val().trim(),
+                    FromYear: $('#FromYear').val().trim(),
+                    ToYear: $('#ToYear').val().trim(),
+                    UnitDays: $('#UnitDays').val().trim(),
+                    MinimunDays: $('#MinimunDays').val().trim(),
+                    AbsenceType: $('#AbsenceType').val().trim(),
+                    ClassId: $('#ClassId').val().trim(),
+                    Gender: $('#Gender').val().trim(),
+                    Fractions: $('#Fractions').val().trim(),
+                    IncludeWeekends: $('#IncludeWeekends').is(':checked'),
+                    IncludeHolidays: $('#IncludeHolidays').is(':checked')
+                }
+                $.ajax({
+                    url: '@Url.Action("SaveAbsenceRule", "HumanResources")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            window.location.reload();
+                        }
+                        else {
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+                    }
+                });
+            }
+        }
+
+        function deleteRule(rowId) {
+            swal({
+                title: "Eliminar",
+                text: "Esta seguro que desea eliminar este registro ?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Si, eliminar!",
+                cancelButtonText: "No, cancelar!",
+                closeOnConfirm: true
+            }, function () {
+                $.ajax({
+                    url: '@Url.Action("DeleteAbsenceRule", "HumanResources")?rowId=' + rowId,
+                    type: "POST",
+                    data: "",
+                    cache: false,
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            window.location.reload();
+                        } else {
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+                    }
+                });
+            });
+        }
+
+        function getRule(rowId) {
+            $('#RowId').val(rowId);
+            $.ajax({
+                url: '@Url.Action("GetAbsenceRule", "HumanResources")?rowId=' + rowId,
+                type: "POST",
+                data: "",
+                cache: false,
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    if (result.status === "OK") {
+                        $('#Description').val(result.model.Description);
+                        $('#FromYear').val(result.model.FromYear);
+                        $('#ToYear').val(result.model.ToYear);
+                        $('#UnitDays').val(result.model.UnitDays);
+                        $('#MinimunDays').val(result.model.MinimunDays);
+                        $('#AbsenceType').val(result.model.AbsenceType);
+                        $('#ClassId').val(result.model.ClassId);
+                        $('#Gender').val(result.model.Gender);
+                        $('#Fractions').val(result.model.Fractions);
+                        if (result.model.IncludeWeekends === true)
+                            $('#IncludeWeekends').prop("checked", true);
+                        else
+                            $('#IncludeWeekends').prop("checked", false);
+                        if (result.model.IncludeHolidays === true)
+                            $('#IncludeHolidays').prop("checked", true);
+                        else
+                            $('#IncludeHolidays').prop("checked", false);
+                    } else {
+                        swal({
+                            title: "ERROR",
+                            text: result.status,
+                            type: "error"
+                        });
+                    }
+                }
+            });
+        }
+    </script>
+}

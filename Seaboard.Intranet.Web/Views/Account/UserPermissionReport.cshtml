@@ -1,0 +1,220 @@
+﻿@model Seaboard.Intranet.Domain.Models.PurchaseRequest
+
+@{
+    ViewBag.Title = "Reporte de permisos de usuarios";
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-sm-4">
+        <h2>Reporte de inventario multimoneda</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Reporte de inventario multimoneda</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="wrapper wrapper-content animated fadeInUp">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="ibox float-e-margins">
+                        <div class="ibox-title">
+                            <h3>Reporte de inventario multimoneda</h3>
+                        </div>
+                        <div class="ibox-content">
+                            <div class="col-sm-12 col-sm-offset-1">
+                                <button class="btn btn-success" type="button" onclick="imprimirReporte();"><i class="fa fa-print"></i> Imprimir</button>
+                                <br />
+                            </div>
+                            <br />
+                            <br />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ibox">
+                <div class="ibox-content">
+                    <div class="hr-line-dashed"></div>
+                    <br />
+                    <div class="row">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">Intervalos</label>
+
+                            <div class="col-sm-3">
+                                <select class="form-control m-b" name="filterSelect" id="filterSelect">
+                                    <option>Id. de usuario</option>
+                                    <option>Departamento</option>
+                                    <option>Modulo</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hr-line-dashed"></div>
+                    <br />
+                    <div class="row">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">Desde:</label>
+                            <div class="col-sm-2 input-group">
+                                <input type="text" name="filterFrom" id="filterFrom" class="form-control" />
+                                <span class="input-group-btn">
+                                    <button id="lookupDesde" type="button" onclick="filtroDesde();" class="btn btn-primary">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                </span>
+                            </div>
+
+                            <br />
+
+                            <label class="col-sm-2 control-label">Hasta:</label>
+                            <div class="col-sm-2 input-group">
+                                <input type="text" name="filterTo" id="filterTo" class="form-control" />
+                                <span class="input-group-btn">
+                                    <button id="lookupHasta" type="button" onclick="filtroHasta();" class="btn btn-primary">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles{
+    @Styles.Render("~/Content/plugins/iCheck/iCheckStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/toastrStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/iCheck")
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+
+    <script>
+        function imprimirReporte() {
+            var data = {
+                filterFrom: $('#filterFrom').val().trim(),
+                filterTo: $('#filterTo').val().trim(),
+                typeFilter: $('#filterSelect').prop("selectedIndex")
+            }
+
+            var url = '@Url.Content("~/PDF/Reportes/")UserPermission.pdf';
+            toastr.info('Estamos procesando su solicitud', 'Por favor espere');
+            $.ajax({
+                url: '@Url.Action("UserPermissionReport", "Account")',
+                type: "POST",
+                data: JSON.stringify(data),
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function(d) {
+                    if (d.status == "OK") {
+                        window.open(url);
+                        window.location.href = "@Url.Action("UserPermissionReport", "Account")";
+                    } else {
+                        alert(d.status);
+                    }
+                }
+            });
+        }
+
+
+        function filtroDesde() {
+            if ($('#filterSelect').prop("selectedIndex") == 0) {
+                $('#lookupDesde').lookupbox({
+                    title: 'Busqueda:',
+                    url: '@Url.Action("ListLookup", "Home")?tipo=35&consulta=',
+                    imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                    width: 800,
+                    height: 1000,
+                    onItemSelected: function(data) {
+                        $('input[name=filterFrom]').val(data.Id);
+                        $('input[name=filterTo]').val(data.Id);
+                    },
+                    tableHeader: ['Id. de usuario', 'Nombre', 'Departamento']
+                });
+            } else if ($('#filterSelect').prop("selectedIndex") == 1) {
+                $('#lookupDesde').lookupbox({
+                    title: 'Busqueda:',
+                    url: '@Url.Action("ListLookup", "Home")?tipo=1&consulta=',
+                    imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                    width: 800,
+                    height: 1000,
+                    onItemSelected: function(data) {
+                        $('input[name=filterFrom]').val(data.Descripción);
+                        $('input[name=filterTo]').val(data.Descripción);
+                    },
+                    tableHeader: ['Id. de departamento', 'Descripción'],
+                    hiddenFields: ['DataExtended']
+                });
+            } else {
+                $('#lookupDesde').lookupbox({
+                    title: 'Busqueda:',
+                    url: '@Url.Action("ListLookup", "Home")?tipo=36&consulta=',
+                    imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                    width: 800,
+                    height: 1000,
+                    onItemSelected: function(data) {
+                        $('input[name=filterFrom]').val(data.Id);
+                        $('input[name=filterTo]').val(data.Id);
+                    },
+                    tableHeader: ['Modulo'],
+                    hiddenFields: ['Descripción', 'DataExtended']
+                });
+            }
+        }
+
+        function filtroHasta() {
+            if ($('#filterSelect').prop("selectedIndex") == 0) {
+                $('#lookupHasta').lookupbox({
+                    title: 'Busqueda:',
+                    url: '@Url.Action("ListLookup", "Home")?tipo=35&consulta=',
+                    imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                    width: 800,
+                    height: 1000,
+                    onItemSelected: function(data) {
+                        $('input[name=filterTo]').val(data.Id);
+                    },
+                    tableHeader: ['Id. de usuario', 'Nombre', 'Departamento']
+                });
+            } else if ($('#filterSelect').prop("selectedIndex") == 1) {
+                $('#lookupHasta').lookupbox({
+                    title: 'Busqueda:',
+                    url: '@Url.Action("ListLookup", "Home")?tipo=1&consulta=',
+                    imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                    width: 800,
+                    height: 1000,
+                    onItemSelected: function(data) {
+                        $('input[name=filterTo]').val(data.Descripción);
+                    },
+                    tableHeader: ['Id. de departamento', 'Descripción'],
+                    hiddenFields: ['DataExtended']
+                });
+            } else {
+                $('#lookupHasta').lookupbox({
+                    title: 'Busqueda:',
+                    url: '@Url.Action("ListLookup", "Home")?tipo=36&consulta=',
+                    imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                    width: 800,
+                    height: 1000,
+                    onItemSelected: function(data) {
+                        $('input[name=filterTo]').val(data.Id);
+                    },
+                    tableHeader: ['Modulo'],
+                    hiddenFields: ['Descripción', 'DataExtended']
+                });
+            }
+        }
+    </script>
+}

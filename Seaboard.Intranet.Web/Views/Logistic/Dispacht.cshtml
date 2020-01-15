@@ -1,0 +1,524 @@
+﻿@model IEnumerable<Seaboard.Intranet.Domain.ViewModels.DispachtHeaderViewModel>
+@{
+    ViewBag.Title = "Despachos";
+}
+
+<style>
+    .selected {
+        background-color: #e0f3ff;
+    }
+
+    .notAvailable {
+        background-color: #f5efb5;
+    }
+</style>
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Seleccion solicitudes a despachar</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li>
+                <a href="@Url.Action("DispachtIndex", "Logistic")">Listado de despachos</a>
+            </li>
+            <li class="active">
+                <strong>Seleccion solicitudes a despachar</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h3>Despachos</h3>
+                </div>
+                <div class="ibox-content">
+                    <div class="form-group">
+                        <div class="col-sm-5 col-sm-offset-1">
+                            <button class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-GenerateDispacht"><i class="fa fa-check"></i> Despachar</button>
+                        </div>
+                        <div class="col-sm-5 col-sm-offset-1">
+                            <button class="btn btn-danger" type="button" onclick="marcarTodo();"><i class="fa fa-check-circle-o"></i> Marcar Todo</button>
+                            <button class="btn btn-warning" type="button" onclick="desmarcarTodo();"><i class="fa fa-remove"></i> Desmarcar Todo</button>
+                        </div>
+                    </div>
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-5">
+            <div class="ibox">
+                <div class="ibox-title">
+                    <h5>Solicitudes</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+
+                        <a class="close-link">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="ibox-content">
+                    <div class="row">
+                        <table class="table informationTable">
+                            <thead>
+                                <tr>
+                                    <th style="width:15%">Sol. Almacen</th>
+                                    <th style="width:15%">Sol. Compras</th>
+                                    <th style="width:40%">Descripción</th>
+                                    <th style="width:10%">Departamento</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@Html.ActionLink(item.DispachtId, "Edit", "PurchaseRequest", new { id = @item.DispachtId.Trim() }, new { @target = "_blank" })</td>
+                                        <td>@item.RequestId</td>
+                                        <td>@item.Description</td>
+                                        <td>@item.DepartmentId</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="ibox">
+                <div class="ibox-title">
+                    <h5>Lineas</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+
+                        <a class="close-link">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="ibox-content">
+                    <div class="row table-responsive" id="itemRows">
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <i class="btn-sm" style="background-color: #f5efb5">  </i>
+                            <label>&nbsp; &nbsp; Disponible menor que requerido</label>
+                        </div>
+                        <div class="col-lg-6">
+                            <label id="Quantity"></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="modal-GenerateDispacht" class="modal fade" tabindex="-1" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="myModalLabel">Generar despacho</h4>
+                        <h3>Esta seguro que desea generar el despacho ?</h3>
+                    </div>
+
+                    <div class="modal-body">
+                        <h4>Despacho</h4>
+                        <hr />
+
+                    </div>
+
+                    <div class="modal-footer">
+                        <div class="form-actions no-color">
+                            <button type="button" class="btn btn-primary" onclick="generarDespacho();"> Si</button>
+                            <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    @Styles.Render("~/plugins/wizardStepsStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/awesomeCheckboxStyles")
+    @Styles.Render("~/plugins/clockpickerStyles")
+    @Styles.Render("~/plugins/dateRangeStyles")
+    @Styles.Render("~/Content/plugins/iCheck/iCheckStyles")
+    @Styles.Render("~/Content/plugins/chosen/chosenStyles")
+    @Styles.Render("~/plugins/switcheryStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/plugins/nouiSliderStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/Content/plugins/ionRangeSlider/ionRangeStyles")
+    @Styles.Render("~/plugins/imagecropperStyles")
+    @Styles.Render("~/Content/plugins/colorpicker/colorpickerStyles")
+    @Styles.Render("~/plugins/select2Styles")
+    @Styles.Render("~/plugins/touchSpinStyles")
+    @Styles.Render("~/plugins/tagInputsStyles")
+    @Styles.Render("~/plugins/duallistStyles")
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+}
+
+@section Scripts {
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/wizardSteps")
+    @Scripts.Render("~/plugins/validate")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/iCheck")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/ionRange")
+    @Scripts.Render("~/plugins/nouiSlider")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/plugins/switchery")
+    @Scripts.Render("~/plugins/chosen")
+    @Scripts.Render("~/plugins/knob")
+    @Scripts.Render("~/plugins/imagecropper")
+    @Scripts.Render("~/plugins/colorpicker")
+    @Scripts.Render("~/plugins/clockpicker")
+    @Scripts.Render("~/plugins/dateRange")
+    @Scripts.Render("~/plugins/select2")
+    @Scripts.Render("~/plugins/touchSpin")
+    @Scripts.Render("~/plugins/tagInputs")
+    @Scripts.Render("~/plugins/duallist")
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+
+    <script type="text/javascript">
+        var value = "";
+        $(document).ready(function () {
+
+            $('.informationTable').DataTable({
+                pageLength: 6,
+                order: [[0, "desc"]],
+                paging: false,
+                scrollCollapse: true,
+                scrollY: "50vh",
+                language: {
+                    "sProcessing": "Procesando... ",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:  ",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                },
+                oAria: {
+                    "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                }
+            });
+
+            $(".informationTable tr").click(function () {
+                $(this).addClass('selected').siblings().removeClass('selected');
+                value = $(this).find('td:first').text();
+                GeneratedItemsTable(value);
+            });
+        });
+
+        function GeneratedItemsTable(requisitionId) {
+            var invoiceItems = [];
+            var itemSelected = "";
+            $.ajax({
+                url: '@Url.Action("GetItemRequisition", "Logistic")?RequisitionId=' + requisitionId,
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                cache: false,
+                contentType: "application/json",
+                success: function (result) {
+                    invoiceItems = result;
+                    if (invoiceItems.length > 0) {
+                        var $table = $('<table class="table table-stripped table-bordered" id="itemTable" />');
+                        $table.append('<thead><tr><th style="width:5%"></th style="width15:%"><th>Id. de art.</th><th style="width:35%">Descripción</th><th>Unidad</th><th style="width:10%">Can. disp</th><th style="width:10%">Can. solic</th><th style="width:10%">Can. pend</th><th style="width:10%">Can. desp</th></tr></thead>');
+                        var $tbody = $('<tbody/>');
+                        $.each(invoiceItems, function (i, val) {
+                            var $row = $('<tr/>');
+                            var $inputQtyDispacht = $('<input type="text" style="width:100%" name="QtyDispacht"/>');
+                            var $remove = $('<button class="btn btn-white btn-xs"><i class="fa fa-book fa"></button>');
+                            $row.append($('<td/>').html($remove));
+                            $row.append($('<td/>').html(val.ItemNumber));
+                            $row.append($('<td/>').html(val.ItemDescription));
+                            $row.append($('<td/>').html(val.BaseUnitId));
+                            $row.append($('<td/>').html(parseFloat(val.QtyOnHand).toFixed(2).replace(/./g, function (c, i, a) {
+                                return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                            })));
+                            $row.append($('<td/>').html(parseFloat(val.QtyOrder).toFixed(2).replace(/./g, function (c, i, a) {
+                                return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                            })));
+                            $row.append($('<td/>').html(parseFloat(val.QtyPending).toFixed(2).replace(/./g, function (c, i, a) {
+                                return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                            })));
+                            $inputQtyDispacht.val("0.00");
+                            $('<td/>').append($inputQtyDispacht).appendTo($row);
+                            
+                            $remove.click(function (e) {
+                                $.ajax({
+                                    url: '@Url.Action("GetQuantities", "Logistic")?RequisitionId=' + requisitionId + '&ItemNumber=' + val.ItemNumber,
+                                    type: "POST",
+                                    data: "",
+                                    dataType: "JSON",
+                                    cache: false,
+                                    contentType: "application/json",
+                                    success: function (d) {
+                                        if (d.status != 'undefined') {
+                                            e.preventDefault();
+                                            var cellQtyDispacht = parseFloat($('#itemTable tr:eq(' + (i + 1) + ') td:eq(' + (8 - 1) + ') input').val().replace(/,/g, ""));
+                                            var cellQtyPending = parseFloat($('#itemTable tr:eq(' + (i + 1) + ') td:eq(' + (7 - 1) + ')').html().replace(/,/g, ""));
+
+                                            if (cellQtyDispacht > 0) {
+                                                setCellValue('itemTable', i, 8, "0.00");
+                                            }
+                                            else {
+                                                if ((parseFloat(d.status.split('-')[0].trim().replace(/,/g, "") - parseFloat(d.status.split('-')[1].trim().replace(/,/g, "")))) >= cellQtyPending) {
+                                                    setCellValue('itemTable', i, 8, parseFloat(cellQtyPending).toFixed(2));
+                                                }
+                                            }
+                                        }
+                                    }
+                                });
+                            });
+
+                            $inputQtyDispacht.focusout(function (e) {
+                                e.preventDefault();
+                                var cellQtyDispacht = parseFloat($('#itemTable tr:eq(' + (i + 1) + ') td:eq(' + (8 - 1) + ') input').val().replace(/,/g, ""));
+                                var cellQtyPending = parseFloat($('#itemTable tr:eq(' + (i + 1) + ') td:eq(' + (7 - 1) + ')').html().replace(/,/g, ""));
+
+                                if (cellQtyDispacht <= 0) {
+                                    setCellValue('itemTable', i, 6, "0.00");
+                                }
+                                else {
+                                    if (cellQtyDispacht >= cellQtyPending) {
+                                        $.ajax({
+                                            url: '@Url.Action("GetQuantities", "Logistic")?RequisitionId=' + requisitionId + '&ItemNumber=' + val.ItemNumber,
+                                            type: "POST",
+                                            data: "",
+                                            dataType: "JSON",
+                                            cache: false,
+                                            contentType: "application/json",
+                                            success: function (d) {
+                                                if (d.status != 'undefined') {
+                                                    if ((parseFloat(d.status.split('-')[0].trim().replace(/,/g, "") - parseFloat(d.status.split('-')[1].trim().replace(/,/g, "")))) >= cellQtyPending) {
+                                                        setCellValue('itemTable', i, 8, parseFloat(cellQtyPending).toFixed(2));
+                                                    }
+                                                    else {
+                                                        setCellValue('itemTable', i, 8, "0.00");
+                                                    }
+                                                }
+                                            }
+                                        });
+                                    }
+                                    else {
+                                        $.ajax({
+                                            url: '@Url.Action("GetQuantities", "Logistic")?RequisitionId=' + requisitionId + '&ItemNumber=' + val.ItemNumber,
+                                            type: "POST",
+                                            data: "",
+                                            dataType: "JSON",
+                                            cache: false,
+                                            contentType: "application/json",
+                                            success: function (d) {
+                                                if (d.status != 'undefined') {
+                                                    if ((parseFloat(d.status.split('-')[0].trim().replace(/,/g, "") - parseFloat(d.status.split('-')[1].trim().replace(/,/g, "")))) >= cellQtyDispacht) {
+                                                        setCellValue('itemTable', i, 8, parseFloat(cellQtyDispacht).toFixed(2));
+                                                    }
+                                                    else {
+                                                        setCellValue('itemTable', i, 8, "0.00");
+                                                    }
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                            });
+
+
+                            $.ajax({
+                                url: '@Url.Action("GetAvailable", "Logistic")?RequisitionId=' + requisitionId + '&ItemNumber=' + val.ItemNumber,
+                                type: "POST",
+                                data: "",
+                                dataType: "JSON",
+                                cache: false,
+                                contentType: "application/json",
+                                success: function (result) {
+                                    if (result == false) {
+                                        $row.addClass('notAvailable');
+                                    }
+                                }
+                            });
+
+                            $tbody.append($row);
+                        });
+                        $table.append($tbody);
+                        $('#itemRows').html($table);
+                        $('#Quantity').html('');
+
+                        $('#itemTable').dataTable({
+                            pageLength: 6,
+                            paging: false,
+                            scrollCollapse: true,
+                            scrollY: '50vh',
+                            language: {
+                                "sProcessing": "Procesando... ",
+                                "sLengthMenu": "Mostrar _MENU_ registros",
+                                "sZeroRecords": "No se encontraron resultados",
+                                "sEmptyTable": "Ningún dato disponible en esta tabla",
+                                "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                                "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                                "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                                "sInfoPostFix": "",
+                                "sSearch": "Buscar:  ",
+                                "sUrl": "",
+                                "sInfoThousands": ",",
+                                "sLoadingRecords": "Cargando...",
+                                "oPaginate": {
+                                    "sFirst": "Primero",
+                                    "sLast": "Último",
+                                    "sNext": "Siguiente",
+                                    "sPrevious": "Anterior"
+                                }
+                            },
+                            oAria: {
+                                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                            }
+                        });
+
+                        $("#itemTable tr").click(function () {
+                            $(this).addClass('selected').siblings().removeClass('selected');
+                            itemSelected = $(this).find('td:eq(1)').html();
+                            //GetQuantities(RequisitionId, itemSelected)
+                        });
+                    }
+                    else {
+                        $('#itemRows').html('');
+                        $('#Quantity').html('');
+                    }
+                }
+            });
+        }
+
+        function setCellValue(tableId, rowId, colNum, newValue) {
+            $('#' + tableId + ' tr:eq(' + (rowId + 1) + ') td:eq(' + (colNum - 1) + ') input').val(parseFloat(newValue).toFixed(2).replace(/./g, function (c, i, a) {
+                return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+            }));
+        }
+
+        function desmarcarTodo() {
+            $('#itemTable > tbody > tr').each(function () {
+                $(this).find('td:eq(7) input').val('0.00')
+            });
+        }
+
+        function marcarTodo() {
+            $('#itemTable > tbody > tr').each(function () {
+                var row = $(this);
+                $.ajax({
+                    url: '@Url.Action("GetQuantities", "Logistic")?RequisitionId=' + value + '&ItemNumber=' + $(this).find('td:eq(1)').html().trim(),
+                    type: "POST",
+                    data: "",
+                    dataType: "JSON",
+                    cache: false,
+                    contentType: "application/json",
+                    success: function (d) {
+                        if (d.status != 'undefined') {
+                            if (((parseFloat(d.status.split('-')[0].trim().replace(/,/g, "")) - parseFloat(d.status.split('-')[1].trim().replace(/,/g, "")))
+                                - parseFloat(row.find('td:eq(7) input').val().replace(/,/g, ""))) >= parseFloat(row.find('td:eq(6)').html().trim().replace(/,/g, ""))) {
+                                row.find('td:eq(7) input').val(parseFloat(row.find('td:eq(6)').html().trim().replace(/./g, function (c, i, a) { return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c; })).toFixed(2));
+                            }
+                        }
+                    }
+                });
+            });
+        }
+
+        function generarDespacho() {
+
+            var isValid = true;
+            var count = 0;
+            var items = [];
+
+            $('#itemTable > tbody > tr').each(function () {
+                if (parseFloat($(this).find('td:eq(7) input').val()) > 0) {
+                    items.push({
+                        ItemNumber: $(this).find('td:eq(1)').html().trim(),
+                        QtyDispachted: parseFloat($(this).find('td:eq(7) input').val().trim().replace(/,/g, "")),
+                        UnitId: $(this).find('td:eq(3)').html().trim(),
+                        RequestId: value
+                    });
+                }
+            });
+
+            if (items.length == 0) {
+                toastr.error('Debe  de especificar al menos un articulo para despachar', 'Campos requeridos')
+                isValid = false;
+            }
+            if (isValid) {
+                var data = {
+                    Items: items
+                }
+
+                $.ajax({
+                    url: '@Url.Action("GenerateDispacht", "Logistic")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (d) {
+                        if (d.status === "OK") {
+                            window.location.href = "@Url.Action("DispachtIndex", "Logistic")";
+                        }
+                        else {
+                            alert(d.status);
+                        }
+                    }
+                });
+            }
+        }
+
+        function GetQuantities(requisitionId, itemNumber) {
+            var qty = "";
+            $.ajax({
+                url: '@Url.Action("GetQuantities", "Logistic")?RequisitionId=' + requisitionId + '&ItemNumber=' + itemNumber,
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                cache: false,
+                contentType: "application/json",
+                success: function (d) {
+                    if (d.status !== 'undefined') {
+                        qty = "Existencia GP: " + d.status.split('-')[0].trim() + " | " + "Asignada: " + d.status.split('-')[1].trim();
+                        $('#Quantity').html(qty);
+                    }
+                }
+            });
+        }
+    </script>
+}

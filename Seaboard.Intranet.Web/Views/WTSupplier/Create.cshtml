@@ -1,0 +1,347 @@
+﻿@model Seaboard.Intranet.Domain.ViewModels.WtSupplierViewModel
+
+@{
+    ViewBag.Title = "Perfil para el WT del Suplidor";
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Perfil para el WT de Suplidor</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li>
+                <a href="@Url.Action("Index", "WtSupplier")">Listado de Datos para el WT del Suplidor</a>
+            </li>
+            <li class="active">
+                <strong>Perfil para el WT del Suplidor</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight ecommerce">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h3>Perfil para el WT del Suplidor</h3>
+                </div>
+                <div class="ibox-content">
+                    <div class="form-group">
+                        <div class="col-sm-12 col-sm-offset-1">
+                            <button class="btn btn-primary" type="button" onclick="guardar();"><i class="fa fa-save"></i> Guardar</button>
+                            <button class="btn btn-white" type="button" onclick="limpiarCampos();"><i class="fa fa-eraser"></i> Borrar</button>
+                        </div>
+                    </div>
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="tabs-container">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a data-toggle="tab" href="#tab-1"> Datos de Transferencia</a></li>
+                </ul>
+
+                @Html.Hidden("PostType", 0)
+
+                <div class="tab-content">
+                    <div id="tab-1" class="tab-pane active">
+                        <div class="panel-body">
+                            <fieldset class="form-horizontal">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        @*Buscar*@
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Supplier ID:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(model => model.SupplierId, new { @class = "form-control", @readonly = "" })
+                                                <span class="input-group-btn">
+                                                    <button id="lookupSupplier" type="button" class="btn btn-primary">
+                                                        <i class="fa fa-search"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                            <span class="asterisk" style="top:10px;">*</span>
+                                        </div>
+
+                                        @*Fecha*@
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Date:</label>
+                                            <div class="col-sm-8 input-group date">
+                                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                @Html.TextBoxFor(m => m.Date, new { @class = "form-control", @Value = DateTime.Now.ToShortDateString() })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Location:</label>
+                                            <div class="col-sm-8 input-group">
+                                                <input type="hidden" id="LocationId" name="LocationId" />
+                                                @Html.TextBoxFor(m => m.Location, new { @class = "form-control", @Value = "Transcontinental Capital Corp. (Bermuda) Ltd.", @readonly = "" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Bank Name:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(m => m.BankName, new { @class = "form-control" })
+                                            </div>
+                                            <span class="asterisk" style="top:40%;">*</span>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">ABA#:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(m => m.AbaNumber, new { @class = "form-control" })
+                                            </div>
+                                            <label class="asterisk" style="top:52%;">*</label>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Swift or Bank Code:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(m => m.SwiftOrBankCod, new { @class = "form-control" })
+                                            </div>
+                                            <label class="asterisk" style="top:65%;">*</label>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Address:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(m => m.Address, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">City / State:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(m => m.CityState, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Account Name:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(m => m.AccountName, new { @class = "form-control" })
+                                            </div>
+                                            <label class="asterisk" style="top:3%;">*</label>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Account#:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(m => m.AccountNumber, new { @class = "form-control" })
+                                            </div>
+                                            <label class="asterisk" style="top:20%;">*</label>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Further Credit:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(m => m.FurtherCredit, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">ABA#2:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(m => m.AbaNumber2, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Wire Reference:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(m => m.WireReferences, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Value Date:</label>
+                                            <div class="col-sm-8 input-group date">
+                                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                @Html.TextBoxFor(m => m.ValueDate, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label class="col-sm-2 control-label">Subject:</label>
+                                                <div class="col-sm-10">
+                                                    @Html.TextAreaFor(m => m.Subject, new { @class = "form-control", @rows = "5", @placeholder = "Introduzca el Asunto" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Styles {
+    @Styles.Render("~/plugins/summernoteStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/plugins/datatables/datatables.min.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+
+    <style>
+        .asterisk {
+            font-size: 17px;
+            font-weight: bold;
+            color: red;
+            left: 100%;
+            position: absolute;
+        }
+    </style>
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/summernote")
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/Scripts/plugins/datatables/datatables.min.js")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+
+    <script type="text/javascript">
+        var editor;
+        var name = "";
+        $(document).ready(function () {
+            @Html.Partial("_Scripts")
+
+        @*Cargar Supplier*@
+        $("#lookupSupplier").lookupbox({
+            title: 'Busqueda:',
+            url: '@Url.Action("ListLookup", "Home")?tipo=7&consulta=',
+            imgLoader: '<img src="~/Images/ajaxloader.gif">',
+            width: 800,
+            height: 1000,
+            onItemSelected: function (data) {
+                $('input[name=supplierId]').val(data.Id);
+            },
+            tableHeader: ['Id. de proveedor', 'Nombre del proveedor'],
+            hiddenFields: ['DataExtended']
+        });
+        });
+
+        function guardar() {
+                procesarSolicitud();
+        }
+
+        function procesarSolicitud() {
+            var isAllValid = true;
+
+            if ($('#supplierId').val().trim() == '') {
+                toastr.error('El Supplier ID es requerido', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#BankName').val().trim() == '') {
+                toastr.error('El Bank Name es requerido', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#ABANumber').val().trim() == '') {
+                toastr.error('El ABA# es requerido', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#SwiftOrBankCod').val().trim() == '') {
+                toastr.error('La Swift or Bank Code de pago es requerido', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#AccountName').val().trim() == '') {
+                toastr.error('El Account Name es requerido', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#AccountNumber').val().trim().replace(/,/g, "") == '') {
+                toastr.error('El Account# es requerido', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (isAllValid) {
+                confirmSaved();
+            }
+        }
+
+
+        function confirmSaved() {
+            var data = {
+                TransferId: $('#TransferId').val(),
+                supplierId: $('#supplierId').val().trim(),
+                Vendname: $('#Vendname').val(),
+                Location: $('#Location').val().trim(),
+                Subject: $('#Subject').val().trim(),
+                BankName: $('#BankName').val().trim(),
+                ABANumber: $('#ABANumber').val().trim(),
+                SwiftOrBankCod: $('#SwiftOrBankCod').val().trim(),
+                Address: $('#Address').val().trim(),
+                City_State: $('#City_State').val().trim(),
+                AccountName: $('#AccountName').val().trim(),
+                AccountNumber: $('#AccountNumber').val().trim(),
+                FurtherCredit: $('#FurtherCredit').val().trim(),
+                ABANumber2: $('#ABANumber2').val().trim(),
+                wireReferences: $('#wireReferences').val().trim()
+            };
+
+            var _url = '@Url.Action("Index", "WtSupplier")';
+
+            $.ajax({
+                url: '@Url.Action("Create", "WtSupplier")?supplierId=' + $('#supplierId').val().trim() + '&bankname=' + $('#BankName').val().trim(),
+                type: "POST",
+                data: JSON.stringify(data),
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    if (result.status == 1) {
+                        toastr.error("Ya existe un suplidor con el mismo número de cuenta...");
+                    }
+                    if (result.status == 0) {
+                        toastr.success('Datos transferidos correctamente...');
+                        setTimeout(function () { window.location.href = _url; }, 2000);
+                    }
+                }
+            });
+        }
+
+        //
+        //Requerido
+        //
+        function limpiarCampos() {
+            $('#supplierId').val('');
+            $('#Date').val('@DateTime.Now.ToShortDateString()');
+            $('#Subject').val('');
+            $('#BankName').val('');
+            $('#ABANumber').val('');
+            $('#SwiftOrBankCod').val('');
+            $('#City_State').val('');
+            $('#Address').val('');
+            $('#AccountName').val('');
+            $('#AccountNumber').val('');
+            $('#FurtherCredit').val('');
+            $('#ABANumber2').val('');
+            $('#wireReferences').val('');
+            $('#ValueDate').val('');
+        }
+    </script>
+}

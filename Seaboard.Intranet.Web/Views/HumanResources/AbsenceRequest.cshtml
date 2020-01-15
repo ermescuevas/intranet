@@ -1,0 +1,652 @@
+﻿@using Seaboard.Intranet.Domain;
+@model IEnumerable<Seaboard.Intranet.Domain.Models.AbsenceRequest>
+@{
+    ViewBag.Title = "Solicitud de ausencia";
+    var employees = (List<Seaboard.Intranet.Domain.ViewModels.Lookup>)ViewBag.Employees;
+}
+
+<style>
+    .bootstrap-select:not([class*=col-]):not([class*=form-control]):not(.input-group-btn) {
+        width: 100%;
+    }
+</style>
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Solicitud de ausencia</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Listado de solicitudes de ausencia</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox">
+                <div class="ibox-title">
+                    <h5>Solicitud de ausencia</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+
+                        <a class="close-link">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="ibox-content">
+                    <button class="btn btn-danger" onclick="createRequest()">NUEVA SOLICITUD</button>
+                    <hr />
+                    <div class="row table-responsive">
+                        <table class="table table-striped table-bordered table-hover informationTable">
+                            <thead>
+                                <tr>
+                                    <th style="width:10%">Id. de solicitud</th>
+                                    <th style="width:9%">Id. de empleado</th>
+                                    <th style="width:14%">Nombre</th>
+                                    <th style="width:8%">Fecha Inicio</th>
+                                    <th style="width:8%">Fecha Final</th>
+                                    <th style="width:8%">Cant. dias</th>
+                                    <th style="width:8%">Tipo ausencia</th>
+                                    <th style="width:20%">Comentario</th>
+                                    <th style="width:5%">Estado</th>
+                                    <th style="width:10%">#</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@item.RequestId</td>
+                                        <td>@item.EmployeeId</td>
+                                        <td>@item.EmployeeName</td>
+                                        <td>@item.StartDate.ToString("dd/MM/yyyy")</td>
+                                        <td>@item.EndDate.ToString("dd/MM/yyyy")</td>
+                                        <td>@item.UnitDays</td>
+                                        <td>@item.AbsenceType</td>
+                                        <td>@item.Note</td>
+                                        <td>
+                                            @if (item.Status == 0)
+                                            {
+                                                <i class="badge badge-danger">Enviado</i>
+                                            }
+                                            else if (item.Status == 1)
+                                            {
+                                                <i class="badge badge-primary">Aprobado</i>
+                                            }
+                                            else
+                                            {
+                                                <i class="badge badge-info">Rechazado</i>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="btn-group-xs">
+                                                <button onclick="deleteRequest(@item.RowId, @item.Status);" class="btn btn-danger btn-xs">Eliminar</button>
+                                                <button onclick="sendRequest(@item.RowId, @item.Status);" class="btn btn-success btn-xs">Enviar</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-CreateHeader" class="modal inmodal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content animated fadeIn">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Nueva solicitud</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="RowId" name="RowId" value="0" />
+                    <form id="form" action="#" class="wizard-big">
+                        <h1>Seleccion</h1>
+                        <fieldset>
+                            <h2>Seleccione Empleado y Tipo de Ausencia</h2>
+                            <div class="row">
+                                <div class="col-lg-8">
+                                    <div class="form-group">
+                                        <label>Empleado:</label>
+                                        <select class="selectpicker form-control required" data-live-search="true" id="EmployeeId" name="EmployeeId">
+                                            <option value=""></option>
+                                            @foreach (var item in employees)
+                                            {
+                                                <option value="@item.Id.Trim()">@(item.Id + " - " + item.Descripción)</option>
+                                            }
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Tipo ausencia:</label>
+                                        @Html.DropDownList("AbsenceType", AbsenceType.GetValues(typeof(AbsenceType)).Cast<AbsenceType>().Select(x => new SelectListItem { Text = x.ToString(), Value = ((int)x).ToString() }), new { @class = "form-control required" })
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="text-center">
+                                        <div style="margin-top: 20px">
+                                            <i class="fa fa-sign-in" style="font-size: 180px;color: #e5e5e5 "></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </fieldset>
+
+                        <h1>Informacion</h1>
+                        <fieldset>
+                            <h2 id="employeeTake"></h2>
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group" id="vacation">
+                                        <label>Cuantos dias desea tomar ?</label>
+                                        <input id="VacationDays" name="VacationDays" type="text" class="form-control">
+                                    </div>
+                                    <div class="form-group" id="start">
+                                        <label>Fecha de Inicio:</label>
+                                        <div class="input-group">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                            <input name="StartDate" id="StartDate" class="form-control required" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Nota:</label>
+                                        <textarea rows="3" id="Note" name="Note" placeholder="Por favor ingreso una nota" class="form-control"></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="text-center">
+                                        @*<h2 id="absenceTypeTake"></h2>*@
+                                        <div style="margin-top: 20px">
+                                            <table class="table table-striped">
+                                                <tr>
+                                                    <td><h4>Años antiguedad</h4></td>
+                                                    <td><h3 id="yearSeniority"></h3></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><h4>Dias tomados</h4></td>
+                                                    <td><h3 id="takenDays"></h3></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><h4>Dias disponible</h4></td>
+                                                    <td><h3 id="availableDays"></h3></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><h4 id="availableFractionsLabel">Fracciones disponibles</h4></td>
+                                                    <td><h3 id="availableFractions"></h3></td>
+                                                </tr>
+                                                <tr>
+                                                    <td><h4 id="availableFractionsLabel">Minimo de dias a tomar</h4></td>
+                                                    <td><h3 id="minimunDays"></h3></td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <p id="info"></p>
+                            </div>
+                        </fieldset>
+
+                        <h1>Detalle</h1>
+                        <fieldset>
+                            <div class="text-center" style="margin-top: 10px">
+                                <h1>Informacion de Solicitud</h1>
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <td><h4>Dias a tomar</h4></td>
+                                        <td><h3 id="daysToTake"></h3></td>
+                                    </tr>
+                                    <tr>
+                                        <td><h4>Fecha Inicio</h4></td>
+                                        <td><h3 id="startDateToTake"></h3></td>
+                                    </tr>
+                                    <tr>
+                                        <td><h4>Fecha de Regreso</h4></td>
+                                        <td><h3 id="endDate"></h3></td>
+                                    </tr>
+                                    <tr>
+                                        <td><h4>Motivo</h4></td>
+                                        <td><h3 id="absenceTypeToTake"></h3></td>
+                                    </tr>
+                                </table>
+                                <input type="hidden" id="UnitDays" name="UnitDays" />
+                                <input type="hidden" id="EndDateString" name="EndDateString" />
+                                <h2>Esta de acuerdo con las informaciones mostradas ?</h2>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/wizardStepsStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/plugins/sweetAlertStyles")
+    @Styles.Render("~/plugins/laddaStyles")
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/css/bootstrap-select.min.css">
+}
+
+@section Scripts {
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/wizardSteps")
+    @Scripts.Render("~/plugins/validate")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/sweetAlert")
+    @Scripts.Render("~/plugins/ladda")
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/bootstrap-select.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/i18n/defaults-en_US.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('.ladda-button').ladda();
+            $("#form").steps({
+                bodyTag: "fieldset",
+                onStepChanging: function (event, currentIndex, newIndex) {
+                    if (currentIndex > newIndex)
+                        return true;
+                    var form = $(this);
+
+                    if (currentIndex < newIndex) {
+                        $(".body:eq(" + newIndex + ") label.error", form).remove();
+                        $(".body:eq(" + newIndex + ") .error", form).removeClass("error");
+                    }
+                    form.validate().settings.ignore = ":disabled,:hidden";
+                    if (form.valid() === true) {
+                        if (newIndex === 1) {
+                            if ($('#AbsenceType').val() === '1' || $('#AbsenceType').val() === '2' || $('#AbsenceType').val() === '8' || $('#AbsenceType').val() === '9') {
+                                $('#start').css('display', '');
+                                $('#vacation').css('display', '');
+                            }
+                            else {
+                                $('#start').css('display', '');
+                                $('#vacation').css('display', 'none');
+                            }
+                            getInfo();
+                        }
+                        if (newIndex === 2) {
+                            if ($('#AbsenceType').val() === '2' || $('#AbsenceType').val() === '1' || $('#AbsenceType').val() === '8' || $('#AbsenceType').val() === '9') {
+                                if (parseInt($('#VacationDays').val()) > parseInt($('#availableDays').html())) {
+                                    swal({
+                                        title: "ERROR",
+                                        text: "Usted no tiene suficiente dias para tomar esa cantidad",
+                                        type: "error"
+                                    });
+                                    return false;
+                                }
+                                if (parseInt($('#VacationDays').val()) < parseInt($('#minimunDays').html())) {
+                                    swal({
+                                        title: "ERROR",
+                                        text: "Usted esta tomando menos dias que el minimo permitido",
+                                        type: "error"
+                                    });
+                                    return false;
+                                }
+                            }
+                            if ($('#AbsenceType').val() === '2') {
+                                if (parseInt($('#VacationDays').val()) > parseInt($('#availableFractions').html())) {
+                                    swal({
+                                        title: "ERROR",
+                                        text: "Usted esta excediendo la cantidad de dias permitidos por mes",
+                                        type: "error"
+                                    });
+                                    return false;
+                                }
+                            }
+                            if (parseInt($('#availableDays').html()) === 0) {
+                                swal({
+                                    title: "ERROR",
+                                    text: "Usted ya no tiene disponibles dias para proceder",
+                                    type: "error"
+                                });
+                                return false;
+                            }
+
+                            absenceInfo();
+                        }
+                    }
+
+                    return form.valid();
+                },
+                onStepChanged: function (event, currentIndex, priorIndex) { },
+                onFinishing: function (event, currentIndex) {
+                    var form = $(this);
+                    form.validate().settings.ignore = ":disabled";
+                    return form.valid();
+                },
+                onFinished: function (event, currentIndex) {
+                    saveRequest();
+                },
+                labels: {
+                    current: "Paso actual:",
+                    pagination: "Pagina",
+                    finish: "Finalizar y enviar",
+                    next: "Siguiente",
+                    previous: "Anterior",
+                    loading: "Cargando ..."
+                }
+            }).validate({
+                errorPlacement: function (error, element) {
+                    element.before(error);
+                },
+                rules: {
+                    confirm: {
+                        equalTo: "#password"
+                    }
+                }
+            });
+            $('#StartDate').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true,
+                format: 'mm/dd/yyyy',
+                minDate: 0
+            });
+            $('#EndDate').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true,
+                format: 'mm/dd/yyyy',
+                minDate: 0
+            });
+            $('.informationTable').DataTable({
+                pageLength: 10,
+                order: [[0, "desc"]],
+                dom: '<"html5buttons"B>lTfgitp',
+                language: {
+                    "sProcessing": "Procesando... ",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:  ",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                },
+                oAria: {
+                    "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                },
+                buttons: [
+                    { extend: 'copy' },
+                    { extend: 'csv' },
+                    { extend: 'excel', title: 'ExampleFile' },
+                    { extend: 'pdf', title: 'ExampleFile' },
+
+                    {
+                        extend: 'print',
+                        customize: function (win) {
+                            $(win.document.body).addClass('white-bg');
+                            $(win.document.body).css('font-size', '10px');
+
+                            $(win.document.body).find('table')
+                                .addClass('compact')
+                                .css('font-size', 'inherit');
+                        }
+                    }
+                ]
+
+            });
+        });
+
+        function limpiarCampos() {
+            $('#EmployeeId').val('');
+            $('#AbsenceType').val('');
+            $('#yearSeniority').html('');
+            $('#takenDays').html('');
+            $('#availableDays').html('');
+            $('#absenceTypeTake').html('');
+            $('#employeeTake').html('');
+            $('#availableFractions').html('');
+            $('#availableFractions').html('');
+            $('#daysToTake').html('');
+            $('#startDateToTake').html('');
+            $('#VacationDays').val('');
+            $('#StartDate').val('');
+            $('#endDate').html('');
+            $('#Note').val('');
+            $('.selectpicker').selectpicker('refresh');
+        }
+
+        function createRequest() {
+            $("#form").steps("previous");
+            $("#form").steps("previous");
+            limpiarCampos();
+            $('#modal-CreateHeader').modal({ backdrop: 'static', keyboard: false });
+        }
+
+        function deleteRequest(rowId, approve) {
+            if (approve !== 1) {
+                swal({
+                    title: "Eliminar",
+                    text: "Esta seguro que desea eliminar esta solicitud ?",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Si, eliminar!",
+                    cancelButtonText: "No, cancelar!",
+                    closeOnConfirm: false
+                }, function () {
+                    $.ajax({
+                        url: '@Url.Action("DeleteAbsenceRequest", "HumanResources")?rowId=' + rowId,
+                        type: "POST",
+                        data: "",
+                        cache: false,
+                        dataType: "JSON",
+                        contentType: "application/json",
+                        success: function (result) {
+                            if (result.status === "OK") {
+                                window.location.reload();
+                            } else {
+                                swal({
+                                    title: "ERROR",
+                                    text: result.status,
+                                    type: "error"
+                                });
+                            }
+                        }
+                    });
+                });
+            } else {
+                swal({
+                    title: "ERROR",
+                    text: "No puede eliminarse la solicitud por que esta aprobada",
+                    type: "error"
+                });
+            }
+        }
+
+        function sendRequest(rowId, approve) {
+            if (approve === 0) {
+                swal({
+                    title: "Envio",
+                    text: "Esta seguro que desea volver a enviar esta solicitud ?",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Si, enviala!",
+                    cancelButtonText: "No, cancelar!",
+                    closeOnConfirm: true
+                }, function () {
+                    $.ajax({
+                        url: '@Url.Action("SendAbsenceRequest", "HumanResources")?rowId=' + rowId,
+                        type: "POST",
+                        data: "",
+                        cache: false,
+                        async: false,
+                        dataType: "JSON",
+                        contentType: "application/json",
+                        success: function (result) {
+                            if (result.status !== "OK") {
+                                swal({
+                                    title: "ERROR",
+                                    text: result.status,
+                                    type: "error"
+                                });
+                            }
+                        }
+                    });
+                });
+            } else {
+                swal({
+                    title: "ERROR",
+                    text: "No puede enviarse la solicitud por que esta aprobada o rechazada",
+                    type: "error"
+                });
+            }
+        }
+
+        function getInfo() {
+            var data = {
+                absenceType: $('#AbsenceType').val(),
+                employeeId: $('#EmployeeId').val().trim()
+            }
+            $.ajax({
+                url: '@Url.Action("AbsenceRule", "HumanResources")',
+                type: "POST",
+                data: JSON.stringify(data),
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    if (result.status === "OK") {
+                        $('#yearSeniority').html(result.years);
+                        $('#takenDays').html(result.daysTaken);
+                        $('#availableDays').html(parseInt(result.days) - parseInt(result.daysTaken));
+                        //$('#absenceTypeTake').html("Tipo: " + $('#AbsenceType option:selected').text().trim());
+                        $('#employeeTake').html(result.employeeName.trim());
+                        $('#minimunDays').html(result.minimunDays);
+                        if ($('#AbsenceType').val() === "2" || $('#AbsenceType').val() === '9')
+                            $('#availableFractionsLabel').html('Maximo de dias en el mes');
+                        else
+                            $('#availableFractionsLabel').html('Fracciones disponibles');
+                        if ($('#AbsenceType').val() === "1")
+                            $('#info').html('Sus días de vacaciones se restablecen con su fecha de cumpleaños en la empresa.');
+                        else if ($('#AbsenceType').val() === "2" || $('#AbsenceType').val() === '9')
+                            $('#info').html('Se establece que los días de permisos no forman partes de los derechos Legales/laborales del empleado, estos serán manejados a discreción del gerente o encargado de área.');
+                        else
+                            $('#info').html('');
+
+                        $('#availableFractions').html(parseInt(result.fractions) - parseInt(result.fractionsTaken));
+                    }
+                    else {
+                        swal({
+                            title: "ERROR",
+                            text: result.status,
+                            type: "error"
+                        });
+                    }
+                }
+            });
+        }
+
+        function absenceInfo() {
+            var unitDays;
+            if ($('#AbsenceType').val() === '2' || $('#AbsenceType').val() === '1' || $('#AbsenceType').val() === '8' || $('#AbsenceType').val() === '9')
+                unitDays = parseInt($('#VacationDays').val());
+            else
+                unitDays = parseInt($('#availableDays').html());
+
+            var data = {
+                fromDate: $('#StartDate').datepicker({ dateFormat: 'ddMMyyyy' }).val(),
+                days: unitDays,
+                employeeId: $('#EmployeeId').val(),
+                absenceType: $('#AbsenceType').val()
+            }
+            $.ajax({
+                url: '@Url.Action("AbsenceInfo", "HumanResources")',
+                type: "POST",
+                data: JSON.stringify(data),
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    if (result.status === "OK") {
+                        $('#daysToTake').html(result.days);
+                        $('#startDateToTake').html(result.fromDate);
+                        $('#endDate').html(result.endDate);
+                        $('#absenceTypeToTake').html($('#AbsenceType option:selected').text().trim());
+                    }
+                    else {
+                        swal({
+                            title: "ERROR",
+                            text: result.status,
+                            type: "error"
+                        });
+                    }
+                }
+            });
+        }
+
+        function saveRequest() {
+            $('.ladda-button').ladda('start');
+            var data = {
+                employeeId: $('#EmployeeId').val(),
+                startDate: $('#StartDate').datepicker({ dateFormat: 'ddMMyyyy' }).val(),
+                endDate: $('#endDate').html(),
+                absenceType: $('#AbsenceType').val(),
+                unitDays: parseInt($('#daysToTake').html()),
+                availableDays: parseInt($('#availableDays').html()) - parseInt($('#daysToTake').html()),
+                note: $('#Note').val(),
+                rowId: $('#RowId').val()
+            }
+            $.ajax({
+                url: '@Url.Action("SaveAbsenceRequest", "HumanResources")',
+                type: "POST",
+                data: JSON.stringify(data),
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    if (result.status === "OK") {
+                        $('#modal-CreateHeader').modal('hide');
+                        window.location.reload();
+                    }
+                    else {
+                        $('.ladda-button').ladda('stop');
+                        swal({
+                            title: "ERROR",
+                            text: result.status,
+                            type: "error"
+                        });
+                    }
+                }
+            });
+        }
+    </script>
+}

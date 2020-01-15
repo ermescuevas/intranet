@@ -1,0 +1,1132 @@
+﻿@{
+    Layout = "~/Views/Shared/_BillingLayout.cshtml";
+    ViewBag.Title = "Neteo de documentos";
+}
+
+<style>
+    .selected {
+        background-color: #e0f3ff;
+    }
+
+    .notAvailable {
+        background-color: #f5efb5;
+    }
+</style>
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Neteo de documentos</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li>
+                <a href="@Url.Action("NetIndex", "AccountReceivables")">Listado de neteos</a>
+            </li>
+            <li class="active">
+                <strong>Neteo de documentos</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight ecommerce">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins" id="buttonPanel">
+                <div class="ibox-title">
+                    <h3>Neteo de documentos</h3>
+                </div>
+                <div class="ibox-content">
+                    <div class="sk-spinner sk-spinner-wave">
+                        <div class="sk-rect1"></div>
+                        <div class="sk-rect2"></div>
+                        <div class="sk-rect3"></div>
+                        <div class="sk-rect4"></div>
+                        <div class="sk-rect5"></div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-12 col-sm-offset-1">
+                            <button class="btn btn-white" type="button" onclick="contabilizar();"><i class="fa fa-money"></i> Contabilizar</button>
+                            <button class="btn btn-info" type="button" onclick="guardar();"><i class="fa fa-save"></i> Guardar</button>
+                            <button class="btn btn-success" type="button" onclick="actualizar();"><i class="fa fa-refresh"></i> Actualizar</button>
+                            <button class="btn btn-white" type="button" onclick="borrar();"><i class="fa fa-eraser"></i> Borrar</button>
+                            <button class="btn btn-warning" type="button" onclick="eliminar();"><i class="fa fa-remove"></i> Eliminar</button>
+                            <button class="btn btn-primary" type="button" onclick="imprimir();" id="btn-print"><i class="fa fa-print"></i> Imprimir</button>
+                        </div>
+                    </div>
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins" id="headerPanel">
+                <div class="ibox-content">
+                    <div class="sk-spinner sk-spinner-wave">
+                        <div class="sk-rect1"></div>
+                        <div class="sk-rect2"></div>
+                        <div class="sk-rect3"></div>
+                        <div class="sk-rect4"></div>
+                        <div class="sk-rect5"></div>
+                    </div>
+                    <div class="form-group">
+                        <fieldset class="form-horizontal">
+                            <div class="row">
+                                <div class="col-sm-7">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Id. de Lote:</label>
+                                        <div class="col-sm-4 input-group">
+                                            <input type="text" id="batchId" name="batchId" class="form-control" maxlength="15" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Descripción:</label>
+                                        <div class="col-sm-8 input-group">
+                                            <input type="text" id="description" name="description" class="form-control" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Fecha documento:</label>
+                                        <div class="col-sm-8 input-group date">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                            <input type="text" id="documentDate" name="documentDate" class="form-control" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Fecha de corte:</label>
+                                        <div class="col-sm-8 input-group date">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                            <input type="text" id="cutDate" name="cutDate" class="form-control" value="@DateTime.Now.ToString("dd/MM/yyyy")" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-7">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Id. de cliente</label>
+                                        <div class="col-sm-8 input-group">
+                                            <input type="text" id="customerId" name="customerId" class="form-control col-md-4" />
+                                            <span class="input-group-btn">
+                                                <button id="lookupCustomer" type="button" class="btn btn-primary">
+                                                    <i class="fa fa-search"></i>
+                                                </button>
+                                            </span>
+                                            <input type="text" id="customerName" name="customerName" readonly="readonly" class="form-control col-md-8" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Id. de moneda</label>
+                                        <div class="col-sm-8 input-group">
+                                            <input type="text" id="currency" name="currency" class="form-control" />
+                                            <span class="input-group-btn">
+                                                <button id="lookupMoneda" type="button" class="btn btn-primary">
+                                                    <i class="fa fa-search"></i>
+                                                </button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-7">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Id. de proveedor</label>
+                                        <div class="col-sm-8 input-group">
+                                            <input type="text" id="vendorId" name="vendorId" class="form-control" />
+                                            <span class="input-group-btn">
+                                                <button id="lookupVendor" type="button" class="btn btn-primary">
+                                                    <i class="fa fa-search"></i>
+                                                </button>
+                                            </span>
+                                            <input type="text" id="vendorName" name="vendorName" readonly="readonly" class="form-control" />
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">&nbsp;</label>
+                                        <label class="checkbox-inline"> <input type="checkbox" id="generateCheck" name="generateCheck"> Generar Cheques e Recibos de Ingresos </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-7">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">No. de resolución</label>
+                                        <div class="col-sm-4 input-group">
+                                            <input type="text" id="resolución" name="resolución" class="form-control" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">Nota:</label>
+                                        <div class="col-sm-10">
+                                            <textarea id="note" name="note" class="form-control" rows="5"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins" id="detailPanel">
+                <div class="ibox-content">
+                    <div class="sk-spinner sk-spinner-wave">
+                        <div class="sk-rect1"></div>
+                        <div class="sk-rect2"></div>
+                        <div class="sk-rect3"></div>
+                        <div class="sk-rect4"></div>
+                        <div class="sk-rect5"></div>
+                    </div>
+                    <div class="tabs-container">
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a data-toggle="tab" href="#tab-1"> Transacciones</a></li>
+                            <li><a data-toggle="tab" href="#tab-2"> Adjuntos</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                            <div id="tab-1" class="tab-pane active">
+                                <div class="panel-body">
+                                    <div class="row">
+                                        <div class="col-md-9">
+                                            <div class="ibox">
+                                                <div class="ibox-title">
+                                                </div>
+
+                                                <div class="ibox-content">
+                                                    <div class="table-responsive" id="transRows" style="max-height: 600px; overflow-y: scroll;"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="ibox">
+                                                <div class="ibox-title">
+                                                    <h5>Totales</h5>
+                                                </div>
+                                                <div class="ibox-content">
+                                                    <span>
+                                                        Total CXC Seaboard
+                                                    </span>
+                                                    <h2 id="totalCxc" class="font-bold">
+                                                        0.00
+                                                    </h2>
+                                                    <hr />
+                                                    <span>
+                                                        Total CXP Seaboard
+                                                    </span>
+                                                    <h2 id="totalCxp" class="font-bold">
+                                                        0.00
+                                                    </h2>
+                                                    <hr />
+                                                    <span>
+                                                        Diferencia Neta
+                                                    </span>
+                                                    <h2 id="diferenciaNeta" class="font-bold">
+                                                        0.00
+                                                    </h2>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="tab-2" class="tab-pane">
+                                <div class="panel-body">
+                                    <div class="row">
+                                        <form action="javascript:;" method="post" enctype="multipart/form-data" id="attachmentForm" accept-charset="utf-8">
+                                            <div class="col-md-9">
+                                                <div class="fileinput fileinput-new input-group" data-provides="fileinput">
+                                                    <div class="form-control" data-trigger="fileinput"><i class="glyphicon glyphicon-file fileinput-exists"></i> <span class="fileinput-filename"></span></div>
+                                                    <span class="input-group-addon btn btn-default btn-file"><span class="fileinput-new">Seleccionar archivo</span><span class="fileinput-exists">Cambiar</span><input type="file" name="FileData" id="FileData"></span>
+                                                    <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">Borrar</a>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <button type="button" class="btn btn-success" onclick="atacharArchivo();" data-dismiss="modal">Adjuntar</button>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <div class="hr-line-dashed"></div>
+
+                                    <div class="row" id="attachmentFiles">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Styles {
+    @Styles.Render("~/plugins/awesomeCheckboxStyles")
+    @Styles.Render("~/plugins/summernoteStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/plugins/textSpinnersStyles")
+    <link href="@Url.Content("~/Content/plugins/datatables/datatables.min.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/footableStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/summernote")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/Scripts/plugins/datatables/datatables.min.js")
+    @Scripts.Render("~/plugins/footable")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+
+    <script type="text/javascript">
+        var amount = 0;
+        $(document).ready(function() {
+            $('#documentDate').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true,
+                format: 'dd/mm/yyyy'
+            });
+
+            $('#cutDate').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true,
+                format: 'dd/mm/yyyy'
+            });
+
+            $("#lookupbatch").lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookup", "Home")?tipo=31&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function(data) {
+                    $('input[name=batchId]').val(data.BatchNumber);
+                    $('input[name=description]').val(data.Description);
+                    $('input[name=vendorId]').val(data.VendorId);
+                    $('input[name=vendorName]').val(data.VendorName);
+                    $('input[name=customerId]').val(data.CustomerId);
+                    $('input[name=customerName]').val(data.CustomerName);
+                    $('input[name=documentDate]').val(data.DocumentDate);
+                    $('input[name=currency]').val(data.CurrencyId);
+                    $('input[name=cutDate]').val(data.CloseDate);
+                    $('textarea[name=note]').val(data.Note);
+                    obtenerDetalle(data.BatchNumber);
+                    calcularTotal();
+                },
+                tableHeader: ['Id. de lote', 'Descripción'],
+                hiddenFields: [
+                    'CustomerId', 'CustomerName', 'VendorId', 'VendorName', 'CurrencyId', 'DocumentDate', 'CloseDate',
+                    'Posted'
+                ]
+            });
+
+            $("#lookupVendor").lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookup", "Home")?tipo=7&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function(data) {
+                    $('input[name=vendorId]').val(data.Id);
+                    $('input[name=vendorName]').val(data.Descripción);
+                    verificarRelacion(0, data.Id);
+                },
+                tableHeader: ['Id. de proveedor', 'Nombre'],
+                hiddenFields: ['DataExtended']
+            });
+
+            $("#lookupCustomer").lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookup", "Home")?tipo=30&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function(data) {
+                    $('input[name=customerId]').val(data.Id);
+                    $('input[name=customerName]').val(data.Descripción);
+                    verificarRelacion(1, data.Id);
+                },
+                tableHeader: ['Id. de cliente', 'Nombre'],
+                hiddenFields: ['DataExtended']
+            });
+
+            $("#lookupMoneda").lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookup", "Home")?tipo=5&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function(data) {
+                    $('input[name=currency]').val(data.Id);
+                },
+                tableHeader: ['Id. de moneda', 'Descripción'],
+                hiddenFields: ['DataExtended']
+            });
+
+            $('#transTable').dataTable({
+                pageLength: 10,
+                paging: false,
+                scrollCollapse: true,
+                scrollY: '50vh',
+                language: {
+                    "sProcessing": "Procesando... ",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:  ",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                },
+                oAria: {
+                    "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                }
+            });
+        });
+
+        function setCellValue(tableId, rowId, colNum, newValue) {
+            $('#' + tableId + ' tr:eq(' + (rowId + 1) + ') td:eq(' + (colNum - 1) + ')').html(newValue);
+        }
+
+        function verificarRelacion(tipo, id) {
+            $.ajax({
+                url: '@Url.Action("GetRelationtCustVend", "AccountReceivables")?tipo=' + tipo + '&id=' + id,
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                cache: false,
+                async: false,
+                contentType: "application/json",
+                success: function(data) {
+                    if (data.status === "OK") {
+                        if (data.count === 0) {
+                            toastr.error('Este proveedor o cliente no tiene una relacion cliente/proveedor',
+                                'Campo requerido');
+                            $('input[name=vendorId]').val('');
+                            $('input[name=vendorName]').val('');
+                            $('input[name=customerId]').val('');
+                            $('input[name=customerName]').val('');
+                        } else {
+                            if (tipo === 0) {
+                                $('input[name=customerId]').val(data.registros.Id);
+                                $('input[name=customerName]').val(data.registros.Descripción);
+                            } else {
+                                $('input[name=vendorId]').val(data.registros.Id);
+                                $('input[name=vendorName]').val(data.registros.Descripción);
+                            }
+
+                            $('input[name=currency]').val(data.currency);
+                        }
+                    } else {
+                        alert(data.status);
+                    }
+                }
+            });
+        }
+
+        function obtenerDetalle(batchId) {
+            $.ajax({
+                url: '@Url.Action("GetNetTransDetail", "AccountReceivables")?batchId=' + batchId,
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                async: false,
+                cache: false,
+                success: function(result) {
+                    if (result.status === "OK") {
+                        var $table =
+                            $('<table  class="table table-stripped table-bordered" id="transTable" />');
+                        var thead =
+                            '<thead><tr>' +
+                                '<th style="width: 2%;">#</th>' +
+                                '<th style="width: 10%;">Modulo</th>' +
+                                '<th style="width: 15%;">Cliente/Proveedor</th>' +
+                                '<th style="width: 15%;">No. de documento</th>' +
+                                '<th style="width: 15%;">Fecha de documento</th>' +
+                                '<th style="width: 10%;">Moneda</th>' +
+                                '<th style="width: 20%;">Monto</th>' +
+                                '<th style="width: 20%;">Aplicar monto</th>' +
+                                '<th style="display:none;">Tipo documento</th>' +
+                                '</tr></thead>';
+                        $table.append(thead);
+                        var $tbody = $('<tbody/>');
+                        $.each(result.registros,
+                            function(x, item) {
+                                var $row = $('<tr/>');
+                                var $inputAppliedAmount =
+                                    $('<input type="text" style="width:100%" name="appliedAmount"/>');
+                                var $inputCurrentAmount =
+                                    $(
+                                        '<input type="text" style="width:100%" readonly="readonly" name="currentAmount"/>');
+                                var $check = $('<input type="checkbox" name="check" >');
+                                if (item.Check === 0) {
+                                    $row.append($('<td/>').html($check.prop("checked", false)));
+                                } else {
+                                    $row.append($('<td/>').html($check.prop("checked", true)));
+                                }
+
+                                $row.append($('<td/>').html(item.Module));
+                                $row.append($('<td/>').html(item.CustomerVendor));
+                                $row.append($('<td/>').html(item.DocumentNumber));
+                                $row.append($('<td/>').html(item.DocumentDate));
+                                $row.append($('<td/>').html(item.CurrencyId));
+                                $('<td/>').append($inputCurrentAmount.val(parseFloat(item.CurrentAmount)
+                                    .toFixed(2)
+                                    .replace(/./g,
+                                        function(c, i, a) {
+                                            return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                                        }))).appendTo($row);
+                                $('<td/>').append($inputAppliedAmount.val(parseFloat(item.AppliedAmount)
+                                    .toFixed(2)
+                                    .replace(/./g,
+                                        function(c, i, a) {
+                                            return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                                        }))).appendTo($row);
+                                $row.append($('<td/>').html(item.DocumentType));
+                                $check.click(function(e) {
+                                    if ($check.is(":checked")) {
+                                        $('#transTable tr:eq(' + (x + 1) + ') td:eq(7) input').val(
+                                            parseFloat($(
+                                                    '#transTable tr:eq(' + (x + 1) + ') td:eq(6) input')
+                                                .val()
+                                                .replace(/,/g, "")).toFixed(2)
+                                            .replace(/./g,
+                                                function(c, i, a) {
+                                                    return i && c !== "." && ((a.length - i) % 3 === 0)
+                                                        ? ',' + c
+                                                        : c;
+                                                }));
+                                    } else {
+                                        $('#transTable tr:eq(' + (x + 1) + ') td:eq(7) input').val("0.00");
+                                    }
+                                    calcularTotal();
+                                });
+
+                                $inputAppliedAmount.focus(function(e) {
+                                    amount = parseFloat($('#transTable tr:eq(' + (x + 1) + ') td:eq(7) input')
+                                        .val()
+                                        .replace(/,/g, ""));
+                                });
+
+                                $inputAppliedAmount.focusout(function(e) {
+                                    if (parseFloat($('#transTable tr:eq(' + (x + 1) + ') td:eq(7) input').val()
+                                            .replace(/,/g, "")).toFixed(2) >
+                                        parseFloat($('#transTable tr:eq(' + (x + 1) + ') td:eq(6) input').val()
+                                            .replace(/,/g, "")).toFixed(2)) {
+
+                                        toastr.error('El monto aplicado no puede exceder el monto pendiente',
+                                            'Campo requerido');
+
+                                        $('#transTable tr:eq(' + (x + 1) + ') td:eq(7) input').val(amount
+                                            .toFixed(2)
+                                            .replace(/./g,
+                                                function(c, i, a) {
+                                                    return i && c !== "." && ((a.length - i) % 3 === 0)
+                                                        ? ',' + c
+                                                        : c;
+                                                }));
+                                    } else {
+                                        $('#transTable tr:eq(' + (x + 1) + ') td:eq(7) input').val(parseFloat(
+                                            $('#transTable tr:eq(' + (x + 1) + ') td:eq(7) input').val()
+                                            .replace(/,/g, "")).toFixed(2).replace(/./g,
+                                            function(c, i, a) {
+                                                return i && c !== "." && ((a.length - i) % 3 === 0)
+                                                    ? ',' + c
+                                                    : c;
+                                            }));
+                                    }
+
+                                    calcularTotal();
+                                });
+
+                                $tbody.append($row);
+                            });
+                        $table.append($tbody);
+                        $('#transRows').html($table);
+                    } else {
+                        alert(result.status);
+                    }
+                }
+            });
+        }
+
+        function contabilizar() {
+            if (!confirm("Esta seguro que desea contabilizar este neteo ?")) {
+                return;
+            }
+            var isAllValid = true;
+            var generateDocument = false;
+
+            if (parseFloat($('#diferenciaNeta').text().replace(/,/g, "")) > 0) {
+                if (!confirm("Existe una diferencia en el neteo desea continuar ?")) {
+                    return;
+                }
+            }
+
+            if ($('#batchId').val().trim() === '') {
+                isAllValid = false;
+                toastr.error('El campo Id. de lote es Requerido', 'Campo requerido');
+            }
+
+            if ($('#documentDate').val().trim() === '') {
+                isAllValid = false;
+                toastr.error('Debe de especificar una fecha de documento', 'Campo requerido');
+            }
+
+            if (parseFloat($('#totalCxc').text().replace(/,/g, "")) === 0 &&
+                parseFloat($('#totalCxp').text().replace(/,/g, "")) === 0) {
+                isAllValid = false;
+                toastr.error('Debe de haber transacciones para poder continuar', 'Campo requerido');
+            }
+
+            if (isAllValid) {
+                $('#buttonPanel').children('.ibox-content').toggleClass('sk-loading');
+                $('#headerPanel').children('.ibox-content').toggleClass('sk-loading');
+                $('#detailPanel').children('.ibox-content').toggleClass('sk-loading');
+                guardado();
+
+                if ($('input[name="generateCheck"]').is(":checked")) {
+                    generateDocument = true;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("PostNetTrans", "AccountReceivables")?batchId=' +
+                        $('#batchId').val().trim() +
+                        '&descripción=' +
+                        $('#description').val().trim() +
+                        '&customerId=' +
+                        $('#customerId').val().trim() +
+                        '&customerAmount=' +
+                        parseFloat($('#totalCxc').text().replace(/,/g, "")) +
+                        '&vendorId=' +
+                        $('#vendorId').val().trim() +
+                        '&vendorAmount=' +
+                        parseFloat($('#totalCxp').text().replace(/,/g, "")) +
+                        '&netDifference=' +
+                        parseFloat($('#diferenciaNeta').text().replace("(", "").replace(")", "").replace(/,/g, "")) +
+                        '&currency=' +
+                        $('#currency').val().trim() +
+                        '&date=' +
+                        $('#documentDate').datepicker({ dateFormat: 'ddMMyyyy' }).val() +
+                        '&generateDocuments=' +
+                        generateDocument +
+                        '&note=' +
+                        $('#note').val().trim(),
+                    type: "POST",
+                    data: "",
+                    dataType: "JSON",
+                    cache: false,
+                    contentType: "application/json",
+                    success: function(data) {
+                        if (data === "OK") {
+                            window.location.href = "@Url.Action("NetIndex", "AccountReceivables")";
+                        } else {
+                            $('#buttonPanel').children('.ibox-content').removeClass('sk-loading');
+                            $('#headerPanel').children('.ibox-content').removeClass('sk-loading');
+                            $('#detailPanel').children('.ibox-content').removeClass('sk-loading');
+                            alert(data);
+                        }
+                    }
+                });
+            }
+        }
+
+        function guardado() {
+            $.ajax({
+                url: '@Url.Action("SaveNetTrans", "AccountReceivables")?batchId=' +
+                    $('#batchId').val().trim() +
+                    '&descripción=' +
+                    $('#description').val().trim() +
+                    '&customerId=' +
+                    $('#customerId').val().trim() +
+                    '&customerName=' +
+                    $('#customerName').val().trim() +
+                    '&vendorId=' +
+                    $('#vendorId').val().trim() +
+                    '&vendorName=' +
+                    $('#vendorName').val().trim() +
+                    '&currency=' +
+                    $('#currency').val().trim() +
+                    '&fechaDocumento=' +
+                    $('#documentDate').datepicker({ dateFormat: 'ddMMyyyy' }).val() +
+                    '&fechaCorte=' +
+                    $('#cutDate').datepicker({ dateFormat: 'ddMMyyyy' }).val() +
+                    '&note=' +
+                    $('#note').val().trim() +
+                    '&resolución=' +
+                    $('#resolución').val().trim(),
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                cache: false,
+                async: false,
+                contentType: "application/json",
+                success: function(data) {
+                    if (data !== "OK") {
+                        alert(data);
+                    }
+                }
+            });
+
+            $('#transTable > tbody > tr').each(function() {
+                if ($(this).find('td:eq(0) input').is(":checked")) {
+                    check = 1;
+                } else {
+                    check = 0;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("SaveNetTransDetail", "AccountReceivables")?batchId=' +
+                        $('#batchId').val().trim() +
+                        '&check=' +
+                        check +
+                        '&module=' +
+                        $(this).find('td:eq(1)').html().trim() +
+                        '&customerVendor=' +
+                        $(this).find('td:eq(2)').html().trim() +
+                        '&documentNumber=' +
+                        $(this).find('td:eq(3)').html().trim() +
+                        '&documentDate=' +
+                        $(this).find('td:eq(4)').html().trim() +
+                        '&currencyId=' +
+                        $(this).find('td:eq(5)').html().trim() +
+                        '&currentAmount=' +
+                        parseFloat($(this).find('td:eq(6) input').val().replace(/,/g, "")).toFixed(2) +
+                        '&appliedAmount=' +
+                        parseFloat($(this).find('td:eq(7) input').val().replace(/,/g, "")).toFixed(2) +
+                        '&documentType=' +
+                        parseInt($(this).find('td:eq(8)').html().trim()),
+                    type: "POST",
+                    data: "",
+                    dataType: "JSON",
+                    cache: false,
+                    async: false,
+                    contentType: "application/json"
+                });
+            });
+        }
+
+        function guardar() {
+            var isAllValid = true;
+
+            if ($('#batchId').val().trim() === '') {
+                isAllValid = false;
+                toastr.error('El campo Id. de lote es Requerido', 'Campo requerido');
+            }
+
+            if ($('#description').val().trim() === '') {
+                isAllValid = false;
+                toastr.error('El campo descripción es Requerido', 'Campo requerido');
+            }
+
+            if ($('#documentDate').val().trim() === '') {
+                isAllValid = false;
+                toastr.error('Debe de especificar una fecha de documento', 'Campo requerido');
+            }
+
+            if (isAllValid) {
+                guardado();
+                window.location.href = "@Url.Action("NetIndex", "AccountReceivables")";
+            }
+        }
+
+        function eliminar() {
+            var isAllValid = true;
+
+            if ($('#batchId').val().trim() === '') {
+                isAllValid = false;
+                toastr.error('El campo Id. de lote es Requerido', 'Campo requerido');
+            }
+
+            if (isAllValid) {
+                if (confirm("Esta seguro que desea eliminar el registro ?")) {
+                    $.ajax({
+                        url: '@Url.Action("DeleteNetTrans", "AccountReceivables")?batchId=' +
+                            $('#batchId').val().trim(),
+                        type: "POST",
+                        data: "",
+                        dataType: "JSON",
+                        cache: false,
+                        async: false,
+                        contentType: "application/json",
+                        success: function(data) {
+                            if (data === "OK") {
+                                window.location.href = "@Url.Action("NetIndex", "AccountReceivables")";
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        function actualizar() {
+            var isAllValid = true;
+            if ($('#customerId').val().trim() === '') {
+                isAllValid = false;
+                toastr.error('Debe de  especificar un cliente para poder continuar', 'Campo requerido');
+            }
+
+            if ($('#vendorId').val().trim() === '') {
+                isAllValid = false;
+                toastr.error('Debe de  especificar un proveedor para poder continuar', 'Campo requerido');
+            }
+
+            if (isAllValid) {
+                if (confirm("Se sobreescribiran los datos introducidos desea continuar ?")) {
+                    $.ajax({
+                        url: '@Url.Action("GetNetTransactions", "AccountReceivables")?customerId=' +
+                            $('#customerId').val().trim() +
+                            '&vendorId=' +
+                            $('#vendorId').val().trim() +
+                            '&date=' +
+                            $('#cutDate').datepicker({ dateFormat: 'ddMMyyyy' }).val(),
+                        data: "",
+                        dataType: "JSON",
+                        async: false,
+                        cache: false,
+                        contentType: "application/json",
+                        success: function(result) {
+                            if (result.status === "OK") {
+                                var $table =
+                                    $('<table  class="table table-stripped table-bordered" id="transTable" />');
+                                var thead =
+                                    '<thead><tr>' +
+                                        '<th style="width: 2%;">#</th>' +
+                                        '<th style="width: 10%;">Modulo</th>' +
+                                        '<th style="width: 15%;">Cliente/Proveedor</th>' +
+                                        '<th style="width: 15%;">No. de documento</th>' +
+                                        '<th style="width: 15%;">Fecha de documento</th>' +
+                                        '<th style="width: 10%;">Moneda</th>' +
+                                        '<th style="width: 20%;">Monto</th>' +
+                                        '<th style="width: 20%;">Aplicar monto</th>' +
+                                        '<th style="display:none;">Tipo de documento</th>' +
+                                        '</tr></thead>';
+                                $table.append(thead);
+                                var $tbody = $('<tbody/>');
+                                $.each(result.registros,
+                                    function(x, item) {
+                                        var $row = $('<tr/>');
+                                        var $inputAppliedAmount =
+                                            $('<input type="text" style="width:100%" name="appliedAmount"/>');
+                                        var $inputCurrentAmount =
+                                            $(
+                                                '<input type="text" style="width:100%" readonly="readonly" name="currentAmount"/>');
+                                        var $check = $('<input type="checkbox" name="check" >');
+                                        if (item.Check === 0) {
+                                            $row.append($('<td/>').html($check.prop("checked", false)));
+                                        } else {
+                                            $row.append($('<td/>').html($check.prop("checked", true)));
+                                        }
+
+                                        $row.append($('<td/>').html(item.Module));
+                                        $row.append($('<td/>').html(item.CustomerVendor));
+                                        $row.append($('<td/>').html(item.DocumentNumber));
+                                        $row.append($('<td/>').html(item.DocumentDate));
+                                        $row.append($('<td/>').html(item.CurrencyId));
+                                        $('<td/>').append($inputCurrentAmount.val(parseFloat(item.CurrentAmount)
+                                            .toFixed(2)
+                                            .replace(/./g,
+                                                function(c, i, a) {
+                                                    return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                                                }))).appendTo($row);
+                                        $('<td/>').append($inputAppliedAmount.val(parseFloat(item.AppliedAmount)
+                                            .toFixed(2)
+                                            .replace(/./g,
+                                                function(c, i, a) {
+                                                    return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                                            }))).appendTo($row);
+                                        $row.append($('<td/>').html(item.DocumentType));
+
+                                        $check.click(function(e) {
+                                            if ($check.is(":checked")) {
+                                                $('#transTable tr:eq(' + (x + 1) + ') td:eq(7) input').val(
+                                                    parseFloat($(
+                                                            '#transTable tr:eq(' + (x + 1) + ') td:eq(6) input')
+                                                        .val()
+                                                        .replace(/,/g, "")).toFixed(2)
+                                                    .replace(/./g,
+                                                        function(c, i, a) {
+                                                            return i && c !== "." && ((a.length - i) % 3 === 0)
+                                                                ? ',' + c
+                                                                : c;
+                                                        }));
+                                            } else {
+                                                $('#transTable tr:eq(' + (x + 1) + ') td:eq(7) input').val("0.00");
+                                            }
+                                            calcularTotal();
+                                        });
+
+                                        $inputAppliedAmount.focus(function(e) {
+                                            amount = parseFloat($('#transTable tr:eq(' + (x + 1) + ') td:eq(7) input')
+                                                .val()
+                                                .replace(/,/g, ""));
+                                        });
+
+                                        $inputAppliedAmount.focusout(function(e) {
+                                            if (parseFloat($('#transTable tr:eq(' + (x + 1) + ') td:eq(7) input').val()
+                                                    .replace(/,/g, "")).toFixed(2) >
+                                                parseFloat($('#transTable tr:eq(' + (x + 1) + ') td:eq(6) input').val()
+                                                    .replace(/,/g, "")).toFixed(2)) {
+
+                                                toastr.error('El monto aplicado no puede exceder el monto pendiente',
+                                                    'Campo requerido');
+
+                                                $('#transTable tr:eq(' + (x + 1) + ') td:eq(7) input').val(amount
+                                                    .toFixed(2)
+                                                    .replace(/./g,
+                                                        function(c, i, a) {
+                                                            return i && c !== "." && ((a.length - i) % 3 === 0)
+                                                                ? ',' + c
+                                                                : c;
+                                                        }));
+                                            } else {
+                                                $('#transTable tr:eq(' + (x + 1) + ') td:eq(7) input').val(parseFloat(
+                                                    $('#transTable tr:eq(' + (x + 1) + ') td:eq(7) input').val()
+                                                    .replace(/,/g, "")).toFixed(2).replace(/./g,
+                                                    function(c, i, a) {
+                                                        return i && c !== "." && ((a.length - i) % 3 === 0)
+                                                            ? ',' + c
+                                                            : c;
+                                                    }));
+                                            }
+
+                                            calcularTotal();
+                                        });
+
+                                        $tbody.append($row);
+                                    });
+                                $table.append($tbody);
+                                $('#transRows').html($table);
+                                $('#totalCxc').text('0.00');
+                                $('#totalCxp').text('0.00');
+                                $('#diferenciaNeta').text('0.00');
+                            } else {
+                                alert(result.status);
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        function calcularTotal() {
+            var totalCxc = 0;
+            var totalCxp = 0;
+            var diferenciaNeta = 0;
+            $('#transTable > tbody > tr').each(function() {
+                if ($(this).find('td:eq(1)').html().trim() === "CC") {
+                    totalCxc = Number(parseFloat(totalCxc)) +
+                        Number(parseFloat($(this).find('td:eq(7) input').val()
+                            .replace(/,/g, "")));
+                } else {
+                    totalCxp = Number(parseFloat(totalCxp)) +
+                        Number(parseFloat($(this).find('td:eq(7) input').val()
+                            .replace(/,/g, "")));
+                }
+            });
+
+            diferenciaNeta = Number(parseFloat(totalCxc)) - Number(parseFloat(totalCxp));
+
+            $('#totalCxc').text(parseFloat(totalCxc).toFixed(2).replace(/./g,
+                function(c, i, a) {
+                    return i && c !== "." && ((a.length - i) % 3 === 0)
+                        ? ',' + c
+                        : c;
+                }));
+            $('#totalCxp').text(parseFloat(totalCxp).toFixed(2).replace(/./g,
+                function(c, i, a) {
+                    return i && c !== "." && ((a.length - i) % 3 === 0)
+                        ? ',' + c
+                        : c;
+                }));
+            if (diferenciaNeta < 0) {
+                $('#diferenciaNeta').text('(' + Math.abs(parseFloat(diferenciaNeta)).toFixed(2).replace(/./g,
+                    function(c, i, a) {
+                        return i && c !== "." && ((a.length - i) % 3 === 0)
+                            ? ',' + c
+                            : c;
+                    }) + ')');
+            } else {
+                $('#diferenciaNeta').text(Math.abs(parseFloat(diferenciaNeta)).toFixed(2).replace(/./g,
+                    function (c, i, a) {
+                        return i && c !== "." && ((a.length - i) % 3 === 0)
+                            ? ',' + c
+                            : c;
+                    }));
+            }
+        }
+
+        function borrar() {
+            $('input[name=batchId]').val('');
+            $('input[name=description]').val('');
+            $('input[name=vendorId]').val('');
+            $('input[name=vendorName]').val('');
+            $('input[name=customerId]').val('');
+            $('input[name=customerName]').val('');
+            $('input[name=currency]').val('');
+            $('textarea[name=note]').val('');
+            $('input[name=documentDate]').val('');
+            $('#transRows').html('');
+            $('#totalCxc').text('0.00');
+            $('#totalCxp').text('0.00');
+            $('#diferenciaNeta').text('0.00');
+        }
+
+        function imprimir() {
+            if ($('#batchId').val().trim() !== '') {
+                url = '@Url.Content("~/PDF/Reportes/")NetTrans.pdf';
+                toastr.info('Estamos procesando su solicitud', 'Por favor espere');
+                $.ajax({
+                    url: '@Url.Action("PrintNetTrans", "AccountReceivables")?batchId=' +
+                        $('#batchId').datepicker({ dateFormat: 'yyyy/MM/dd' }).val(),
+                    type: "POST",
+                    data: "",
+                    cache: false,
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function(d) {
+                        if (d.status === "OK") {
+                            window.open(url);
+                        } else {
+                            alert(d.status);
+                        }
+                    }
+                });
+            }
+        }
+
+        function cargarArchivos() {
+            $.ajax({
+                url: '@Url.Action("LoadAttachmentFiles", "AccountReceivables")?batchId=' + $('#batchId').val().trim(),
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    attachmentFiles = result;
+                    if (attachmentFiles.length > 0) {
+                        var $ul = $('<ul class="list-unstyled file-list" />');
+                        $.each(attachmentFiles, function (i, val) {
+                            var $li = $('<li/>');
+                            var $a = $('<a href="@Url.Action("Download", "AccountReceivables")?batchId=' + $('#batchId').val().trim() + '&fileName=' + val.trim() + '" />')
+                            var $delete = $('<a href="#" />')
+                            $a.append($('<i class="fa fa-file-pdf-o" />'));
+                            $delete.html("&nbsp; &nbsp; &nbsp;");
+                            $delete.click(function (e) {
+                                e.preventDefault();
+                                eliminarArchivo(val.trim());
+                            });
+                            $delete.append($('<i class="fa fa-remove fa-2x" />'));
+                            $li.append($a.html("  " + val));
+                            $li.append($delete);
+                            $ul.append($li);
+                        });
+                        $('#attachmentFiles').html($ul);
+                    }
+                    else {
+                        $('#attachmentFiles').html('');
+                    }
+                }
+            });
+        }
+
+        function atacharArchivo() {
+            var data = new FormData();
+            data.append("fileData", document.getElementById("FileData").files[0]);
+            data.append("batchId", $('#batchId').val());
+            $.ajax({
+                url: '@Url.Action("AttachFile", "AccountReceivables")',
+                type: "POST",
+                data: data,
+                dataType: "JSON",
+                contentType: false,
+                processData: false,
+                success: function (d) {
+                    if (d.status == true) {
+                        $('#attachmentForm').each(function () {
+                            this.reset();
+                        });
+                        toastr.success('Archivo adjuntado correctamente', 'Adjuntos')
+                        cargarArchivos();
+                    }
+                    else {
+                        alert('Ha ocurrido un error');
+                    }
+                },
+                error: function () {
+                    alert('Error. Por favor trate de nuevo.');
+                }
+            });
+        }
+
+        function eliminarArchivo(fileName) {
+            if (confirm("Esta seguro que desea eliminar este archivo ?")) {
+                $.ajax({
+                    url: '@Url.Action("DeleteFile", "AccountReceivables")?id=' + $('#batchId').val().trim() + "&fileName=" + fileName,
+                    type: "POST",
+                    dataType: "JSON",
+                    contentType: false,
+                    processData: false,
+                    success: function (d) {
+                        if (d.status == "OK") {
+                            toastr.success('ARchivo eliminado correctamente', 'Adjuntos');
+                            cargarArchivos();
+                        }
+                        else {
+                            alert(d.status);
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+}

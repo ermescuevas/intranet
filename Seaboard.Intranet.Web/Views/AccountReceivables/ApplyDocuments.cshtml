@@ -1,0 +1,497 @@
+﻿@{
+    Layout = "~/Views/Shared/_BillingLayout.cshtml";
+    ViewBag.Title = "Aplicar documentos cuentas por cobrar";
+}
+
+<style>
+    .selected {
+        background-color: #e0f3ff;
+    }
+
+    .notAvailable {
+        background-color: #f5efb5;
+    }
+</style>
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Aplicar documentos cuentas por cobrar</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Aplicar documentos cuentas por cobrar</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight ecommerce">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins" id="buttonPanel">
+                <div class="ibox-title">
+                    <h3>Aplicar documentos cuentas por cobrar</h3>
+                </div>
+                <div class="ibox-content">
+                    <div class="form-group">
+                        <div class="col-sm-12 col-sm-offset-1">
+                            <button class="btn btn-success" type="button" onclick="contabilizar();"><i class="fa fa-money"></i> Contabilizar</button>
+                            <button class="btn btn-white" type="button" onclick="borrar();"><i class="fa fa-eraser"></i> Borrar</button>
+                        </div>
+                    </div>
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins" id="headerPanel">
+                <div class="ibox-content">
+                    <div class="form-group">
+                        <fieldset class="form-horizontal">
+                            <div class="row">
+                                <div class="col-sm-7">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Id. de cliente:</label>
+                                        <div class="col-sm-4 input-group">
+                                            <input type="text" id="customerId" name="customerId" class="form-control" readonly="readonly"/>
+                                            <span class="input-group-btn">
+                                                <button id="lookupCustomer" type="button" class="btn btn-primary">
+                                                    <i class="fa fa-search"></i>
+                                                </button>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Nombre:</label>
+                                        <div class="col-sm-8 input-group">
+                                            <input type="text" id="customerName" name="customerName" class="form-control" readonly="readonly"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Numero de documento:</label>
+                                        <div class="col-sm-8 input-group">
+                                            <input type="text" id="documentNumber" name="documentNumber" class="form-control" readonly="readonly" />
+                                            <span class="input-group-btn">
+                                                <button id="lookupDocument" onclick="getDocument();" type="button" class="btn btn-primary">
+                                                    <i class="fa fa-search"></i>
+                                                </button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Aplicar desde la moneda</label>
+                                        <div class="col-sm-8 input-group">
+                                            <input type="text" id="currencyId" name="currencyId" class="form-control" readonly="readonly" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Fecha de aplicación:</label>
+                                        <div class="col-sm-8 input-group date">
+                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                            <input type="text" id="documentDate" name="documentDate" class="form-control" value="@DateTime.Now.ToString("dd/MM/yyyy")" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Monto pendiente:</label>
+                                        <div class="col-sm-8 input-group">
+                                            <input type="text" id="originalAmount" name="originalAmount" class="form-control" readonly="readonly" />
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Monto no aplicado:</label>
+                                        <div class="col-sm-8 input-group">
+                                            <input type="text" id="pendingAmount" name="pendingAmount" class="form-control" readonly="readonly" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins" id="detailPanel">
+                <div class="ibox-content">
+                    <div class="sk-spinner sk-spinner-wave">
+                        <div class="sk-rect1"></div>
+                        <div class="sk-rect2"></div>
+                        <div class="sk-rect3"></div>
+                        <div class="sk-rect4"></div>
+                        <div class="sk-rect5"></div>
+                    </div>
+                    <div class="tabs-container">
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a data-toggle="tab" href="#tab-1"> Transacciones</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                            <div id="tab-1" class="tab-pane active">
+                                <div class="panel-body">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="ibox">
+                                                <div class="ibox-title">
+                                                </div>
+
+                                                <div class="ibox-content">
+                                                    <div class="table-responsive" id="transRows" style="max-height: 600px; overflow-y: scroll;"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Styles {
+    @Styles.Render("~/plugins/awesomeCheckboxStyles")
+    @Styles.Render("~/plugins/summernoteStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/plugins/textSpinnersStyles")
+    <link href="@Url.Content("~/Content/plugins/datatables/datatables.min.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/footableStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/summernote")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/Scripts/plugins/datatables/datatables.min.js")
+    @Scripts.Render("~/plugins/footable")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+
+    <script type="text/javascript">
+        var amount = 0;
+        var invoiceApplied = [];
+        $(document).ready(function() {
+            $('#documentDate').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true,
+                format: 'dd/mm/yyyy'
+            });
+
+            $("#lookupCustomer").lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookup", "Home")?tipo=30&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function(data) {
+                    $('input[name=customerId]').val(data.Id);
+                    $('input[name=customerName]').val(data.Descripción);
+                },
+                tableHeader: ['Id. de cliente', 'Nombre'],
+                hiddenFields: ['DataExtended']
+            });
+
+            $('#transTable').dataTable({
+                pageLength: 10,
+                paging: false,
+                scrollCollapse: true,
+                scrollY: '50vh',
+                language: {
+                    "sProcessing": "Procesando... ",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:  ",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                },
+                oAria: {
+                    "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                }
+            });
+        });
+
+        function getDocument() {
+            if ($('#customerId').val().trim() != '') {
+                $("#lookupDocument").lookupbox({
+                    title: 'Busqueda:',
+                    url: '@Url.Action("ListLookup", "Home")?tipo=33&consultaExtra=' + $('#customerId').val().trim() + '&consulta=',
+                    imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                    width: 800,
+                    height: 1000,
+                    onItemSelected: function(data) {
+                        $('input[name=documentNumber]').val(data.CustomerId);
+                        $('input[name=currencyId]').val(data.CurrencyId);
+                        $('input[name=originalAmount]').val(data.Description);
+                        $('input[name=pendingAmount]').val(data.BatchNumber);
+                        obtenerDetalle($('#customerId', data.CustomerId).val().trim());
+                        calcularTotal();
+                    },
+                    tableHeader: ['Monto original', 'Monto pendiente', 'Numero de documento'],
+                    hiddenFields: [
+                        'CurrencyId', 'CustomerName', 'VendorId', 'VendorName', 'DocumentDate', 'CloseDate', 'Note',
+                        'Posted'
+                    ]
+                });
+            }
+        }
+
+        function setCellValue(tableId, rowId, colNum, newValue) {
+            $('#' + tableId + ' tr:eq(' + (rowId + 1) + ') td:eq(' + (colNum - 1) + ')').html(newValue);
+        }
+
+        function obtenerDetalle(customerId, documentNumber) {
+            $.ajax({
+                url: '@Url.Action("GetDocumentsForApply", "AccountReceivables")?customerId=' + customerId + '&documentNumber=' + documentNumber,
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                async: false,
+                cache: false,
+                success: function(result) {
+                    if (result.status === "OK") {
+                        var $table =
+                            $('<table  class="table table-stripped table-bordered" id="transTable" />');
+                        var thead =
+                            '<thead><tr>' +
+                                '<th style="width: 5%;">#</th>' +
+                                '<th style="width: 20%;">No. de documento</th>' +
+                                '<th style="width: 15%;">Fecha de documento</th>' +
+                                '<th style="width: 10%;">Moneda</th>' +
+                                '<th style="width: 25%;">Monto pendiente</th>' +
+                                '<th style="width: 25%;">Aplicar monto</th>' +
+                                '</tr></thead>';
+                        $table.append(thead);
+                        var $tbody = $('<tbody/>');
+                        $.each(result.registros,
+                            function(x, item) {
+                                var $row = $('<tr/>');
+                                var $inputAppliedAmount = $('<input type="text" style="width:100%" name="appliedAmount"/>');
+                                var $inputCurrentAmount = $('<input type="text" style="width:100%" readonly="readonly" name="currentAmount"/>');
+                                var $check = $('<input type="checkbox" name="check" >');
+
+                                $row.append($('<td/>').html($check.prop("checked", false)));
+                                $row.append($('<td/>').html(item.DocumentNumber));
+                                $row.append($('<td/>').html(item.DocumentDate));
+                                $row.append($('<td/>').html(item.CurrencyId));
+                                $('<td/>').append($inputCurrentAmount.val(parseFloat(item.CurrentAmount).toFixed(2)
+                                    .replace(/./g, function(c, i, a) {return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c; }))).appendTo($row);
+                                $('<td/>').append($inputAppliedAmount.val('0.00')).appendTo($row);
+
+                                $check.click(function(e) {
+                                    if ($check.is(":checked")) {
+                                        $('#transTable tr:eq(' + (x + 1) + ') td:eq(5) input').val(
+                                            parseFloat($(
+                                                    '#transTable tr:eq(' + (x + 1) + ') td:eq(4) input')
+                                                .val()
+                                                .replace(/,/g, "")).toFixed(2)
+                                            .replace(/./g,
+                                                function(c, i, a) {
+                                                    return i && c !== "." && ((a.length - i) % 3 === 0)
+                                                        ? ',' + c
+                                                        : c;
+                                                }));
+                                    } else {
+                                        $('#transTable tr:eq(' + (x + 1) + ') td:eq(5) input').val("0.00");
+                                    }
+                                    calcularTotal();
+                                });
+                                $inputAppliedAmount.focus(function(e) {
+                                    amount = parseFloat($('#transTable tr:eq(' + (x + 1) + ') td:eq(5) input')
+                                        .val()
+                                        .replace(/,/g, ""));
+                                });
+                                $inputAppliedAmount.focusout(function (e) {
+                                    var amountApplied =
+                                        parseFloat($('#transTable tr:eq(' + (x + 1) + ') td:eq(5) input').val()
+                                            .replace(/,/g, "")).toFixed(2);
+                                    var amountPending =
+                                        parseFloat($('#transTable tr:eq(' + (x + 1) + ') td:eq(4) input').val()
+                                            .replace(/,/g, "")).toFixed(2);
+                                    if (Number(amountApplied) > Number(amountPending)) {
+                                        toastr.error('El monto aplicado no puede exceder el monto pendiente',
+                                            'Campo requerido');
+
+                                        $('#transTable tr:eq(' + (x + 1) + ') td:eq(5) input').val(amount
+                                            .toFixed(2)
+                                            .replace(/./g,
+                                                function(c, i, a) {
+                                                    return i && c !== "." && ((a.length - i) % 3 === 0)
+                                                        ? ',' + c
+                                                        : c;
+                                                }));
+                                    } else {
+                                        $('#transTable tr:eq(' + (x + 1) + ') td:eq(5) input').val(parseFloat(
+                                            $('#transTable tr:eq(' + (x + 1) + ') td:eq(5) input').val()
+                                            .replace(/,/g, "")).toFixed(2).replace(/./g,
+                                            function(c, i, a) {
+                                                return i && c !== "." && ((a.length - i) % 3 === 0)
+                                                    ? ',' + c
+                                                    : c;
+                                            }));
+                                    }
+
+                                    calcularTotal();
+                                });
+                                $tbody.append($row);
+                            });
+                        $table.append($tbody);
+                        $('#transRows').html($table);
+                    } else {
+                        alert(result.status);
+                    }
+                }
+            });
+        }
+
+        function contabilizar() {
+            if (!confirm("Esta seguro que desea aplicar estos documentos ?")) {
+                return;
+            }
+            var isAllValid = true;
+
+            if (parseFloat($('#pendingAmount').val().replace(/,/g, "")) < 0) {
+                if (!confirm("El monto aplicado no puede ser mayor al monto pendiente ?")) {
+                    return;
+                }
+            }
+
+            if ($('#customerId').val().trim() === '') {
+                isAllValid = false;
+                toastr.error('El campo Id. de cliente es obligatorio', 'Campo requerido');
+            }
+
+            if ($('#documentNumber').val().trim() === '') {
+                isAllValid = false;
+                toastr.error('El campo Numero de documento es obligatorio', 'Campo requerido');
+            }
+
+            if ($('#documentDate').val().trim() === '') {
+                isAllValid = false;
+                toastr.error('Debe de especificar una fecha de aplicación', 'Campo requerido');
+            }
+
+            $('tr').each(function() {
+                var $row = $(this);
+                if ($row.find("input[name=appliedAmount]").val() != undefined) {
+                    if (parseFloat($row.find("input[name=appliedAmount]").val().replace(/,/g, "")) > 0) {
+                        invoiceApplied.push({
+                            DocumentNumber: $row.find("td:eq(1)").html().trim(),
+                            DocumentAmount: parseFloat($row.find("input[name=appliedAmount]").val().replace(/,/g, "")).toFixed(2)
+                        });
+                    }
+                }
+            });
+
+            var data = {
+                CashReceiptId: $('#documentNumber').val().trim(),
+                Description: '',
+                DocumentDate: $('#documentDate').datepicker({ dateFormat: 'ddMMyyyy' }).val(),
+                Note: '',
+                CustomerId: $('#customerId').val().trim(),
+                CashReceiptType: 0,
+                Currency: $('#currencyId').val().trim(),
+                Amount: 0,
+                ApplyAmount: 0,
+                BatchNumber: '',
+                InvoiceLines: invoiceApplied,
+                docDate: $('#documentDate').datepicker({ dateFormat: 'ddMMyyyy' }).val()
+            }
+
+            if (isAllValid) {
+                $.ajax({
+                    url: '@Url.Action("PostApplyDocument", "AccountReceivables")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    cache: false,
+                    contentType: "application/json",
+                    success: function(result) {
+                        if (result.status === "OK") {
+                            window.location.href = "@Url.Action("ApplyDocuments", "AccountReceivables")";
+                        } else {
+                            alert(result.status);
+                        }
+                    }
+                });
+            }
+        }
+
+        function calcularTotal() {
+            var total = 0;
+            var aTotal = 0;
+            $('#transTable > tbody > tr').each(function() {
+                total = parseFloat(total) +
+                    parseFloat($(this).find('td:eq(5) input').val()
+                        .replace(/,/g, ""));
+            });
+
+            aTotal = parseFloat($('#originalAmount').val().replace(/,/g, "")) - total; 
+
+            $('#pendingAmount').val(parseFloat(aTotal).toFixed(2).replace(/./g,
+                function(c, i, a) {
+                    return i && c !== "." && ((a.length - i) % 3 === 0)
+                        ? ',' + c
+                        : c;
+                }));
+
+        }
+
+        function borrar() {
+            $('input[name=customerId]').val('');
+            $('input[name=customerName]').val('');
+            $('input[name=currencyId]').val('');
+            $('input[name=documentNumber]').val('');
+            $('input[name=documentDate]').val('@DateTime.Now.ToString("dd/MM/yyyy")');
+            $('input[name=pendingAmount]').val('');
+            $('input[name=originalAmount]').val('');
+            $('#transRows').html('');
+        }
+
+    </script>
+}

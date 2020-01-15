@@ -1,0 +1,4 @@
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Seaboard Intranet\Seaboard.Intranet.Domain\bin\Release\Seaboard.Intranet.Domain.dll
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Seaboard Intranet\Seaboard.Intranet.Domain\bin\Release\Seaboard.Intranet.Domain.pdb
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Seaboard Intranet\Seaboard.Intranet.Domain\obj\Release\Seaboard.Intranet.Domain.dll
+C:\Users\Administrator\Documents\Visual Studio 2015\Projects\Seaboard Intranet\Seaboard.Intranet.Domain\obj\Release\Seaboard.Intranet.Domain.pdb

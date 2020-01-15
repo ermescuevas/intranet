@@ -1,0 +1,220 @@
+﻿@model IEnumerable<Seaboard.Intranet.Domain.ViewModels.AmountOfItemViewModel>
+@{
+    ViewBag.Title = "Cantidad de Artículo";
+
+    var disponible = 0;
+    var minimo = 0;
+    var countMin = 0;
+    var countMed = 0;
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Cantidad de Artículos</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Listado de Cantidad de Artículos</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+
+    </div>
+</div>
+
+<div id="tab" class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>Listado de Cantidad de Artículos</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="ibox-content">
+                    @Html.ActionLink("CREAR SOLICITUD", "Create", "ServiceRequest", null, new { @class = "btn btn-primary" })
+                    <div class="hr-line-dashed"></div>    
+                    <table class="table table-striped table-bordered table-hover informationTable">
+                        <thead>
+                            <tr>
+                                <th style="width:10%">Número de artículo</th>
+                                <th style="width:25%">Descripción artículo</th>
+                                <th style="width:14%">Cant. de punto de pedido</th>
+                                <th style="width:10%">Cant. en pedido</th>
+                                <th style="width:12%">Cant. en existencia</th>
+                                <th style="width:10%">Pedir hasta nivel</th>
+                                <th style="width:3%">Estado</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <a><i>@Html.DisplayFor(modelItem => item.ArticleNum)</i></a>
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.ArticleDes)
+                                    </td>
+                                    <td class="td1">
+                                        @Html.DisplayFor(modelItem => item.OrderPointquant)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.OrderQuantity)
+                                    </td>
+                                    <td class="td2">
+                                        @Html.DisplayFor(modelItem => item.ExistingAmount)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.AskUptolevel)
+                                    </td>
+                                    <td>
+                                        @{
+                                            disponible = Convert.ToInt32(item.ExistingAmount);
+                                            minimo = Convert.ToInt32(item.OrderPointquant);
+                                            if (disponible <= minimo)
+                                            {
+                                                countMin += 1;
+                                                <span class="badge badge-danger">Agotado</span>
+                                            }
+                                            else if (disponible == (minimo + 1))
+                                            {
+                                                countMed += 1;
+                                                <span class="badge badge-warning">Agotado</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-primary">Disponible</span>
+                                            }
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-container" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content animated flipInY">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel">
+    <div class="modal-dialog" role="document" style="width:30%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="gridSystemModalLabel"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>  Alerta</h4>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <p align="left">Cantidad de Artículos casi Agotados: @countMed</p>
+                    <p align="left">Cantidad de Artículos Agotados: @countMin</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/toastr")
+
+    <script type="text/javascript">
+    $(document).ready(function () {
+
+        $(window).on('load', function () {
+            var med = parseInt(@countMed);
+            var min = parseInt(@countMin);
+            if (( med >= 1) || ( min >= 1))
+            {
+                $('#myModal').modal('show');
+            }
+            else
+            {
+                $('#myModal').modal('hide');
+            }
+        });
+
+        $('body').on('click', '.modal-link', function (e) {
+            e.preventDefault();
+            $(this).attr('data-target', '#modal-container');
+            $(this).attr('data-toggle', 'modal');
+        });
+
+        $('#modal-container').on('hidden.bs.modal', function () {
+            $(this).removeData('bs.modal');
+        });
+
+        $('.informationTable').DataTable({
+            pageLength: 10,
+            order: [[0, "desc"]],
+            dom: '<"html5buttons"B>lTfgitp',
+            language: {
+                "sProcessing": "Procesando... ",
+                "sLengthMenu": "Mostrar _MENU_ registros",
+                "sZeroRecords": "No se encontraron resultados",
+                "sEmptyTable": "Ningún dato disponible en esta tabla",
+                "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                "sInfoPostFix": "",
+                "sSearch": "Buscar:  ",
+                "sUrl": "",
+                "sInfoThousands": ",",
+                "sLoadingRecords": "Cargando...",
+                "oPaginate": {
+                    "sFirst": "Primero",
+                    "sLast": "Último",
+                    "sNext": "Siguiente",
+                    "sPrevious": "Anterior"
+                }
+            },
+            oAria: {
+                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+            },
+            buttons: [
+                { extend: 'copy' },
+                { extend: 'csv' },
+                { extend: 'excel', title: 'ExampleFile' },
+                { extend: 'pdf', title: 'ExampleFile' },
+
+                {
+                    extend: 'print',
+                    customize: function (win) {
+                        $(win.document.body).addClass('white-bg');
+                        $(win.document.body).css('font-size', '10px');
+
+                        $(win.document.body).find('table')
+                                .addClass('compact')
+                                .css('font-size', 'inherit');
+                    }
+                }
+            ]
+        });
+    });
+    </script>
+}

@@ -1,0 +1,112 @@
+﻿@{
+    Layout = "~/Views/Shared/_BillingLayout.cshtml";
+    ViewBag.Title = "Analisis de resumen de transacciones del MEM";
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-sm-4">
+        <h2>Analisis de resumen de transacciones del MEM</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Analisis de resumen de transacciones del MEM</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="wrapper wrapper-content animated fadeInUp">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="ibox float-e-margins">
+                        <div class="ibox-title">
+                            <h3>Analisis de resumen de transacciones del MEM</h3>
+                        </div>
+                        <div class="ibox-content">
+                                <div class="col-sm-12 col-sm-offset-1">
+                                    <button class="btn btn-success" type="button" onclick="imprimirReporte();"><i class="fa fa-print"></i> Imprimir</button>
+                                    <br />
+                                </div>
+                            <br />
+                            <br />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ibox">
+                <div class="ibox-content">
+                    <div class="hr-line-dashed"></div>
+                    <br />
+                    <div class="row">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">Mes:</label>
+                            <div class="col-sm-3 input-group">
+                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                <input id="month" name="month" class="form-control" value="@DateTime.Now.ToString("MM/yyyy")" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hr-line-dashed"></div>
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles{
+   @Styles.Render("~/Content/plugins/iCheck/iCheckStyles")
+   @Styles.Render("~/plugins/dataPickerStyles")
+   <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/toastrStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/iCheck")
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+
+    <script>
+        $(document).ready(function() {
+            $('#month').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true,
+                format: 'mm/yyyy'
+            });
+        });
+
+        function imprimirReporte() {
+            var data = {
+                date: "01/" + $('#month').datepicker({ dateFormat: 'ddMMyyyy' }).val()
+            }
+
+            var url = '@Url.Content("~/PDF/Reportes/")AccountReceivablesTransAnalysisReport.pdf';
+            toastr.info('Estamos procesando su solicitud', 'Por favor espere');
+            $.ajax({
+                url: '@Url.Action("TransAnalysisReport", "AccountReceivables")',
+                type: "POST",
+                data: JSON.stringify(data),
+                dataType: "JSON",
+                cache: false,
+                contentType: "application/json",
+                success: function(d) {
+                    if (d.status == "OK") {
+                        window.open(url);
+                        @*window.location.href = "@Url.Action("TransAnalysisReport", "AccountReceivables")";*@
+                    } else {
+                        alert(d.status);
+                    }
+                }
+            });
+        }
+    </script>
+}

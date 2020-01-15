@@ -1,0 +1,299 @@
+﻿@using Microsoft.AspNet.Identity;
+@model Seaboard.Intranet.Domain.Models.ConfigurationModel
+@{
+    ViewBag.Title = "Configuración cotizacion de compras";
+}
+
+<style>
+    .bootstrap-select:not([class*=col-]):not([class*=form-control]):not(.input-group-btn) {
+        width: 100%;
+    }
+</style>
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Configuración cotizacion de compras</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Configuración cotizacion de compras</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight ecommerce">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h3>Configuración cotizacion de compras</h3>
+                </div>
+                <div class="ibox-content">
+                    <div class="form-group">
+                        <div class="col-sm-12 col-sm-offset-1">
+                            <button class="btn btn-primary" type="button" onclick="saveConfiguration();"><i class="fa fa-save"></i> Guardar</button>
+                        </div>
+                    </div>
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="tabs-container">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a data-toggle="tab" href="#tab-1"> Emails</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div id="tab-1" class="tab-pane active">
+                        <div class="panel-body">
+                            <div class="row">
+                                <fieldset class="form-horizontal">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <button class="btn btn-primary" onclick="saveEmailStep();">Configurar nuevo correo</button>
+                                            <div class="hr-line-dashed"></div>
+                                            <div class="table-responsive">
+                                                <div id="emailRows">
+                                                    <table class="table table-hover">
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="width: 20%;">Email</th>
+                                                                <th style="width: 60%;">Nombre</th>
+                                                                <th style="width: 20%;">#</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody></tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-CreateEmail" class="modal inmodal" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content animated fadeIn">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Configurar nuevo correo</h4>
+                </div>
+
+                <div class="modal-body">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label>Email:</label>
+                            <input type="text" class="form-control" id="email" name="email" />
+                        </div>
+
+
+                        <div class="form-group">
+                            <label>Nombre:</label>
+                            <input name="nameEmail" id="nameEmail" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="form-actions no-color">
+                        <button type="button" class="btn btn-primary" onclick="saveEmailAccount();"> Guardar</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Styles {
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/summernoteStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/plugins/touchSpinStyles")
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/css/bootstrap-select.min.css">
+}
+
+@section Scripts {
+
+    @Scripts.Render("~/plugins/summernote")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/touchSpin")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/bootstrap-select.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/i18n/defaults-en_US.js"></script>
+
+    <script type="text/javascript">
+        var products;
+        var customers;
+        $(document).ready(function () {
+            generateEmails();
+        });
+
+        function saveEmailStep() {
+            $('#modal-CreateEmail').modal('show');
+            $('#email').val('');
+            $('#nameEmail').val('');
+        }
+
+
+        function generateEmails() {
+            $.ajax({
+                url: '@Url.Action("GetEmailAccounts", "PurchaseQuotation")',
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    customers = result;
+                    var $table = $('<table class="table table-striped table-bordered table-hover"/>');
+                    $table.append(
+                        '<thead>' +
+                        '<tr>' +
+                        '<th style="width: 20%;">Email</th>' +
+                        '<th style="width: 60%;">Nombre</th>' +
+                        '<th style="width: 20%;">#</th>' +
+                        '</tr>' +
+                        '</thead>');
+                    if (customers.length > 0) {
+                        var $tbody = $('<tbody/>');
+                        $.each(customers, function (i, val) {
+                            var $row = $('<tr/>');
+                            $row.append($('<td/>').html(val.Id));
+                            $row.append($('<td/>').html(val.Descripción));
+                            var $btnGroup = $('<div class="btn-group"/>')
+                            var $remove = $('<button href="#"class="btn btn-danger btn-xs">Eliminar</button>');
+                            $remove.click(function (e) {
+                                deleteEmailAccount(val.Id);
+                                e.preventDefault();
+                            });
+                            $btnGroup.append($remove);
+                            $row.append($('<td/>').html($btnGroup));
+                            $tbody.append($row);
+                        });
+                        $table.append($tbody);
+                    }
+                    $('#emailRows').html($table);
+                    $($table).DataTable({
+                        pageLength: 10,
+                        order: [[0, "desc"]],
+                        dom: '<"html5buttons"B>lTfgitp',
+                        language: {
+                            "sProcessing": "Procesando... ",
+                            "sLengthMenu": "Mostrar _MENU_ registros",
+                            "sZeroRecords": "No se encontraron resultados",
+                            "sEmptyTable": "Ningún dato disponible en esta tabla",
+                            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                            "sInfoPostFix": "",
+                            "sSearch": "Buscar:  ",
+                            "sUrl": "",
+                            "sInfoThousands": ",",
+                            "sLoadingRecords": "Cargando...",
+                            "oPaginate": {
+                                "sFirst": "Primero",
+                                "sLast": "Último",
+                                "sNext": "Siguiente",
+                                "sPrevious": "Anterior"
+                            }
+                        },
+                        oAria: {
+                            "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                            "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                        },
+                        buttons: [
+                            { extend: 'copy' },
+                            { extend: 'csv' },
+                            { extend: 'excel', title: 'ExampleFile' },
+                            { extend: 'pdf', title: 'ExampleFile' },
+
+                            {
+                                extend: 'print',
+                                customize: function (win) {
+                                    $(win.document.body).addClass('white-bg');
+                                    $(win.document.body).css('font-size', '10px');
+
+                                    $(win.document.body).find('table')
+                                        .addClass('compact')
+                                        .css('font-size', 'inherit');
+                                }
+                            }
+                        ]
+                    });
+                }
+            });
+        }
+
+        function saveEmailAccount() {
+            var isAllValid = true;
+            if ($('#email').val() === '') {
+                toastr.error('Por favor debe de especificar un email para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#nameEmail').val() === '') {
+                toastr.error('Por favor debe de un nombre para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (isAllValid) {
+                $.ajax({
+                    url: '@Url.Action("SaveEmailAccount", "PurchaseQuotation")?email=' + $('#email').val() + '&name=' + $('#nameEmail').val(),
+                    type: "POST",
+                    data: '',
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            $('#modal-CreateEmail').modal('hide');
+                            generateEmails();
+                        }
+                        else {
+                            alert(result.status);
+                        }
+                    }
+                });
+            }
+        }
+
+        function deleteEmailAccount(email) {
+            if (confirm("Esta seguro que desea eliminar este email ?")) {
+                $.ajax({
+                    url: '@Url.Action("DeleteEmailAccount", "PurchaseQuotation")?id=' + email,
+                    type: "POST",
+                    data: "",
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        customers = result;
+                        if (result.status !== "OK") {
+                            alert(result.status);
+                        } else {
+                            generateEmails();
+                        }
+                    }
+                });
+            }
+        }
+
+    </script>
+}

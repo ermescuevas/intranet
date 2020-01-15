@@ -1,0 +1,374 @@
+﻿@{
+    ViewBag.Title = "Asignación de nivel de reorden";
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Asignación de nivel de reorden</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Asignación de nivel de reorden</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight ecommerce">
+    <div class="ibox float-e-margins">
+        <div class="ibox-title">
+            <h3>Asignación de nivel de reorden</h3>
+        </div>
+        <div class="ibox-content">
+            <div class="form-group">
+                <div class="col-sm-12 col-sm-offset-1">
+                    <button class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-Process"><i class="fa fa-check"></i> Procesar</button>
+                    <button class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-Asign"><i class="fa fa-bars"></i> Asignar Masivamente</button>
+                    <br />
+                </div>
+            </div>
+            <br />
+        </div>
+    </div>
+    <div class="ibox-content m-b-sm border-bottom">
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="form-group">
+                    <label class="control-label" for="status">Filtrar por: </label>
+                    <select name="status" id="status" class="form-control">
+                        <option value="0" selected>Clase de articulo</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-sm-4">
+                <div class="form-group">
+                    <label class="control-label" for="product_name">Criterio</label>
+                    <div class="col-sm-12 input-group">
+                        <input id="Filter" name="Filter" type="text" placeholder="Introduzca un criterio" class="form-control"> <span class="input-group-btn">
+                            <button id="lookupClase" type="button" class="btn btn-primary">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <div class="form-group">
+                    <label class="control-label" for="status">&nbsp;</label>
+                    <button class="btn btn-success form-control" type="button" onclick="buscarArticulos();"><i class="fa fa-search"></i> Buscar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox">
+                <div class="ibox-content">
+                    <div class="row table-responsive" id="itemRows">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-Process" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Generar nivel de reorden</h4>
+                    <h3>Esta seguro que desea procesar ?</h3>
+                </div>
+
+                <div class="modal-body">
+                    <h4>Nivel de reorden</h4>
+                    <hr />
+
+                </div>
+
+                <div class="modal-footer">
+                    <div class="form-actions no-color">
+                        <button type="button" class="btn btn-primary" onclick="generarNivelReorden();"> Si</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-Asign" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Asignación Masiva</h4>
+                </div>
+
+                <div class="modal-body">
+                    <h4>Nivel de reorden</h4>
+                    <hr />
+                    <div class="row">
+                        <div class="form-group">
+                            <label class="col-sm-4 control-label">Minimo:</label>
+                            <div class="col-sm-5 input-group m-b">
+                                <input id="MasiveQtyMin" name="MasiveQtyMin" type="text" class="form-control">
+                                <span class="input-group-addon">.00</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group">
+                            <label class="col-sm-4 control-label">Maximo:</label>
+                            <div class="col-sm-5 input-group m-b">
+                                <input id="MasiveQtyMax" name="MasiveQtyMax" type="text" class="form-control">
+                                <span class="input-group-addon">.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="form-actions no-color">
+                        <button type="button" class="btn btn-primary" onclick="asignarMasivamente();"> Asignar</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-close"></i> Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    @Styles.Render("~/plugins/wizardStepsStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/awesomeCheckboxStyles")
+    @Styles.Render("~/plugins/clockpickerStyles")
+    @Styles.Render("~/plugins/dateRangeStyles")
+    @Styles.Render("~/Content/plugins/iCheck/iCheckStyles")
+    @Styles.Render("~/Content/plugins/chosen/chosenStyles")
+    @Styles.Render("~/plugins/switcheryStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/plugins/nouiSliderStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/Content/plugins/ionRangeSlider/ionRangeStyles")
+    @Styles.Render("~/plugins/imagecropperStyles")
+    @Styles.Render("~/Content/plugins/colorpicker/colorpickerStyles")
+    @Styles.Render("~/plugins/select2Styles")
+    @Styles.Render("~/plugins/touchSpinStyles")
+    @Styles.Render("~/plugins/tagInputsStyles")
+    @Styles.Render("~/plugins/duallistStyles")
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+}
+
+@section Scripts {
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/wizardSteps")
+    @Scripts.Render("~/plugins/validate")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/iCheck")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/ionRange")
+    @Scripts.Render("~/plugins/nouiSlider")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/plugins/switchery")
+    @Scripts.Render("~/plugins/chosen")
+    @Scripts.Render("~/plugins/knob")
+    @Scripts.Render("~/plugins/imagecropper")
+    @Scripts.Render("~/plugins/colorpicker")
+    @Scripts.Render("~/plugins/clockpicker")
+    @Scripts.Render("~/plugins/dateRange")
+    @Scripts.Render("~/plugins/select2")
+    @Scripts.Render("~/plugins/touchSpin")
+    @Scripts.Render("~/plugins/tagInputs")
+    @Scripts.Render("~/plugins/duallist")
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+        $("#lookupClase").lookupbox({
+            title: 'Busqueda: ',
+            url: '@Url.Action("ListLookup", "Home")?tipo=22&consulta=',
+            imgLoader: '<img src="~/Images/ajaxloader.gif">',
+            width: 800,
+            height: 1000,
+            onItemSelected: function(data) {
+                $('input[name=Filter]').val(data.Id);
+            },
+            tableHeader: ['Id. de clase', 'Descripción'],
+            hiddenFields: ['DataExtended']
+            });
+        });
+
+        var items = [];
+        function buscarArticulos() {
+            $.ajax({
+                url: '@Url.Action("GetItemReorder", "Inventory")?Filter=' + $('#Filter').val().trim(),
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                cache: false,
+                contentType: "application/json",
+                success: function (result) {
+                    items = result;
+                    fillItemsTable();
+                }
+            });
+        }
+
+        function fillItemsTable() {
+            if (items.length > 0) {
+                var $table = $('<table class="table table-stripped table-bordered" id="informationTable" />');
+                $table.append('<thead><tr><th>Id. de articulo</th><th>Descripción</th><th>Unidad</th><th>Clase</th><th>Cantidad minima</th><th>Cantidad maxima</th></tr></thead>');
+                var $tbody = $('<tbody/>');
+                $.each(items, function (i, val) {
+                    var $row = $('<tr/>');
+                    var $inputQtyMin = $('<input type="text" name="QtyMin"/>');
+                    var $inputQtyMax = $('<input type="text" name="QtyMax"/>');
+                    $row.append($('<td/>').html(val.ItemId));
+                    $row.append($('<td/>').html(val.ItemDescription));
+                    $row.append($('<td/>').html(val.UnitId));
+                    $row.append($('<td/>').html(val.ItemClass));
+                    $inputQtyMin.val(parseFloat(val.MinStock).toFixed(2).replace(/./g, function (c, i, a) {
+                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                    }));
+                    $inputQtyMax.val(parseFloat(val.MaxStock).toFixed(2).replace(/./g, function (c, i, a) {
+                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                    }));
+                    $('<td/>').append($inputQtyMin).appendTo($row);
+                    $('<td/>').append($inputQtyMax).appendTo($row);
+                    $tbody.append($row);
+                });
+
+                $table.append($tbody);
+                $('#itemRows').html($table);
+
+                $('#informationTable').DataTable({
+                    pageLength: 8,
+                    dom: '<"html5buttons"B>lTfgitp',
+                    paging: false,
+                    scrollCollapse: true,
+                    scrollY: "50vh",
+                    language: {
+                        "sProcessing": "Procesando... ",
+                        "sLengthMenu": "Mostrar _MENU_ registros",
+                        "sZeroRecords": "No se encontraron resultados",
+                        "sEmptyTable": "Ningún dato disponible en esta tabla",
+                        "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                        "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                        "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                        "sInfoPostFix": "",
+                        "sSearch": "Buscar:  ",
+                        "sUrl": "",
+                        "sInfoThousands": ",",
+                        "sLoadingRecords": "Cargando...",
+                        "oPaginate": {
+                            "sFirst": "Primero",
+                            "sLast": "Último",
+                            "sNext": "Siguiente",
+                            "sPrevious": "Anterior"
+                        }
+                    },
+                    oAria: {
+                        "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                        "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                    },
+                    buttons: [
+                        { extend: 'copy' },
+                        { extend: 'csv' },
+                        { extend: 'excel', title: 'ExampleFile' },
+                        { extend: 'pdf', title: 'ExampleFile' },
+
+                        {
+                            extend: 'print',
+                            customize: function (win) {
+                                $(win.document.body).addClass('white-bg');
+                                $(win.document.body).css('font-size', '10px');
+
+                                $(win.document.body).find('table')
+                                    .addClass('compact')
+                                    .css('font-size', 'inherit');
+                            }
+                        }
+                    ]
+
+                });
+            }
+            else {
+                $('#itemRows').html('');
+                toastr.info('No se encontraron articulos con ese criterio', 'Busqueda')
+            }
+        }
+
+        function asignarMasivamente() {
+            var isAllValid = true;
+            if (!($('#MasiveQtyMin').val().trim() != '' && !isNaN($('#MasiveQtyMin').val().trim()))) {
+                isAllValid = false;
+                toastr.error('Debe de especificar un nivel minimo', 'Campos requeridos')
+            }
+            if (!($('#MasiveQtyMax').val().trim() != '' && !isNaN($('#MasiveQtyMax').val().trim()))) {
+                isAllValid = false;
+                toastr.error('Debe de especificar un nivel maximo', 'Campos requeridos')
+            }
+
+            if (isAllValid) {
+                $('#informationTable > tbody > tr').each(function () {
+                    var row = $(this);
+                    row.find('td:eq(4) input').val(parseFloat($('#MasiveQtyMin').val()).toFixed(2).replace(/./g, function (c, i, a) {
+                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                    }));
+                    row.find('td:eq(5) input').val(parseFloat($('#MasiveQtyMax').val()).toFixed(2).replace(/./g, function (c, i, a) {
+                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                    }));
+                });
+
+                $('#modal-Asign').modal('hide');
+                $('#MasiveQtyMin').val('');
+                $('#MasiveQtyMax').val('');
+            }
+        }
+
+        function generarNivelReorden() {
+            var isAllValid = false;
+            var items = [];
+            $('#informationTable > tbody > tr').each(function () {
+                var row = $(this);
+                isAllValid = true;
+                items.push({
+                    ItemId: row.find('td:eq(0)').html().trim(),
+                    ItemDescription: row.find('td:eq(1)').html().trim(),
+                    UnitId: row.find('td:eq(2)').html().trim(),
+                    QtyMin: parseFloat(row.find('td:eq(4) input').val().replace(/,/g, "")).toFixed(2),
+                    QtyMax: parseFloat(row.find('td:eq(5) input').val().replace(/,/g, "")).toFixed(2)
+                });
+            });
+
+            if (isAllValid) {
+                var data = {
+                    Items: items
+                }
+
+                $.ajax({
+                    url: '@Url.Action("ProcessReorder", "Inventory")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (d) {
+                        if (d.status == "OK") {
+                            window.location.href = "@Url.Action("Edit", "Inventory")";
+                        }
+                        else {
+                            alert(d.status);
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+}

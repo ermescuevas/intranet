@@ -1,0 +1,349 @@
+﻿@model Seaboard.Intranet.Domain.Models.Project
+@{
+    ViewBag.Title = "Proyectos";
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Proyectos</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li>
+                <a href="@Url.Action("Index", "Ar")">Listado de proyectos</a>
+            </li>
+            <li class="active">
+                <strong>Proyectos</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight ecommerce">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h3>Proyectos</h3>
+                </div>
+
+                <div class="ibox-content">
+                    <div class="form-group">
+                        <div class="col-sm-12 col-sm-offset-1">
+                            <button class="btn btn-primary" type="button" onclick="procesarSolicitud();"><i class="fa fa-save"></i> Guardar</button>
+                            <button class="btn btn-white" type="button" onclick="limpiarCampos();"><i class="fa fa-eraser"></i> Borrar</button>
+                        </div>
+                    </div>
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="tabs-container">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a data-toggle="tab" href="#tab-1"> Datos Basicos</a></li>
+                    <li class=""><a data-toggle="tab" href="#tab-2"> Lineas</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div id="tab-1" class="tab-pane active">
+                        <div class="panel-body">
+                            <fieldset class="form-horizontal">
+                                <div class="row">
+                                    <div class="col-sm-7">
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Id. de proyecto:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(m => m.ProjectId, new { @class = "form-control", @max_length = "15" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Descripción:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextAreaFor(m => m.ProjectDesc, new { @class = "form-control", @rows = "3" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Departamento:</label>
+                                            <div class="col-sm-8 input-group">
+                                                <input type="text" id="Department" name="Department" readonly="readonly" class="form-control" value="@ViewBag.DepartmentId"/>
+                                                <span class="input-group-btn">
+                                                    <button id="lookupDepartamento" type="button" class="btn btn-primary">
+                                                        <i class="fa fa-search"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+
+                    <div id="tab-2" class="tab-pane">
+                        <div class="panel-body">
+                            <div class="row">
+                                <fieldset class="form-horizontal">
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Id. de AR</label>
+                                                <div class="col-sm-8 input-group">
+                                                    <input id="ARNumber" name="ARNumber" type="text" class="form-control"> <span class="input-group-btn">
+                                                        <button id="lookupAR" type="button" class="btn btn-primary">
+                                                            <i class="fa fa-search"></i>
+                                                        </button>
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Descripción:</label>
+                                                <div class="col-sm-8 input-group">
+                                                    <textarea id="ARDescription" name="ARDescription" class="form-control" rows="3"></textarea>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Monto:</label>
+                                                <div class="col-sm-8 input-group m-b">
+                                                    <input id="Amount" name="Amount" type="text" class="form-control">
+                                                    <span class="input-group-addon">.00</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Cuenta:</label>
+                                                <div class="col-sm-7 input-group">
+                                                    <input readonly="readonly" id="AccountNum" name="AccountNum" type="text" class="form-control" value="0000-000-000"> <span class="input-group-btn">
+                                                        <button id="lookupCuenta" type="button" class="btn btn-primary">
+                                                            <i class="fa fa-search"></i>
+                                                        </button>
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Id. de departamento:</label>
+                                                <div class="col-sm-7 input-group">
+                                                    <input readonly="readonly" id="DepartmentId" name="DepartmentId" type="text" class="form-control" value="@ViewBag.DepartmentId"> 
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">&nbsp;</label>
+                                                <div class="col-sm-8">
+                                                    <button class="btn btn-primary" type="submit" onclick="agregarProducto();">Agregar</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+
+                            <div class="row">
+                                <div class="table-responsive" id="itemsRows"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    @Styles.Render("~/plugins/dataPickerStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/plugins/datatables.min.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+}
+
+@section Scripts {
+
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+    @Scripts.Render("~/Scripts/plugins/datatables/datatables.min.js")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            @Html.Partial("_Scripts")
+
+            $('#Amount').focusout(function () {
+                if (($('#Amount').val().trim().replace(/,/g, "") != '' && !isNaN($('#Amount').val().trim().replace(/,/g, "")))) {
+                    $('#Amount').val(parseFloat($('#Amount').val().replace(/,/g, "")).toFixed(2).replace(/./g, function (c, i, a) {
+                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                    }));
+                }
+            });
+        });
+
+        function limpiarCampos() {
+            $('#ProjectId, #ProjectDesc, #ARNumber, #ARDescription, #Amount, #AccountNum').val('');
+            $('#Charge', '#DepartmentId').val('@ViewBag.DepartmentId');
+            $('#AccountNum').val('0000-000-000');
+            $('#itemsRows').empty();
+        }
+
+        var purchaseRequestItems = [];
+
+        function agregarProducto() {
+
+            var isValidItem = true;
+            if ($('#ARNumber').val().trim() == '') {
+                isValidItem = false;
+                toastr.error('El numero de AR es requerido', 'Campos requeridos')
+            }
+
+            if (!($('#Amount').val().trim().replace(/,/g, "") != '' && !isNaN($('#Amount').val().trim().replace(/,/g, "")))) {
+                isValidItem = false;
+                toastr.error('El monto es requerido', 'Campos requeridos')
+            }
+
+            if ($('#ARDescription').val().trim() == '') {
+                isValidItem = false;
+                toastr.error('La descripción es requerida', 'Campos requeridos')
+            }
+
+            if ($('#DepartmentId').val().trim() == '') {
+                isValidItem = false;
+                toastr.error('El departamento es requerido', 'Campos requeridos')
+            }
+
+            if (isValidItem) {
+                purchaseRequestItems.push({
+                    ARNumber: $('#ARNumber').val().trim(),
+                    Amount: $('#Amount').val().trim().replace(/,/g, ""),
+                    ARDescription: $('#ARDescription').val().trim(),
+                    AccountNum: $('#AccountNum').val().trim(),
+                    DepartmentId: $('#DepartmentId').val().trim()
+
+                });
+                $('#ARNumber').val('').focus();
+                $('#Amount, #ARDescription, #DepartmentId').val('');
+                $('#DepartmentId').val('@ViewBag.DepartmentId');
+                $('#AccountNum').val('0000-000-000');
+            }
+
+            
+
+            GeneratedItemsTable();
+        }
+
+        function GeneratedItemsTable() {
+            if (purchaseRequestItems.length > 0) {
+                var $table = $('<table  class="table table-stripped table-bordered" id="itemsTable" />');
+                $table.append('<thead><tr><th>Id. de AR</th><th>Descripción</th><th>Monto</th><th>Cuenta</th><th>Departamento</th><th style="width:5%"></th><th style="width:5%"></th></tr></thead>');
+                var $tbody = $('<tbody/>');
+                $.each(purchaseRequestItems, function (i, val) {
+                    var $row = $('<tr/>');
+                    $row.append($('<td/>').html(val.ARNumber));
+                    $row.append($('<td/>').html(val.ARDescription));
+                    $row.append($('<td/>').html(parseFloat(val.Amount.replace(/,/g, "")).toFixed(2).replace(/./g, function (c, i, a) {
+                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                    })));
+                    $row.append($('<td/>').html(val.AccountNum));
+                    $row.append($('<td/>').html(val.DepartmentId));
+                    var $remove = $('<a href="#" class="btn btn-white btn-xs"><i class="fa fa-trash fa"></a>');
+                    var $edit = $('<a href="#"class="btn btn-white btn-xs"><i class="fa fa-edit fa"></a>');
+                    $remove.click(function (e) {
+                        e.preventDefault();
+                        purchaseRequestItems.splice(i, 1);
+                        GeneratedItemsTable();
+                    });
+
+                    $edit.click(function (e) {
+                        EditarFila(purchaseRequestItems[i]);
+                        purchaseRequestItems.splice(i, 1);
+                        e.preventDefault();
+                    });
+
+                    $row.append($('<td/>').html($remove));
+                    $row.append($('<td/>').html($edit));
+                    $tbody.append($row);
+                });
+                $table.append($tbody);
+                $('#itemsRows').html($table);
+            }
+            else {
+                $('#itemsRows').html('');
+            }
+        }
+
+        function EditarFila(requestLine) {
+            $('#ARNumber').val(requestLine.ARNumber);
+            $('#ARDescription').val(requestLine.ARDescription);
+            $('#Amount').val(parseFloat(requestLine.Amount.replace(/,/g, "")).toFixed(2).replace(/./g, function (c, i, a) {
+                return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+            }));
+            $('#AccountNum').val(requestLine.AccountNum);
+            $('#DepartmentId').val(requestLine.DepartmentId.replace(/,/g, ""));
+        }
+
+        function procesarSolicitud() {
+            var isAllValid = true;
+            if (purchaseRequestItems.length == 0) {
+                toastr.error('Por favor debe de insertar AR para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#ProjectId').val().trim() == '') {
+                toastr.error('El Id. de projecto es requerido', 'Campos requeridos')
+                isAllValid = false;
+            }
+            else {
+                if ($('#ProjectId').val().length > 15) {
+                    toastr.error('El Id. de projecto no puede ser mas de 15 caracteres', 'Campos requeridos')
+                    isAllValid = false;
+                }
+            }
+
+            if ($('#ProjectDesc').val().trim() == '') {
+                toastr.error('La descripción es requerida', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (isAllValid) {
+                var data = {
+                    ProjectId: $('#ProjectId').val().trim(),
+                    ProjectDesc: $('#ProjectDesc').val().trim(),
+                    AccountNum: $('#AccountNum').val().trim(),
+                    ProjectLines: purchaseRequestItems
+                }
+
+                $.ajax({
+                    url: '@Url.Action("SaveProject","Ar")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (d) {
+                        if (d.status == true) {
+                            window.location.href = "@Url.Action("Index","Ar")";
+                        }
+                        else {
+                            alert('Ha ocurrido un error');
+                        }
+                        $('#submit').val('Guardar');
+                    },
+                    error: function () {
+                        alert('Error. Por favor trate de nuevo.');
+                        $('#submit').val('Guardar');
+                    }
+                });
+            }
+        }
+
+    </script>
+}

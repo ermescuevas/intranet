@@ -1,0 +1,1120 @@
+﻿@using Microsoft.AspNet.Identity;
+@model Seaboard.Intranet.Domain.Models.ConfigurationModel
+@{
+    Layout = "~/Views/Shared/_BillingLayout.cshtml";
+    ViewBag.Title = "Configuración modulo de facturación";
+    var customers = (List<Seaboard.Intranet.Domain.ViewModels.Lookup>)ViewBag.Customers;
+    var products = (List<Seaboard.Intranet.Domain.ViewModels.Lookup>)ViewBag.Products;
+}
+
+<style>
+    .bootstrap-select:not([class*=col-]):not([class*=form-control]):not(.input-group-btn) {
+        width: 100%;
+    }
+</style>
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Configuración modulo de facturación</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Configuración modulo de facturación</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight ecommerce">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h3>Configuración modulo de facturación</h3>
+                </div>
+                <div class="ibox-content">
+                    <div class="form-group">
+                        <div class="col-sm-12 col-sm-offset-1">
+                            <button class="btn btn-primary" type="button" onclick="saveConfiguration();"><i class="fa fa-save"></i> Guardar</button>
+                        </div>
+                    </div>
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="tabs-container">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a data-toggle="tab" href="#tab-1"> Layout Archivo OC</a></li>
+                    <li class=""><a data-toggle="tab" href="#tab-2"> Asignación clientes</a></li>
+                    <li class=""><a data-toggle="tab" href="#tab-3"> Componentes facturación</a></li>
+                    <li class=""><a data-toggle="tab" href="#tab-4"> Emails Notificación NCF</a></li>
+                    <li class=""><a data-toggle="tab" href="#tab-5"> Generales</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div id="tab-1" class="tab-pane active">
+                        <div class="panel-body">
+                            <fieldset class="form-horizontal">
+                                <div class="row">
+                                    <p>
+                                        Configuración del archivo RTE que envía el OC, se debe especificar la ruta del archivo y los parámetros
+                                        de columnas y líneas donde el sistema buscara las informaciones.
+                                    </p>
+                                    <div class="col-sm-11">
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">Ruta archivo OC:</label>
+                                            <div class="col-sm-10 input-group">
+                                                @Html.TextBoxFor(m => m.FilePath, new { @class = "form-control" })
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Posición hoja:</label>
+                                            <div class="col-sm-6 input-group">
+                                                @Html.TextBoxFor(m => m.Sheet, new { @class = "touchspin3" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Fila comienzo datos:</label>
+                                            <div class="col-sm-6 input-group">
+                                                @Html.TextBoxFor(m => m.RowBeginningData, new { @class = "touchspin3" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Fila nombre columnas:</label>
+                                            <div class="col-sm-6 input-group">
+                                                @Html.TextBoxFor(m => m.RowNameColumn, new { @class = "touchspin3" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Resumen columna total:</label>
+                                            <div class="col-sm-6 input-group">
+                                                @Html.TextBoxFor(model => model.SummaryTotalColumn, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group date">
+                                            <label class="col-sm-4 control-label">Buscar facturas apli. desde</label>
+                                            <div class="col-sm-6 input-group date">
+                                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                @Html.TextBoxFor(m => m.InvoiceStartDate, new { @class = "form-control", Value = Model.InvoiceStartDate.ToShortDateString() })
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Columna Acreedor:</label>
+                                            <div class="col-sm-6 input-group">
+                                                @Html.TextBoxFor(model => model.CréditorExcelColumn, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Columna Deudor:</label>
+                                            <div class="col-sm-6 input-group">
+                                                @Html.TextBoxFor(model => model.DebtorExcelColumn, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Resumen fila comienzo:</label>
+                                            <div class="col-sm-6 input-group">
+                                                @Html.TextBoxFor(m => m.SummaryRowBeginningData, new { @class = "touchspin3" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Id. de perfil correo SQL:</label>
+                                            <div class="col-sm-6 input-group">
+                                                @Html.TextBoxFor(m => m.SqlEmailProfile, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Rnc Empresa:</label>
+                                            <div class="col-sm-6 input-group">
+                                                @Html.TextBoxFor(m => m.TaxRegistrationNumber, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+
+                    <div id="tab-2" class="tab-pane">
+                        <div class="panel-body">
+                            <div class="row">
+                                <fieldset class="form-horizontal">
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <p>
+                                                Se debe de asociar el ID de cliente que envía el OC con el ID de cliente existente en el sistema.
+                                            </p>
+                                            <button class="btn btn-primary" onclick="createCustomer('','')">Asignar nuevo cliente</button>
+                                            <label>&nbsp;&nbsp;&nbsp;</label>
+                                            <a class="btn btn-success" href="@Url.Action("CustomerCreate","Billing")" target="_blank">Crear nuevo cliente</a>
+                                            <div class="hr-line-dashed"></div>
+                                            <div id="customerRows">
+                                                <table class="table table-striped table-bordered table-hover informationTable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width:20%">Id. cliente OC</th>
+                                                            <th style="width:20%">Id. cliente GP</th>
+                                                            <th style="width:30%">Nombre</th>
+                                                            <th style="width:20%">Id. de clase</th>
+                                                            <th style="width:10%">#</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr></tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="tab-3" class="tab-pane">
+                        <div class="panel-body">
+                            <div class="row">
+                                <fieldset class="form-horizontal">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <p>
+                                                Se deben de especificar las columnas de los componentes de facturación del archivo que envía el
+                                                OC, la etiqueta es para poner un nombre personalizado diferente a como viene en el archivo.
+                                            </p>
+                                            <button class="btn btn-primary" onclick="createProduct('','','')">Configurar nuevo componente</button>
+                                            <div class="hr-line-dashed"></div>
+                                            <div id="itemRows">
+                                                <table class="table table-hover">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Id. de producto</th>
+                                                            <th>Descripción</th>
+                                                            <th>Columna Archivo OC</th>
+                                                            <th>Etiqueta producto</th>
+                                                            <th>#</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="tab-4" class="tab-pane">
+                        <div class="panel-body">
+                            <div class="row">
+                                <fieldset class="form-horizontal">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <p>
+                                                Especificación de los correos de los usuarios que recibirán alertas cuando los comprobantes
+                                                fiscales se estén agotando.
+                                            </p>
+                                            <button class="btn btn-primary" onclick="saveEmailStep();">Configurar nuevo correo</button>
+                                            <div class="hr-line-dashed"></div>
+                                            <div id="emailRows">
+                                                <table class="table table-hover">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 20%;">Email</th>
+                                                            <th style="width: 60%;">Nombre</th>
+                                                            <th style="width: 20%;">#</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="tab-5" class="tab-pane">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-10 col-md-offset-1">
+                                    <p>
+                                        Creación de las notas personalizadas que saldrán en la factura según el tipo de Documentos,
+                                        además se pueden abrir en esta pantalla los lotes que fueron cerrados.
+                                    </p>
+                                    <div class="row">
+                                        <div class="panel panel-success">
+                                            <div class="panel-heading">
+                                                Abrir lotes cerrados
+                                            </div>
+                                            <div class="panel-body">
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label class="col-sm-4 control-label">Id. de lote:</label>
+                                                            <div class="col-sm-8 input-group">
+                                                                <input type="text" class="form-control" readonly="readonly" id="BatchNumber" name="BatchNumber" />
+                                                                <span class="input-group-btn">
+                                                                    <button id="lookupLote" type="button" class="btn btn-primary">
+                                                                        <i class="fa fa-search"></i>
+                                                                    </button>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label class="col-sm-4 control-label">Descripción:</label>
+                                                            <div class="col-sm-8 input-group">
+                                                                <input type="text" class="form-control" readonly="readonly" id="BatchDescription" name="BatchDescription" />
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+
+                                                    <div class="col-md-2">
+                                                        <button class="btn btn-primary" onclick="openBatch();">Abrir Lote</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="panel panel-info">
+                                            <div class="panel-heading">
+                                                Configuración de notas
+                                            </div>
+                                            <div class="panel-body">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Nota de NC:</label>
+                                                        @Html.TextAreaFor(m => m.DefaultNoteNC, new { @class = "form-control", @rows = "5" })
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Nota de ND:</label>
+                                                        @Html.TextAreaFor(m => m.DefaultNoteND, new { @class = "form-control", @rows = "5" })
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <ul style="padding: 0; margin: 0; list-style: none;">
+                                                            <li><strong>Campos dinamicos de las notas</strong></li>
+                                                            <li>${ResolutionNumber}</li>
+                                                            <li>${MonthDescription}</li>
+                                                            <li>${Year}</li>
+                                                            <li>${BatchDescription}</li>
+                                                            <li>${BatchNumber}</li>
+                                                            <li>${RangeCorresponding}</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-CreateCustomer" class="modal inmodal" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content animated fadeIn">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Asignación cliente OC a GP</h4>
+                </div>
+
+                <div class="modal-body">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label>Id. de cliente OC:</label>
+                            <input name="CustomerOC" id="CustomerOC" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label>Id. de cliente GP:</label>
+                            <select class="selectpicker" data-live-search="true" id="CustomerId" name="CustomerId">
+                                <option value=""></option>
+                                @foreach (var item in customers)
+                                {
+                                    <option value="@item.Id.Trim()">@(item.Id + " - " + item.Descripción)</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="form-actions no-color">
+                        <button type="button" class="btn btn-primary" onclick="saveCustomerConfiguration();"> Guardar</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-CreateProduct" class="modal inmodal" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content animated fadeIn">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Configurar componente de facturación</h4>
+                </div>
+
+                <div class="modal-body">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label>Id. de producto:</label>
+                            <select class="selectpicker" data-live-search="true" id="ItemId" name="ItemId">
+                                <option></option>
+                                @foreach (var item in products)
+                                {
+                                    <option value="@item.Id.Trim()">@item.Descripción</option>
+                                }
+                            </select>
+                        </div>
+
+
+                        <div class="form-group">
+                            <label>Columna Archivo OC:</label>
+                            <input name="ColumnIndex" id="ColumnIndex" class="form-control" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Etiqueta producto:</label>
+                            <input name="ExternalLabel" id="ExternalLabel" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="form-actions no-color">
+                        <button type="button" class="btn btn-primary" onclick="saveProductConfiguration();"> Guardar</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-CreateEmail" class="modal inmodal" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content animated fadeIn">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Configurar nuevo correo</h4>
+                </div>
+
+                <div class="modal-body">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label>Email:</label>
+                            <input type="text" class="form-control" id="email" name="email" />
+                        </div>
+
+
+                        <div class="form-group">
+                            <label>Nombre:</label>
+                            <input name="nameEmail" id="nameEmail" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="form-actions no-color">
+                        <button type="button" class="btn btn-primary" onclick="saveEmailAccount();"> Guardar</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Styles {
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/summernoteStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/plugins/touchSpinStyles")
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/css/bootstrap-select.min.css">
+}
+
+@section Scripts {
+
+    @Scripts.Render("~/plugins/summernote")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/touchSpin")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/bootstrap-select.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/i18n/defaults-en_US.js"></script>
+
+    <script type="text/javascript">
+        var products;
+        var customers;
+        $(document).ready(function () {
+            $(".touchspin3").TouchSpin({
+                verticalbuttons: true,
+                buttondown_class: 'btn btn-white',
+                buttonup_class: 'btn btn-white'
+            });
+            $('#InvoiceStartDate').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true
+            });
+            $('select').selectpicker();
+            getConfiguration();
+            $("#lookupLote").lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookup", "Home")?tipo=43&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 1100,
+                height: 1000,
+                onItemSelected: function (data) {
+                    $('input[name=BatchNumber]').val(data.Id);
+                    $('input[name=BatchDescription]').val(data.Descripción);
+                },
+                tableHeader: ['Id. de lote', 'Descripción'],
+                hiddenFields: ['DataExtended']
+            });
+        });
+
+        function openBatch() {
+            if ($('#BatchNumber').val() !== '') {
+                if (confirm("Esta seguro que desea abrir este lote ?")) {
+                    $.ajax({
+                        url: '@Url.Action("OpenBatchTransaction", "Billing")?batchNumber=' + $('#BatchNumber').val(),
+                        type: "POST",
+                        data: "",
+                        dataType: "JSON",
+                        contentType: "application/json",
+                        success: function (result) {
+                            if (result.status === "OK") {
+                                $('#BatchNumber').val('');
+                                $('#BatchDescription').val('');
+                            }
+                            else {
+                                alert(result.status);
+                            }
+                        }
+                    });
+                }
+            } else {
+                toastr.info("Debe de especificar primero un Id. de lote");
+            }
+        }
+
+        function saveEmailStep() {
+            $('#modal-CreateEmail').modal('show');
+            $('#email').val('');
+            $('#nameEmail').val('');
+        }
+
+        function getConfiguration() {
+            generateCustomers();
+            generateProducts();
+            generateEmails();
+        }
+
+        function generateProducts() {
+            $.ajax({
+                url: '@Url.Action("GetProductConfigurations", "Billing")',
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    products = result;
+                    var $table = $('<table class="table table-striped table-bordered table-hover"/>');
+                    $table.append(
+                        '<thead>' +
+                        '<tr>' +
+                        '<th>Id. de producto</th>' +
+                        '<th>Descripción</th>' +
+                        '<th>Columna Archivo OC</th>' +
+                        '<th>Etiqueta producto</th>' +
+                        '<th>#</th>' +
+                        '</tr>' +
+                        '</thead>');
+                    if (products.length > 0) {
+                        var $tbody = $('<tbody/>');
+                        $.each(products, function (i, val) {
+                            var $row = $('<tr/>');
+                            $row.append($('<td/>').html(val.ProductId));
+                            $row.append($('<td/>').html(val.ProductName));
+                            $row.append($('<td/>').html(val.ColumnIndex));
+                            $row.append($('<td/>').html(val.ExternalLabel));
+                            var $btnGroup = $('<div class="btn-group"/>')
+
+                            var $edit = $('<button href="#" class="btn btn-success btn-xs">Editar</button>');
+                            var $remove = $('<button href="#"class="btn btn-danger btn-xs">Eliminar</button>');
+                            $remove.click(function (e) {
+                                deleteProduct(val.ProductId);
+                                e.preventDefault();
+                            });
+                            $edit.click(function (e) {
+                                createProduct(val.ProductId, val.ColumnIndex, val.ExternalLabel)
+                                e.preventDefault();
+                            });
+                            $btnGroup.append($edit);
+                            $btnGroup.append($remove);
+                            $row.append($('<td/>').html($btnGroup));
+                            $tbody.append($row);
+                        });
+                        $table.append($tbody);
+                    }
+                    $('#itemRows').html($table);
+                    $($table).DataTable({
+                        pageLength: 10,
+                        order: [[0, "desc"]],
+                        dom: '<"html5buttons"B>lTfgitp',
+                        language: {
+                            "sProcessing": "Procesando... ",
+                            "sLengthMenu": "Mostrar _MENU_ registros",
+                            "sZeroRecords": "No se encontraron resultados",
+                            "sEmptyTable": "Ningún dato disponible en esta tabla",
+                            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                            "sInfoPostFix": "",
+                            "sSearch": "Buscar:  ",
+                            "sUrl": "",
+                            "sInfoThousands": ",",
+                            "sLoadingRecords": "Cargando...",
+                            "oPaginate": {
+                                "sFirst": "Primero",
+                                "sLast": "Último",
+                                "sNext": "Siguiente",
+                                "sPrevious": "Anterior"
+                            }
+                        },
+                        oAria: {
+                            "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                            "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                        },
+                        buttons: [
+                            { extend: 'copy' },
+                            { extend: 'csv' },
+                            { extend: 'excel', title: 'ExampleFile' },
+                            { extend: 'pdf', title: 'ExampleFile' },
+
+                            {
+                                extend: 'print',
+                                customize: function (win) {
+                                    $(win.document.body).addClass('white-bg');
+                                    $(win.document.body).css('font-size', '10px');
+
+                                    $(win.document.body).find('table')
+                                        .addClass('compact')
+                                        .css('font-size', 'inherit');
+                                }
+                            }
+                        ]
+                    });
+                }
+            });
+        }
+
+        function generateCustomers() {
+            $.ajax({
+                url: '@Url.Action("GetCustomerConfigurations", "Billing")',
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    customers = result;
+                    var $table = $('<table class="table table-striped table-bordered table-hover"/>');
+                    $table.append(
+                        '<thead>' +
+                        '<tr>' +
+                        '<th>Id. cliente OC</th>' +
+                        '<th>Id. cliente GP</th>' +
+                        '<th>Nombre</th>' +
+                        '<th>Id. de clase</th>' +
+                        '<th>#</th>' +
+                        '</tr>' +
+                        '</thead>');
+                    if (customers.length > 0) {
+                        var $tbody = $('<tbody/>');
+                        $.each(customers, function (i, val) {
+                            var $row = $('<tr/>');
+                            $row.append($('<td/>').html(val.CustomerExternalId));
+                            $row.append($('<td/>').html(val.CustomerId));
+                            $row.append($('<td/>').html(val.CustomerName));
+                            $row.append($('<td/>').html(val.CustomerClass));
+                            var $btnGroup = $('<div class="btn-group"/>')
+
+                            var $edit = $('<button href="#" class="btn btn-success btn-xs">Editar</button>');
+                            var $remove = $('<button href="#"class="btn btn-danger btn-xs">Eliminar</button>');
+                            $remove.click(function (e) {
+                                deleteCustomer(val.CustomerExternalId);
+                                e.preventDefault();
+                            });
+                            $edit.click(function (e) {
+                                createCustomer(val.CustomerExternalId, val.CustomerId)
+                                e.preventDefault();
+                            });
+                            $btnGroup.append($edit);
+                            $btnGroup.append($remove);
+                            $row.append($('<td/>').html($btnGroup));
+                            $tbody.append($row);
+                        });
+                        $table.append($tbody);
+                    }
+                    $('#customerRows').html($table);
+                    $($table).DataTable({
+                        pageLength: 10,
+                        order: [[0, "desc"]],
+                        dom: '<"html5buttons"B>lTfgitp',
+                        language: {
+                            "sProcessing": "Procesando... ",
+                            "sLengthMenu": "Mostrar _MENU_ registros",
+                            "sZeroRecords": "No se encontraron resultados",
+                            "sEmptyTable": "Ningún dato disponible en esta tabla",
+                            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                            "sInfoPostFix": "",
+                            "sSearch": "Buscar:  ",
+                            "sUrl": "",
+                            "sInfoThousands": ",",
+                            "sLoadingRecords": "Cargando...",
+                            "oPaginate": {
+                                "sFirst": "Primero",
+                                "sLast": "Último",
+                                "sNext": "Siguiente",
+                                "sPrevious": "Anterior"
+                            }
+                        },
+                        oAria: {
+                            "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                            "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                        },
+                        buttons: [
+                            { extend: 'copy' },
+                            { extend: 'csv' },
+                            { extend: 'excel', title: 'ExampleFile' },
+                            { extend: 'pdf', title: 'ExampleFile' },
+
+                            {
+                                extend: 'print',
+                                customize: function (win) {
+                                    $(win.document.body).addClass('white-bg');
+                                    $(win.document.body).css('font-size', '10px');
+
+                                    $(win.document.body).find('table')
+                                        .addClass('compact')
+                                        .css('font-size', 'inherit');
+                                }
+                            }
+                        ]
+                    });
+                }
+            });
+        }
+
+        function generateEmails() {
+            $.ajax({
+                url: '@Url.Action("GetEmailAccountConfigurations", "Billing")',
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    customers = result;
+                    var $table = $('<table class="table table-striped table-bordered table-hover"/>');
+                    $table.append(
+                        '<thead>' +
+                        '<tr>' +
+                        '<th style="width: 20%;">Email</th>' +
+                        '<th style="width: 60%;">Nombre</th>' +
+                        '<th style="width: 20%;">#</th>' +
+                        '</tr>' +
+                        '</thead>');
+                    if (customers.length > 0) {
+                        var $tbody = $('<tbody/>');
+                        $.each(customers, function (i, val) {
+                            var $row = $('<tr/>');
+                            $row.append($('<td/>').html(val.Id));
+                            $row.append($('<td/>').html(val.Descripción));
+                            var $btnGroup = $('<div class="btn-group"/>')
+                            var $remove = $('<button href="#"class="btn btn-danger btn-xs">Eliminar</button>');
+                            $remove.click(function (e) {
+                                deleteEmailAccount(val.Id);
+                                e.preventDefault();
+                            });
+                            $btnGroup.append($remove);
+                            $row.append($('<td/>').html($btnGroup));
+                            $tbody.append($row);
+                        });
+                        $table.append($tbody);
+                    }
+                    $('#emailRows').html($table);
+                    $($table).DataTable({
+                        pageLength: 10,
+                        order: [[0, "desc"]],
+                        dom: '<"html5buttons"B>lTfgitp',
+                        language: {
+                            "sProcessing": "Procesando... ",
+                            "sLengthMenu": "Mostrar _MENU_ registros",
+                            "sZeroRecords": "No se encontraron resultados",
+                            "sEmptyTable": "Ningún dato disponible en esta tabla",
+                            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                            "sInfoPostFix": "",
+                            "sSearch": "Buscar:  ",
+                            "sUrl": "",
+                            "sInfoThousands": ",",
+                            "sLoadingRecords": "Cargando...",
+                            "oPaginate": {
+                                "sFirst": "Primero",
+                                "sLast": "Último",
+                                "sNext": "Siguiente",
+                                "sPrevious": "Anterior"
+                            }
+                        },
+                        oAria: {
+                            "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                            "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                        },
+                        buttons: [
+                            { extend: 'copy' },
+                            { extend: 'csv' },
+                            { extend: 'excel', title: 'ExampleFile' },
+                            { extend: 'pdf', title: 'ExampleFile' },
+
+                            {
+                                extend: 'print',
+                                customize: function (win) {
+                                    $(win.document.body).addClass('white-bg');
+                                    $(win.document.body).css('font-size', '10px');
+
+                                    $(win.document.body).find('table')
+                                        .addClass('compact')
+                                        .css('font-size', 'inherit');
+                                }
+                            }
+                        ]
+                    });
+                }
+            });
+        }
+
+        function saveProductConfiguration() {
+            var isAllValid = true;
+            if ($('#ItemId').val() === '') {
+                toastr.error('Por favor debe de especificar un producto para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#ColumnIndex').val() === '') {
+                toastr.error('Por favor debe de un identificador de columna', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (isAllValid) {
+                var data = {
+                    ProductId: $('#ItemId').val().trim(),
+                    ProductName: '',
+                    ColumnIndex: $('#ColumnIndex').val().trim(),
+                    ExternalLabel: $('#ExternalLabel').val().trim()
+                }
+                $.ajax({
+                    url: '@Url.Action("SaveProductConfiguration", "Billing")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            $('#modal-CreateProduct').modal('hide');
+                            generateProducts();
+                        }
+                        else {
+                            alert(result.status);
+                        }
+                    }
+                });
+            }
+        }
+
+        function saveEmailAccount() {
+            var isAllValid = true;
+            if ($('#email').val() === '') {
+                toastr.error('Por favor debe de especificar un email para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#nameEmail').val() === '') {
+                toastr.error('Por favor debe de un nombre para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (isAllValid) {
+                $.ajax({
+                    url: '@Url.Action("SaveEmailAccountConfiguration", "Billing")?email=' + $('#email').val() + '&name=' + $('#nameEmail').val(),
+                    type: "POST",
+                    data: '',
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            $('#modal-CreateEmail').modal('hide');
+                            generateEmails();
+                        }
+                        else {
+                            alert(result.status);
+                        }
+                    }
+                });
+            }
+        }
+
+        function saveCustomerConfiguration() {
+            var isAllValid = true;
+            if ($('#CustomerId').val() === '') {
+                toastr.error('Por favor debe de especificar un cliente para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#CustomerOC').val() === '') {
+                toastr.error('Por favor debe de un nombre de cliente de OC para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (isAllValid) {
+                var data = {
+                    CustomerId: $('#CustomerId').val().trim(),
+                    CustomerExternalId: $('#CustomerOC').val().trim(),
+                    CustomerName: '',
+                    CustomerClass: ''
+                }
+                $.ajax({
+                    url: '@Url.Action("SaveCustomerConfiguration", "Billing")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            $('#modal-CreateCustomer').modal('hide');
+                            generateCustomers();
+                        }
+                        else {
+                            alert(result.status);
+                        }
+                    }
+                });
+            }
+        }
+
+        function saveConfiguration() {
+            var isAllValid = true;
+            if ($('#FilePath').val() === '') {
+                toastr.error('Por favor debe de especificar una ruta de archivo para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Sheet').val() === '') {
+                toastr.error('Por favor debe de un numero de hoja de columna', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#RowNameColumn').val() === '') {
+                toastr.error('Por favor debe de una fila para identificador de nombre', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#RowBeginningData').val() === '') {
+                toastr.error('Por favor debe de especificar una fila de comienzo de datos', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Cr_ditorExcelColumn').val() === '') {
+                toastr.error('Por favor debe de especificar un identificador de columna acreedor', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#DebtorExcelColumn').val() === '') {
+                toastr.error('Por favor debe de especificar un identificador de columna deudor', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#SummaryTotalColumn').val() === '') {
+                toastr.error('Por favor debe de especificar un identificador de columna resumen total', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#SummaryRowBeginningData').val() === '') {
+                toastr.error('Por favor debe de especificar una fila resumen comienzo datos', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#SqlEmailProfile').val() === '') {
+                toastr.error('Por favor debe de especificar un perfil de correo de sql', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#TaxRegistrationNumber').val() === '') {
+                toastr.error('Por favor debe de especificar un rnc de empresa', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (isAllValid) {
+                var data = {
+                    FilePath: $('#FilePath').val().trim(),
+                    Sheet: $('#Sheet').val().trim(),
+                    RowNameColumn: $('#RowNameColumn').val().trim(),
+                    RowBeginningData: $('#RowBeginningData').val().trim(),
+                    CréditorExcelColumn: $('#Cr_ditorExcelColumn').val().trim(),
+                    DebtorExcelColumn: $('#DebtorExcelColumn').val().trim(),
+                    SummaryTotalColumn: $('#SummaryTotalColumn').val().trim(),
+                    SummaryRowBeginningData: $('#SummaryRowBeginningData').val().trim(),
+                    SqlEmailProfile: $('#SqlEmailProfile').val().trim(),
+                    DefaultNoteNC: $('#DefaultNoteNC').val().trim(),
+                    DefaultNoteND: $('#DefaultNoteND').val().trim(),
+                    InvoiceStartDate: $('#InvoiceStartDate').val().trim(),
+                    TaxRegistrationNumber: $('#TaxRegistrationNumber').val().trim() 
+                }
+                $.ajax({
+                    url: '@Url.Action("SaveConfiguration", "Billing")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            toastr.success('Registro guardado correctamente', 'Campos requeridos')
+                        }
+                        else {
+                            alert(result.status);
+                        }
+                    }
+                });
+            }
+        }
+
+        function createCustomer(customerOC, customerId) {
+            $('#modal-CreateCustomer').modal('show');
+            if (customerOC !== '') {
+                $('#CustomerOC').prop('readonly', true);
+            } else {
+                $('#CustomerOC').prop('readonly', false);
+            }
+            $('#CustomerOC').val(customerOC);
+            $('select[name=CustomerId]').val(customerId);
+            $('select[name=CustomerId]').selectpicker('refresh');
+        }
+
+        function createProduct(productId, columnIndex, labelProduct) {
+            $('#modal-CreateProduct').modal('show');
+            if (productId !== '') {
+                $('select[name=ItemId]').attr('disabled', 'disabled');
+            } else {
+                $('select[name=ItemId]').removeAttr('disabled');
+            }
+            $('#ColumnIndex').val(columnIndex);
+            $('#ExternalLabel').val(labelProduct);
+            $('select[name=ItemId]').val(productId);
+            $('select[name=ItemId]').selectpicker('refresh');
+        }
+
+        function deleteEmailAccount(email) {
+            if (confirm("Esta seguro que desea eliminar este email ?")) {
+                $.ajax({
+                    url: '@Url.Action("DeleteEmailAccountConfiguration", "Billing")?id=' + email,
+                    type: "POST",
+                    data: "",
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        customers = result;
+                        if (result.status !== "OK") {
+                            alert(result.status);
+                        } else {
+                            generateEmails();
+                        }
+                    }
+                });
+            }
+        }
+
+        function deleteProduct(productId) {
+            if (confirm("Esta seguro que desea eliminar este componente ?")) {
+                $.ajax({
+                    url: '@Url.Action("DeleteProductConfiguration", "Billing")?id=' + productId,
+                    type: "POST",
+                    data: "",
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        customers = result;
+                        if (result.status !== "OK") {
+                            alert(result.status);
+                        } else {
+                            generateProducts();
+                        }
+                    }
+                });
+            }
+        }
+
+        function deleteCustomer(customerId) {
+            if (confirm("Esta seguro que desea eliminar esta asignación ?")) {
+                $.ajax({
+                    url: '@Url.Action("DeleteCustomerConfiguration", "Billing")?id=' + customerId,
+                    type: "POST",
+                    data: "",
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        customers = result;
+                        if (result.status !== "OK") {
+                            alert(result.status);
+                        } else {
+                            generateCustomers();
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+}

@@ -1,0 +1,327 @@
+﻿@{
+    ViewBag.Title = "Consulta facturas recibidas";
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Consulta facturas recibidas</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Consulta facturas recibidas</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight ecommerce">
+    <div class="ibox float-e-margins">
+        <div class="ibox-title">
+            <h3>Consulta facturas recibidas</h3>
+        </div>
+        <div class="ibox-content">
+            <div class="form-group">
+                <div class="col-sm-12 col-sm-offset-1">
+                    <button class="btn btn-white" type="button" onclick="borrar();"><i class="fa fa-eraser"></i> Borrar</button>
+                    <br />
+                </div>
+            </div>
+            <br />
+        </div>
+    </div>
+
+    <div class="ibox-content m-b-sm border-bottom">
+        <div class="row">
+            <div class="col-sm-2">
+                <div class="form-group">
+                    <label class="control-label" for="fromDate">Fecha desde</label>
+                    <input id="fromDate" name="fromDate" class="form-control" />
+                </div>
+            </div>
+            
+            <div class="col-sm-2">
+                <div class="form-group">
+                    <label class="control-label" for="toDate">Fecha hasta</label>
+                    <input id="toDate" name="toDate" class="form-control" />
+                </div>
+            </div>
+            
+            <div class="col-sm-2">
+                <div class="form-group">
+                    <label class="control-label" for="status">&nbsp;</label>
+                    <button class="btn btn-success form-control" type="button" onclick="consultar();"><i class="fa fa-search"></i> Buscar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox">
+                <div class="ibox-content">
+                    <div class="row table-responsive" id="itemRows">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    @Styles.Render("~/plugins/wizardStepsStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/awesomeCheckboxStyles")
+    @Styles.Render("~/plugins/clockpickerStyles")
+    @Styles.Render("~/plugins/dateRangeStyles")
+    @Styles.Render("~/Content/plugins/iCheck/iCheckStyles")
+    @Styles.Render("~/Content/plugins/chosen/chosenStyles")
+    @Styles.Render("~/plugins/switcheryStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/plugins/nouiSliderStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/Content/plugins/ionRangeSlider/ionRangeStyles")
+    @Styles.Render("~/plugins/imagecropperStyles")
+    @Styles.Render("~/Content/plugins/colorpicker/colorpickerStyles")
+    @Styles.Render("~/plugins/select2Styles")
+    @Styles.Render("~/plugins/touchSpinStyles")
+    @Styles.Render("~/plugins/tagInputsStyles")
+    @Styles.Render("~/plugins/duallistStyles")
+    @Styles.Render("~/Content/plugins/iCheck/iCheckStyles")
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+}
+
+@section Scripts {
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/iCheck")
+    @Scripts.Render("~/plugins/wizardSteps")
+    @Scripts.Render("~/plugins/validate")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/iCheck")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/ionRange")
+    @Scripts.Render("~/plugins/nouiSlider")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/plugins/switchery")
+    @Scripts.Render("~/plugins/chosen")
+    @Scripts.Render("~/plugins/knob")
+    @Scripts.Render("~/plugins/imagecropper")
+    @Scripts.Render("~/plugins/colorpicker")
+    @Scripts.Render("~/plugins/clockpicker")
+    @Scripts.Render("~/plugins/dateRange")
+    @Scripts.Render("~/plugins/select2")
+    @Scripts.Render("~/plugins/touchSpin")
+    @Scripts.Render("~/plugins/tagInputs")
+    @Scripts.Render("~/plugins/duallist")
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#fromDate').datepicker({
+                changeMonth: true,
+                changeYear: true,
+                showButtonPanel: true,
+                dateFormat: 'MM yy',
+                onClose: function (dateText, inst) {
+                    $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
+                }
+            });
+            $('#fromDate').datepicker().datepicker("setDate", new Date());
+
+            $('#toDate').datepicker({
+                changeMonth: true,
+                changeYear: true,
+                showButtonPanel: true,
+                dateFormat: 'MM yy',
+                onClose: function (dateText, inst) {
+                    $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
+                }
+            });
+            $('#toDate').datepicker().datepicker("setDate", new Date());
+        });
+        var items = [];
+
+        function consultar() {
+            var data = {
+                fromDate: $('#fromDate').datepicker('getDate'),
+                toDate: $('#toDate').datepicker('getDate')
+            }
+            $.ajax({
+                url: '@Url.Action("InvoiceMovementInquiry", "Inventory")',
+                type: "POST",
+                data: JSON.stringify(data),
+                dataType: "JSON",
+                cache: false,
+                contentType: "application/json",
+                success: function (result) {
+                    if (result.status === "OK") {
+                        items = result.registros;
+                        fillItemsTable();
+                    } else {
+                        alert(result.status);
+                    }
+                }
+            });
+        }
+
+        function fillItemsTable() {
+            if (items.length > 0) {
+                var $table = $('<table class="table table-stripped table-bordered" id="informationTable" />');
+                $table.append('<thead><tr>' +
+                    '<th style="width: 10%;">Recepcion</th>' +
+                    '<th style="width: 5%;">Fecha</th>' +
+                    '<th style="width: 10%;">Proveedor</th>' +
+                    '<th style="width: 5%;">Moneda</th>' +
+                    '<th style="width: 8%;">Id. de articulo</th>' +
+                    '<th style="width: 15%;">Descripción</th>' +
+                    '<th style="width: 5%;">Cant</th>' +
+                    '<th style="width: 9%;">Precio RD</th>' +
+                    '<th style="width: 5%;">Tasa</th>' +
+                    '<th style="width: 8%;">Precio USD</th>' +
+                    '<th style="width: 10%;">Total RD</th>' +
+                    '<th style="width: 10%;">Total USD</th>' +
+                    '</tr></thead>');
+                var $tbody = $('<tbody/>');
+                var $column1Total = 0;
+                var $column2Total = 0;
+                var $column3Total = 0;
+                var $column4Total = 0;
+                var $column5Total = 0;
+                $.each(items, function (i, val) {
+                    var $row = $('<tr/>');
+                    $column1Total += parseFloat(val.QtyOnHand);
+                    $column2Total += parseFloat(val.MinStock);
+                    $column3Total += parseFloat(val.MaxStock);
+                    $column4Total += parseFloat(Number(val.MinStock) * Number(val.QtyOnHand));
+                    $column5Total += parseFloat(Number(val.MaxStock) * Number(val.QtyOnHand));
+                    $row.append($('<td/>').html(val.ItemClass.trim()));
+                    $row.append($('<td/>').html(val.Status.trim()));
+                    $row.append($('<td/>').html(val.DataExtended.trim()));
+                    $row.append($('<td/>').html(val.DataPlus.trim()));
+                    $row.append($('<td/>').html("'" + val.ItemId.trim()));
+                    $row.append($('<td/>').html(val.ItemDescription.trim()));
+                    $row.append($('<td/>').html(parseFloat(val.QtyOnHand).toFixed(2).replace(/./g, function (c, x, a) { return x && c !== "." && ((a.length - x) % 3 === 0) ? ',' + c : c; })));
+                    $row.append($('<td/>').html(parseFloat(val.MinStock).toFixed(2).replace(/./g, function (c, x, a) { return x && c !== "." && ((a.length - x) % 3 === 0) ? ',' + c : c; })));
+                    $row.append($('<td/>').html(parseFloat(val.QtyRequest).toFixed(2).replace(/./g, function (c, x, a) { return x && c !== "." && ((a.length - x) % 3 === 0) ? ',' + c : c; })));
+                    $row.append($('<td/>').html(parseFloat(val.MaxStock).toFixed(2).replace(/./g, function (c, x, a) { return x && c !== "." && ((a.length - x) % 3 === 0) ? ',' + c : c; })));
+                    $row.append($('<td/>').html(parseFloat(Number(val.MinStock) * Number(val.QtyOnHand)).toFixed(2).replace(/./g, function (c, x, a) { return x && c !== "." && ((a.length - x) % 3 === 0) ? ',' + c : c; })));
+                    $row.append($('<td/>').html(parseFloat((Number(val.MaxStock) * Number(val.QtyOnHand)) / val.QtyRequest === 0 ? 1 : Number(val.QtyRequest)).toFixed(2).replace(/./g, function (c, x, a) { return x && c !== "." && ((a.length - x) % 3 === 0) ? ',' + c : c; })));
+                    $tbody.append($row);
+                });
+                $table.append($tbody);
+                $('#itemRows').html($table);
+                $('#informationTable').DataTable({
+                    pageLength: 8,
+                    dom: '<"html5buttons"B>lTfgitp',
+                    paging: false,
+                    scrollCollapse: true,
+                    scrollY: "50vh",
+                    language: {
+                        "sProcessing": "Procesando... ",
+                        "sLengthMenu": "Mostrar _MENU_ registros",
+                        "sZeroRecords": "No se encontraron resultados",
+                        "sEmptyTable": "Ningún dato disponible en esta tabla",
+                        "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                        "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                        "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                        "sInfoPostFix": "",
+                        "sSearch": "Buscar:  ",
+                        "sUrl": "",
+                        "sInfoThousands": ",",
+                        "sLoadingRecords": "Cargando...",
+                        "oPaginate": {
+                            "sFirst": "Primero",
+                            "sLast": "Último",
+                            "sNext": "Siguiente",
+                            "sPrevious": "Anterior"
+                        }
+                    },
+                    oAria: {
+                        "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                        "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                    },
+                    buttons: [
+                        { extend: 'copy' },
+                        { extend: 'csv' },
+                        { extend: 'excel', title: 'Reporte inventario multimoneda' },
+                        { extend: 'pdf', title: 'Reporte inventario multimoneda' },
+                        {
+                            extend: 'print',
+                            customize: function (win) {
+                                $(win.document.body).addClass('white-bg');
+                                $(win.document.body).css('font-size', '10px');
+
+                                $(win.document.body).find('table')
+                                    .addClass('compact')
+                                    .css('font-size', 'inherit');
+                            }
+                        }
+                    ]
+
+                });
+                $('#transRows').html($table);
+                var $tableTotal = $('<table  class="table table-stripped table-bordered" id="totalTable" />');
+                var $tbodyTotal = $('<tbody/>');
+                var $rowTotal = $('<tr/>');
+               
+                $rowTotal.append($('<td/>').html("Totales"));
+                $rowTotal.append($('<td/>').html(""));
+                $rowTotal.append($('<td/>').html(""));
+                $rowTotal.append($('<td/>').html(""));
+                $rowTotal.append($('<td/>').html(parseFloat($column1Total).toFixed(2).replace(/./g,
+                    function(c, i, a) {
+                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                    })));
+                $rowTotal.append($('<td/>').html(parseFloat($column2Total).toFixed(2).replace(/./g,
+                    function(c, i, a) {
+                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                    })));
+                $rowTotal.append($('<td/>').html(""));
+                $rowTotal.append($('<td/>').html(parseFloat($column3Total).toFixed(2).replace(/./g,
+                    function(c, i, a) {
+                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                    })));
+                $rowTotal.append($('<td/>').html(parseFloat($column4Total).toFixed(2).replace(/./g,
+                    function(c, i, a) {
+                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                    })));
+                $rowTotal.append($('<td/>').html(parseFloat($column5Total).toFixed(2).replace(/./g,
+                    function(c, i, a) {
+                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                    })));
+                
+                var theadTotal =
+                    '<thead><tr>' +
+                    '<th style="style="width: 10%;"></th>' +
+                    '<th style="style="width: 5%;"></th>' +
+                    '<th style="style="width: 10%;"></th>' +
+                    '<th style="style="width: 5%;"></th>' +
+                    '<th style="style="width: 8%;"></th>' +
+                    '<th style="style="width: 15%;"></th>' +
+                    '<th style="style="width: 5%;"></th>' +
+                    '<th style="style="width: 9%;"></th>' +
+                    '<th style="style="width: 5%;"></th>' +
+                    '<th style="style="width: 8%;"></th>' +
+                    '<th style="style="width: 10%;"></th>' +
+                    '<th style="style="width: 10%;"></th>' +
+                    '</tr></thead>';
+                $tableTotal.append(theadTotal);
+                $tbodyTotal.append($rowTotal);
+                $tableTotal.append($tbodyTotal);
+                $('#totalRows').html($tableTotal);
+            }
+            else {
+                $('#itemRows').html('');
+                toastr.info('No se encontraron articulos con ese criterio', 'Busqueda');
+            }
+        }
+        
+        function borrar() {
+            $('#itemRows').html('');
+            $('#totalRows').html('');
+        }
+    </script>
+}

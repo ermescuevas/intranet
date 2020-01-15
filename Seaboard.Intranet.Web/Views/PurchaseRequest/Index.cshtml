@@ -1,0 +1,376 @@
+﻿@using Seaboard.Intranet.Domain.ViewModels;
+
+@model IEnumerable<Seaboard.Intranet.Domain.ViewModels.PurchaseRequestViewModel>
+@{
+    ViewBag.Title = "Solicitudes de almacen";
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Solicitudes de almacen</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Listado de solicitudes de almacen</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>Listado de solicitudes de almacen</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <div class="row m-t-sm">
+                        <div class="col-lg-12">
+                            <div class="panel blank-panel">
+                                <div class="panel-heading">
+                                    <div class="panel-options">
+                                        <ul class="nav nav-tabs">
+                                            <li id="tabButton1" class="active"><a href="#tab-1" data-toggle="tab">Recientes</a></li>
+                                            <li id="tabButton2" class=""><a href="#tab-2" data-toggle="tab">Historico</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div class="panel-body">
+                                    <div class="tab-content" id="tabContainer">
+                                        <div class="tab-pane active" id="tab-1">
+                                            @Html.ActionLink("NUEVA SOLICITUD", "Create", "PurchaseRequest", null, new { @class = "btn btn-primary" })
+                                            <div class="hr-line-dashed"></div>
+                                            <table class="table table-striped table-bordered table-hover informationTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width:15%">Solicitud</th>
+                                                        <th style="width:12%">No. Requisición</th>
+                                                        <th style="width:25%">Descripción</th>
+                                                        <th style="width:10%">Prioridad</th>
+                                                        <th style="width:12%">Fecha doc</th>
+                                                        <th style="width:12%">Fecha req</th>
+                                                        <th style="width:5%">Solicitante</th>
+                                                        <th style="width:10%">AR</th>
+                                                        <th style="width:8%">Estado</th>
+                                                        <th style="width:30%">#</th>
+                                                    </tr>
+                                                </thead>
+
+                                                <tbody>
+                                                    @foreach (var item in Model)
+                                                    {
+                                                        <tr>
+                                                            <td>@Html.ActionLink(item.RequestId, "Edit", new { id = @item.RequestId })</td>
+                                                            <td>@item.WorkNumber</td>
+                                                            <td>@item.Description</td>
+                                                            <td class="text-center">
+                                                                @switch (item.Priority.ToLower())
+                                                                {
+                                                                    case "baja":
+                                                                        <span class="label label-success">Baja</span>
+                                                                        break;
+                                                                    case "normal":
+                                                                        <span class="label label-warning">Normal</span>
+                                                                        break;
+                                                                    case "alta":
+                                                                        <span class="label label-danger">Alta</span>
+                                                                        break;
+                                                                    default:
+                                                                        <span class="label label-success">Baja</span>
+                                                                        break;
+                                                                }
+                                                            </td>
+                                                            <td>@item.DocumentDate.ToShortDateString()</td>
+                                                            <td>@item.RequiredDate.ToShortDateString()</td>
+                                                            <td>@item.Requester</td>
+                                                            <td>
+                                                                @if (!string.IsNullOrEmpty(item.Ar))
+                                                                {
+                                                                    if (item.Ar.Trim().ToUpper() == "NO")
+                                                                    {
+                                                                        @item.Ar;
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        @Html.ActionLink(item.Ar, "Details", "AR", new { @id = item.Ar }, null);
+                                                                    }
+                                                                }
+                                                                else
+                                                                {
+                                                                    @item.Ar;
+                                                                }
+                                                            </td>
+                                                            <td>
+                                                                @switch (item.Status)
+                                                                {
+                                                                    case "No enviado":
+                                                                        <i class="badge badge-danger">@item.Status</i>
+                                                                        break;
+                                                                    case "Enviada":
+                                                                        <i class="badge badge-warning-light">@item.Status</i>
+                                                                        break;
+                                                                    case "En Proceso":
+                                                                        <i class="badge badge-primary">@item.Status</i>
+                                                                        break;
+                                                                    case "Anulado":
+                                                                        <i class="badge badge-warning">@item.Status</i>
+                                                                        break;
+                                                                    case "Aprobado":
+                                                                        <i class="badge badge-info">@item.Status</i>
+                                                                        break;
+                                                                    case "Rechazado":
+                                                                        <i class="badge badge-warning">@item.Status</i>
+                                                                        break;
+                                                                    case "Cerrada":
+                                                                        <i class="badge badge-success">@item.Status</i>
+                                                                        break;
+                                                                }
+                                                            </td>
+                                                            <td>
+                                                                <div class="btn-group">
+                                                                    <a class="modal-link" href="@Url.Action("Details", "PurchaseRequest", new { id = item.RequestId })"><i class="fa fa-bars"></i></a>
+                                                                    <a onclick="Print('@item.RequestId');"><i class="fa fa-print"></i></a>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="tab-pane" id="tab-2">
+                                            <div class="row">
+                                                <div class="col-sm-2">
+                                                    <div class="form-group">
+                                                        <div class="form-group">
+                                                            <label class="control-label">Fecha desde</label>
+                                                            <div class="col-sm-12 input-group date">
+                                                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                                <input id="fromDate" name="fromDate" class="form-control" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-sm-2">
+                                                    <div class="form-group">
+                                                        <label class="control-label">Fecha hasta</label>
+                                                        <div class="col-sm-12 input-group date">
+                                                            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                            <input id="toDate" name="toDate" class="form-control" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+
+                                                <div class="col-sm-2">
+                                                    <div class="form-group">
+                                                        <label class="control-label">&nbsp;</label>
+                                                        <button class="form-control btn btn-primary" onclick="consultar();">Buscar <i class="fa fa-search"></i></button>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                            <div class="hr-line-dashed"></div>
+                                            <div class="table-responsive" id="documentRows">
+                                                @Html.Partial("_List",new List<PurchaseRequestViewModel>())
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-container" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content animated flipInY">
+            </div>
+        </div>
+    </div>
+</div>
+@section Styles {
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/dataPicker")
+
+<script type="text/javascript">
+        $(document).ready(function () {
+            $('body').on('click', '.modal-link', function (e) {
+                e.preventDefault();
+                $(this).attr('data-target', '#modal-container');
+                $(this).attr('data-toggle', 'modal');
+            });
+
+            $('#modal-container').on('hidden.bs.modal', function () {
+                $(this).removeData('bs.modal');
+            });
+
+            $('.informationTable').DataTable({
+                pageLength: 10,
+                order: [[0, "desc"]],
+                dom: '<"html5buttons"B>lTfgitp',
+                language: {
+                    "sProcessing": "Procesando... ",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:  ",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                },
+                oAria: {
+                    "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                },
+                buttons: [
+                    { extend: 'copy' },
+                    { extend: 'csv' },
+                    { extend: 'excel', title: 'ExampleFile' },
+                    { extend: 'pdf', title: 'ExampleFile' },
+
+                    {
+                        extend: 'print',
+                        customize: function (win) {
+                            $(win.document.body).addClass('white-bg');
+                            $(win.document.body).css('font-size', '10px');
+
+                            $(win.document.body).find('table')
+                                .addClass('compact')
+                                .css('font-size', 'inherit');
+                        }
+                    }
+                ]
+            });
+
+            $('#fromDate').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true
+            });
+
+            $('#toDate').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true
+            });
+        });
+
+    function consultar() {
+        $.ajax({
+            url: '@Url.Action("List", "PurchaseRequest")?fromDate=' + $('#fromDate').datepicker({ dateFormat: 'ddMMyyyy' }).val() + '&toDate=' + $('#toDate').datepicker({ dateFormat: 'ddMMyyyy' }).val(),
+            type: "POST",
+            data: "",
+            async: false,
+            success: function (result) {
+                $('#documentRows').html(result);
+                $('#documentTable').DataTable({
+                    pageLength: 10,
+                    order: [[0, "desc"]],
+                    dom: '<"html5buttons"B>lTfgitp',
+                    language: {
+                        "sProcessing": "Procesando... ",
+                        "sLengthMenu": "Mostrar _MENU_ registros",
+                        "sZeroRecords": "No se encontraron resultados",
+                        "sEmptyTable": "Ningún dato disponible en esta tabla",
+                        "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                        "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                        "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                        "sInfoPostFix": "",
+                        "sSearch": "Buscar:  ",
+                        "sUrl": "",
+                        "sInfoThousands": ",",
+                        "sLoadingRecords": "Cargando...",
+                        "oPaginate": {
+                            "sFirst": "Primero",
+                            "sLast": "Último",
+                            "sNext": "Siguiente",
+                            "sPrevious": "Anterior"
+                        }
+                    },
+                    oAria: {
+                        "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                        "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                    },
+                    buttons: [
+                        { extend: 'copy' },
+                        { extend: 'csv' },
+                        { extend: 'excel', title: 'ExampleFile' },
+                        { extend: 'pdf', title: 'ExampleFile' },
+
+                        {
+                            extend: 'print',
+                            customize: function (win) {
+                                $(win.document.body).addClass('white-bg');
+                                $(win.document.body).css('font-size', '10px');
+
+                                $(win.document.body).find('table')
+                                    .addClass('compact')
+                                    .css('font-size', 'inherit');
+                            }
+                        }
+                    ]
+
+                });
+            }
+        });
+    }
+
+    function Print(id) {
+        var url = '@Url.Content("~/PDF/Requisicion/")' + id + '.pdf';
+        toastr.info('Estamos procesando su solicitud', 'Por favor espere')
+        $.ajax({
+            url: '@Url.Action("Print", "PurchaseRequest")?id=' + id,
+            type: "POST",
+            data: "",
+            cache: false,
+            dataType: "JSON",
+            contentType: "application/json",
+            success: function (result) {
+                window.open(url);
+            },
+            error: function (result) {
+                alert(result.status)
+            }
+        });
+    }
+
+</script>
+}

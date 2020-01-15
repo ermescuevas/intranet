@@ -1,0 +1,189 @@
+﻿@using Microsoft.AspNet.Identity;
+@using Seaboard.Intranet.BusinessLogic
+@{
+    var reportPermission = Account.GetAccountPermission(User.Identity.GetUserName()).Any(p => p.Action == "BillingReport" && p.Controller == "Home");
+}
+<div class="row border-bottom white-bg">
+    <nav class="navbar navbar-static-top" role="navigation">
+        <div class="navbar-header">
+            <button aria-controls="navbar" aria-expanded="false" data-target="#navbar" data-toggle="collapse" class="navbar-toggle collapsed" type="button">
+                <i class="fa fa-reorder"></i>
+            </button>
+            <a href="@Url.Action("Index", "Home")" class="navbar-brand">SEABOARD</a>
+        </div>
+        <div class="navbar-collapse collapse" id="navbar">
+            <ul class="nav navbar-nav">
+                <li class="dropdown">
+                    <a aria-expanded="false" role="button" href="#" class="dropdown-toggle" data-toggle="dropdown"> Solicitudes <span class="caret"></span></a>
+                    <ul role="menu" class="dropdown-menu">
+                        <li><a href="@Url.Action("Index", "PurchaseRequest")">Almacen</a></li>
+                        <li><a href="@Url.Action("Index", "PettyCash")">Caja Chica</a></li>
+                        <li><a href="@Url.Action("Index", "ServiceRequest")">Servicio</a></li>
+                        <li><a href="@Url.Action("Index", "PaymentRequest")">Pago</a></li>
+                        <li><a href="@Url.Action("UserRequest", "HumanResources")">Creación usuario de red</a></li>
+                        <li><a href="@Url.Action("Index", "PurchaseQuotation")">Cotizacion compras</a></li>
+                    </ul>
+                </li>
+
+                <li class="dropdown">
+                    <a role="button" href="#" class="dropdown-toggle" data-toggle="dropdown"> Compras <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-submenu">
+                            <a href="#">Almacen</a>
+                            <ul class="dropdown-menu">
+                                <li><a href="@Url.Action("UnDispachtRequest", "PurchaseRequest")">Solicitudes de compra</a></li>
+                                <li><a href="@Url.Action("IndexWarehouse", "ServiceRequest")">Reabastecimiento</a></li>
+                                <li><a href="@Url.Action("IndexWarehouse", "PurchaseRequest")">Consulta General</a></li>
+                                <li><a href="@Url.Action("Create", "Inventory")">Req. Automatica</a></li>
+                                <li><a href="@Url.Action("Edit", "Inventory")">Nivel de reorden</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown-submenu">
+                            <a href="#">Logistica</a>
+                            <ul class="dropdown-menu">
+                                <li><a href="@Url.Action("DispachtIndex", "Logistic")">Despacho</a></li>
+                                <li><a href="@Url.Action("ReturnIndex", "Logistic")">Devolucion</a></li>
+                                <li><a href="@Url.Action("DepartmentIndex", "Logistic")">Departamento</a></li>
+                                <li><a href="@Url.Action("UserDepartment", "Logistic")">Asignación usuario</a></li>
+                                <li><a href="@Url.Action("AccountDepartment", "Logistic")">Asignación clase de artículo</a></li>
+                                <li><a href="@Url.Action("SiteDepartment", "Logistic")">Asignación sitio</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown-submenu">
+                            <a href="#">Reportes</a>
+                            <ul class="dropdown-menu">
+                                <li><a href="@Url.Action("InventoryReport", "Inventory")">Inventario multimoneda</a></li>
+                                <li><a href="@Url.Action("DepartmentMovementReport", "Inventory")">Gastos por departamento</a></li>
+                                <li><a href="@Url.Action("InvoiceMovementReport", "Inventory")">Facturas recibidas</a></li>
+                                <li><a href="@Url.Action("StockReport", "Logistic")">Stock de inventario</a></li>
+                                <li><a href="@Url.Action("ReorderReport", "Logistic")">Niveles de reorden</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown-submenu">
+                            <a href="#">Consultas</a>
+                            <ul class="dropdown-menu">
+                                <li><a href="@Url.Action("InventoryInquiry", "Inventory")">Inventario multimoneda</a></li>
+                                <li><a href="@Url.Action("DepartmentMovementInquiry", "Inventory")">Gastos por departamento</a></li>
+                                <li><a href="@Url.Action("InvoiceMovementInquiry", "Inventory")">Facturas recibidas</a></li>
+                                <li>&nbsp;</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="dropdown">
+                    <a href="@Url.Action("Index", "Billing")" class="dropdown-toggle"> Negocios </a>
+                </li>
+
+                <li class="dropdown">
+                    <a aria-expanded="false" role="button" href="#" class="dropdown-toggle" data-toggle="dropdown"> Recursos Humanos <span class="caret"></span></a>
+                    <ul role="menu" class="dropdown-menu">
+                        <li class="dropdown-submenu">
+                            <a href="#">Solicitudes</a>
+                            <ul class="dropdown-menu">
+                                <li><a href="@Url.Action("AbsenceRequest","HumanResources")">Solicitud de ausencias</a></li>
+                                <li><a href="@Url.Action("Index", "PaymentVoucher")">Volante de pago</a></li>
+                                <li><a href="@Url.Action("TrainingRequest", "HumanResources")">Solicitud de capacitación</a></li>
+                                <li><a href="@Url.Action("PayrollView", "PaymentVoucher")">Acceso a nominas</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown-submenu">
+                            <a href="#">Transacciones</a>
+                            <ul class="dropdown-menu">
+                                <li><a href="@Url.Action("OvertimeRequest","HumanResources")">Horas Extras</a></li>
+                                <li><a href="@Url.Action("ExtraOvertimeRequest", "HumanResources")">Horas Extras extraordinarias</a></li>
+                                <li><a href="@Url.Action("HumanResourcesOvertime", "HumanResources")">Nomina - Horas Extras</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown-submenu">
+                            <a href="#">Consultas</a>
+                            <ul class="dropdown-menu">
+                                <li><a href="@Url.Action("AbsenceReport","HumanResources")">Ausencias procesadas</a></li>
+                                <li><a href="@Url.Action("VacationPendingReport", "HumanResources")">Vacaciones pendientes</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown-submenu">
+                            <a href="#">Configuración</a>
+                            <ul class="dropdown-menu">
+                                <li><a href="@Url.Action("AbsenceConfiguration","HumanResources")">Reglas de ausencias</a></li>
+                                <li><a href="@Url.Action("HolidayConfiguration", "HumanResources")">Dias feriados</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="dropdown">
+                    <a role="button" href="#" class="dropdown-toggle" data-toggle="dropdown"> Otros <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-submenu">
+                            <a href="#">Transacciones</a>
+                            <ul class="dropdown-menu">
+                                <li><a href="@Url.Action("Index", "AccountPayables")">Facturas</a></li>
+                                <li><a href="@Url.Action("Index", "Ar")">AR</a></li>
+                                <li><a href="@Url.Action("Index", "FoodMenu")">Menu de comida</a></li>
+                                <li><a href="@Url.Action("Index", "EmployeeExtension")">Directorio telefonico</a></li>
+                                <li><a href="@Url.Action("Index", "WtSupplier")">Perfil para el WT de Suplidor</a></li>
+                                <li><a href="@Url.Action("Index", "PayrollBatch")">Nómina</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown-submenu">
+                            <a href="#">Consultas</a>
+                            <ul class="dropdown-menu">
+                                <li><a href="@Url.Action("Index", "PaymentVoucher")">Volante de pago</a></li>
+                                <li><a href="@Url.Action("Inquiry", "Ar")">AR</a></li>
+                                <li><a href="@Url.Action("Project", "Ar")">Proyectos</a></li>
+                                <li><a href="@Url.Action("AR_Consult", "Ar")">Detalle de AR</a></li>
+                                <li><a href="@Url.Action("AmountItem", "PurchaseRequest")">Cantidad de articulo</a></li>
+                                <li><a href="@Url.Action("OpenPurchaseOrders", "Home")">Estado ordenes abiertas</a></li>
+                                <li><a href="@Url.Action("ApprovalHistory", "Home")">Aprobaciones electronicas</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown-submenu">
+                            <a href="#">Configuración</a>
+                            <ul class="dropdown-menu">
+                                <li><a href="@Url.Action("Index", "Account")">Usuarios</a></li>
+                                <li><a href="@Url.Action("UserPermissionReport", "Account")">Permisos de usuarios</a></li>
+                                <li><a href="@Url.Action("Configuration", "PurchaseQuotation")">Cotizacion de compras</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+
+            <ul class="nav navbar-top-links navbar-right">
+                <li>
+                    @if (Request.IsAuthenticated)
+                    {
+                        <a data-toggle="dropdown" class="dropdown-toggle" href="#">
+                            <i class="fa fa-user-circle fa-2x"></i> &nbsp; &nbsp;
+                            <strong class="font-bold">@(Account.GetAccount(User.Identity.GetUserName()) == null ? "" : Account.GetAccount(User.Identity.GetUserName()).FirstName + " " + Account.GetAccount(User.Identity.GetUserName()).LastName) </strong>
+                        </a>
+                        <ul class="dropdown-menu animated fadeInRight m-t-xs">
+                            <li><a href="@Url.Action("Index", "PaymentVoucher")">Perfil</a></li>
+                            <li class="divider"></li>
+                            <li><a href="@Url.Action("ChangePassword", "Account")">Cambiar contraseña</a></li>
+                        </ul>
+                    }
+                    else
+                    {
+                        <span class="block m-t-xs"><strong class="font-bold">Usuario anonimo</strong></span>
+                    }
+                </li>
+                <li>
+                    @if (Request.IsAuthenticated)
+                    {
+                        using (Html.BeginForm("Logoff", "Account", FormMethod.Post, new { id = "logoutForm", @class = "navbar-right" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <a href="javascript:document.getElementById('logoutForm').submit()"><i class="fa fa-sign-out"></i> Salir</a>
+                        }
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("Login", "Account")" id="loginLink"><i class="fa fa-sign-in"></i> Acceder</a>
+                    }
+                </li>
+            </ul>
+        </div>
+    </nav>
+</div>

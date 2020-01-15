@@ -1,0 +1,736 @@
+﻿@using Microsoft.AspNet.Identity;
+@model IEnumerable<Seaboard.Intranet.Domain.Models.UserRequest>
+@{
+    ViewBag.Title = "Solicitud de Creación de Usuario";
+    var employees = (List<Seaboard.Intranet.Domain.ViewModels.Lookup>)ViewBag.Employees;
+    var departments = (List<Seaboard.Intranet.Domain.ViewModels.Lookup>)ViewBag.Departments;
+}
+
+<style>
+    .selected {
+        background-color: #e0f3ff;
+    }
+
+    .clockpicker-popover {
+        z-index: 999999;
+    }
+</style>
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Solicitud de Creación de Usuario</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Solicitud de Creación de Usuario</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox">
+                <div class="ibox-title">
+                    <h5>Solicitud de Creación de Usuario</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                        <a class="close-link">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="ibox-content">
+                    <button class="btn btn-danger" onclick="createRequest(0)">NUEVA SOLICITUD</button>
+                    <hr />
+                    <div class="row table-responsive">
+                        <table class="table table-striped table-bordered table-hover informationTable">
+                            <thead>
+                                <tr>
+                                    <th style="width:10%">Id. de solicitud</th>
+                                    <th style="width:8%">Solicitante</th>
+                                    <th style="width:9%">Cuenta Email</th>
+                                    <th style="width:9%">Internet</th>
+                                    <th style="width:8%">Horas Trabajo</th>
+                                    <th style="width:15%">Dias trabajo</th>
+                                    <th style="width:9%">Politicas IT</th>
+                                    <th style="width:7%">Estado</th>
+                                    <th style="width:10%">#</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@item.RequestId</td>
+                                        <td>@item.EmployeeName</td>
+                                        <td>
+                                            @if (item.EmailAccount == "1")
+                                            {
+                                                <p>Interno</p>
+                                            }
+                                            else
+                                            {
+                                                <p>Externo</p>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (item.InternetAccess == "1")
+                                            {
+                                                <p>Ilimitado</p>
+                                            }
+                                            else
+                                            {
+                                                <p>Limitado</p>
+                                            }
+                                        </td>
+                                        <td>@(item.StartTime + " - " + item.EndTime)</td>
+                                        <td>@item.DaysWork</td>
+                                        <td>@(item.IsPolicy ? "SI" : "NO")</td>
+                                        <td>
+                                            @if (item.Status == 0)
+                                            {
+                                                <i class="badge badge-danger">Creado</i>
+                                            }
+                                            else if (item.Status == 1)
+                                            {
+                                                <i class="badge badge-primary">Enviado</i>
+                                            }
+                                            else if (item.Status == 2)
+                                            {
+                                                <i class="badge badge-info">Aprobado</i>
+                                            }
+                                            else
+                                            {
+                                                <i class="badge badge-info">Rechazado</i>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-primary btn-xs" onclick="createRequest(@item.RowId, @item.Status)">Editar</button>
+                                                <button type="button" class="btn btn-danger btn-xs" onclick="deleteRequest(@item.RowId, @item.Status)">Eliminar</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-CreateHeader" class="modal inmodal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content animated fadeIn">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Nueva solicitud</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="RowId" name="RowId" value="0" />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Empleado a solicitar:</label>
+                                <select class="selectpicker form-control required" data-live-search="true" id="EmployeeId" name="EmployeeId">
+                                    <option value=""></option>
+                                    @foreach (var item in employees)
+                                    {
+                                        <option value="@item.Id.Trim()">@(item.Id + " - " + item.Descripción)</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Departamento Solicitante:</label>
+                                <select class="selectpicker form-control required" data-live-search="true" id="Department" name="Department">
+                                    <option value=""></option>
+                                    @foreach (var item in departments)
+                                    {
+                                        <option value="@item.Id.Trim()">@(item.Descripción)</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Seleccione las aplicaciones a utilizar por el usuario:</label>
+                                <form id="form" action="#" class="wizard-big">
+                                    <select id="Resources" name="Resources" data-placeholder="Seleccione los recursos..." class="dual_select" multiple>
+                                        <option value="1">Acceso VPN</option>
+                                        <option value="2">MS Dynamics GP (Compras)</option>
+                                        <option value="3">MS Dynamics GP (Ventas)</option>
+                                        <option value="4">MS Dynamics GP (Nomina)</option>
+                                        <option value="5">MS Dynamics GP (RRHH)</option>
+                                        <option value="6">MS Dynamics GP (CxP & CxC)</option>
+                                        <option value="7">MS Dynamics GP (Requisiciones)</option>
+                                        <option value="8">MS Office</option>
+                                        <option value="9">MS Windows</option>
+                                        <option value="10">Oracle JDE</option>
+                                        <option value="11">Perfil Intranet</option>
+                                        <option value="12">Equipo Portatil</option>
+                                        <option value="13">Equipo sobremesa</option>
+                                        <option value="14">Telefono móvil</option>
+                                        <option value="15">Telefono sobremesa</option>
+                                    </select>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Cuenta email:</label>
+                                <select class="form-control" id="EmailAccount" name="EmailAccount">
+                                    <option value="1">Interno</option>
+                                    <option value="2">Externo</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Internet:</label>
+                                <select class="form-control" id="InternetAccess" name="InternetAccess">
+                                    <option value="1">Ilimitado</option>
+                                    <option value="2">Limitado</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Hora Inicio:</label>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="input-group clockpicker" data-autoclose="true">
+                                            <input name="StartTime" id="StartTime" class="form-control" />
+                                            <span class="input-group-addon"><i class="fa fa-clock-o"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Hora Salida:</label>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="input-group clockpicker" data-autoclose="true">
+                                            <input name="EndTime" id="EndTime" class="form-control" />
+                                            <span class="input-group-addon"><i class="fa fa-clock-o"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Dias de Trabajo:</label>
+                                <select id="Days" name="Days" data-placeholder="Seleccione los dias de trabajo..." class="chosen-select" multiple tabindex="4">
+                                    <option value=""></option>
+                                    <option value="1">Domingo</option>
+                                    <option value="2">Lunes</option>
+                                    <option value="3">Martes</option>
+                                    <option value="4">Miercoles</option>
+                                    <option value="5">Jueves</option>
+                                    <option value="6">Viernes</option>
+                                    <option value="7">Sabado</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Comentarios:</label>
+                                <textarea id="Comments" rows="2" name="Comments" class="form-control"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (Seaboard.Intranet.BusinessLogic.Account.GetAccount(User.Identity.GetUserName()).Department == "INFORMATICA")
+                    {
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="checkbox-inline i-checks">
+                                        <input type="checkbox" name="itPolicy"> Ha anexado las politicas de IT ?
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-7">
+                                <form action="javascript:;" method="post" enctype="multipart/form-data" id="attachmentForm" accept-charset="utf-8">
+                                    <div class="col-md-11">
+                                        <div class="fileinput fileinput-new input-group" data-provides="fileinput">
+                                            <div class="form-control" data-trigger="fileinput"><i class="glyphicon glyphicon-file fileinput-exists"></i> <span class="fileinput-filename"></span></div>
+                                            <span class="input-group-addon btn btn-default btn-file"><span class="fileinput-new"><i class="fa fa-search"></i></span><span class="fileinput-exists"><i class="fa fa-edit"></i></span><input type="file" name="FileData" id="FileData"></span>
+                                            <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput"><i class="fa fa-remove"></i></a>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-1">
+                                        <button type="button" class="btn btn-success" onclick="atacharArchivo();"><i class="fa fa-save"></i></button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="col-md-5">
+                                <div id="attachmentFiles">
+
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <input type="checkbox" style="display:none;" name="itPolicy">
+                    }
+                </div>
+
+                <div class="modal-footer">
+                    <div class="form-actions no-color">
+                        <button type="button" class="ladda-button btn btn-primary" data-style="expand-left" id="saveButton" onclick="saveRequest();"> Guardar y enviar</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    @Styles.Render("~/Content/plugins/iCheck/iCheckStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/plugins/sweetAlertStyles")
+    @Styles.Render("~/plugins/awesomeCheckboxStyles")
+    @Styles.Render("~/Content/plugins/chosen/chosenStyles")
+    @Styles.Render("~/plugins/clockpickerStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/duallistStyles")
+    @Styles.Render("~/plugins/laddaStyles")
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/css/bootstrap-select.min.css">
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/iCheck")
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/sweetAlert")
+    @Scripts.Render("~/plugins/chosen")
+    @Scripts.Render("~/plugins/clockpicker")
+    @Scripts.Render("~/plugins/duallist")
+    @Scripts.Render("~/plugins/ladda")
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/bootstrap-select.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/i18n/defaults-en_US.js"></script>
+
+    <script type="text/javascript">
+        var value = "";
+        $(document).ready(function () {
+            $('.informationTable').DataTable({
+                pageLength: 10,
+                order: [[0, "desc"]],
+                dom: '<"html5buttons"B>lTfgitp',
+                language: {
+                    "sProcessing": "Procesando... ",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:  ",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                },
+                oAria: {
+                    "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                },
+                buttons: [
+                    { extend: 'copy' },
+                    { extend: 'csv' },
+                    { extend: 'excel', title: 'ExampleFile' },
+                    { extend: 'pdf', title: 'ExampleFile' },
+
+                    {
+                        extend: 'print',
+                        customize: function (win) {
+                            $(win.document.body).addClass('white-bg');
+                            $(win.document.body).css('font-size', '10px');
+
+                            $(win.document.body).find('table')
+                                .addClass('compact')
+                                .css('font-size', 'inherit');
+                        }
+                    }
+                ]
+
+            });
+            $('.i-checks').iCheck({
+                checkboxClass: 'icheckbox_square-green',
+                radioClass: 'iradio_square-green',
+            });
+            $('#StartDate').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true,
+                format: 'mm/dd/yyyy',
+                minDate: 0
+            });
+            $('#EndDate').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true,
+                format: 'mm/dd/yyyy',
+                minDate: 0
+            });
+            $('.clockpicker').clockpicker();
+            $.formattedDate = function (dateToFormat) {
+                var dateObject = new Date(dateToFormat);
+                var day = dateObject.getDate();
+                var month = dateObject.getMonth() + 1;
+                var year = dateObject.getFullYear();
+                day = day < 10 ? "0" + day : day;
+                month = month < 10 ? "0" + month : month;
+                var formattedDate = month + "/" + day + "/" + year;
+                return formattedDate;
+            };
+            $('.chosen-select').chosen({ width: "100%" });
+            $('.dual_select').bootstrapDualListbox({
+                selectorMinimalHeight: 100,
+                showFilterInputs: false,
+                nonSelectedListLabel: 'Disponibles',
+                selectedListLabel: 'Seleccionados',
+                infoText: '',
+                filterTextClear: ''
+            });
+            $('.ladda-button').ladda();
+        });
+
+        function createRequest(rowId, status = 0) {
+            if (rowId > 0)
+                getRequest(rowId, status);
+            else
+            {
+                limpiarCampos();
+                $('#modal-CreateHeader').modal({ backdrop: 'static', keyboard: false });
+                $('#RowId').val(0);
+            }
+        }
+
+        function saveRequest() {
+            var isAllValid = true;
+            var isCompleted = false;
+            if ($('input[name="itPolicy"]').is(":checked"))
+                isCompleted = true;
+
+            if ($('#EmployeeId').val() === '') {
+                toastr.error('Por favor debe de especificar un solicitante para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Resources').val() === '') {
+                toastr.error('Por favor debe de especificar un recurso para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Department').val() === '') {
+                toastr.error('Por favor debe de especificar un departamento para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#StartTime').val() === '') {
+                toastr.error('Por favor debe de especificar una hora de inicio para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#EndTime').val() === '') {
+                toastr.error('Por favor debe de especificar una hora de salida para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Days').val() === '') {
+                toastr.error('Por favor debe de especificar un recurso para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+
+            if (isAllValid) {
+                $('#saveButton').ladda('start');
+                var data = {
+                    RowId: $('#RowId').val(),
+                    EmployeeId: $('#EmployeeId').val().trim(),
+                    StartTime: $('#StartTime').val().trim(),
+                    EndTime: $('#EndTime').val().trim(),
+                    DaysWork: $('#Days').val().join(','),
+                    Department: $('#Department').val().trim(),
+                    Resources: $('#Resources').val().join(','),
+                    EmailAccount: $('#EmailAccount').val().trim(),
+                    InternetAccess: $('#InternetAccess').val().trim(),
+                    Comments: $('#Comments').val().trim(),
+                    IsPolicy: isCompleted
+                }
+                $.ajax({
+                    url: '@Url.Action("SaveUserRequest", "HumanResources")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            window.location.reload();
+                        }
+                        else {
+                            $('#saveButton').ladda('stop');
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+                    }
+                });
+            }
+        }
+
+        function deleteRequest(rowId, status) {
+            if (status !== 2) {
+                swal({
+                    title: "Eliminar",
+                    text: "Esta seguro que desea eliminar este registro ?",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Si, eliminar!",
+                    cancelButtonText: "No, cancelar!",
+                    closeOnConfirm: true
+                }, function () {
+                    $.ajax({
+                        url: '@Url.Action("DeleteUserRequest", "HumanResources")?rowId=' + rowId,
+                        type: "POST",
+                        data: "",
+                        cache: false,
+                        dataType: "JSON",
+                        contentType: "application/json",
+                        success: function (result) {
+                            if (result.status === "OK") {
+                                window.location.reload();
+                            } else {
+                                swal({
+                                    title: "ERROR",
+                                    text: result.status,
+                                    type: "error"
+                                });
+                            }
+                        }
+                    });
+                });
+            } else {
+                swal({
+                    title: "ERROR",
+                    text: "No puede eliminarse por que esta en estado aprobado",
+                    type: "error"
+                });
+            }
+        }
+
+        function getRequest(rowId, status) {
+            if (status !== 2) {
+                $('#modal-CreateHeader').modal({ backdrop: 'static', keyboard: false });
+                $('#RowId').val(rowId);
+                $.ajax({
+                    url: '@Url.Action("GetUserRequest", "HumanResources")?rowId=' + rowId,
+                    type: "POST",
+                    data: "",
+                    cache: false,
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            $('#EmployeeId').val(result.model.EmployeeId);
+                            $('#Department').val(result.model.Department);
+                            $('#Resources').val(result.model.Resources);
+                            $('#EmailAccount').val(result.model.EmailAccount);
+                            $('#InternetAccess').val(result.model.InternetAccess);
+                            $('#StartTime').val(result.model.StartTime);
+                            $('#EndTime').val(result.model.EndTime);
+                            $('#Days').val(result.model.Days);
+                            $('#Comments').val(result.model.Comments);
+                            if (result.model.IsPolicy === true)
+                                $('input[name="itPolicy"]').iCheck('check');
+                            $.each(result.model.DaysWork.split(","), function (i, e) {
+                                $("#Days option[value='" + e + "']").prop("selected", true);
+                            });
+                            $.each(result.model.Resources.split(","), function (i, e) {
+                                $("#Resources option[value='" + e + "']").prop("selected", true);
+                            });
+                            $('#Resources').bootstrapDualListbox('refresh', null);
+                            $('.selectpicker').selectpicker('refresh');
+                            $('#Days').trigger("chosen:updated");
+                            cargarArchivos();
+                        } else {
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+                    }
+                });
+            } else {
+                swal({
+                    title: "ERROR",
+                    text: "No puede editarse por que esta en estado aprobado",
+                    type: "error"
+                });
+            }
+        }
+
+        function cargarArchivos() {
+            $.ajax({
+                url: '@Url.Action("LoadAttachmentFiles", "HumanResources")?id=UserReq' + $('#RowId').val().trim(),
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    attachmentFiles = result;
+                    if (attachmentFiles.length > 0) {
+                        var $ul = $('<ul class="list-unstyled file-list" />');
+                        $.each(attachmentFiles, function (i, val) {
+                            var $li = $('<li/>');
+                            var $a = $('<a href="@Url.Action("Download","HumanResources")?id=UserReq' + $('#RowId').val().trim() + '&FileName=' + val.trim() + '" />')
+                            var $delete = $('<a href="#" />')
+                            $a.append($('<i class="fa fa-file-pdf-o" />'));
+                            $delete.html("&nbsp; &nbsp; &nbsp;");
+                            $delete.click(function (e) {
+                                e.preventDefault();
+                                eliminarArchivo(val.trim());
+                            });
+                            $delete.append($('<i class="fa fa-remove fa-2x" />'));
+                            $li.append($a.html("  " + val));
+                            $li.append($delete);
+                            $ul.append($li);
+                        });
+                        $('#attachmentFiles').html($ul);
+                    }
+                    else {
+                        $('#attachmentFiles').html('');
+                    }
+                }
+            });
+        }
+
+        function atacharArchivo() {
+            var data = new FormData();
+            data.append("FileData", document.getElementById("FileData").files[0]);
+            data.append("id", 'UserReq' + $('#RowId').val());
+            $.ajax({
+                url: '@Url.Action("AttachFile", "HumanResources")',
+                type: "POST",
+                data: data,
+                dataType: "JSON",
+                contentType: false,
+                processData: false,
+                success: function (d) {
+                    if (d.status == true) {
+                        $('#attachmentForm').each(function () {
+                            this.reset();
+                        });
+                        toastr.success('Archivo adjuntado correctamente', 'Adjuntos')
+                        cargarArchivos();
+                    }
+                    else {
+                        alert('Ha ocurrido un error');
+                    }
+                },
+                error: function () {
+                    alert('Error. Por favor trate de nuevo.');
+                }
+            });
+        }
+
+        function eliminarArchivo(fileName) {
+            if (confirm("Esta seguro que desea eliminar este archivo ?")) {
+                $.ajax({
+                    url: '@Url.Action("DeleteFile", "HumanResources")?id=UserReq' + $('#RowId').val().trim() + "&fileName=" + fileName,
+                    type: "POST",
+                    dataType: "JSON",
+                    contentType: false,
+                    processData: false,
+                    success: function (d) {
+                        if (d.status == "OK") {
+                            toastr.success('Archivo eliminado correctamente', 'Adjuntos');
+                            cargarArchivos();
+                        }
+                        else {
+                            alert(d.status);
+                        }
+                    }
+                });
+            }
+        }
+
+        function limpiarCampos() {
+            $('#EmployeeId').val('');
+            $('#RowId').html('0');
+            $('#Department').val('');
+            $('#Resources').val('');
+            $('#EmailAccount').val('');
+            $('#InternetAccess').val('');
+            $('#Days').val('');
+            $('#StartTime').val('');
+            $('#EndTime').val('');
+            $('#Comments').val('');
+            $('#Requirements').val('');
+            $('#attachmentFiles').html('');
+            $('#Objectives').val('');
+            $('input[name="itPolicy"]').iCheck('uncheck');
+            $('.selectpicker').selectpicker('refresh');
+            $('#Resources').trigger("chosen:updated");
+            $('#Days').trigger("chosen:updated");
+        }
+    </script>
+}

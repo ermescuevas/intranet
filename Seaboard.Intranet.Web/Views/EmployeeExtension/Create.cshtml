@@ -1,0 +1,99 @@
+﻿@model Seaboard.Intranet.Domain.Models.EmployeeExtension
+
+@{
+    ViewBag.Title = "Extensiones";
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Extension</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li>
+                <a href="@Url.Action("Index", "EmployeeExtension")">Listado de extensiones</a>
+            </li>
+            <li class="active">
+                <strong>Extension</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="wrapper wrapper-content animated fadeInRight ecommerce">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <h3>Extension</h3>
+                    </div>
+                    <div class="ibox-content">
+                        <div class="form-group">
+                            <div class="col-sm-12 col-sm-offset-1">
+                                <button class="btn btn-primary" type="submit"><i class="fa fa-save"></i> Guardar</button>
+                                <button class="btn btn-white" type="reset"><i class="fa fa-eraser"></i> Borrar</button>
+                            </div>
+                        </div>
+                        <br />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="panel-body">
+                <fieldset class="form-horizontal">
+                    <div class="col-md-6 col-sm-6 col-xs-12">
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Name, "Nombre", new { @class = "col-sm-4 control-label" })
+                            <div class="col-sm-8 input-group">
+                                @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
+                            </div>
+                                @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+                            </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.LastName, "Apellido", new { @class = "col-sm-4 control-label" })
+                            <div class="col-sm-8 input-group">
+                                @Html.EditorFor(model => model.LastName, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.ExtensionNumber, "Numero de extension", new { @class = "col-sm-4 control-label" })
+                            <div class="col-sm-8 input-group">
+                                @Html.EditorFor(model => model.ExtensionNumber, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.ExtensionNumber, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-sm-6 col-xs-12">
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.CellPhone, "Numero de flota", new { @class = "col-sm-4 control-label" })
+                            <div class="col-sm-8 input-group">
+                                @Html.EditorFor(model => model.CellPhone, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.CellPhone, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.DepartmentId, "Id. de departamento", new { @class = "col-sm-4 control-label" })
+                            <div class="col-sm-8 input-group">
+                                @Html.DropDownList("DepartmentId", null, htmlAttributes: new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.DepartmentId, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+}

@@ -1,0 +1,1087 @@
+﻿@model Seaboard.Intranet.Domain.Models.MemBillingHead
+@{
+    Layout = "~/Views/Shared/_BillingLayout.cshtml";
+    ViewBag.Title = "Facturación miscelaneas";
+    decimal totalPesos = ViewBag.TotalPesos;
+    decimal totalDolar = ViewBag.TotalDolar;
+    int cantidad = ViewBag.QuantityTrans;
+    DateTime lastDate = Seaboard.Intranet.BusinessLogic.HelperLogic.GetLastDate();
+}
+
+<style>
+    .selected {
+        background-color: #e0f3ff;
+    }
+
+    .notAvailable {
+        background-color: #f5efb5;
+    }
+
+    .bootstrap-select:not([class*=col-]):not([class*=form-control]):not(.input-group-btn) {
+        width: 100%;
+    }
+</style>
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <br />
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li>
+                <a href="@Url.Action("MiscellaneousInvoiceEntryIndex", "Billing")">Listado de facturaciones</a>
+            </li>
+            <li class="active">
+                <strong>Facturación miscelaneas</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-content">
+                    <div class="form-group">
+                        <div class="col-sm-12 col-sm-offset-1">
+                            <button class="ladda-button btn btn-white" data-style="expand-left" type="button" id="postButton" onclick="verifyTransaction();"><i class="fa fa-exchange"></i> Someter</button>
+                            <button class="ladda-button btn btn-success" data-style="expand-right" type="button" id="saveButton" onclick="save();"><i class="fa fa-save"></i> Guardar</button>
+                            <button class="ladda-button btn btn-warning" data-style="expand-right" type="button" id="getFileButton" onclick="getTransactionFile();"><i class="fa fa-file-text"></i> Procesar archivo</button>
+                            <button class="btn btn-info" type="button" onclick="eliminar();"><i class="fa fa-remove"></i> Eliminar</button>
+                        </div>
+                    </div>
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="ibox">
+                <div class="ibox-content">
+                    <div class="row">
+                        <div class="row">
+                            <div class="col-3 col-md-3">
+                                <div class="form-group">
+                                    <label>Id. de lote</label>
+                                    @Html.TextBoxFor(m => m.BatchNumber, new { @class = "form-control" })
+                                </div>
+                            </div>
+
+                            <div class="col-6 col-md-6">
+                                <div class="form-group">
+                                    <label>Descripción</label>
+                                    @Html.TextBoxFor(m => m.BatchDescription, new { @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-2 col-md-2">
+                                <div class="form-group date">
+                                    <label>Fecha de documento</label>
+                                    <div class="col-sm-12 input-group date">
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        @Html.TextBoxFor(m => m.DocumentDate, new { @class = "form-control", Value = Model.DocumentDate.ToShortDateString() })
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-2 col-md-2">
+                                <div class="form-group date">
+                                    <label>Fecha de vencimiento</label>
+                                    <div class="col-sm-12 input-group date">
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        @Html.TextBoxFor(m => m.DueDate, new { @class = "form-control", Value = Model.DueDate.ToShortDateString() })
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            @Html.HiddenFor(m => m.ExchangeRate, new { @class = "form-control", value = "1" })
+
+                            <div class="col-5 col-md-5">
+                                <label>Ruta archivo buffer</label>
+                                <form id="form-" method="post" enctype="multipart/form-data" accept-charset="utf-8">
+                                    <div class="fileinput fileinput-new input-group" data-provides="fileinput">
+                                        <div class="form-control" data-trigger="fileinput"><i class="glyphicon glyphicon-file fileinput-exists"></i> <span class="fileinput-filename"></span></div>
+                                        <span class="input-group-addon btn btn-default btn-file">
+                                            <span class="fileinput-new"><i class="fa fa-folder-o"></i></span><span class="fileinput-exists"><i class="fa fa-folder-open"></i></span>
+                                            <input accept=".xlsx, .xls, .xlsm" type="file" name="FileData" id="FileData">
+                                        </span>
+                                        <a href="#" class="input-group-addon btn btn-default fileinput-exists" id="delete" data-dismiss="fileinput">Borrar</a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-2">
+                                &nbsp;
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <div class="ibox">
+                                        <h5>Total en Pesos</h5>
+                                        <div class="ibox-content">
+                                            <h3 id="totalPesos" class="font-bold">
+                                                @totalPesos.ToString("N2")
+                                            </h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <div class="ibox">
+                                        <h5>Total en Dólares</h5>
+                                        <div class="ibox-content">
+                                            <h3 id="totalDolar" class="font-bold">
+                                                @totalDolar.ToString("N2")
+                                            </h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <div class="ibox">
+                                        <h5>Cant. transacciones</h5>
+                                        <div class="ibox-content">
+                                            <h3 id="cantidad" class="font-bold">
+                                                @cantidad.ToString()
+                                            </h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="ibox">
+                <div class="ibox-title">
+                    <h5>Clientes</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+
+                        <a class="close-link">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="ibox-content">
+                    <div class="row table-responsive" id="customerRows">
+                        <table class="table informationTable">
+                            <thead>
+                                <tr>
+                                    <th style="width:10%">#</th>
+                                    <th style="width:25%">Id. de cliente</th>
+                                    <th style="width:25%">Moneda</th>
+                                    <th style="width:40%">Total facturación</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="ibox">
+                <div class="ibox-title">
+                    <h5>Lineas</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+
+                        <a class="close-link">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="ibox-content">
+                    <div class="row table-responsive" id="itemRows">
+                        <table class="table informationTable">
+                            <thead>
+                                <tr>
+                                    <th style="width:10%">#</th>
+                                    <th style="width:15%">Codigo</th>
+                                    <th style="width:25%">Descripción</th>
+                                    <th style="width:10%">Cant.</th>
+                                    <th style="width:20%">Monto</th>
+                                    <th style="width:20%">Total</th>
+                                </tr>
+                            </thead>
+
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-CreateCustomer" class="modal inmodal" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content animated fadeIn">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Asignación cliente OC a GP</h4>
+                </div>
+
+                <div class="modal-body">
+                    <div id="questions">
+                        <h3>Ha creado ya el cliente en GP para esta nueva asignación ?</h3>
+                        <br />
+                        <div class="row">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">Cliente:</label>
+                                <div class="col-sm-4 input-group">
+                                    <input type="text" readonly="readonly" class="form-control" id="newCustomer" />
+                                </div>
+                            </div>
+                        </div>
+                        <hr />
+                        <div>
+                            <button type="button" class="btn btn-lg btn-success" onclick="assignCustomerStep();">Si</button>
+                            <button type="button" class="btn btn-lg btn-danger" onclick="createCustomerStep();">No</button>
+                        </div>
+                    </div>
+                    <div id="assignCustomer" style="display:none">
+                        <label>Asignación de cliente</label>
+                        <div class="form-group">
+                            <div class="form-group">
+                                <label>Id. de cliente OC:</label>
+                                <input name="CustomerOC" id="CustomerOC" class="form-control" readonly="readonly" />
+                            </div>
+                            <label>Id. de cliente GP:</label>
+                            <select class="selectpicker" data-live-search="true" id="CustomerId" name="CustomerId"></select>
+                        </div>
+                        <hr />
+                        <button type="button" class="btn btn-lg btn-success" onclick="assignCustomer();">Aceptar</button>
+                    </div>
+                    <div id="createCustomer" style="display:none">
+                        <label>Desea crear un cliente nuevo ?</label>
+                        <br />
+                        <button type="button" class="btn btn-lg btn-success" onclick="createCustomer();">Si</button>
+                        <button type="button" class="btn btn-lg btn-default" data-dismiss="modal">Cancelar</button>
+                    </div>
+                    <div id="customerCreated">
+                        <label>Desea asignar el nuevo cliente que ha creado ?</label>
+                        <br />
+                        <button type="button" class="btn btn-lg btn-success" onclick="assignCustomerStep();">Si</button>
+                        <button type="button" class="btn btn-lg btn-default" data-dismiss="modal">Cancelar</button>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="form-actions no-color">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-Message" class="modal inmodal" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content animated fadeIn">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <i class="fa fa-warning modal-icon"></i>
+                    <h4 class="modal-title" id="myModalLabel">Verificar</h4>
+                </div>
+
+                <div class="modal-body" id="messageBody">
+
+                </div>
+                <div class="modal-footer">
+                    <div class="form-actions no-color">
+                        <button type="button" class="btn btn-success">Aceptar</button>
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-Question" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Pasos a seguir</h4>
+                    <h3>Desea ir directamente a la pantalla de pre-facturación ?</h3>
+                </div>
+
+                <div class="modal-body">
+                    <h2>Pre-facturación</h2>
+                    <p>Este proceso se utiliza para verificar, imprimir y postear las pre-facturas del lote generado.</p>
+                    <hr />
+                    <a type="button" class="btn btn-primary" href="@Url.Action("MemBillingTransactionIndex","Billing")"> Ir</a>
+                    <hr />
+                </div>
+
+                <div class="modal-footer">
+                    <div class="form-actions no-color">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal"> Quedarse</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    @Styles.Render("~/plugins/wizardStepsStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/awesomeCheckboxStyles")
+    @Styles.Render("~/plugins/clockpickerStyles")
+    @Styles.Render("~/plugins/dateRangeStyles")
+    @Styles.Render("~/Content/plugins/iCheck/iCheckStyles")
+    @Styles.Render("~/Content/plugins/chosen/chosenStyles")
+    @Styles.Render("~/plugins/switcheryStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/plugins/nouiSliderStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/Content/plugins/ionRangeSlider/ionRangeStyles")
+    @Styles.Render("~/plugins/imagecropperStyles")
+    @Styles.Render("~/Content/plugins/colorpicker/colorpickerStyles")
+    @Styles.Render("~/plugins/select2Styles")
+    @Styles.Render("~/plugins/touchSpinStyles")
+    @Styles.Render("~/plugins/tagInputsStyles")
+    @Styles.Render("~/plugins/duallistStyles")
+    @Styles.Render("~/plugins/sweetAlertStyles")
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/plugins/laddaStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/css/bootstrap-select.min.css">
+}
+
+@section Scripts {
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/wizardSteps")
+    @Scripts.Render("~/plugins/validate")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/iCheck")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/ionRange")
+    @Scripts.Render("~/plugins/nouiSlider")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/plugins/switchery")
+    @Scripts.Render("~/plugins/chosen")
+    @Scripts.Render("~/plugins/knob")
+    @Scripts.Render("~/plugins/imagecropper")
+    @Scripts.Render("~/plugins/colorpicker")
+    @Scripts.Render("~/plugins/clockpicker")
+    @Scripts.Render("~/plugins/dateRange")
+    @Scripts.Render("~/plugins/select2")
+    @Scripts.Render("~/plugins/touchSpin")
+    @Scripts.Render("~/plugins/tagInputs")
+    @Scripts.Render("~/plugins/duallist")
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+    @Scripts.Render("~/plugins/sweetAlert")
+    @Scripts.Render("~/plugins/ladda")
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/bootstrap-select.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/i18n/defaults-en_US.js"></script>
+
+    <script type="text/javascript">
+        var value = "";
+        var customerNotFound = [];
+        var itemToBilling = [];
+        $(document).ready(function () {
+            $('#BatchNumber').EnsureMaxLength({
+                limit: 15,
+                cssClass: '',
+                separator: '/',
+                placement: null
+            });
+            $('#BatchDescription').EnsureMaxLength({
+                limit: 61,
+                cssClass: '',
+                separator: '/',
+                placement: null
+            });
+            $('.informationTable').DataTable({
+                pageLength: 6,
+                order: [[0, "desc"]],
+                paging: false,
+                scrollCollapse: true,
+                scrollY: "50vh",
+                language: {
+                    "sProcessing": "Procesando... ",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:  ",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                },
+                oAria: {
+                    "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                }
+            });
+            $('#DocumentDate').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true,
+                minDate: new Date(@lastDate.Year, @lastDate.Month, @lastDate.Day)
+            });
+            $('#DueDate').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true,
+                minDate: new Date(@lastDate.Year, @lastDate.Month, @lastDate.Day)
+            });
+            if ($('#BatchNumber').val().trim() !== '') {
+                $('#getFileButton').hide();
+                generateHeader();
+                $('#BatchNumber').prop('readonly', true);
+            } else
+                $('#ExchangeRate').val('1');
+            $('.ladda-button').ladda();
+            if ($('#ExchangeRate').val() !== '') {
+                $('#ExchangeRate').val(parseFloat($('#ExchangeRate').val()).toFixed(4));
+            }
+        });
+
+        function getTransactionFile() {
+            var isAllValid = true;
+            var formdata = new FormData($('#form-')[0]);
+            if (formdata === null) {
+                toastr.info("Debe de especificar un archivo para poder procesarlo");
+                isAllValid = false;
+            }
+            if ($('#BatchNumber').val() === '') {
+                toastr.info("Debe de especificar un id. de lote para poder procesar el archivo");
+                isAllValid = false;
+            }
+
+            if (isAllValid) {
+                toastr.info('Procesando el archivo, por favor espere', 'Proceso');
+                $('#getFileButton').ladda('start');
+
+                $.ajax({
+                    url: '@Url.Action("GetMiscellaneousInvoiceTransactionFile", "Billing")?batchNumber=' + $('#BatchNumber').val(),
+                    type: 'POST',
+                    data: formdata,
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            $('#getFileButton').ladda('stop');
+                            var $table = $('<table  class="table table-stripped" id="customerTable"/>');
+                            var thead = '<thead>' +
+                                '<tr>' +
+                                '<th style="width:10%">Excluir</th>' +
+                                '<th style="width:25%">Id. de cliente</th>' +
+                                '<th style="width:25%">Moneda</th>' +
+                                '<th style="width:40%">Total facturación</th>' +
+                                '</tr>' +
+                                '</thead>';
+                            $table.append(thead);
+                            var $tbody = $('<tbody/>');
+                            $.each(result.registros,
+                                function (x, item) {
+                                    var $row = $('<tr/>');
+                                    var $labelCheck = $('<label>');
+                                    var $checkInput;
+                                    var $checkDiv = $('<div class="checkbox checkbox-success checkbox-circle text-center" style="margin-top: 1px; margin-bottom: 1px;">');
+                                    if (item.Exclude === false)
+                                        $checkInput = $('<input type="checkbox" name="check">');
+                                    else
+                                        $checkInput = $('<input type="checkbox" name="check" checked="checked">');
+                                    $checkDiv.append($checkInput).append($labelCheck);
+                                    $row.append($('<td/>').html($checkDiv));
+                                    $row.append($('<td/>').html(item.Debtor));
+                                    $row.append($('<td/>').html(item.CurrencyId));
+                                    $row.append($('<td/>').html(parseFloat(item.TotalAmount).toFixed(2).replace(/./g, function (c, i, a) {
+                                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                                    })));
+                                    $($row).click(function () {
+                                        $(this).addClass('selected').siblings().removeClass('selected');
+                                        generateDetails(item.Debtor, item.Marker);
+                                    });
+                                    $checkInput.click(function () {
+                                        if ($(this).is(':checked'))
+                                            updateMemBillingCustomerExclusion(item.Debtor, true);
+                                        else
+                                            updateMemBillingCustomerExclusion(item.Debtor, true);
+                                    });
+                                    $tbody.append($row);
+                                });
+
+                            $table.append($tbody);
+                            $('#customerRows').html($table);
+                            $('#totalPesos').html(parseFloat(result.totalPesos).toFixed(2).replace(/./g, function (c, i, a) {
+                                return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                            }));
+                            $('#totalDolar').html(parseFloat(result.totalDolar).toFixed(2).replace(/./g, function (c, i, a) {
+                                return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                            }));
+                            $('#cantidad').html(result.cantidad);
+                        } else {
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+                        $('#getFileButton').ladda('stop');
+                    }
+                });
+            }
+        }
+
+        function generateHeader() {
+             $.ajax({
+                 url: '@Url.Action("GetMiscellaneousInvoiceTransactionHeader", "Billing")?batchNumber=' + $('#BatchNumber').val(),
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                     if (result.status === "OK") {
+                         var $table = $('<table  class="table table-stripped" id="customerTable"/>');
+                         var thead = '<thead>' +
+                             '<tr>' +
+                             '<th style="width:10%">Excluir</th>' +
+                             '<th style="width:25%">Id. de cliente</th>' +
+                             '<th style="width:25%">Moneda</th>' +
+                             '<th style="width:40%">Total facturación</th>' +
+                             '</tr>' +
+                             '</thead>';
+                         $table.append(thead);
+                         var $tbody = $('<tbody/>');
+                         $.each(result.registros,
+                             function (x, item) {
+                                 var $row = $('<tr/>');
+                                 var $labelCheck = $('<label>');
+                                 var $checkInput;
+                                 var $checkDiv = $('<div class="checkbox checkbox-success checkbox-circle text-center" style="margin-top: 1px; margin-bottom: 1px;">');
+                                 if (item.Exclude === false)
+                                     $checkInput = $('<input type="checkbox" name="check">');
+                                 else
+                                     $checkInput = $('<input type="checkbox" name="check" checked="checked">');
+                                 $checkDiv.append($checkInput).append($labelCheck);
+                                 $row.append($('<td/>').html($checkDiv));
+                                 $row.append($('<td/>').html(item.CustomerId));
+                                 $row.append($('<td/>').html(item.CurrencyId));
+                                 $row.append($('<td/>').html(parseFloat(item.TotalAmount).toFixed(2).replace(/./g, function (c, i, a) {
+                                     return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                                 })));
+                                 $($row).click(function () {
+                                     $(this).addClass('selected').siblings().removeClass('selected');
+                                     generateDetails(item.Debtor, item.Marker);
+                                 });
+                                 $checkInput.click(function () {
+                                     if ($(this).is(':checked'))
+                                         updateMemBillingCustomerExclusion(item.Debtor, true);
+                                     else
+                                         updateMemBillingCustomerExclusion(item.Debtor, false);
+                                 });
+                                 $tbody.append($row);
+                             });
+
+                         $table.append($tbody);
+                         $('#customerRows').html($table);
+                         $($table).DataTable({
+                             pageLength: 6,
+                             order: [[0, "desc"]],
+                             paging: false,
+                             scrollCollapse: true,
+                             scrollY: "50vh",
+                             language: {
+                                 "sProcessing": "Procesando... ",
+                                 "sLengthMenu": "Mostrar _MENU_ registros",
+                                 "sZeroRecords": "No se encontraron resultados",
+                                 "sEmptyTable": "Ningún dato disponible en esta tabla",
+                                 "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                                 "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                                 "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                                 "sInfoPostFix": "",
+                                 "sSearch": "Buscar:  ",
+                                 "sUrl": "",
+                                 "sInfoThousands": ",",
+                                 "sLoadingRecords": "Cargando...",
+                                 "oPaginate": {
+                                     "sFirst": "Primero",
+                                     "sLast": "Último",
+                                     "sNext": "Siguiente",
+                                     "sPrevious": "Anterior"
+                                 }
+                             },
+                             oAria: {
+                                 "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                                 "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                             }
+                         });
+                     } else {
+                         swal({
+                             title: "ERROR",
+                             text: result.status,
+                             type: "error"
+                         });
+                     }
+                 }
+            });
+        }
+
+        function generateDetails(code, marker) {
+            $.ajax({
+                url: '@Url.Action("GetMiscellaneousInvoiceTransactionDetail", "Billing")?batchNumber=' + $('#BatchNumber').val() + "&customerId=" + code + '&flag=' + marker,
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    var $table = $('<table class="table table-stripped"/>');
+                    $table.append(
+                        '<thead>' +
+                        '<tr>' +
+                        '<th style="width:10%">Excluir</th>' +
+                        '<th style="width:15%">Codigo</th>' +
+                        '<th style="width:25%">Descripción</th>' +
+                        '<th style="width:10%">Cant.</th>' +
+                        '<th style="width:20%">Monto</th>' +
+                        '<th style="width:20%">Total</th>' +
+                        '</tr>' +
+                        '</thead>');
+                    if (result.registros.length > 0) {
+                        var $tbody = $('<tbody/>');
+                        $.each(result.registros, function (i, val) {
+                            var $row = $('<tr/>');
+                            var $labelCheck = $('<label>');
+                            var $checkInput;
+                            var $checkDiv = $('<div class="checkbox checkbox-success checkbox-circle text-center" style="margin-top: 1px; margin-bottom: 1px;">');
+                            if (val.Exclude === false)
+                                $checkInput = $('<input type="checkbox" name="check">');
+                            else
+                                $checkInput = $('<input type="checkbox" name="check" checked="checked">');
+                            $checkDiv.append($checkInput).append($labelCheck);
+                            $row.append($('<td/>').html($checkDiv));
+                            $row.append($('<td/>').html(val.ProductId));
+                            $row.append($('<td/>').html(val.ProductName));
+                            $row.append($('<td/>').html(parseFloat(val.Quantity).toFixed(2).replace(/./g, function (c, i, a) {
+                                return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                            })));
+                            $row.append($('<td/>').html(parseFloat(val.Amount).toFixed(2).replace(/./g, function (c, i, a) {
+                                return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                            })));
+                            $row.append($('<td/>').html(parseFloat(val.LineTotalAmount).toFixed(2).replace(/./g, function (c, i, a) {
+                                return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                            })));
+                            $checkInput.click(function () {
+                                if ($(this).is(':checked'))
+                                    updateMemBillingProductExclusion(code, val.ProductId, true);
+                                else
+                                    updateMemBillingProductExclusion(code, val.ProductId, false);
+                            });
+                            $tbody.append($row);
+                        });
+                        $table.append($tbody);
+                    }
+
+                    $('#itemRows').html($table);
+                    $($table).DataTable({
+                        pageLength: 6,
+                        order: [[0, "desc"]],
+                        paging: false,
+                        scrollCollapse: true,
+                        scrollY: "50vh",
+                        language: {
+                            "sProcessing": "Procesando... ",
+                            "sLengthMenu": "Mostrar _MENU_ registros",
+                            "sZeroRecords": "No se encontraron resultados",
+                            "sEmptyTable": "Ningún dato disponible en esta tabla",
+                            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                            "sInfoPostFix": "",
+                            "sSearch": "Buscar:  ",
+                            "sUrl": "",
+                            "sInfoThousands": ",",
+                            "sLoadingRecords": "Cargando...",
+                            "oPaginate": {
+                                "sFirst": "Primero",
+                                "sLast": "Último",
+                                "sNext": "Siguiente",
+                                "sPrevious": "Anterior"
+                            }
+                        },
+                        oAria: {
+                            "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                            "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                        }
+                    });
+                }
+            });
+        }
+
+        function verifyTransaction() {
+            var isAllValid = true;
+            if ($('#BatchNumber').val().trim() == '') {
+                toastr.error('Debe de especificar un id. de lote', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#BatchDescription').val().trim() == '') {
+                toastr.error('Debe de especificar una descripción', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#DocumentDate').val().trim() == '') {
+                toastr.error('Debe de especificar una fecha de documento', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#DueDate').val().trim() == '') {
+                toastr.error('Debe de especificar una fecha de vencimiento', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (parseFloat($('#totalPesos').html().trim().replace(/,/g, "")) === 0
+                && parseFloat($('#totalDolar').html().trim().replace(/,/g, "")) === 0) {
+                toastr.error('Debe de procesar un archivo de transacciones para continuar', 'Campos requeridos')
+                isAllValid = false;
+            }
+            if (parseFloat($('#totalDolar').html().trim().replace(/,/g, "")) > 0) {
+                if ($('#ExchangeRate').val().trim() === '') {
+                    toastr.error('Existen transacciones con moneda diferente de pesos debe de especificar una tasa para continuar', 'Campos requeridos')
+                    isAllValid = false;
+                }
+            }
+
+            if (isAllValid) {
+                verifyNcfAvailability();
+            }
+        }
+
+        function verifyNcfAvailability() {
+            var data = {
+                BatchNumber: $('#BatchNumber').val().trim(),
+                BatchDescription: $('#BatchDescription').val().trim(),
+                ResolutionNumber: '',
+                Note: '',
+                FilePath: '',
+                DocumentDate: $('#DocumentDate').val().trim(),
+                DueDate: $('#DueDate').val().trim(),
+                ExchangeRate: $('#ExchangeRate').val().trim(),
+                billingMonth: '01/01/1900',
+                billingType: 20
+            };
+            $.ajax({
+                url: '@Url.Action("SaveMemBillingTransaction", "Billing")',
+                type: "POST",
+                data: JSON.stringify(data),
+                cache: false,
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    if (result.status === "OK") {
+                        $.ajax({
+                            url: '@Url.Action("VerifyMemBillingNcfAvailability", "Billing")?batchNumber=' + $('#BatchNumber').val() + '&preInvoice=1&batch=0&billingType=20',
+                            type: "POST",
+                            data: "",
+                            cache: false,
+                            async: false,
+                            dataType: "JSON",
+                            contentType: "application/json",
+                            success: function (result) {
+                                if (result.status !== "OK") {
+                                    swal({
+                                        title: "INFORMACIÓN",
+                                        text: result.status,
+                                        type: "warning",
+                                        showCancelButton: true,
+                                        confirmButtonColor: "#DD6B55",
+                                        confirmButtonText: "Si, proceder!",
+                                        cancelButtonText: "No, cancelar!",
+                                        closeOnConfirm: false
+                                    }, function (isConfirm) {
+                                        if (isConfirm) {
+                                            post();
+                                        }
+                                    });
+                                } else {
+                                    post();
+                                }
+                            }
+                        });
+                    } else {
+                        swal({
+                            title: "ERROR",
+                            text: result.status,
+                            type: "error"
+                        });
+                    }
+                    $('#postButton').ladda('stop');
+                }
+            });
+        }
+
+        function save() {
+            var isAllValid = true;
+            $('#saveButton').ladda('start');
+            var isAllValid = true;
+            if ($('#BatchNumber').val().trim() == '') {
+                toastr.error('Debe de especificar un id. de lote', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#BatchDescription').val().trim() == '') {
+                toastr.error('Debe de especificar una descripción', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#DocumentDate').val().trim() == '') {
+                toastr.error('Debe de especificar una fecha de documento', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#DueDate').val().trim() == '') {
+                toastr.error('Debe de especificar una fecha de vencimiento', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (parseFloat($('#totalPesos').html().trim().replace(/,/g, "")) === 0
+                && parseFloat($('#totalDolar').html().trim().replace(/,/g, "")) === 0) {
+                toastr.error('Debe de procesar un archivo de transacciones para continuar', 'Campos requeridos')
+                isAllValid = false;
+            }
+            if (parseFloat($('#totalDolar').html().trim().replace(/,/g, "")) > 0) {
+                if ($('#ExchangeRate').val().trim() === '') {
+                    toastr.error('Existen transacciones con moneda diferente de pesos debe de especificar una tasa para continuar', 'Campos requeridos')
+                    isAllValid = false;
+                }
+            }
+
+            if (isAllValid) {
+                var data = {
+                    BatchNumber: $('#BatchNumber').val().trim(),
+                    BatchDescription: $('#BatchDescription').val().trim(),
+                    ResolutionNumber: '',
+                    Note: '',
+                    FilePath: '',
+                    DocumentDate: $('#DocumentDate').val().trim(),
+                    DueDate: $('#DueDate').val().trim(),
+                    ExchangeRate: $('#ExchangeRate').val().trim(),
+                    billingMonth: '01/01/1900',
+                    billingType: 20
+                };
+                $.ajax({
+                    url: '@Url.Action("SaveMemBillingTransaction", "Billing")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    cache: false,
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            window.location.href = '@Url.Action("MiscellaneousInvoiceEntryIndex", "Billing")';
+                        } else {
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+                        $('#saveButton').ladda('stop');
+                    }
+                });
+            }
+            else {
+                $('#saveButton').ladda('stop');
+            }
+        }
+
+        function post() {
+            if ($('#DocumentDate').val().trim() === $('#DueDate').val().trim()) {
+                swal({
+                    title: "Fecha",
+                    text: "La fecha de vencimiento es la misma que la del dia de hoy esta seguro que desea continuar ?",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Si, proceder!",
+                    cancelButtonText: "No, cancelar!",
+                    closeOnConfirm: false
+                }, function (isConfirm) {
+                    if (isConfirm) {
+                        $.ajax({
+                            url: '@Url.Action("PostMemBillingTransactionEntry", "Billing")?batchNumber=' + $('#BatchNumber').val().trim() + '&billingType=20',
+                            type: "POST",
+                            data: "",
+                            cache: false,
+                            async: false,
+                            dataType: "JSON",
+                            contentType: "application/json",
+                            success: function (result) {
+                                if (result.status === "OK") {
+                                    swal({
+                                        title: "PREGUNTA",
+                                        text: "Desea ir directamente hacia la pantalla de pre-facturación ?",
+                                        type: "warning",
+                                        showCancelButton: true,
+                                        confirmButtonColor: "#DD6B55",
+                                        confirmButtonText: "Si, deseo ir!",
+                                        cancelButtonText: "No, quedarme!",
+                                        closeOnConfirm: false
+                                    }, function (isConfirm) {
+                                        if (isConfirm) {
+                                            window.location.href = '@Url.Action("MemBillingTransactionIndex", "Billing", new { billingType = 20 })';
+                                        } else {
+                                            window.location.href = '@Url.Action("MiscellaneousInvoiceEntryIndex", "Billing")';
+                                        }
+                                    });
+                                } else {
+                                    swal({
+                                        title: "ERROR",
+                                        text: result.status,
+                                        type: "error"
+                                    });
+                                }
+                                $('#postButton').ladda('stop');
+                            }
+                        });
+                    } else {
+                        $('#postButton').ladda('stop');
+                    }
+                });
+            } else {
+                $.ajax({
+                    url: '@Url.Action("PostMemBillingTransactionEntry", "Billing")?batchNumber=' + $('#BatchNumber').val().trim() + '&billingType=20',
+                    type: "POST",
+                    data: "",
+                    cache: false,
+                    async: false,
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            swal({
+                                title: "PREGUNTA",
+                                text: "Desea ir directamente hacia la pantalla de pre-facturación ?",
+                                type: "warning",
+                                showCancelButton: true,
+                                confirmButtonColor: "#DD6B55",
+                                confirmButtonText: "Si, deseo ir!",
+                                cancelButtonText: "No, quedarme!",
+                                closeOnConfirm: false
+                            }, function (isConfirm) {
+                                if (isConfirm)
+                                    window.location.href = '@Url.Action("MemBillingTransactionIndex", "Billing", new { billingType = 20 })';
+                                else
+                                    window.location.href = '@Url.Action("MiscellaneousInvoiceEntryIndex", "Billing")';
+                            });
+                        } else {
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+                        $('#postButton').ladda('stop');
+                    }
+                });
+            }
+        }
+
+        function updateMemBillingProductExclusion(customerId, code, exclude) {
+            $.ajax({
+                url: '@Url.Action("UpdateMiscellaneousInvoiceTransactionProductExclusion", "Billing")?batchNumber=' + $('#BatchNumber').val() + "&customerId=" + customerId + "&productId=" + code + "&exclude=" + exclude,
+                type: "POST",
+                data: "",
+                cache: false,
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    if (result.status !== "OK")
+                        alert(result.status);
+                }
+            });
+        }
+
+        function updateMemBillingCustomerExclusion(code, exclude) {
+            $.ajax({
+                url: '@Url.Action("UpdateMiscellaneousInvoiceTransactionCustomerExclusion", "Billing")?batchNumber=' + $('#BatchNumber').val() + "&customerId=" + code + "&exclude=" + exclude,
+                type: "POST",
+                data: "",
+                cache: false,
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    if (result.status !== "OK")
+                        alert(result.status);
+                }
+            });
+        }
+
+        function eliminar() {
+            swal({
+                title: "Eliminar",
+                text: "Esta seguro que desea eliminar este lote ?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Si, eliminar!",
+                cancelButtonText: "No, cancelar!",
+                closeOnConfirm: false
+            }, function () {
+                $.ajax({
+                    url: '@Url.Action("DeleteMiscellaneousInvoiceTransaction", "Billing")?batchNumber=' + $('#BatchNumber').val(),
+                    type: "POST",
+                    data: "",
+                    cache: false,
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            window.location.href = '@Url.Action("MiscellaneousInvoiceEntryIndex", "Billing")';
+                        } else {
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+                    }
+                });
+            });
+        }
+    </script>
+}

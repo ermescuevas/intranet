@@ -1,0 +1,66 @@
+﻿<div id="modal-food" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content animated flipInY">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Plato</h4>
+            </div>
+
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <label>Nombre</label>
+                            <input type="text" id="FoodFoodName" name="FoodFoodName" class="form-control" rows="">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-success" onclick="procesarPlato();"><i class=" fa fa-add "></i>  Guardar</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function procesarPlato() {
+        var isAllValid = true;
+        if ($('#FoodFoodName').val().trim() == '') {
+            $('#FoodFoodName').siblings('span.error').css('visibility', 'visible');
+            isAllValid = false;
+        }
+        else {
+            $('#FoodFoodName').siblings('span.error').css('visibility', 'hidden');
+        }
+
+        if (isAllValid) {
+            var data = {
+                FoodName: $('#FoodFoodName').val().trim()
+            }
+
+            $.ajax({
+                url: '@Url.Action("SaveFood", "Home")',
+                type: "POST",
+                data: JSON.stringify(data),
+                dataType: "JSON",
+                cache: false,
+                contentType: "application/json",
+                success: function (d) {
+                    if (d.status == true) {
+                        $('#FoodFoodName').val('');
+                        $('#modal-food').modal('hide');
+                    }
+                    else {
+                        alert('Ha ocurrido un error');
+                    }
+                },
+                error: function () {
+                    alert('Error. Por favor trate de nuevo.');
+                }
+            });
+        }
+    }
+</script>

@@ -1,0 +1,785 @@
+﻿@using Microsoft.AspNet.Identity;
+@model Seaboard.Intranet.Domain.Models.PurchaseRequest
+@{
+    ViewBag.Title = "Solicitudes de servicio";
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Solicitudes de servicio</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li>
+                <a href="@Url.Action("Index", "PurchaseRequest")">Listado de solicitudes</a>
+            </li>
+            <li class="active">
+                <strong>Solicitudes de servicio</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight ecommerce">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h3>Solicitudes de servicio</h3>
+                </div>
+                <div class="ibox-content">
+                    <div class="form-group">
+                        <div class="col-sm-12 col-sm-offset-1">
+                            <button class="btn btn-primary" type="button" onclick="guardar();"><i class="fa fa-save"></i> Guardar</button>
+                            <button class="btn btn-white" type="button" onclick="limpiarCampos();"><i class="fa fa-eraser"></i> Borrar</button>
+                            <button class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-SendRequest"><i class="fa fa-send"></i> Enviar</button>
+                            <button class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-items">Solicitar articulo</button>
+                            <button class="btn btn-info" type="button" id="copyRequest"><i class="fa fa-copy"></i> Copiar</button>
+                            <br />
+                        </div>
+                    </div>
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @Html.Hidden("PostType", 0)
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="tabs-container">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a data-toggle="tab" href="#tab-1"> Datos Basicos</a></li>
+                    <li class=""><a data-toggle="tab" href="#tab-2"> Lineas</a></li>
+                    <li class=""><a data-toggle="tab" href="#tab-3" onclick="cargarArchivos();"> Adjuntos</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div id="tab-1" class="tab-pane active">
+                        <div class="panel-body">
+                            <fieldset class="form-horizontal">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">No. de solicitud:</label>
+                                            <div class="col-sm-8 input-group">
+                                                <input type="hidden" id="RequisitionId" name="RequisitionId" />
+                                                @Html.TextBoxFor(m => m.PurchaseRequestId, new { @class = "form-control", @Value = ViewBag.PurchaseRequestId, @readonly = "" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Descripción:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(m => m.Description, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Departamento:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(model => model.DepartmentId, new { @class = "form-control", @readonly = "", @Value = ViewBag.DepartmentId })
+                                                <span class="input-group-btn">
+                                                    <button id="lookupDepartamento" type="button" class="btn btn-primary">
+                                                        <i class="fa fa-search"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Prioridad:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(model => model.Priority, new { @class = "form-control", @readonly = "", @Value = ViewBag.Priority })
+                                                <span class="input-group-btn">
+                                                    <button id="lookupPrioridad" type="button" class="btn btn-primary">
+                                                        <i class="fa fa-search"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">AR:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(model => model.AR, new { @class = "form-control", @readonly = "" })
+                                                <span class="input-group-btn">
+                                                    <button id="lookupAR" type="button" class="btn btn-primary">
+                                                        <i class="fa fa-search"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Fecha documento:</label>
+                                            <div class="col-sm-8 input-group">
+                                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                @Html.TextBoxFor(m => m.DocumentDate, new { @class = "form-control", @readonly = "", @Value = DateTime.Now.ToShortDateString() })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Fecha requerida:</label>
+                                            <div class="col-sm-8 input-group">
+                                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                @Html.TextBoxFor(m => m.RequiredDate, new { @class = "form-control", @readonly = "", @Value = DateTime.Now.AddDays(10).ToShortDateString() })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Aprobado por:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(model => model.Approver, new { @class = "form-control", @readonly = "", @Value = ViewBag.Aprover })
+                                                <span class="input-group-btn">
+                                                    <button id="lookupApprover" type="button" class="btn btn-primary">
+                                                        <i class="fa fa-search"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Solicitado por:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(model => model.Requester, new { @class = "form-control", @readonly = "", @Value = Seaboard.Intranet.BusinessLogic.Account.GetAccount(User.Identity.GetUserName()).UserId })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">Nota:</label>
+                                            <div class="col-sm-10">
+                                                @Html.TextAreaFor(m => m.Note, new { @class = "form-control", @rows = "5", @placeholder = "Introduzca la nota" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+
+                    <div id="tab-2" class="tab-pane">
+                        <div class="panel-body">
+                            <div class="row">
+                                <fieldset class="form-horizontal">
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <a class="col-sm-4 control-label" data-toggle="modal" data-target="#modal-items">Id. de articulo:</a>
+                                                <div class="col-sm-8 input-group">
+                                                    <input id="ItemId" name="ItemId" type="text" class="form-control" readonly="readonly"> <span class="input-group-btn">
+                                                       @if (Seaboard.Intranet.BusinessLogic.Account.GetAccount(User.Identity.GetUserName()).Department == "ALMACEN")
+                                                       {
+                                                        <button id="lookupArticulo" type="button" class="btn btn-primary">
+                                                            <i class="fa fa-search"></i>
+                                                        </button>
+                                                       }
+                                                       else
+                                                       {
+                                                        <button id="lookupArticuloServicio" type="button" class="btn btn-primary">
+                                                            <i class="fa fa-search"></i>
+                                                        </button>
+                                                       }
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Descripción:</label>
+                                                <div class="col-sm-8 input-group">
+                                                    <input id="ItemDescription" readonly="readonly" name="ItemDescription" type="text" class="form-control">
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Unidad:</label>
+                                                <div class="col-sm-8 input-group">
+                                                    <input readonly="readonly" id="UnitId" name="UnitId" type="text" class="form-control"> <span class="input-group-btn">
+                                                        <button id="lookupUnidad" type="button" onclick="getUnidad();" class="btn btn-primary">
+                                                            <i class="fa fa-search"></i>
+                                                        </button>
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Cantidad:</label>
+                                                <div class="col-sm-7 input-group m-b">
+                                                    <input id="Quantity" name="Quantity" type="text" class="form-control">
+                                                    <span class="input-group-addon">.00</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-6">
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Almacen:</label>
+                                                <div class="col-sm-7 input-group">
+                                                    <input readonly="readonly" id="Warehouse" name="Warehouse" type="text" class="form-control"> <span class="input-group-btn">
+                                                        <button id="lookupAlmacen" type="button" class="btn btn-primary">
+                                                            <i class="fa fa-search"></i>
+                                                        </button>
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Cuenta gasto:</label>
+                                                <div class="col-sm-7 input-group">
+                                                    <input readonly="readonly" id="AccountNum" name="AccountNum" type="text" class="form-control"> <span class="input-group-btn">
+                                                        <button id="lookupCuenta" type="button" class="btn btn-primary">
+                                                            <i class="fa fa-search"></i>
+                                                        </button>
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Cargado a:</label>
+                                                <div class="col-sm-7 input-group">
+                                                    <input readonly="readonly" id="Charge" name="Charge" type="text" class="form-control" value="@ViewBag.DepartmentId">
+                                                    <span class="input-group-btn">
+                                                        <button id="lookupProyecto" type="button" class="btn btn-primary">
+                                                            <i class="fa fa-search"></i>
+                                                        </button>
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">&nbsp;</label>
+                                                <div class="col-sm-8">
+                                                    <button class="btn btn-primary" id="addProduct" type="submit" onclick="agregarProducto();">Agregar</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+
+                            <div class="row">
+                                <div class="table-responsive" id="itemsRows">
+
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="tab-3" class="tab-pane">
+                        <div class="panel-body">
+                            <div class="row">
+                                <form action="javascript:;" method="post" enctype="multipart/form-data" id="attachmentForm" accept-charset="utf-8">
+                                    <div class="col-md-9">
+                                        <div class="fileinput fileinput-new input-group" data-provides="fileinput">
+                                            <div class="form-control" data-trigger="fileinput"><i class="glyphicon glyphicon-file fileinput-exists"></i> <span class="fileinput-filename"></span></div>
+                                            <span class="input-group-addon btn btn-default btn-file"><span class="fileinput-new">Seleccionar archivo</span><span class="fileinput-exists">Cambiar</span><input type="file" name="FileData" id="FileData"></span>
+                                            <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">Borrar</a>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <button type="button" class="btn btn-success" onclick="atacharArchivo();" data-dismiss="modal">Adjuntar</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div class="hr-line-dashed"></div>
+
+                            <div class="row" id="attachmentFiles">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-SendRequest" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Enviar a flujo de trabajo</h4>
+                    <h3>Esta seguro que desea enviar al flujo de trabajo ?</h3>
+                </div>
+
+                <div class="modal-body">
+                    <h4>Solicitud de almacen</h4>
+                    <hr />
+
+                </div>
+
+                <div class="modal-footer">
+                    <div class="form-actions no-color">
+                        <button type="button" class="btn btn-primary" onclick="enviarFlujo();"> Si</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    @Styles.Render("~/plugins/summernoteStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/plugins/datatables/datatables.min.css")" rel="stylesheet" type="text/css" />
+}
+
+@section Scripts {
+
+    @Scripts.Render("~/plugins/summernote")
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+    @Scripts.Render("~/Scripts/plugins/datatables/datatables.min.js")
+    @Scripts.Render("~/plugins/toastr")
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            @Html.Partial("_Scripts")
+
+            $("#lookupArticuloServicio").lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookup", "Home")?tipo=14&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 1100,
+                height: 1000,
+                onItemSelected: function (data) {
+                    $('input[name=ItemId]').val(data.ItemId);
+                    $('input[name=ItemDescription]').val(data.ItemDesc);
+                    $('input[name=UnitId]').val(data.UnitId);
+                    $('input[name=Warehouse]').val(data.Warehouse);
+                    $('input[name=Quantity]').val('');
+                    GetAccountNum(data.ItemId);
+                },
+                tableHeader: ['Id. de articulo', 'Descripción', 'Categoria  '],
+                hiddenFields: ['UnitId', 'Warehouse', 'Quantity']
+            });
+
+            $("#lookupArticulo").lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookup", "Home")?tipo=0&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 1100,
+                height: 1000,
+                onItemSelected: function (data) {
+                    $('input[name=ItemId]').val(data.ItemId);
+                    $('input[name=ItemDescription]').val(data.ItemDesc);
+                    $('input[name=UnitId]').val(data.UnitId);
+                    $('input[name=Warehouse]').val(data.Warehouse);
+                    $('input[name=Quantity]').val('');
+                    GetAccountNum(data.ItemId);
+                },
+                tableHeader: ['Id. de articulo', 'Descripción', 'Categoria '],
+                hiddenFields: ['UnitId', 'Warehouse', 'Quantity']
+            });
+
+            $("#copyRequest").lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookup", "Home")?tipo=20&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 1100,
+                height: 1000,
+                onItemSelected: function (data) {
+                    if (confirm("Esto sobreescribira los datos existentes desea continuar?")) {
+                        $('input[name=Description]').val(data.Description);
+                        $('input[name=RequisitionId]').val(data.RequestId);
+                        GeneratedItems();
+                    }
+                },
+                tableHeader: ['No. solicitud', 'Descripción'],
+                hiddenFields: ['AR', 'Note', 'Priority', 'WorkNumber', 'DocumentDate', 'QuoteId', 'RequiredDate', 'Requester']
+            });
+        });
+
+        function GetAccountNum(itemId) {
+            var items = "";
+            $.ajax({
+                url: '@Url.Action("GetAccountNum", "PurchaseRequest")?ItemId=' + itemId,
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                cache: false,
+                contentType: "application/json",
+                success: function (result) {
+                    $('#AccountNum').val(result);
+                }
+            });
+        }
+
+        function getUnidad() {
+            $('#lookupUnidad').lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookup", "Home")?tipo=10&consultaExtra=' + $('#ItemId').val().trim() + '&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function (data) {
+                    $('input[name=UnitId]').val(data.Id);
+                },
+                tableHeader: ['Id. de unidad de medida', 'Descripción'],
+                hiddenFields: ['DataExtended']
+            });
+        }
+
+        function limpiarCampos() {
+            $('#ItemId, #ItemDescription, #Quantity, #UnitId, #Warehouse, #AccountNum, #Charge, #Description, #Note, #AR').val('');
+            $('#DocumentDate').val('@DateTime.Now.ToShortDateString()')
+            $('#RequiredDate').val('@DateTime.Now.AddDays(10).ToShortDateString()')
+            $('#Charge', '#DepartmentId').val('@ViewBag.DepartmentId');
+            $('#Priority').val('Baja');
+            $('#Approver').val('@ViewBag.Aprover');
+            $('#Requester').val('@Seaboard.Intranet.BusinessLogic.Account.GetAccount(User.Identity.GetUserName()).UserId');
+            $('#itemsRows').empty();
+            $('#PostType').val(0);
+        }
+
+        function guardar() {
+            $('input[name=PostType]').val(0);
+            procesarSolicitud();
+        }
+
+        function enviarFlujo() {
+            $('input[name=PostType]').val(1);
+            procesarSolicitud();
+        }
+
+        window.onbeforeunload = function () {
+            $.ajax({
+                url: '@Url.Action("UnblockSecuence", "ServiceRequest", new { Secuencia = ViewBag.PurchaseRequestId, Formulario = "LPPOP10200", Usuario = ViewBag.UserId })'
+            }).done(function () {
+            });
+        }
+
+        var purchaseRequestItems = [];
+
+        function GeneratedItems() {
+            var items = "";
+            $.ajax({
+                url: '@Url.Action("ListItems", "ServiceRequest")?id=' + $('#RequisitionId').val().trim(),
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                cache: false,
+                contentType: "application/json",
+                success: function (result) {
+                    console.log("current", result);
+                    purchaseRequestItems = result;
+                    GeneratedItemsTable();
+                }
+            });
+        }
+
+        function agregarProducto() {
+
+            var isValidItem = true;
+            if ($('#ItemId').val().trim() == '') {
+                isValidItem = false;
+                toastr.error('Debe de especificar un Id. de articulo', 'Campos requeridos')
+            }
+
+            if (!($('#Quantity').val().trim() != '' && !isNaN($('#Quantity').val().trim()))) {
+                isValidItem = false;
+                toastr.error('Debe de especificar una cantidad', 'Campos requeridos');
+            }
+
+            if ($('#Charge').val().trim() == '') {
+                isValidItem = false;
+                toastr.error('Debe de especificar a que va cargado', 'Campos requeridos');
+            }
+            else {
+                if ($('#Charge').val().trim() == "EDM II") {
+                    if ($('#AccountNum').val().trim() == '') {
+                        isValidItem = false;
+                        toastr.error('Debe de especificar una cuenta de gasto', 'Campos requeridos');
+                    }
+                    else {
+                        if ($('#AccountNum').val().trim() == '00000-0000-000') {
+                            toastr.error('Debe de especificar una cuenta de gasto', 'Campos requeridos');
+                        }
+                    }
+                }
+            }
+
+            if ($('#UnitId').val().trim() == '') {
+                isValidItem = false;
+                toastr.error('Debe de especificar una unidad de medida', 'Campos requeridos')
+            }
+
+            if (purchaseRequestItems.length > 0) {
+                $.each(purchaseRequestItems, function (i, val) {
+                    if (val.ItemId.trim() == $('#ItemId').val().trim()) {
+                        isValidItem = false;
+                        toastr.error('No puede haber articulos duplicados', 'Campos requeridos')
+                    }
+                });
+            }
+
+            if (isValidItem) {
+                purchaseRequestItems.push({
+                    ItemId: $('#ItemId').val().trim(),
+                    ItemDescription: $('#ItemDescription').val().trim(),
+                    Quantity: parseFloat($('#Quantity').val().trim()),
+                    UnitId: $('#UnitId').val().trim(),
+                    Warehouse: $('#Warehouse').val().trim(),
+                    AccountNum: $('#AccountNum').val().trim(),
+                    Charge: $('#Charge').val().trim()
+
+                });
+
+                $('#ItemId').val('').focus();
+                $('#ItemDescription, #Quantity, #UnitId, #Warehouse, #AccountNum, #Charge').val('');
+                $('#Charge').val($('#DepartmentId').val());
+                $('#addProduct').html('Agregar');
+                GeneratedItemsTable();
+            }
+        }
+
+        function GeneratedItemsTable() {
+            if (purchaseRequestItems.length > 0) {
+                var $table = $('<table  class="table table-stripped table-bordered" id="itemsTable" />');
+                $table.append('<thead><tr><th>Id. de producto</th><th>Descripción</th><th>Unidad</th><th style="width:8%">Cantidad</th><th>Almacen</th><th>Cuenta Gasto</th><th>Cargado a</th><th style="width:5%"></th><th style="width:5%"></th></tr></thead>');
+                var $tbody = $('<tbody/>');
+                $.each(purchaseRequestItems, function (i, val) {
+                    var $row = $('<tr/>');
+                    $row.append($('<td/>').html(val.ItemId));
+                    $row.append($('<td/>').html(val.ItemDescription));
+                    $row.append($('<td/>').html(val.UnitId));
+                    $row.append($('<td/>').html(val.Quantity));
+                    $row.append($('<td/>').html(val.Warehouse));
+                    $row.append($('<td/>').html(val.AccountNum));
+                    $row.append($('<td/>').html(val.Charge));
+                    var $remove = $('<a href="#" class="btn btn-white btn-xs"><i class="fa fa-trash fa"></a>');
+                    var $edit = $('<a href="#"class="btn btn-white btn-xs"><i class="fa fa-edit fa"></a>');
+                    $remove.click(function (e) {
+                        e.preventDefault();
+                        purchaseRequestItems.splice(i, 1);
+                        GeneratedItemsTable();
+                    });
+
+                    $edit.click(function (e) {
+                        EditarFila(purchaseRequestItems[i]);
+                        $('#addProduct').html('Modificar');
+                        purchaseRequestItems.splice(i, 1);
+                        e.preventDefault();
+
+                    });
+
+                    $row.append($('<td/>').html($remove));
+                    $row.append($('<td/>').html($edit));
+                    $tbody.append($row);
+                });
+                console.log("current", purchaseRequestItems);
+                $table.append($tbody);
+                $('#itemsRows').html($table);
+            }
+            else {
+                $('#itemsRows').html('');
+            }
+        }
+
+        function EditarFila(requestLine) {
+            $('#ItemId').val(requestLine.ItemId);
+            $('#ItemDescription').val(requestLine.ItemDescription);
+            $('#Quantity').val(requestLine.Quantity);
+            $('#UnitId').val(requestLine.UnitId);
+            $('#Warehouse').val(requestLine.Warehouse);
+            $('#AccountNum').val(requestLine.AccountNum);
+            $('#Charge').val(requestLine.Charge);
+        }
+
+        function procesarSolicitud() {
+            var isAllValid = true;
+            if (purchaseRequestItems.length == 0) {
+                toastr.error('Por favor debe de insertar articulos para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Description').val().trim() == '') {
+                toastr.error('Debe de especificar una descripción', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Priority').val().trim() == '') {
+                toastr.error('Debe de especificar una prioridad', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Priority').val().trim() == 'Alta') {
+                if ($('#Note').val().trim() == '') {
+                    toastr.error('Debe de especificar una nota debido a la prioridad', 'Campos requeridos')
+                    isAllValid = false;
+                }
+            }
+
+            if ($('#DepartmentId').val().trim() == '') {
+                toastr.error('Debe de especificar un departamento', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#AR').val().trim() == '') {
+                toastr.error('Debe de especificar un numero de AR', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (isAllValid) {
+                var data = {
+                    PurchaseRequestId: $('#PurchaseRequestId').val().trim(),
+                    Description: $('#Description').val().trim(),
+                    DocumentDate: $('#DocumentDate').val().trim(),
+                    Note: $('#Note').val().trim(),
+                    RequiredDate: $('#RequiredDate').val().trim(),
+                    Priority: $('#Priority').val().trim(),
+                    DepartmentId: $('#DepartmentId').val().trim(),
+                    AR: $('#AR').val().trim(),
+                    Approver: $('#Approver').val().trim(),
+                    Requester: $('#Requester').val().trim(),
+                    PostType: $('#PostType').val(),
+                    PurchaseRequestLines: purchaseRequestItems
+                }
+
+                $.ajax({
+                    url: '@Url.Action("SaveServiceRequest", "ServiceRequest")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    async: false,
+                    success: function (d) {
+                        if (d.status == "OK") {
+                            window.location.href = "@Url.Action("Index", "ServiceRequest")";
+                        }
+                        else {
+                            alert('Ha ocurrido un error');
+                        }
+                    }
+                });
+            }
+        }
+
+        function cargarArchivos() {
+            $.ajax({
+                url: '@Url.Action("LoadAttachmentFiles", "ServiceRequest")?PurchaseRequestId=' + $('#PurchaseRequestId').val().trim(),
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    attachmentFiles = result;
+                    if (attachmentFiles.length > 0) {
+                        var $ul = $('<ul class="list-unstyled file-list" />');
+                        $.each(attachmentFiles, function (i, val) {
+                            var $li = $('<li/>');
+                            var $a = $('<a href="@Url.Action("Download", "ServiceRequest")?DocumentId=' + $('#PurchaseRequestId').val().trim() + '&FileName=' + val.trim() + '" />')
+                            var $delete = $('<a href="#" />')
+                            $a.append($('<i class="fa fa-file-pdf-o" />'));
+                            $delete.html("&nbsp; &nbsp; &nbsp;");
+                            $delete.click(function (e) {
+                                e.preventDefault();
+                                eliminarArchivo(val.trim());
+                            });
+                            $delete.append($('<i class="fa fa-remove fa-2x" />'));
+                            $li.append($a.html("  " + val));
+                            $li.append($delete);
+                            $ul.append($li);
+                        });
+                        $('#attachmentFiles').html($ul);
+                    }
+                    else {
+                        $('#attachmentFiles').html('');
+                    }
+                }
+            });
+        }
+
+        function atacharArchivo() {
+            var data = new FormData();
+            data.append("FileData", document.getElementById("FileData").files[0]);
+            data.append("RequestId", $('#PurchaseRequestId').val());
+
+            $.ajax({
+                url: '@Url.Action("AttachFile", "ServiceRequest")',
+                type: "POST",
+                data: data,
+                dataType: "JSON",
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (d) {
+                    if (d.status == true) {
+                        $('#attachmentForm').each(function () {
+                            this.reset();
+                        });
+                        toastr.success('ARchivo adjuntado correctamente', 'Adjuntos')
+                        cargarArchivos();
+                    }
+                    else {
+                        alert('Ha ocurrido un error');
+                    }
+                    $('#submit').val('Guardar');
+                },
+                error: function () {
+                    alert('Error. Por favor trate de nuevo.');
+                    $('#submit').val('Guardar');
+                }
+            });
+        }
+
+        function eliminarArchivo(fileName) {
+            if (confirm("Esta seguro que desea eliminar este archivo ?")) {
+                $.ajax({
+                    url: '@Url.Action("DeleteFile", "ServiceRequest")?id=' + $('#PurchaseRequestId').val().trim() + "&fileName=" + fileName,
+                    type: "POST",
+                    dataType: "JSON",
+                    contentType: false,
+                    processData: false,
+                    success: function (d) {
+                        if (d.status == "OK") {
+                            toastr.success('ARchivo eliminado correctamente', 'Adjuntos');
+                            cargarArchivos();
+                        }
+                        else {
+                            alert(d.status);
+                        }
+                    }
+                });
+            }
+        }
+
+        function Print() {
+            var url = '@Url.Content("~/PDF/Requisicion/")' + $('#PurchaseRequestId').val() + '.pdf';
+            toastr.info('Estamos procesando su solicitud', 'Por favor espere')
+            $.ajax({
+                url: '@Url.Action("Print", "ServiceRequest")?id=' + $('#PurchaseRequestId').val(),
+                type: "POST",
+                data: "",
+                cache: false,
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    $('#loadingPanel').hide();
+                    window.open(url);
+                },
+                error: function (result) {
+                    toastr.error('Ha ocurrido un error en la generación del documento', 'Campos requeridos')
+                }
+            });
+        }
+
+    </script>
+}

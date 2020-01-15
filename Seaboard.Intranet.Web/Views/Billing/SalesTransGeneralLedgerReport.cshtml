@@ -1,0 +1,338 @@
+﻿@{
+    Layout = "~/Views/Shared/_BillingLayout.cshtml";
+    ViewBag.Title = "Reporte de transacciones de ventas cuentas contables";
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-sm-4">
+        <h2>Reporte de transacciones de ventas cuentas contables</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Billing")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Reporte de transacciones de ventas cuentas contables</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="wrapper wrapper-content animated fadeInUp">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="ibox float-e-margins">
+                        <div class="ibox-title">
+                            <h3>Reporte de transacciones de ventas cuentas contables</h3>
+                        </div>
+                        <div class="ibox-content">
+                            <div class="col-sm-12 col-sm-offset-1">
+                                <button class="btn btn-success" type="button" onclick="imprimirReporte();"><i class="fa fa-print"></i> Imprimir</button>
+                                <button class="btn btn-info" type="button" onclick="borrar();"><i class="fa fa-eraser"></i> Borrar</button>
+                                <br />
+                            </div>
+                            <br />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ibox">
+                <div class="ibox-content">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    Filtrar por fecha
+                                </div>
+                                <div class="panel-body">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="col-sm-5 control-label">Fecha desde:</label>
+                                            <div class="col-sm-7 input-group">
+                                                <div class="col-sm-12 input-group date">
+                                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                    <input type="text" id="fromDate" name="fromDate" class="form-control" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="col-sm-5 control-label">Fecha hasta:</label>
+                                            <div class="col-sm-7 input-group">
+                                                <div class="col-sm-12 input-group date">
+                                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                    <input type="text" id="toDate" name="toDate" class="form-control" value="@DateTime.Now.ToShortDateString()" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    Filtrar por cliente
+                                </div>
+                                <div class="panel-body">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="col-sm-5 control-label">Id de cliente desde:</label>
+                                            <div class="col-sm-7 input-group">
+                                                <input type="text" name="fromCustomer" id="fromCustomer" class="form-control" />
+                                                <span class="input-group-btn">
+                                                    <button id="lookupCustomerFrom" type="button" class="btn btn-primary">
+                                                        <i class="fa fa-search"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="col-sm-5 control-label">Id. de cliente hasta:</label>
+                                            <div class="col-sm-7 input-group">
+                                                <input type="text" name="toCustomer" id="toCustomer" class="form-control" />
+                                                <span class="input-group-btn">
+                                                    <button id="lookupCustomerTo" type="button" class="btn btn-primary">
+                                                        <i class="fa fa-search"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    Filtrar por lotes
+                                </div>
+                                <div class="panel-body">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="col-sm-5 control-label">Id de lote desde:</label>
+                                            <div class="col-sm-7 input-group">
+                                                <input type="text" name="fromBatch" id="fromBatch" class="form-control" />
+                                                <span class="input-group-btn">
+                                                    <button id="lookupBatchFrom" type="button" class="btn btn-primary">
+                                                        <i class="fa fa-search"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="col-sm-5 control-label">Id. de lote hasta:</label>
+                                            <div class="col-sm-7 input-group">
+                                                <input type="text" name="toBatch" id="toBatch" class="form-control" />
+                                                <span class="input-group-btn">
+                                                    <button id="lookupBatchTo" type="button" class="btn btn-primary">
+                                                        <i class="fa fa-search"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    Filtrar por clase
+                                </div>
+                                <div class="panel-body">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="col-sm-5 control-label">Id de clase desde:</label>
+                                            <div class="col-sm-7 input-group">
+                                                <input type="text" name="fromClass" id="fromClass" class="form-control" />
+                                                <span class="input-group-btn">
+                                                    <button id="lookupClassFrom" type="button" class="btn btn-primary">
+                                                        <i class="fa fa-search"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="col-sm-5 control-label">Id. de clase hasta:</label>
+                                            <div class="col-sm-7 input-group">
+                                                <input type="text" name="toClass" id="toClass" class="form-control" />
+                                                <span class="input-group-btn">
+                                                    <button id="lookupClassTo" type="button" class="btn btn-primary">
+                                                        <i class="fa fa-search"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles{
+    @Styles.Render("~/Content/plugins/iCheck/iCheckStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/awesomeCheckboxStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/iCheck")
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+
+    <script>
+        $(document).ready(function () {
+            $('#fromDate').datepicker({
+                    todayBtn: "linked",
+                    keyboardNavigation: false,
+                    forceParse: false,
+                    calendarWeeks: true,
+                    autoclose: true
+                });
+                $('#toDate').datepicker({
+                    todayBtn: "linked",
+                    keyboardNavigation: false,
+                    forceParse: false,
+                    calendarWeeks: true,
+                    autoclose: true
+                });
+                $('#lookupCustomerFrom').lookupbox({
+                    title: 'Busqueda:',
+                    url: '@Url.Action("ListLookup", "Home")?tipo=30&consulta=',
+                    imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                    width: 800,
+                    height: 1000,
+                    onItemSelected: function (data) {
+                        $('input[name=fromCustomer]').val(data.Id);
+                        $('input[name=toCustomer]').val(data.Id);
+                    },
+                    tableHeader: ['Id. de cliente', 'Descripción'],
+                    hiddenFields: ['DataExtended']
+                });
+
+                $('#lookupCustomerTo').lookupbox({
+                    title: 'Busqueda:',
+                    url: '@Url.Action("ListLookup", "Home")?tipo=30&consulta=',
+                    imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                    width: 800,
+                    height: 1000,
+                    onItemSelected: function (data) {
+                        $('input[name=toCustomer]').val(data.Id);
+                    },
+                    tableHeader: ['Id. de cliente', 'Descripción'],
+                    hiddenFields: ['DataExtended']
+                });
+
+                $('#lookupBatchFrom').lookupbox({
+                    title: 'Busqueda:',
+                    url: '@Url.Action("ListLookup", "Home")?tipo=45&consulta=',
+                    imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                    width: 800,
+                    height: 1000,
+                    onItemSelected: function (data) {
+                        $('input[name=fromBatch]').val(data.Id);
+                        $('input[name=toBatch]').val(data.Id);
+                    },
+                    tableHeader: ['Id. de lote', 'Descripción', 'Fecha']
+                });
+
+                $('#lookupBatchTo').lookupbox({
+                    title: 'Busqueda:',
+                    url: '@Url.Action("ListLookup", "Home")?tipo=45&consulta=',
+                    imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                    width: 800,
+                    height: 1000,
+                    onItemSelected: function (data) {
+                        $('input[name=toBatch]').val(data.Id);
+                    },
+                    tableHeader: ['Id. de lote', 'Descripción', 'Fecha']
+                });
+
+                $('#lookupClassFrom').lookupbox({
+                    title: 'Busqueda:',
+                    url: '@Url.Action("ListLookup", "Home")?tipo=32&consulta=',
+                    imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                    width: 800,
+                    height: 1000,
+                    onItemSelected: function (data) {
+                        $('input[name=fromClass]').val(data.Id);
+                        $('input[name=toClass]').val(data.Id);
+                    },
+                    tableHeader: ['Id. de clase', 'Descripción'],
+                    hiddenFields: ['DataExtended']
+                });
+
+                $('#lookupClassTo').lookupbox({
+                    title: 'Busqueda:',
+                    url: '@Url.Action("ListLookup", "Home")?tipo=32&consulta=',
+                    imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                    width: 800,
+                    height: 1000,
+                    onItemSelected: function (data) {
+                        $('input[name=toClass]').val(data.Id);
+                    },
+                    tableHeader: ['Id. de clase', 'Descripción'],
+                    hiddenFields: ['DataExtended']
+                });
+        });
+
+        function imprimirReporte() {
+            var isValid = true;
+
+            if (isValid) {
+                var data = {
+                    fromDate: $('#fromDate').datepicker('getDate'),
+                    toDate: $('#toDate').datepicker('getDate'),
+                    fromCustomer: $('#fromCustomer').val().trim(),
+                    toCustomer: $('#fromCustomer').val().trim(),
+                    fromBatch: $('#fromBatch').val().trim(),
+                    toBatch: $('#toBatch').val().trim(),
+                    fromClass: $('#fromClass').val().trim(),
+                    toClass: $('#toClass').val().trim()
+                }
+                var url = '@Url.Content("~/PDF/Reportes/")SalesTransGeneralLedgerReport.pdf';
+                toastr.info('Estamos procesando su solicitud', 'Por favor espere');
+                $.ajax({
+                    url: '@Url.Action("SalesTransGeneralLedgerReport", "Billing")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    async: false,
+                    contentType: "application/json",
+                    success: function(d) {
+                        if (d.status === "OK") {
+                            window.open(url);
+                        } else {
+                            alert(d.status);
+                        }
+                    }
+                });
+            }
+        }
+
+        function borrar() {
+            $('#filterFrom,#filterTo').val('');
+        }
+    </script>
+}

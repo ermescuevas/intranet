@@ -1,0 +1,436 @@
+﻿@model Seaboard.Intranet.Domain.Models.User
+
+@{
+    ViewBag.Title = "Mantenimiento de usuarios";
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Mantenimiento de usuarios</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li>
+                <a href="@Url.Action("Index", "Account")">Listado de usuarios</a>
+            </li>
+            <li class="active">
+                <strong>Mantenimiento de usuarios</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight ecommerce">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h3>Mantenimiento de usuarios</h3>
+                </div>
+
+                <div class="ibox-content">
+                    <div class="form-group">
+                        <div class="col-sm-12 col-sm-offset-1">
+                            <button class="btn btn-primary" type="button" onclick="procesarSolicitud();"><i class="fa fa-save"></i> Guardar</button>
+                            <button class="btn btn-white" type="button" onclick="limpiarCampos();"><i class="fa fa-eraser"></i> Borrar</button>
+                            <button class="btn btn-danger" type="button" data-toggle="modal" data-target="#modal-Delete"><i class="fa fa-remove"></i> Eliminar</button>
+                            <br />
+                        </div>
+                    </div>
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="tabs-container">
+            <ul class="nav nav-tabs">
+                <li class="active">
+                    <a data-toggle="tab" href="#tab-1"> Datos Basicos</a>
+                </li>
+
+                <li class="">
+                    <a data-toggle="tab" href="#tab-2" onclick="cargarPermisos();"> Permisos</a>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <div id="tab-1" class="tab-pane active">
+                    <div class="panel-body">
+                        <fieldset class="form-horizontal">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Id. de empleado:</label>
+                                        <div class="col-sm-8 input-group">
+                                            <input type="hidden" name="OldPassword" id="OldPassword" value="@ViewBag.Password" />
+                                            @Html.TextBoxFor(m => m.EmployeeId, new { @class = "form-control", @readonly = "" })
+                                            <span class="input-group-btn">
+                                                <button id="lookupEmpleado" type="button" class="btn btn-primary">
+                                                    <i class="fa fa-search"></i>
+                                                </button>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Nombre:</label>
+                                        <div class="col-sm-8 input-group">
+                                            @Html.TextBoxFor(m => m.FirstName, new { @class = "form-control" })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Apellido:</label>
+                                        <div class="col-sm-8 input-group">
+                                            @Html.TextBoxFor(m => m.LastName, new { @class = "form-control" })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Id. de usuario:</label>
+                                        <div class="col-sm-8 input-group">
+                                            @Html.TextBoxFor(model => model.UserName, new { @class = "form-control" })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Contraseña:</label>
+                                        <div class="col-sm-8 input-group">
+                                            @Html.PasswordFor(model => model.Password, new { @class = "form-control", value = Model.Password })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Usuario ERP:</label>
+                                        <div class="col-sm-8 input-group">
+                                            @Html.TextBoxFor(model => model.UserId, new { @class = "form-control" })
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-5">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Departamento:</label>
+                                        <div class="col-sm-8 input-group">
+                                            @Html.TextBoxFor(m => m.Department, new { @class = "form-control", @readonly = "" })
+                                            <span class="input-group-btn">
+                                                <button id="lookupDepartamento" type="button" class="btn btn-primary">
+                                                    <i class="fa fa-search"></i>
+                                                </button>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Cedula:</label>
+                                        <div class="col-sm-8 input-group">
+                                            @Html.TextBoxFor(m => m.Identification, new { @class = "form-control" })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Cargo:</label>
+                                        <div class="col-sm-8 input-group">
+                                            @Html.TextBoxFor(m => m.JobTitle, new { @class = "form-control" })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Email:</label>
+                                        <div class="col-sm-8 input-group">
+                                            @Html.TextBoxFor(model => model.Email, new { @class = "form-control" })
+                                        </div>
+                                    </div>
+
+                                    @Html.HiddenFor(m => m.IsActiveDirectory)
+                                    @Html.HiddenFor(m => m.Inactive)
+
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">&nbsp;</label>
+                                        <div class="col-sm-10 input-group">
+                                            <div class="checkbox checkbox-danger">
+                                                <input id="ckActiveDirectory" type="checkbox" onclick="ActiveDirectory();" checked="checked">
+                                                <label for="ckActiveDirectory">
+                                                    Es un usuario de Active Directory
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">&nbsp;</label>
+                                        <div class="col-sm-10 input-group">
+                                            <div class="checkbox checkbox-danger">
+                                                <input id="ckInactive" type="checkbox" onclick="Inactive();">
+                                                <label for="ckInactive">
+                                                    Inactivo
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+
+                <div id="tab-2" class="tab-pane">
+                    <div class="panel-body">
+                        <div class="row">
+                            <form id="form" action="#" class="wizard-big">
+                                <br />
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-Delete" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Eliminar</h4>
+                    <h3>Esta seguro que desea eliminar este usuario ?</h3>
+                </div>
+
+                <div class="modal-body">
+                    <h4>Usuario</h4>
+                    <hr />
+
+                </div>
+
+                <div class="modal-footer">
+                    <div class="form-actions no-color">
+                        <button type="button" class="btn btn-primary" onclick="eliminarUsuario();"> Si</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Styles {
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/plugins/duallistStyles")
+    @Styles.Render("~/Content/plugins/iCheck/iCheckStyles")
+    @Styles.Render("~/plugins/awesomeCheckboxStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+    @Scripts.Render("~/plugins/duallist")
+    @Scripts.Render("~/plugins/iCheck")
+
+    <script>
+        var UserPemissions = [];
+        var Pemissions = [];
+        $(document).ready(function () {
+            @Html.Partial("_Scripts")
+            $('.dual_select').bootstrapDualListbox({
+                selectorMinimalHeight: 160
+            });
+
+            if ($('#IsActiveDirectory').val() == "True") {
+                $('#ckActiveDirectory').attr('checked', true);
+            }
+            else {
+                $('#ckActiveDirectory').attr('checked', false);
+            }
+
+            cargarPermisos();
+        });
+
+        function cargarPermisos() {
+            $.ajax({
+                url: '@Url.Action("LoadPermissions", "Account")?UserId=' + $('#UserId').val().trim(),
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                cache: false,
+                contentType: "application/json",
+                success: function (result) {
+                    Pemissions = result;
+                    if (Pemissions.length > 0) {
+                        var $select = $('<select class="form-control dual_select" name="UserPermission[]" multiple />');
+                        $.each(Pemissions, function (i, val) {
+                            if (val.ActivePermission == 1) {
+                                var $option = $('<option selected value="' + val.PermissionId + '" />').html(val.Name);
+                            }
+                            else {
+                                var $option = $('<option value="' + val.PermissionId + '" />').html(val.Name);
+                            }
+
+                            $select.append($option);
+                        });
+                        $('#form').html($select);
+                        $('.dual_select').bootstrapDualListbox({
+                            selectorMinimalHeight: 160
+                        });
+                    }
+                    else {
+                        $('#form').html('');
+                    }
+                }
+            });
+        }
+
+        function ActiveDirectory() {
+            if ($('#ckActiveDirectory').is(':checked')) {
+                $('#IsActiveDirectory').val(true);
+            }
+            else {
+                $('#IsActiveDirectory').val(false);
+            }
+        }
+
+        function Inactive() {
+            if ($('#ckInactive').is(':checked')) {
+                $('#Inactive').val(true);
+            }
+            else {
+                $('#Inactive').val(false);
+            }
+        }
+
+        function eliminarUsuario() {
+            if ($('#UserName').val().trim() == '') {
+                toastr.error('Debe de especificar un id. de usuario de ERP', 'Campos requeridos')
+                isAllValid = false;
+            }
+            else {
+                $.ajax({
+                    url: '@Url.Action("Delete", "Account")?UserId=' + $('#UserName').val().trim() + '&UserName=' + $('#UserId').val().trim(),
+                    type: "POST",
+                    data: "",
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (d) {
+                        if (d.status == true) {
+                            window.location.href = "@Url.Action("Index", "Account")";
+                        }
+                        else {
+                            alert('Ha ocurrido un error');
+                        }
+                    }
+                });
+            }
+        }
+
+        function procesarSolicitud() {
+            var isAllValid = true;
+
+            if ($('#EmployeeId').val().trim() == '') {
+                toastr.error('Debe de especificar un id. de empleado', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#UserName').val().trim() == '') {
+                toastr.error('Debe de especificar un id. de usuario', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#UserId').val().trim() == '') {
+                toastr.error('Debe de especificar un id. de usuario de ERP', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#FirstName').val().trim() == '') {
+                toastr.error('Debe de especificar un nombre', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#LastName').val().trim() == '') {
+                toastr.error('Debe de especificar un nombre', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Department').val().trim() == '') {
+                toastr.error('Debe de especificar un departamento', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Identification').val().trim() == '') {
+                toastr.error('Debe de especificar una cedula', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#JobTitle').val().trim() == '') {
+                toastr.error('Debe de especificar un cargo', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#IsActiveDirectory').val().trim() == '0') {
+                if ($('#Password').val.trim() == '') {
+                    toastr.error('Debe de especificar un password si no es de active directory', 'Campos requeridos')
+                    isAllValid = false;
+                }
+                else {
+                    if ($('#Password').val().trim().length < 6) {
+                        toastr.error('La contraseña debe de tener minimo 6 carateres', 'Campos requeridos')
+                        isAllValid = false;
+                    }
+                }
+            }
+
+            if (isAllValid) {
+                var item = String($('select[name="UserPermission[]"]').val());
+                var items = item.split(",");
+                for (var i = 0; i < items.length; i++) {
+                    UserPemissions.push({
+                        PermissionId: items[i].trim(),
+                        UserId: $('#UserId').val().trim()
+                    });
+                }
+                var data = {
+                    EmployeeId: $('#EmployeeId').val().trim(),
+                    UserName: $('#UserId').val().trim(),
+                    UserId: $('#UserName').val().trim(),
+                    FirstName: $('#FirstName').val().trim(),
+                    LastName: $('#LastName').val().trim(),
+                    Department: $('#Department').val().trim(),
+                    JobTitle: $('#JobTitle').val().trim(),
+                    Email: $('#Email').val().trim(),
+                    IsActiveDirectory: $('#IsActiveDirectory').val().trim(),
+                    Identification: $('#Identification').val().trim(),
+                    Password: $('#Password').val().trim(),
+                    UserPermissions: UserPemissions
+                }
+
+                $.ajax({
+                    url: '@Url.Action("SaveUser", "Account")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (d) {
+                        if (d.status == true) {
+                            window.location.href = "@Url.Action("Index", "Account")";
+                        }
+                        else {
+                            alert('Ha ocurrido un error');
+                        }
+                        $('#submit').val('Guardar');
+                    },
+                    error: function () {
+                        alert('Error. Por favor trate de nuevo.');
+                        $('#submit').val('Guardar');
+                    }
+                });
+            }
+        }
+    </script>
+}

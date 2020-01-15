@@ -1,0 +1,819 @@
+﻿@using Microsoft.AspNet.Identity;
+@model Seaboard.Intranet.Domain.Models.PaymentRequest
+@{
+    ViewBag.Title = "Solicitudes de pago";
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Solicitudes de pago</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li>
+                <a href="@Url.Action("Index", "PaymentRequest")">Listado de solicitudes</a>
+            </li>
+            <li class="active">
+                <strong>Solicitudes de pago</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight ecommerce">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h3>Solicitudes de pago</h3>
+                </div>
+                <div class="ibox-content">
+                    <div class="form-group">
+                        <div class="col-sm-12 col-sm-offset-1">
+                            <button class="btn btn-primary" type="button" onclick="guardar();"><i class="fa fa-save"></i> Guardar</button>
+                            <button class="btn btn-white" type="button" onclick="limpiarCampos();"><i class="fa fa-eraser"></i> Borrar</button>
+                            <button class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-SendRequest"><i class="fa fa-send"></i> Enviar</button>
+                        </div>
+                    </div>
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="tabs-container">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a data-toggle="tab" href="#tab-1"> Datos Basicos</a></li>
+                    <li class=""><a data-toggle="tab" onclick="GeneratedPurchaseOrdersTable();" href="#tab-2"> Orden de compras</a></li>
+                    <li class=""><a data-toggle="tab" onclick="GeneratedInvoicesTable();" href="#tab-3"> Facturas</a></li>
+                    <li class=""><a data-toggle="tab" onclick="cargarArchivos();" href="#tab-4"> Adjuntos</a></li>
+                </ul>
+
+                @Html.Hidden("PostType", 0)
+
+                <div class="tab-content">
+                    <div id="tab-1" class="tab-pane active">
+                        <div class="panel-body">
+                            <fieldset class="form-horizontal">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Num. de pago:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(m => m.PaymentRequestId, new { @class = "form-control", @Value = ViewBag.PaymentRequestId, @readonly = "" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Descripción:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(m => m.Description, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+
+                                        @Html.HiddenFor(model => model.BatchNumber, new { @class = "form-control" })
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Departamento:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(model => model.DepartmentId, new { @class = "form-control", @readonly = "", @Value = ViewBag.DepartmentId })
+                                                <span class="input-group-btn">
+                                                    <button id="lookupDepartamento" type="button" class="btn btn-primary">
+                                                        <i class="fa fa-search"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Id. de proveedor:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(model => model.VendorId, new { @class = "form-control", @readonly = "" })
+                                                <span class="input-group-btn">
+                                                    <button id="lookupProveedor" type="button" class="btn btn-primary">
+                                                        <i class="fa fa-search"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Nombre:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(model => model.VendName, new { @class = "form-control", @readonly = "" })
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Fecha documento:</label>
+                                            <div class="col-sm-8 input-group date">
+                                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                @Html.TextBoxFor(m => m.DocumentDate, new { @class = "form-control", @Value = DateTime.Now.ToShortDateString() })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Metodo de pago:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(model => model.PaymentCondition, new { @class = "form-control", @readonly = "", @Value = ViewBag.Aprover })
+                                                <span class="input-group-btn">
+                                                    <button id="lookupCondicionPago" type="button" class="btn btn-primary">
+                                                        <i class="fa fa-search"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Moneda:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(model => model.Currency, new { @class = "form-control", @readonly = "" })
+                                                <span class="input-group-btn">
+                                                    <button id="lookupMoneda" type="button" class="btn btn-primary">
+                                                        <i class="fa fa-search"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Monto:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(model => model.Amount, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Prioridad:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(model => model.Priority, new { @class = "form-control", @readonly = "", @Value = ViewBag.Priority })
+                                                <span class="input-group-btn">
+                                                    <button id="lookupPrioridad" type="button" class="btn btn-primary">
+                                                        <i class="fa fa-search"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Solicitado por:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(model => model.Requester, new { @class = "form-control", @readonly = "", @Value = Seaboard.Intranet.BusinessLogic.Account.GetAccount(User.Identity.GetUserName()).UserId })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">Nota:</label>
+                                            <div class="col-sm-9 input-group">
+                                                @Html.TextAreaFor(m => m.Note, new { @class = "form-control", @rows = "5", @placeholder = "Introduzca la nota" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+
+                    <div id="tab-2" class="tab-pane">
+                        <div class="panel-body">
+                            <div class="row">
+                                <fieldset class="form-horizontal">
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label class="col-sm-5 control-label">Orden de compra:</label>
+                                                <div class="col-sm-7 input-group">
+                                                    <input id="PaymentPurchaseOrder" name="PaymentPurchaseOrder" type="text" class="form-control">
+                                                    <span class="input-group-btn">
+                                                        <button id="lookupPurchaseOrder" type="button" class="btn btn-primary">
+                                                            <i class="fa fa-search"></i>
+                                                        </button>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-2">
+                                            <div class="form-group">
+                                                <label class="col-sm-2 control-label">&nbsp;</label>
+                                                <div class="col-sm-7 input-group">
+                                                    <button class="btn btn-primary" type="submit" onclick="agregarOrden();">Agregar</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-7">
+                                    <div class="ibox">
+                                        <div class="ibox-title">
+                                            <h5>Listado de ordenes de compras</h5>
+                                        </div>
+
+                                        <div class="ibox-content">
+                                            <div class="table-responsive" id="chargeRows">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="tab-3" class="tab-pane">
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-9">
+                                    <div class="ibox">
+                                        <div class="ibox-title">
+                                            <h5>Lista de facturas a aplicar</h5>
+                                        </div>
+
+                                        <div class="ibox-content">
+                                            <div class="table-responsive" id="invoiceRows">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-md-3">
+
+                                    <div class="ibox">
+                                        <div class="ibox-title">
+                                            <h5>Totales</h5>
+                                        </div>
+                                        <div class="ibox-content">
+                                            <span>
+                                                Monto pago
+                                            </span>
+                                            <h2 id="montoPago" class="font-bold">
+                                                0.00
+                                            </h2>
+                                            <hr />
+                                            <span>
+                                                Monto aplicado
+                                            </span>
+                                            <h2 id="montoAplicado" class="font-bold">
+                                                0.00
+                                            </h2>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="tab-4" class="tab-pane">
+                        <div class="panel-body">
+                            <div class="row">
+                                <form action="javascript:;" method="post" enctype="multipart/form-data" id="attachmentForm" accept-charset="utf-8">
+                                    <div class="col-md-9">
+                                        <div class="fileinput fileinput-new input-group" data-provides="fileinput">
+                                            <div class="form-control" data-trigger="fileinput"><i class="glyphicon glyphicon-file fileinput-exists"></i> <span class="fileinput-filename"></span></div>
+                                            <span class="input-group-addon btn btn-default btn-file"><span class="fileinput-new">Seleccionar archivo</span><span class="fileinput-exists">Cambiar</span><input type="file" name="FileData" id="FileData"></span>
+                                            <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">Borrar</a>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <button type="button" class="btn btn-success" onclick="atacharArchivo();" data-dismiss="modal">Adjuntar</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div class="hr-line-dashed"></div>
+
+                            <div class="row" id="attachmentFiles">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-SendRequest" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Enviar a flujo de trabajo</h4>
+                    <h3>Esta seguro que desea enviar al flujo de trabajo ?</h3>
+                </div>
+
+                <div class="modal-body">
+                    <h4>Solicitud de pago</h4>
+                    <hr />
+
+                </div>
+
+                <div class="modal-footer">
+                    <div class="form-actions no-color">
+                        <button type="button" class="btn btn-primary" onclick="enviarFlujo();"> Si</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    @Styles.Render("~/plugins/summernoteStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    <link href="@Url.Content("~/Content/plugins/datatables/datatables.min.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/summernote")
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/Scripts/plugins/datatables/datatables.min.js")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+
+    <script type="text/javascript">
+        var editor;
+       $(document).ready(function () {
+            @Html.Partial("_Scripts")
+            $('#Amount').focusout(function () {
+                if (($('#Amount').val().trim().replace(/,/g, "") != '' && !isNaN($('#Amount').val().replace(/,/g, "").trim()))) {
+                    $('#montoPago').text(parseFloat($('#Amount').val().replace(/,/g, "")).toFixed(2).replace(/./g, function (c, i, a) {
+                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                    }));
+                    $('#montoPagoCargo').text(parseFloat($('#Amount').val().replace(/,/g, "")).toFixed(2).replace(/./g, function (c, i, a) {
+                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                    }));
+
+                    $('#Amount').val(parseFloat($('#Amount').val().replace(/,/g, "")).toFixed(2).replace(/./g, function (c, i, a) {
+                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                    }));
+                }
+            });
+            if (($('#Amount').val().trim().replace(/,/g, "") != '' && !isNaN($('#Amount').val().trim().replace(/,/g, "")))) {
+                $('#montoPago').text(parseFloat($('#Amount').val().replace(/,/g, "")).toFixed(2).replace(/./g, function (c, i, a) {
+                    return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                }));
+                $('#montoPagoCargo').text(parseFloat($('#Amount').val().replace(/,/g, "")).toFixed(2).replace(/./g, function (c, i, a) {
+                    return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                }));
+                $('#Amount').val(parseFloat($('#Amount').val().replace(/,/g, "")).toFixed(2).replace(/./g, function (c, i, a) {
+                    return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                }));
+            }
+        });
+
+        var invoiceItems = [];
+        var purchaseOrders = [];
+        var invoiceApplied = [];
+
+        window.onbeforeunload = function () {
+            $.ajax({
+                url: '@Url.Action("UnblockSecuence", "PaymentRequest", new { Secuencia = ViewBag.PaymentRequestId, Formulario = "PM10300", Usuario = ViewBag.UserId })'
+            }).done(function () {
+            });
+        }
+
+        function guardar() {
+            $('input[name=PostType]').val(0);
+            procesarSolicitud();
+        }
+
+        function enviarFlujo() {
+            $('input[name=PostType]').val(1);
+            procesarSolicitud();
+        }
+
+        function agregarOrden() {
+
+            var isValidItem = true;
+            if ($('#PaymentPurchaseOrder').val().trim() == '') {
+                isValidItem = false;
+                toastr.error('La orden de compra es requerida es requerido', 'Campos requeridos')
+            }
+            if (isValidItem) {
+                purchaseOrders.push({
+                    PaymentPurchaseOrder: $('#PaymentPurchaseOrder').val().trim(),
+                    PaymentRequestId: $('#PaymentRequestId').val().trim()
+                });
+                $('#PaymentPurchaseOrder').val('').focus();
+                GeneratedPurchaseOrdersTable();
+            }
+        }
+
+        function GeneratedPurchaseOrdersTable() {
+            if (purchaseOrders.length > 0) {
+                var $table = $('<table  class="table table-stripped table-bordered informationTable" />');
+                $table.append('<thead><tr><th>Orden de compras</th><th style="width:5%"></th><th style="width:5%"></th></tr></thead>');
+                var $tbody = $('<tbody/>');
+                $.each(purchaseOrders, function (i, val) {
+                    var $row = $('<tr/>');
+                    $row.append($('<td/>').html(val.PaymentPurchaseOrder));
+                    var $remove = $('<a href="#" class="btn btn-white btn-xs"><i class="fa fa-trash fa"></a>');
+                    var $edit = $('<a href="#"class="btn btn-white btn-xs"><i class="fa fa-edit fa"></a>');
+                    $remove.click(function (e) {
+                        e.preventDefault();
+                        purchaseOrders.splice(i, 1);
+                        GeneratedPurchaseOrdersTable();
+                    });
+
+                    $edit.click(function (e) {
+                        EditarFila(chargeItems[i]);
+                        purchaseOrders.splice(i, 1);
+                        e.preventDefault();
+                    });
+
+                    $row.append($('<td/>').html($remove));
+                    $row.append($('<td/>').html($edit));
+                    $tbody.append($row);
+                });
+
+                $table.append($tbody);
+                $('#chargeRows').html($table);
+
+                $('.informationTable').dataTable();
+            }
+            else {
+                $('#chargeRows').html('');
+            }
+        }
+
+        function GeneratedInvoicesTable() {
+            $.ajax({
+                url: '@Url.Action("InvoiceApply","PaymentRequest")?VendorId=' + $('#VendorId').val().trim() + '&Currency=' + $('#Currency').val().trim(),
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                cache: false,
+                contentType: "application/json",
+                success: function (result) {
+                    invoiceItems = result;
+                    if (invoiceItems.length > 0) {
+                        var $table = $('<table  class="table table-stripped table-bordered" id="invoiceTable" />');
+                        $table.append('<thead><tr><th style="width:5%"></th><th>Aplicar al documento</th><th>Fecha documento</th><th>Monto pendiente</th><th>Aplicar monto</th></tr></thead>');
+                        var $tbody = $('<tbody/>');
+                        $.each(invoiceItems, function (i, val) {
+                            var $row = $('<tr/>');
+                            var $inputCurrentAmount = $('<input style="width:auto" type="text" readonly="readonly" name="CurrentAmount"/>');
+                            var $inputDocumentAmount = $('<input style="width:auto" type="text" name="DocumentAmount"/>');
+                            var $remove = $('<button class="btn btn-white btn-xs"><i class="fa fa-book fa"></button>');
+                            $row.append($('<td/>').html($remove));
+                            $row.append($('<td name="DocumentNumber"/>').html(val.Id));
+                            $row.append($('<td name="DocumentDate"/>').html(val.DataExtended));
+                            $inputCurrentAmount.val(parseFloat(val.Descripción).toFixed(2).replace(/./g, function (c, i, a) {
+                                return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                            }));
+                            $inputDocumentAmount.val("0.00");
+                            $.each(invoiceApplied, function (j, amount) {
+                                if (invoiceApplied[j].DocumentNumber == invoiceItems[i].Id) {
+                                    $inputDocumentAmount.val(parseFloat(invoiceApplied[j].DocumentAmount).toFixed(2).replace(/./g, function (c, i, a) {
+                                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                                    }));
+                                }
+                            });
+                            $.each(invoiceApplied, function (j, amount) {
+                                if (invoiceApplied[j].DocumentNumber == invoiceItems[i].Id) {
+                                    if (parseFloat(val.Descripción) > 0) {
+                                        $inputCurrentAmount.val(parseFloat(parseFloat(val.Descripción) - parseFloat(invoiceApplied[j].DocumentAmount).toFixed(2).replace(/./g, function (c, i, a) {
+                                            return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                                        })));
+                                    }
+                                }
+                            });
+                            $('<td/>').append($inputCurrentAmount).appendTo($row);
+                            $('<td/>').append($inputDocumentAmount).appendTo($row);
+                            $remove.click(function (e) {
+                                e.preventDefault();
+                                var value = invoiceItems[i];
+                                var cellValueApplied = parseFloat($('#invoiceTable tr:eq(' + (i + 1) + ') td:eq(' + (5 - 1) + ') input').val().replace(/,/g, ""));
+                                var cellValueCurrent = parseFloat($('#invoiceTable tr:eq(' + (i + 1) + ') td:eq(' + (4 - 1) + ') input').val().replace(/,/g, ""));
+                                if (cellValueApplied == 0) {
+                                    console.log(value.Descripción);
+                                    invoiceApplied.push({
+                                        DocumentNumber: value.Id,
+                                        DocumentAmount: value.Descripción
+                                    });
+
+                                    setCellValue('invoiceTable', i, 5, parseFloat(value.Descripción).toFixed(2));
+                                    setCellValue('invoiceTable', i, 4, 0);
+                                    var monto = parseFloat($('#montoAplicado').text().replace(/,/g, ""));
+                                    monto = monto + parseFloat(value.Descripción);
+                                    $('#montoAplicado').text(monto.toFixed(2).replace(/./g, function (c, i, a) {
+                                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                                    }));
+                                }
+                                else {
+                                    for (var j = 0; j < invoiceApplied.length; j++) {
+                                        if (invoiceApplied[j].DocumentNumber == value.Id) {
+                                            invoiceApplied.splice(j, 1);
+                                        }
+                                    }
+
+                                    setCellValue('invoiceTable', i, 5, "0.00");
+                                    setCellValue('invoiceTable', i, 4, parseFloat(value.Descripción).toFixed(2));
+                                    var monto = parseFloat($('#montoAplicado').text().replace(/,/g, ""));
+                                    monto = monto - parseFloat(cellValueApplied);
+                                    $('#montoAplicado').text(monto.toFixed(2).replace(/./g, function (c, i, a) {
+                                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                                    }));
+                                }
+                            });
+                            $inputDocumentAmount.focusout(function (e) {
+                                e.preventDefault();
+                                var value = invoiceItems[i];
+                                var cellValueApplied = parseFloat($('#invoiceTable tr:eq(' + (i + 1) + ') td:eq(' + (5 - 1) + ') input').val().replace(/,/g, "")).toFixed(2);
+                                var cellValueCurrent = parseFloat($('#invoiceTable tr:eq(' + (i + 1) + ') td:eq(' + (4 - 1) + ') input').val().replace(/,/g, "")).toFixed(2);
+                                for (var j = 0; j < invoiceApplied.length; j++) {
+                                    if (invoiceApplied[j].DocumentNumber == value.Id) {
+                                        invoiceApplied.splice(j, 1);
+                                    }
+                                }
+
+                                if (cellValueApplied > 0) {
+                                    console.log(Math.abs(parseFloat(value.Descripción) - Math.abs(cellValueApplied - cellValueCurrent)));
+                                    invoiceApplied.push({
+                                        DocumentNumber: value.Id,
+                                        DocumentAmount: Math.abs(parseFloat(value.Descripción) - Math.abs(cellValueApplied - cellValueCurrent))
+                                    });
+                                }
+
+                                setCellValue('invoiceTable', i, 4, Math.abs(parseFloat(value.Descripción) - Math.abs(cellValueApplied)).toFixed(2));
+                                cellValueCurrent = parseFloat($('#invoiceTable tr:eq(' + (i + 1) + ') td:eq(' + (4 - 1) + ') input').val().replace(/,/g, ""));
+                                setCellValue('invoiceTable', i, 5, Math.abs(parseFloat(value.Descripción) - Math.abs(cellValueCurrent)).toFixed(2));
+
+                                var monto = parseFloat($('#montoAplicado').text().replace(/,/g, ""));
+                                monto = monto + Math.abs(parseFloat(value.Descripción) - Math.abs(cellValueApplied - cellValueCurrent));
+                                AmountApply(i);
+                            });
+                            $tbody.append($row);
+                        });
+                        $table.append($tbody);
+                        $('#invoiceRows').html($table);
+
+                        $('#invoiceTable').dataTable({
+                            pageLength: 10,
+                            paging: false,
+                            scrollCollapse: true,
+                            scrollY: '50vh',
+                            language: {
+                                "sProcessing": "Procesando... ",
+                                "sLengthMenu": "Mostrar _MENU_ registros",
+                                "sZeroRecords": "No se encontraron resultados",
+                                "sEmptyTable": "Ningún dato disponible en esta tabla",
+                                "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                                "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                                "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                                "sInfoPostFix": "",
+                                "sSearch": "Buscar:  ",
+                                "sUrl": "",
+                                "sInfoThousands": ",",
+                                "sLoadingRecords": "Cargando...",
+                                "oPaginate": {
+                                    "sFirst": "Primero",
+                                    "sLast": "Último",
+                                    "sNext": "Siguiente",
+                                    "sPrevious": "Anterior"
+                                }
+                            },
+                            oAria: {
+                                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                            }
+                        });
+                        AmountApply();
+                    }
+                    else {
+                        $('#invoiceRows').html('');
+                    }
+                }
+            });
+        }
+
+        function EditarFila(requestLine) {
+            $('#PaymentPurchaseOrder').val(requestLine.PaymentPurchaseOrder);
+        }
+
+        function procesarSolicitud() {
+            var isAllValid = true;
+
+            if (parseFloat($('#montoAplicado').text().replace(/,/g, "")) > parseFloat($('#Amount').val().replace(/,/g, ""))) {
+                toastr.error('El monto aplicado no puede ser mayor al monto del pago', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Description').val().trim() == '') {
+                toastr.error('La descripción es requerida', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#DepartmentId').val().trim() == '') {
+                toastr.error('El departamento es requerido', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#VendorId').val().trim() == '') {
+                toastr.error('El Id del proveedor es requerido', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#PaymentCondition').val().trim() == '') {
+                toastr.error('La condicion de pago es requerido', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Currency').val().trim() == '') {
+                toastr.error('La moneda es requerida', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Amount').val().trim().replace(/,/g, "") == '') {
+                toastr.error('El monto es requerido', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (isAllValid) {
+                var data = {
+                    PaymentRequestId: $('#PaymentRequestId').val().trim(),
+                    Description: $('#Description').val().trim(),
+                    DocumentDate: $('#DocumentDate').val().trim(),
+                    Note: $('#Note').val().trim(),
+                    VendorId: $('#VendorId').val().trim(),
+                    DepartmentId: $('#DepartmentId').val().trim(),
+                    PaymentCondition: $('#PaymentCondition').val().trim(),
+                    Currency: $('#Currency').val().trim(),
+                    Amount: parseFloat($('#Amount').val().replace(/,/g, "")).toFixed(2),
+                    Priority: $('#Priority').val().trim(),
+                    Requester: $('#Requester').val().trim(),
+                    PostType: $('#PostType').val(),
+                    ApplyAmount: parseFloat($('#montoAplicado').text().replace(/,/g, "")).toFixed(2),
+                    BatchNumber: $('#BatchNumber').val().trim(),
+                    PaymentRequestPurchaseOrders: purchaseOrders,
+                    PaymentRequestInvoiceLines: invoiceApplied
+                }
+
+                $.ajax({
+                    url: '@Url.Action("SavePaymentRequest", "PaymentRequest")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (d) {
+                        if (d.status == true) {
+                            window.location.href = "@Url.Action("Index","PaymentRequest")";
+                        }
+                        else {
+                            alert('Ha ocurrido un error');
+                        }
+                        $('#submit').val('Guardar');
+                    },
+                    error: function () {
+                        alert('Error. Por favor trate de nuevo.');
+                        $('#submit').val('Guardar');
+                    }
+                });
+            }
+        }
+
+        function AmountApply()
+        {
+            var monto = 0;
+            $('tr').each(function () {
+                var $row = $(this);
+                if ($row.find("input[name=DocumentAmount]").val() != undefined) {
+                    monto = monto + Math.abs(parseFloat($row.find("input[name=DocumentAmount]").val().replace(/,/g, "")));
+                }
+            });
+
+            if (monto != undefined) {
+                $('#montoAplicado').text(monto.toFixed(2).replace(/./g, function (c, i, a) {
+                    return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                }));
+            }
+        }
+
+        function setCellValue(tableId, rowId, colNum, newValue) {
+            $('#' + tableId + ' tr:eq(' + (rowId + 1) + ') td:eq(' + (colNum - 1) + ') input').val(parseFloat(newValue).toFixed(2).replace(/./g, function (c, i, a) {
+                return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+            }));
+        }
+
+        function limpiarCampos() {
+            $('#DocumentNumber, #VendorId, #VendName, #PaymentCondition, #Currency, #Note, #BatchNumber').val('');
+            $('#DocumentDate').val('@DateTime.Now.ToShortDateString()')
+            $('#DepartmentId').val('@ViewBag.DepartmentId');
+            $('#Priority').val('Baja');
+            $('#Approver').val('@ViewBag.Aprover');
+            $('#Requester').val('@Seaboard.Intranet.BusinessLogic.Account.GetAccount(User.Identity.GetUserName()).UserId');
+            $('#chargeRows').empty();
+            $('#invoiceRows').empty();
+            $('#PostType').val(0);
+        }
+
+        function cargarArchivos() {
+            $.ajax({
+                url: '@Url.Action("LoadAttachmentFiles", "PaymentRequest")?PaymentRequestId=' + $('#PaymentRequestId').val().trim(),
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    attachmentFiles = result;
+                    if (attachmentFiles.length > 0) {
+                        var $ul = $('<ul class="list-unstyled file-list" />');
+                        $.each(attachmentFiles, function (i, val) {
+                            var $li = $('<li/>');
+                            var $a = $('<a href="@Url.Action("Download", "PaymentRequest")?DocumentId=' + $('#PaymentRequestId').val().trim() + '&FileName=' + val.trim() + '" />')
+                            var $delete = $('<a href="#" />')
+                            $a.append($('<i class="fa fa-file-pdf-o" />'));
+                            $delete.html("&nbsp; &nbsp; &nbsp;");
+                            $delete.click(function (e) {
+                                e.preventDefault();
+                                eliminarArchivo(val.trim());
+                            });
+                            $delete.append($('<i class="fa fa-remove fa-2x" />'));
+                            $li.append($a.html("  " + val));
+                            $li.append($delete);
+                            $ul.append($li);
+                        });
+                        $('#attachmentFiles').html($ul);
+                    }
+                    else {
+                        $('#attachmentFiles').html('');
+                    }
+                }
+            });
+        }
+
+        function atacharArchivo() {
+            var data = new FormData();
+            data.append("FileData", document.getElementById("FileData").files[0]);
+            data.append("PaymentRequestId", $('#PaymentRequestId').val());
+
+            $.ajax({
+                url: '@Url.Action("AttachFile", "PaymentRequest")',
+                type: "POST",
+                data: data,
+                dataType: "JSON",
+                contentType: false,
+                processData: false,
+                success: function (d) {
+                    if (d.status == true) {
+                        $('#attachmentForm').each(function () {
+                            this.reset();
+                        });
+                        toastr.success('Archivo adjuntado correctamente', 'Adjuntos')
+                        cargarArchivos();
+                    }
+                    else {
+                        alert('Ha ocurrido un error');
+                    }
+                    $('#submit').val('Guardar');
+                },
+                error: function () {
+                    alert('Error. Por favor trate de nuevo.');
+                    $('#submit').val('Guardar');
+                }
+            });
+        }
+
+        function eliminarArchivo(fileName) {
+            if (confirm("Esta seguro que desea eliminar este archivo ?")) {
+                $.ajax({
+                    url: '@Url.Action("DeleteFile", "PaymentRequest")?id=' + $('#PaymentRequestId').val().trim() + "&fileName=" + fileName,
+                    type: "POST",
+                    dataType: "JSON",
+                    contentType: false,
+                    processData: false,
+                    success: function (d) {
+                        if (d.status == "OK") {
+                            toastr.success('Archivo eliminado correctamente', 'Adjuntos');
+                            cargarArchivos();
+                        }
+                        else {
+                            alert(d.status);
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+}

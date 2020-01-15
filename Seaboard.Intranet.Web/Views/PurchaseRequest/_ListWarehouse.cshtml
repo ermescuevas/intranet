@@ -1,0 +1,114 @@
+﻿@model IEnumerable<Seaboard.Intranet.Domain.ViewModels.PurchaseRequestViewModel>
+
+<table class="table table-striped table-bordered table-hover informationTable">
+    <thead>
+        <tr>
+            <th style="width:15%">Solicitud</th>
+            <th style="width:15%">Sol. Original</th>
+            <th style="width:25%">Descripción</th>
+            <th style="width:10%">Prioridad</th>
+            <th style="width:12%">Fecha doc</th>
+            <th style="width:12%">Fecha req</th>
+            <th style="width:5%">Solicitante</th>
+            <th style="width:10%">AR</th>
+            <th style="width:8%">Estado</th>
+            <th style="width:30%">#</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.ActionLink(item.RequestId, "Edit", new { id = @item.RequestId })</td>
+                <td>@item.OriginalRequest</td>
+                <td>@item.Description</td>
+                <td class="text-center">
+                    @switch (item.Priority.ToLower())
+                    {
+                        case "baja":
+                            <span class="label label-success">Baja</span>
+                            break;
+                        case "normal":
+                            <span class="label label-warning">Normal</span>
+                            break;
+                        case "alta":
+                            <span class="label label-danger">Alta</span>
+                            break;
+                        default:
+                            <span class="label label-success">Baja</span>
+                            break;
+                    }
+                </td>
+                <td>@item.DocumentDate.ToShortDateString()</td>
+                <td>@item.RequiredDate.ToShortDateString()</td>
+                <td>@item.Requester</td>
+                <td>
+                    @if (!String.IsNullOrEmpty(item.Ar))
+                    {
+                        if (item.Ar.Trim().ToUpper() == "NO")
+                        {
+                            @item.Ar;
+                        }
+                        else
+                        {
+                            @Html.ActionLink(item.Ar, "Details", "Ar", new { @id = item.Ar }, null)
+                            ;
+                        }
+                    }
+                    else
+                    {
+                        @item.Ar;
+                    }
+                </td>
+                <td>
+                    @switch (item.Status)
+                    {
+                        case "No enviado":
+                            <i class="badge badge-danger">@item.Status</i>
+                            break;
+                        case "Enviado":
+                            <i class="badge badge-primary">@item.Status</i>
+                            break;
+                        case "Rechazado":
+                            <i class="badge badge-warning">@item.Status</i>
+                            break;
+                        case "Anulado":
+                            <i class="badge badge-warning">@item.Status</i>
+                            break;
+                        case "Aprobado":
+                            <i class="badge badge-success">@item.Status</i>
+                            break;
+                        case "No iniciado":
+                            <i class="badge badge-danger">@item.Status</i>
+                            break;
+                        case "En requisicion":
+                            <i class="badge badge-warning-light">@item.Status</i>
+                            break;
+                        case "En pre-analisis":
+                            <i class="badge badge-primary">@item.Status</i>
+                            break;
+                        case "En cotizacion":
+                            <i class="badge badge-warning">@item.Status</i>
+                            break;
+                        case "En analisis":
+                            <i class="badge badge-info">@item.Status</i>
+                            break;
+                        case "En compras":
+                            <i class="badge badge-success">@item.Status</i>
+                            break;
+                        case "Recibido":
+                            <i class="badge badge-success">@item.Status</i>
+                            break;
+                    }
+                </td>
+                <td>
+                    <div class="btn-group">
+                        <a href="@Url.Action("Details","ServiceRequest", new { id = item.RequestId })" class="modal-link"><i class="fa fa-bars"></i></a>
+                        <a onclick="Print('@item.RequestId');"><i class="fa fa-print"></i></a>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

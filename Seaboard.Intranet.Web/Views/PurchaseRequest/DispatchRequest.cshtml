@@ -1,0 +1,193 @@
+﻿@model Seaboard.Intranet.Domain.Models.PurchaseRequest
+
+@{
+    ViewBag.Title = "Crear solicitud";
+
+    IEnumerable<Seaboard.Intranet.Domain.ViewModels.Item> items = ViewBag.Items;
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-sm-4">
+        <h2>Crear solicitud</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li>
+                <a href="@Url.Action("UnDispachtRequest", "PurchaseRequest")">Solicitudes sin despachar</a>
+            </li>
+            <li class="active">
+                <strong>Crear solicitud</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="wrapper wrapper-content animated fadeInUp">
+            <div class="ibox">
+                <div class="ibox-content">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="m-b-md">
+                                <h2>@Model.Description</h2>
+                            </div>
+                            <dl class="dl-horizontal">
+                                <dt>Id de requisicion:</dt>
+                                <dd><h4 id="PurchaseRequestId">@Model.PurchaseRequestId.Trim()</h4></dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <dl class="dl-horizontal">
+                                <dt>Departamento:</dt>
+                                <dd>@Model.DepartmentId</dd>
+                                <dt>AR:</dt>
+                                <dd>@Model.AR</dd>
+                                <dt>Prioridad:</dt>
+                                <dd>@Model.Priority</dd>
+                                <dt>Aprobador:</dt>
+                                <dd>@Model.Approver</dd>
+                                <dt>Nota:</dt>
+                                <dd>@Model.Note</dd>
+                            </dl>
+                        </div>
+
+                        <div class="col-lg-6" id="cluster_info">
+                            <dl class="dl-horizontal">
+                                <dt>Fecha documento:</dt>
+                                <dd>@Model.DocumentDate.ToShortDateString()</dd>
+                                <dt>Fecha requerida:</dt>
+                                <dd>@Model.RequiredDate.ToShortDateString()</dd>
+                                <dt>Solicitante: </dt>
+                                <dd>@Model.Requester</dd>
+                            </dl>
+                        </div>
+                    </div>
+
+                    <br />
+                    <div class="row m-t-sm">
+                        <div class="col-lg-12">
+                            <div class="panel blank-panel">
+                                <div class="panel-heading">
+                                    <div class="panel-options">
+                                        <ul class="nav nav-tabs">
+                                            <li class="active"><a href="#tab-1" data-toggle="tab">Lineas</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div class="panel-body">
+                                    <div class="tab-content">
+                                        <div class="tab-pane active" id="tab-1">
+                                            <form id="form" action="#" class="wizard-big">
+                                                <button class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-SendRequest"><i class="fa fa-save"></i> Procesar</button>
+                                                <br />
+                                                <br />
+                                                <select class="form-control dual_select" name="itemsBox[]" multiple>
+                                                    @foreach (var item in items)
+                                                    {
+                                                        <option value="@item.ItemId">@(item.ItemId + " - " + @item.ItemDesc + " - " + @item.Quantity.ToString("N2"))</option>
+                                                    }
+                                                </select>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-2">
+        <div class="wrapper wrapper-content project-manager">
+        </div>
+    </div>
+</div>
+
+<div id="modal-SendRequest" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Procesar solicitud</h4>
+                <h3>Esta seguro que desea procesar este registro ?</h3>
+            </div>
+
+            <div class="modal-body">
+                <h4>Solicitud de almacen</h4>
+                <hr />
+            </div>
+
+            <div class="modal-footer">
+                <div class="form-actions no-color">
+                    <button type="button" class="btn btn-primary" onclick="procesarSolicitud();"> Si</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles{
+    @Styles.Render("~/plugins/duallistStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/duallist")
+    @Scripts.Render("~/plugins/toastr")
+    <script>
+        $(document).ready(function () {
+            $('.dual_select').bootstrapDualListbox({
+                selectorMinimalHeight: 160
+            });
+        });
+
+        var purchaseRequestItems = [];
+
+        function procesarSolicitud() {
+            var item = String($('select[name="itemsBox[]"]').val());
+            var isValidItem = true;
+            var items = item.split(",");
+            for (var i = 0; i < items.length; i++) {
+                purchaseRequestItems.push({
+                    PurchaseRequestId: $('#PurchaseRequestId').text().trim(),
+                    ItemId: items[i].trim()
+                });
+            }
+            if (purchaseRequestItems.length == 0) {
+                isValidItem = false;
+                toastr.error('Debe de seleccionar los articulos que se va a procesar', 'Campos requeridos');
+            }
+
+            if (isValidItem) {
+                var data = {
+                    Items:purchaseRequestItems
+                }
+
+                $.ajax({
+                    url: '@Url.Action("ProcessPurchaseRequest", "PurchaseRequest")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (d) {
+                        if (d.status == "OK") {
+                            window.location.href = "@Url.Action("IndexWarehouse", "ServiceRequest")";
+                        }
+                        else {
+                            alert(d.status);
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+}

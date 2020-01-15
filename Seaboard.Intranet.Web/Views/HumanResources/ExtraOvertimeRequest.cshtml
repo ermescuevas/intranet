@@ -1,0 +1,962 @@
+﻿@using Seaboard.Intranet.Domain;
+@model IEnumerable<Seaboard.Intranet.Domain.Models.Overtime>
+@{
+    ViewBag.Title = "Horas extras extraordinarias";
+    var employees = (List<Seaboard.Intranet.Domain.ViewModels.Lookup>)ViewBag.Employees;
+    var batches = (List<Seaboard.Intranet.Domain.Models.OvertimeApproval>)ViewBag.BatchApprovals;
+    var departments = (List<Seaboard.Intranet.Domain.ViewModels.Lookup>)ViewBag.Departments;
+}
+
+<style>
+    .bootstrap-select:not([class*=col-]):not([class*=form-control]):not(.input-group-btn) {
+        width: 100%;
+    }
+
+    .clockpicker-popover {
+        z-index: 999999;
+    }
+
+    .modal-lg {
+        width: 1200px;
+    }
+</style>
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Horas extras extraordinarias</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Listado de horas extras</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>Listado de horas extras</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <div class="row m-t-sm">
+                        <div class="col-lg-12">
+                            <div class="panel blank-panel">
+                                <div class="panel-heading">
+                                    <div class="panel-options">
+                                        <ul class="nav nav-tabs">
+                                            <li id="tabButton1" class="active"><a href="#tab-1" data-toggle="tab">Horas extras</a></li>
+                                            <li id="tabButton2" class=""><a href="#tab-2" data-toggle="tab">Envio horas extras a aprobación</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div class="panel-body">
+                                    <div class="tab-content" id="tabContainer">
+                                        <div class="tab-pane active" id="tab-1">
+                                            <button class="btn btn-danger" onclick="createOvertime()">NUEVA HORA EXTRA</button>
+                                            <div class="hr-line-dashed"></div>
+                                            <table class="table table-striped table-bordered table-hover informationTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width:10%">Id. de empleado</th>
+                                                        <th style="width:25%">Nombre</th>
+                                                        <th style="width:10%">Cant. Horas</th>
+                                                        <th style="width:10%">Tipo</th>
+                                                        <th style="width:25%">Comentario</th>
+                                                        <th style="width:10%">Estado</th>
+                                                        <th style="width:20%">#</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var item in Model)
+                                                    {
+                                                        <tr>
+                                                            <td>@item.EmployeeId</td>
+                                                            <td>@item.EmployeeName</td>
+                                                            <td>@item.Hours</td>
+                                                            <td>@item.OvertimeTypeDesc</td>
+                                                            <td>@item.Note</td>
+                                                            <td>
+                                                                @if (item.Status == 0)
+                                                                {
+                                                                    <i class="badge badge-danger">Creado</i>
+                                                                }
+                                                                else if (item.Status == 1)
+                                                                {
+                                                                    <i class="badge badge-primary">Enviado</i>
+                                                                }
+                                                                else if (item.Status == 2)
+                                                                {
+                                                                    <i class="badge badge-info">Aprobado</i>
+                                                                }
+                                                                else if (item.Status == 3)
+                                                                {
+                                                                    <i class="badge badge-info">Rechazado</i>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <i class="badge badge-success">Procesado</i>
+                                                                }
+                                                            </td>
+                                                            <td>
+                                                                <div class="btn-group-xs">
+                                                                    <button onclick="getOvertime(@item.RowId, @item.Status);" class="btn btn-success btn-xs">Editar</button>
+                                                                    <button onclick="deleteOvertime(@item.RowId, @item.Status);" class="btn btn-danger btn-xs">Eliminar</button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="tab-pane" id="tab-2">
+                                            <button class="btn btn-danger" onclick="createSendApproval();">NUEVO ENVIO APROBACION</button>
+                                            <div class="hr-line-dashed"></div>
+                                            <table class="table table-striped table-bordered table-hover informationTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width:10%">Id. de lote</th>
+                                                        <th style="width:23%">Descripcion</th>
+                                                        <th style="width:13%">Departamento Aprobador</th>
+                                                        <th style="width:24%">Comentario</th>
+                                                        <th style="width:10%">Estado</th>
+                                                        <th style="width:20%">#</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var item in batches)
+                                                    {
+                                                        <tr>
+                                                            <td>@item.BatchNumber</td>
+                                                            <td>@item.Description</td>
+                                                            <td>@item.Approver</td>
+                                                            <td>@item.Note</td>
+                                                            <td>
+                                                                @if (item.Status == 0)
+                                                                {
+                                                                    <i class="badge badge-danger">Creado</i>
+                                                                }
+                                                                else if (item.Status == 1)
+                                                                {
+                                                                    <i class="badge badge-primary">Enviado</i>
+                                                                }
+                                                                else if (item.Status == 2)
+                                                                {
+                                                                    <i class="badge badge-info">Aprobado</i>
+                                                                }
+                                                                else if (item.Status == 3)
+                                                                {
+                                                                    <i class="badge badge-info">Rechazado</i>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <i class="badge badge-success">Procesado</i>
+                                                                }
+                                                            </td>
+                                                            <td>
+                                                                <div class="btn-group-xs">
+                                                                    <button onclick="getApprovalOvertime('@item.BatchNumber', @item.Status);" class="btn btn-success btn-xs">Editar</button>
+                                                                    <button onclick="deleteApprovalOvertime('@item.BatchNumber', @item.Status);" class="btn btn-danger btn-xs">Eliminar</button>
+                                                                    <button onclick="sendApprovalOvertime('@item.BatchNumber', @item.Status);" class="btn btn-info btn-xs">Enviar</button>
+                                                                    <button onclick="printApprovalOvertime('@item.RowId');" class="btn btn-info btn-xs">Imprimir</button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-CreateHeader" class="modal inmodal" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content animated fadeIn">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Nueva hora extra</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="RowId" id="RowId" />
+                    <div class="row">
+                        <div class="form-group">
+                            <label>Empleado:</label>
+                            <select class="selectpicker form-control required" data-live-search="true" id="EmployeeId" name="EmployeeId">
+                                <option value=""></option>
+                                @foreach (var item in employees)
+                                {
+                                    <option value="@item.Id.Trim()">@(item.Id + " - " + item.Descripción)</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>Inicio:</label>
+                                    <div class="input-group">
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        <input name="StartDate" id="StartDate" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label>Fin:</label>
+                                    <div class="input-group">
+                                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                        <input name="EndDate" id="EndDate" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group">
+                            <label>Horas:</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="input-group">
+                                        <span class="input-group-addon"><i class="fa fa-clock-o"></i></span>
+                                        <input name="Hours" id="Hours" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group">
+                            <label>Tipo:</label>
+                            <div class="row">
+                                <div class="col-md-10">
+                                    <div class="input-group">
+                                        <select class="form-control" id="OvertimeType" name="OvertimeType">
+                                            <option value="1">100%</option>
+                                            <option value="2">35%</option>
+                                            <option value="3">15%</option>
+                                            <option value="4">Feriado</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="input-group">&nbsp;</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group">
+                            <label>Nota:</label>
+                            <textarea rows="3" id="Note" name="Note" placeholder="Por favor ingreso una nota" class="form-control"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+                    <button type="button" class="btn btn-success" onclick="saveOvertime();">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-SendOvertime" class="modal inmodal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content animated fadeIn">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Nueva aprobacion</h4>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" name="BatchNumber" id="BatchNumber" />
+                    <input type="hidden" name="BatchRowId" id="BatchRowId" />
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Descripcion:</label>
+                                <input name="Description" id="Description" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Departamento Aprobador:</label>
+                                <select class="selectpicker form-control required" data-live-search="true" id="Approver" name="Approver">
+                                    <option value=""></option>
+                                    @foreach (var item in departments)
+                                    {
+                                        <option value="@item.Descripción.Trim()">@(item.Id + " - " + item.Descripción)</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group">
+                            <label>Nota:</label>
+                            <textarea rows="1" id="BatchNote" name="BatchNote" placeholder="Por favor ingreso una nota" class="form-control"></textarea>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="btn-group">
+                                <button class="btn btn-info" onclick="marcarTodo();"><i class="fa fa-check"></i> Marcar todo</button>
+                                <button class="btn btn-success" onclick="desmarcarTodo();"><i class="fa fa-remove"></i> Desmarcar todo</button>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <form action="javascript:;" method="post" enctype="multipart/form-data" id="attachmentForm" accept-charset="utf-8">
+                                <div class="col-md-11">
+                                    <div class="fileinput fileinput-new input-group" data-provides="fileinput">
+                                        <div class="form-control" data-trigger="fileinput"><i class="glyphicon glyphicon-file fileinput-exists"></i> <span class="fileinput-filename"></span></div>
+                                        <span class="input-group-addon btn btn-default btn-file"><span class="fileinput-new"><i class="fa fa-search"></i></span><span class="fileinput-exists"><i class="fa fa-edit"></i></span><input type="file" name="FileData" id="FileData"></span>
+                                        <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput"><i class="fa fa-remove"></i></a>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <hr />
+                    <div class="table-responsive" style="height:400px;overflow:auto" id="overtimeRows"></div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+                    <button type="button" class="btn btn-success ladda-button" data-style="expand-left" onclick="saveOvertimeApproval();">Guardar y enviar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Styles {
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/wizardStepsStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/plugins/sweetAlertStyles")
+    @Styles.Render("~/plugins/clockpickerStyles")
+    @Styles.Render("~/plugins/awesomeCheckboxStyles")
+    @Styles.Render("~/Content/plugins/iCheck/iCheckStyles")
+    @Styles.Render("~/plugins/laddaStyles")
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/css/bootstrap-select.min.css">
+}
+
+@section Scripts {
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/wizardSteps")
+    @Scripts.Render("~/plugins/validate")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/sweetAlert")
+    @Scripts.Render("~/plugins/clockpicker")
+    @Scripts.Render("~/plugins/ladda")
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/bootstrap-select.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/i18n/defaults-en_US.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#StartDate').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true,
+                format: 'mm/dd/yyyy',
+                minDate: 0
+            });
+            $('#EndDate').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true,
+                format: 'mm/dd/yyyy',
+                minDate: 0
+            });
+            $('.informationTable').DataTable({
+                pageLength: 10,
+                order: [[0, "desc"]],
+                dom: '<"html5buttons"B>lTfgitp',
+                language: {
+                    "sProcessing": "Procesando... ",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:  ",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                },
+                oAria: {
+                    "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                },
+                buttons: [
+                    { extend: 'copy' },
+                    { extend: 'csv' },
+                    { extend: 'excel', title: 'ExampleFile' },
+                    { extend: 'pdf', title: 'ExampleFile' },
+
+                    {
+                        extend: 'print',
+                        customize: function (win) {
+                            $(win.document.body).addClass('white-bg');
+                            $(win.document.body).css('font-size', '10px');
+
+                            $(win.document.body).find('table')
+                                .addClass('compact')
+                                .css('font-size', 'inherit');
+                        }
+                    }
+                ]
+
+            });
+            $.formattedDate = function (dateToFormat) {
+                var dateObject = new Date(dateToFormat);
+                var day = dateObject.getDate();
+                var month = dateObject.getMonth() + 1;
+                var year = dateObject.getFullYear();
+                day = day < 10 ? "0" + day : day;
+                month = month < 10 ? "0" + month : month;
+                var formattedDate = month + "/" + day + "/" + year;
+                return formattedDate;
+            };
+            $.formattedDateTime = function (dateToFormat) {
+                var dateObject = new Date(dateToFormat);
+                var day = dateObject.getDate();
+                var month = dateObject.getMonth() + 1;
+                var year = dateObject.getFullYear();
+                var hour = dateObject.getHours();
+                var minute = dateObject.getMinutes();
+                day = day < 10 ? "0" + day : day;
+                month = month < 10 ? "0" + month : month;
+                var formattedDate = month + "/" + day + "/" + year + " " + hour.toString().padStart(2, "0") + ":" + minute.toString().padStart(2, "0");
+                return formattedDate;
+            };
+            $('.ladda-button').ladda();
+        });
+
+        function limpiarCampos() {
+            $('#RowId').val('0');
+            $('#EmployeeId').val('');
+            $('#AbsenceType').val('1');
+            $('#Hours').val('');
+            $('#Note').val('');
+            $('.selectpicker').selectpicker('refresh');
+        }
+
+        function createOvertime() {
+            $('#modal-CreateHeader').modal({ backdrop: 'static', keyboard: false });
+            limpiarCampos();
+        }
+
+        function createSendApproval() {
+            $('#modal-SendOvertime').modal({ backdrop: 'static', keyboard: false });
+            $('#BatchNumber').val('');
+            $('#Description').val('');
+            $('#Approver').val('');
+            $('#BatchNote').val('');
+            $('#BatchRowId').val('0');
+            $('.selectpicker').selectpicker('refresh');
+            generateOvertimeDetails();
+        }
+
+        function deleteOvertime(rowId, approve) {
+            if (approve === 0) {
+                swal({
+                    title: "Eliminar",
+                    text: "Esta seguro que desea eliminar esta hora extra ?",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Si, eliminar!",
+                    cancelButtonText: "No, cancelar!",
+                    closeOnConfirm: false
+                }, function () {
+                    $.ajax({
+                        url: '@Url.Action("DeleteOvertime", "HumanResources")?rowId=' + rowId,
+                        type: "POST",
+                        data: "",
+                        cache: false,
+                        dataType: "JSON",
+                        contentType: "application/json",
+                        success: function (result) {
+                            if (result.status === "OK") {
+                                window.location.reload();
+                            } else {
+                                swal({
+                                    title: "ERROR",
+                                    text: result.status,
+                                    type: "error"
+                                });
+                            }
+                        }
+                    });
+                });
+            } else {
+                swal({
+                    title: "ERROR",
+                    text: "No puede eliminarse la hora extra por que esta en estado enviado o aprobado",
+                    type: "error"
+                });
+            }
+        }
+
+        function getOvertime(rowId, approve) {
+            if (approve === 0) {
+            $.ajax({
+                url: '@Url.Action("GetOvertime", "HumanResources")?rowId=' + rowId,
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    if (result.status === "OK") {
+                        $('#modal-CreateHeader').modal({ backdrop: 'static', keyboard: false });
+                        $('#EmployeeId').val(result.model.EmployeeId.trim());
+                        $('#Note').val(result.model.Note);
+                        $('#OvertimeType').val(result.model.OvertimeType);
+                        $('#StartDate').val($.formattedDate(new Date(parseInt(result.model.StartDate.substr(6)))));
+                        $('#EndDate').val($.formattedDate(new Date(parseInt(result.model.EndDate.substr(6)))));
+                        $('#Hours').val(result.model.Hours);
+                        $('#RowId').val(result.model.RowId);
+                        $('.selectpicker').selectpicker('refresh');
+                    }
+                    else {
+                        swal({
+                            title: "ERROR",
+                            text: result.status,
+                            type: "error"
+                        });
+                    }
+                }
+                });
+            } else {
+                swal({
+                    title: "ERROR",
+                    text: "No puede editarse la hora extra por que esta en estado enviado o aprobado",
+                    type: "error"
+                });
+            }
+        }
+
+        function saveOvertime() {
+            var isAllValid = true;
+            if ($('#EmployeeId').val() === '') {
+                toastr.error('Por favor debe de especificar un empleado para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Hours').val() === '') {
+                toastr.error('Por favor debe de especificar las horas trabajadas para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (isAllValid) {
+                var data = {
+                    employeeId: $('#EmployeeId').val(),
+                    startDate: $('#StartDate').datepicker({ dateFormat: 'ddMMyyyy' }).val(),
+                    endDate: $('#EndDate').datepicker({ dateFormat: 'ddMMyyyy' }).val(),
+                    hours: $('#Hours').val(),
+                    overtimeType: $('#OvertimeType').val(),
+                    note: $('#Note').val(),
+                    startTime: '00:00',
+                    endTime: '00:00',
+                    rowId: $('#RowId').val(),
+                    module: 2
+                }
+                $.ajax({
+                    url: '@Url.Action("SaveOvertime", "HumanResources")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            window.location.reload();
+                        }
+                        else {
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+                    }
+                });
+            }
+        }
+
+        function generateOvertimeDetails() {
+            $.ajax({
+                url: '@Url.Action("GetOvertimeNotApproved", "HumanResources")?module=2&batchNumber=' + $('#BatchNumber').val(),
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    var $table = $('<table class="table table-stripped table-hover" id="itemTable"/>');
+                    $table.append(
+                        '<thead>' +
+                        '<tr>' +
+                        '<th style="width:5%">#</th>' +
+                        '<th style="width:10%">Codigo</th>' +
+                        '<th style="width:20%">Nombre</th>' +
+                        '<th style="width:15%">Inicio</th>' +
+                        '<th style="width:15%">Fin</th>' +
+                        '<th style="width:10%">Horas</th>' +
+                        '<th style="width:25%">Nota</th>' +
+                        '<th style="width:0%"></th>' +
+                        '</tr>' +
+                        '</thead>');
+                    if (result.registros.length > 0) {
+                        var $tbody = $('<tbody/>');
+                        $.each(result.registros, function (i, val) {
+                            var $row = $('<tr/>');
+                            var $labelCheck = $('<label>');
+                            var $checkInput;
+                            var $checkDiv = $('<div class="checkbox checkbox-success checkbox-circle text-center" style="margin-top: 1px; margin-bottom: 1px;">');
+                            if (val.Exclude === false)
+                                $checkInput = $('<input type="checkbox" name="check">');
+                            else
+                                $checkInput = $('<input type="checkbox" name="check" checked="checked">');
+                            $checkDiv.append($checkInput).append($labelCheck);
+                            $row.append($('<td/>').html($checkDiv));
+                            $row.append($('<td/>').html(val.EmployeeId));
+                            $row.append($('<td/>').html(val.EmployeeName));
+                            $row.append($('<td/>').html($.formattedDate(new Date(parseInt(val.StartDate.substr(6))))));
+                            $row.append($('<td/>').html($.formattedDate(new Date(parseInt(val.EndDate.substr(6))))));
+                            $row.append($('<td/>').html(val.Hours));
+                            $row.append($('<td/>').html(val.Note));
+                            $row.append($('<td/>').html(val.RowId));
+                            $tbody.append($row);
+                        });
+                        $table.append($tbody);
+                    }
+                    $('#overtimeRows').html($table);
+                }
+            });
+        }
+
+        function marcarTodo() {
+            $('#itemTable > tbody > tr').each(function () {
+                $(this).find('td:eq(0) input').prop("checked", true);
+            });
+        }
+
+        function desmarcarTodo() {
+            $('#itemTable > tbody > tr').each(function () {
+                $(this).find('td:eq(0) input').prop("checked", false);
+            });
+        }
+
+        function deleteApprovalOvertime(batchNumber, approve) {
+            if (approve === 0) {
+                swal({
+                    title: "Eliminar",
+                    text: "Esta seguro que desea eliminar este registro ?",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Si, eliminar!",
+                    cancelButtonText: "No, cancelar!",
+                    closeOnConfirm: false
+                }, function () {
+                    $.ajax({
+                        url: '@Url.Action("DeleteApprovalOvertime", "HumanResources")?batchNumber=' + batchNumber,
+                        type: "POST",
+                        data: "",
+                        cache: false,
+                        dataType: "JSON",
+                        contentType: "application/json",
+                        success: function (result) {
+                            if (result.status === "OK") {
+                                window.location.reload();
+                            } else {
+                                swal({
+                                    title: "ERROR",
+                                    text: result.status,
+                                    type: "error"
+                                });
+                            }
+                        }
+                    });
+                });
+            } else {
+                swal({
+                    title: "ERROR",
+                    text: "No puede eliminarse la hora extra por que esta en estado enviado o aprobado",
+                    type: "error"
+                });
+            }
+        }
+
+        function getApprovalOvertime(batchNumber, approve) {
+            if (approve === 0) {
+                $.ajax({
+                    url: '@Url.Action("GetApprovalOvertime", "HumanResources")?batchNumber=' + batchNumber,
+                    type: "POST",
+                    data: "",
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            $('#modal-SendOvertime').modal({ backdrop: 'static', keyboard: false });
+                            $('#BatchNumber').val(result.model.BatchNumber);
+                            $('#Description').val(result.model.Description);
+                            $('#Approver').val(result.model.Approver);
+                            $('#BatchNote').val(result.model.Note);
+                            $('#BatchRowId').val(result.model.RowId);
+                            $('.selectpicker').selectpicker('refresh');
+                            generateOvertimeDetails();
+                        }
+                        else {
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+                    }
+                });
+            } else {
+                swal({
+                    title: "ERROR",
+                    text: "No puede editarse el registro por que esta en estado enviado o aprobado",
+                    type: "error"
+                });
+            }
+        }
+
+        function sendApprovalOvertime(rowId, approve) {
+            if (approve !== 2) {
+                swal({
+                    title: "Enviar",
+                    text: "Esta seguro que desea enviar de nuevo este registro ?",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Si, enviar!",
+                    cancelButtonText: "No, cancelar!",
+                    closeOnConfirm: false
+                }, function () {
+                    $.ajax({
+                        url: '@Url.Action("SendApprovalOvertime", "HumanResources")?rowId=' + rowId,
+                        type: "POST",
+                        data: "",
+                        cache: false,
+                        dataType: "JSON",
+                        contentType: "application/json",
+                        success: function (result) {
+                            if (result.status === "OK") {
+                                window.location.reload();
+                            } else {
+                                swal({
+                                    title: "ERROR",
+                                    text: result.status,
+                                    type: "error"
+                                });
+                            }
+                        }
+                    });
+                });
+            } else {
+                swal({
+                    title: "ERROR",
+                    text: "No puede editarse el registro por que esta en estado aprobado",
+                    type: "error"
+                });
+            }
+        }
+
+        function saveOvertimeApproval() {
+            var isAllValid = true;
+            var items = [];
+            if ($('#Description').val() === '') {
+                toastr.error('Por favor debe de especificar una descripción para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+            $('#itemTable > tbody > tr').each(function () {
+                if ($(this).find('td:eq(0) input').is(':checked')) {
+                    items.push(parseInt($(this).find('td:eq(7)').html()));
+                }
+            });
+
+            if ($('#Approver').val() === '') {
+                toastr.error('Por favor debe de especificar un departamento aprobador para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (isAllValid) {
+                $('.ladda-button').ladda('start');
+                var data = {
+                    description: $('#Description').val(),
+                    note: $('#BatchNote').val(),
+                    rowId: $('#BatchRowId').val(),
+                    approver: $('#Approver').val(),
+                    module: 2,
+                    detailRowIds: items,
+                    fileData: document.getElementById("FileData").files[0]
+                }
+                $.ajax({
+                    url: '@Url.Action("SaveApprovalOvertime", "HumanResources")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            atacharArchivo(result.RowId);
+                        }
+                        else {
+                             $('.ladda-button').ladda('stop');
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+                    }
+                });
+            }
+        }
+
+        function cargarArchivos() {
+            $.ajax({
+                url: '@Url.Action("LoadAttachmentFiles", "HumanResources")?id=Overtime' + $('#RowId').val().trim(),
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    attachmentFiles = result;
+                    if (attachmentFiles.length > 0) {
+                        var $ul = $('<ul class="list-unstyled file-list" />');
+                        $.each(attachmentFiles, function (i, val) {
+                            var $li = $('<li/>');
+                            var $a = $('<a href="@Url.Action("Download","HumanResources")?id=Overtime' + $('#RowId').val().trim() + '&FileName=' + val.trim() + '" />')
+                            var $delete = $('<a href="#" />')
+                            $a.append($('<i class="fa fa-file-pdf-o" />'));
+                            $delete.html("&nbsp; &nbsp; &nbsp;");
+                            $delete.click(function (e) {
+                                e.preventDefault();
+                                eliminarArchivo(val.trim());
+                            });
+                            $delete.append($('<i class="fa fa-remove fa-2x" />'));
+                            $li.append($a.html("  " + val));
+                            $li.append($delete);
+                            $ul.append($li);
+                        });
+                        $('#attachmentFiles').html($ul);
+                    }
+                    else {
+                        $('#attachmentFiles').html('');
+                    }
+                }
+            });
+        }
+
+        function atacharArchivo(rowId) {
+            var data = new FormData();
+            data.append("FileData", document.getElementById("FileData").files[0]);
+            data.append("id", 'Overtime' + rowId);
+            $.ajax({
+                url: '@Url.Action("AttachFile", "HumanResources")',
+                type: "POST",
+                data: data,
+                dataType: "JSON",
+                contentType: false,
+                processData: false,
+                success: function (d) {
+                    window.location.reload();
+                },
+                error: function () {
+                    window.location.reload();
+                }
+            });
+        }
+
+        function eliminarArchivo(fileName) {
+            if (confirm("Esta seguro que desea eliminar este archivo ?")) {
+                $.ajax({
+                    url: '@Url.Action("DeleteFile", "HumanResources")?id=Overtime' + $('#RowId').val().trim() + "&fileName=" + fileName,
+                    type: "POST",
+                    dataType: "JSON",
+                    contentType: false,
+                    processData: false,
+                    success: function (d) {
+                        if (d.status == "OK") {
+                            toastr.success('Archivo eliminado correctamente', 'Adjuntos');
+                            cargarArchivos();
+                        }
+                        else {
+                            alert(d.status);
+                        }
+                    }
+                });
+            }
+        }
+
+        function printApprovalOvertime(id) {
+            var data = {
+                rowId: id
+            }
+            var url = '@Url.Content("~/PDF/Reportes/")ApprovalOvertimeReport.pdf';
+            toastr.info('Estamos procesando su solicitud', 'Por favor espere');
+            $.ajax({
+                url: '@Url.Action("ApprovalOvertimeReport", "HumanResources")',
+                type: "POST",
+                data: JSON.stringify(data),
+                dataType: "JSON",
+                cache: false,
+                contentType: "application/json",
+                success: function(d) {
+                    if (d.status == "OK") {
+                        window.open(url);
+                    } else {
+                        alert(d.status);
+                    }
+                }
+            });
+        }
+    </script>
+}

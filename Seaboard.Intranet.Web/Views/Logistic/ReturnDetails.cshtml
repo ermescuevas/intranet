@@ -1,0 +1,53 @@
+﻿
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h4 class="modal-title" id="myModalLabel">Detalles de devolucion</h4>
+</div>
+
+<div class="modal-body">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="tabs-container">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a data-toggle="tab" href="#tab-1"> Detalles</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div id="tab-1" class="tab-pane active">
+                        <div class="panel-body">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Id. de articulo</th>
+                                        <th>Descripción</th>
+                                        <th>Cantidad</th>
+                                        <th>Unidad</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (ViewBag.RequestDetail != null)
+                                    {
+                                        foreach (Seaboard.Intranet.Domain.ViewModels.DispachtDetailViewModel item in ViewBag.RequestDetail)
+                                        {
+                                            <tr>
+                                                <td>@item.ItemNumber.Trim()</td>
+                                                <td>@item.ItemDescription.Trim()</td>
+                                                <td>@item.QtyDispachted.ToString("N2")</td>
+                                                <td>@item.UnitId.Trim()</td>
+                                                <td>@item.Status.Trim()</td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cerrar</button>
+</div>

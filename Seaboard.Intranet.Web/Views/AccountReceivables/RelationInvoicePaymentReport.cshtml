@@ -1,0 +1,250 @@
+﻿@{
+    Layout = "~/Views/Shared/_BillingLayout.cshtml";
+    ViewBag.Title = "Reporte de relacion de factura y pago";
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-sm-4">
+        <h2>Reporte de relacion de factura y pago</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Reporte de relacion de factura y pago</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="wrapper wrapper-content animated fadeInUp">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="ibox float-e-margins">
+                        <div class="ibox-title">
+                            <h3>Reporte de relacion de factura y pago</h3>
+                        </div>
+                        <div class="ibox-content">
+                            <div class="col-sm-12 col-sm-offset-1">
+                                <button class="btn btn-success" type="button" onclick="imprimirReporte();"><i class="fa fa-print"></i> Imprimir</button>
+                                <br />
+                            </div>
+                            <br />
+                            <br />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ibox">
+                <div class="ibox-content">
+                    <div class="hr-line-dashed"></div>
+                    <br />
+                    <div class="row">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">Fecha desde:</label>
+                            <div class="col-sm-3 input-group">
+                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                <input id="fromDate" name="fromDate" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">Fecha hasta:</label>
+                            <div class="col-sm-3 input-group">
+                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                <input id="toDate" name="toDate" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hr-line-dashed"></div>
+                    <br />
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="col-sm-6 control-label">Intervalos:</label>
+                                <div class="col-sm-6 ">
+                                    <select class="form-control" name="filterSelect" id="filterSelect">
+                                        <option>Id. de cliente</option>
+                                        <option>Clase de cliente</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hr-line-dashed"></div>
+                    <br />
+                    <div class="row">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">Desde:</label>
+                            <div class="col-sm-2 input-group">
+                                <input type="text" name="filterFrom" id="filterFrom" class="form-control" />
+                                <span class="input-group-btn">
+                                    <button id="lookupDesde" type="button" onclick="filtroDesde();" class="btn btn-primary">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                </span>
+                            </div>
+
+                            <br />
+
+                            <label class="col-sm-2 control-label">Hasta:</label>
+                            <div class="col-sm-2 input-group">
+                                <input type="text" name="filterTo" id="filterTo" class="form-control" />
+                                <span class="input-group-btn">
+                                    <button id="lookupHasta" type="button" onclick="filtroHasta();" class="btn btn-primary">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles{
+    @Styles.Render("~/Content/plugins/iCheck/iCheckStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/awesomeCheckboxStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/iCheck")
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+
+    <script>
+        $(document).ready(function() {
+            $('#fromDate').datepicker({
+                changeMonth: true,
+                changeYear: true,
+                showButtonPanel: true,
+                dateFormat: 'MM yy',
+                onClose: function(dateText, inst) {
+                    $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
+                }
+            });
+            $('#fromDate').datepicker().datepicker("setDate", new Date());
+
+            $('#toDate').datepicker({
+                changeMonth: true,
+                changeYear: true,
+                showButtonPanel: true,
+                dateFormat: 'MM yy',
+                onClose: function(dateText, inst) {
+                    $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
+                }
+            });
+            $('#toDate').datepicker().datepicker("setDate", new Date());
+        });
+
+        function imprimirReporte() {
+            var isValid = true;
+
+            if ($('#filterFrom').val().trim() === '') {
+                isValid = false;
+                toastr.error('Debe de especificar un filtro para poder continuar', 'Campos requeridos');
+            }
+
+            if (isValid) {
+                var data = {
+                    filterFrom: $('#filterFrom').val().trim(),
+                    filterTo: $('#filterTo').val().trim(),
+                    typeFilter: $('#filterSelect').prop("selectedIndex"),
+                    fromDate: $('#fromDate').datepicker('getDate'),
+                    toDate: $('#toDate').datepicker('getDate')
+                }
+                var url = '@Url.Content("~/PDF/Reportes/")AccountReceivablesRelationReport.pdf';
+                toastr.info('Estamos procesando su solicitud', 'Por favor espere');
+                $.ajax({
+                    url: '@Url.Action("RelationInvoicePaymentReport", "AccountReceivables")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    async: false,
+                    contentType: "application/json",
+                    success: function(d) {
+                        if (d.status === "OK") {
+                            window.open(url);
+                            @*window.location.href = "@Url.Action("RelationInvoicePaymentReport", "AccountReceivables")";*@
+                        } else {
+                            alert(d.status);
+                        }
+                    }
+                });
+            }
+        }
+
+        function filtroDesde() {
+            if ($('#filterSelect').prop("selectedIndex") == 0) {
+                $('#lookupDesde').lookupbox({
+                    title: 'Busqueda:',
+                    url: '@Url.Action("ListLookup", "Home")?tipo=30&consulta=',
+                    imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                    width: 800,
+                    height: 1000,
+                    onItemSelected: function(data) {
+                        $('input[name=filterFrom]').val(data.Id);
+                        $('input[name=filterTo]').val(data.Id);
+                    },
+                    tableHeader: ['Id. de cliente', 'Descripción'],
+                    hiddenFields: ['DataExtended']
+                });
+            } else {
+                $('#lookupDesde').lookupbox({
+                    title: 'Busqueda:',
+                    url: '@Url.Action("ListLookup", "Home")?tipo=32&consulta=',
+                    imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                    width: 800,
+                    height: 1000,
+                    onItemSelected: function(data) {
+                        $('input[name=filterFrom]').val(data.Id);
+                        $('input[name=filterTo]').val(data.Id);
+                    },
+                    tableHeader: ['Id. de clase', 'Descripción'],
+                    hiddenFields: ['DataExtended']
+                });
+            }
+        }
+
+        function filtroHasta() {
+            if ($('#filterSelect').prop("selectedIndex") === 0) {
+                $('#lookupHasta').lookupbox({
+                    title: 'Busqueda:',
+                    url: '@Url.Action("ListLookup", "Home")?tipo=30&consulta=',
+                    imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                    width: 800,
+                    height: 1000,
+                    onItemSelected: function(data) {
+                        $('input[name=filterTo]').val(data.Id);
+                    },
+                    tableHeader: ['Id. de cliente', 'Descripción'],
+                    hiddenFields: ['DataExtended']
+                });
+            } else {
+                $('#lookupHasta').lookupbox({
+                    title: 'Busqueda:',
+                    url: '@Url.Action("ListLookup", "Home")?tipo=32&consulta=',
+                    imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                    width: 800,
+                    height: 1000,
+                    onItemSelected: function(data) {
+                        $('input[name=filterTo]').val(data.Id);
+                    },
+                    tableHeader: ['Id. de clase', 'Descripción'],
+                    hiddenFields: ['DataExtended']
+                });
+            }
+        }
+    </script>
+}

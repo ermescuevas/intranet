@@ -1,0 +1,154 @@
+﻿@model List<Seaboard.Intranet.Domain.Models.FoodMenu>
+@{
+    ViewBag.Title = "Menu semanal";
+    Layout = "~/Views/Shared/_Layout_3.cshtml";
+}
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Menu semanal</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Menu semanal</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+
+<div class="fh-breadcrumb">
+    <div class="fh-column">
+        <div class="full-height-scroll">
+            <ul class="list-group elements-list">
+                @foreach (var item in Model)
+                {
+                    string day = "";
+                        switch (item.FoodMenuDate.DayOfWeek)
+                        {
+                            case DayOfWeek.Monday:
+                                day = "Lunes";
+                                break;
+                            case DayOfWeek.Tuesday:
+                                day = "Martes";
+                                break;
+                            case DayOfWeek.Wednesday:
+                                day = "Miercoles";
+                                break;
+                            case DayOfWeek.Thursday:
+                                day = "Jueves";
+                                break;
+                            case DayOfWeek.Friday:
+                                day = "Viernes";
+                                break;
+                            case DayOfWeek.Saturday:
+                                day = "Sabado";
+                                break;
+                            case DayOfWeek.Sunday:
+                                day = "Domingo";
+                                break;
+                        }
+                    <li class="list-group-item">
+                        <a data-toggle="tab" href="#@item.FoodMenuId">
+                            <h4>@day</h4>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+
+    <div class="full-height">
+        <div class="full-height-scroll white-bg border-left">
+            <div class="element-detail-box">
+                <div class="tab-content">
+                    @foreach (var item in Model.Where(m => m.FoodMenuLines.Count > 0))
+                    {
+                        <div id="@item.FoodMenuId" class="tab-pane">
+                            <h1>Comida</h1>
+                            <br />
+                            @foreach (var food in item.FoodMenuLines)
+                            {
+                                if (food.FoodLineScheduleId == Seaboard.Intranet.Domain.Enums.FoodSchedule.Comida)
+                                {
+                                    <h4><span class="btn btn-success btn">@food.Food.FoodName</span></h4>
+                                }
+                            }
+                            <div class="hr-line-dashed"></div>
+                            <h1>Cena</h1>
+                            <br />
+                            @foreach (var food in item.FoodMenuLines)
+                            {
+                                if (food.FoodLineScheduleId == Seaboard.Intranet.Domain.Enums.FoodSchedule.Cena)
+                                {
+                                    <h4><span class="btn btn-primary btn">@food.Food.FoodName</span></h4>
+                                }
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/dataTables")
+
+    <script>
+        $(document).ready(function () {
+            $('.informationTable').DataTable({
+                pageLength: 10,
+                dom: '<"html5buttons"B>lTfgitp',
+                language: {
+                    "sProcessing": "Procesando... ",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:  ",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                },
+                oAria: {
+                    "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                },
+                buttons: [
+                    { extend: 'copy' },
+                    { extend: 'csv' },
+                    { extend: 'excel', title: 'ExampleFile' },
+                    { extend: 'pdf', title: 'ExampleFile' },
+
+                    {
+                        extend: 'print',
+                        customize: function (win) {
+                            $(win.document.body).addClass('white-bg');
+                            $(win.document.body).css('font-size', '10px');
+
+                            $(win.document.body).find('table')
+                                    .addClass('compact')
+                                    .css('font-size', 'inherit');
+                        }
+                    }
+                ]
+
+            });
+        });
+    </script>
+}
