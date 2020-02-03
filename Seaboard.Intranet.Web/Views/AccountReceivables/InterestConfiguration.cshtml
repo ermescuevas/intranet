@@ -1,0 +1,221 @@
+﻿@using Microsoft.AspNet.Identity;
+@model Seaboard.Intranet.Domain.InterestConfiguration
+@{
+    Layout = "~/Views/Shared/_BillingLayout.cshtml";
+    ViewBag.Title = "Configuración calculo de intereses";
+}
+
+<style>
+    .bootstrap-select:not([class*=col-]):not([class*=form-control]):not(.input-group-btn) {
+        width: 100%;
+    }
+</style>
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Configuración calculo de intereses</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Configuración calculo de intereses</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight ecommerce">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h3>Configuración calculo de intereses</h3>
+                </div>
+                <div class="ibox-content">
+                    <div class="form-group">
+                        <div class="col-sm-12 col-sm-offset-1">
+                            <button class="btn btn-primary" type="button" onclick="saveConfiguration();"><i class="fa fa-save"></i> Guardar</button>
+                        </div>
+                    </div>
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="tabs-container">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a data-toggle="tab" href="#tab-1"> Calculo de interes</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div id="tab-1" class="tab-pane active">
+                        <div class="panel-body">
+                            <fieldset class="form-horizontal">
+                                <div class="row">
+                                    <div class="col-sm-5">
+                                        <div class="form-group">
+                                            <label class="col-sm-6 control-label">Tasa de recargo:</label>
+                                            <div class="col-sm-6 input-group">
+                                                @Html.TextBoxFor(m => m.ChargeRate, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-6 control-label">Id. de articulo de interes:</label>
+                                            <div class="col-sm-6 input-group">
+                                                @Html.TextBoxFor(m => m.InterestItemCode, new { @class = "form-control" })
+                                                <span class="input-group-btn">
+                                                    <button id="lookupArticuloInteres" type="button" class="btn btn-primary">
+                                                        <i class="fa fa-search"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-5">
+                                        <div class="form-group date">
+                                            <label class="col-sm-6 control-label">Buscar facturas desde</label>
+                                            <div class="col-sm-6 input-group date">
+                                                <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                @Html.TextBoxFor(m => m.StartDateInvoice, new { @class = "form-control", Value = Model.StartDateInvoice.ToString("dd/MM/yyyy") })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-6 control-label">Id. de articulo de interes:</label>
+                                            <div class="col-sm-6 input-group">
+                                                @Html.TextBoxFor(m => m.RechargeItemCode, new { @class = "form-control" })
+                                                <span class="input-group-btn">
+                                                    <button id="lookupArticuloRecargo" type="button" class="btn btn-primary">
+                                                        <i class="fa fa-search"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Styles {
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/summernoteStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/plugins/touchSpinStyles")
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/css/bootstrap-select.min.css">
+}
+
+@section Scripts {
+
+    @Scripts.Render("~/plugins/summernote")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/touchSpin")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/bootstrap-select.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/i18n/defaults-en_US.js"></script>
+
+    <script type="text/javascript">
+        var products;
+        var customers;
+        $(document).ready(function () {
+            $('#ChargeRate').focusout(function () {
+                if (($('#ChargeRate').val().trim().replace(/,/g, "") != '' && !isNaN($('#ChargeRate').val().replace(/,/g, "").trim()))) {
+                    $('#ChargeRate').val(parseFloat($('#ChargeRate').val().replace(/,/g, "")).toFixed(2).replace(/./g, function (c, i, a) {
+                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                    }));
+                }
+            });
+            if (($('#ChargeRate').val().trim().replace(/,/g, "") != '' && !isNaN($('#ChargeRate').val().trim().replace(/,/g, "")))) {
+                $('#ChargeRate').val(parseFloat($('#ChargeRate').val().replace(/,/g, "")).toFixed(2).replace(/./g, function (c, i, a) {
+                    return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                }));
+            }
+            $('#StartDateInvoice').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true,
+                format: 'dd/mm/yyyy'
+            });
+            $("#lookupArticuloInteres").lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookup", "Home")?tipo=42&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 1100,
+                height: 1000,
+                onItemSelected: function (data) {
+                    $('input[name=InterestItemCode]').val(data.Id);
+                },
+                tableHeader: ['Id. de articulo', 'Descripción', 'Categoria'],
+                hiddenFields: ['UnitId', 'Warehouse', 'Quantity']
+            });
+            $("#lookupArticuloRecargo").lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookup", "Home")?tipo=42&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 1100,
+                height: 1000,
+                onItemSelected: function (data) {
+                    $('input[name=RechargeItemCode]').val(data.Id);
+                },
+                tableHeader: ['Id. de articulo', 'Descripción', 'Categoria'],
+                hiddenFields: ['UnitId', 'Warehouse', 'Quantity']
+            });
+        });
+
+        function saveConfiguration() {
+            var isAllValid = true;
+            if ($('#ChargeRate').val() === '') {
+                toastr.error('Por favor debe de especificar una tasa de recargo para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#StartDateInvoice').val() === '') {
+                toastr.error('Por favor debe de una fecha de busqueda desde', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (isAllValid) {
+                var data = {
+                    ChargeRate: $('#ChargeRate').val().trim(),
+                    StartDateInvoice: $('#StartDateInvoice').val().trim(),
+                    InterestItemCode: $('#InterestItemCode').val().trim(),
+                    RechargeItemCode: $('#RechargeItemCode').val().trim()
+                }
+                $.ajax({
+                    url: '@Url.Action("SaveInterestConfiguration", "AccountReceivables")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            toastr.success('Registro guardado correctamente', 'Campos requeridos')
+                        }
+                        else {
+                            alert(result.status);
+                        }
+                    }
+                });
+            }
+        }
+
+    </script>
+}

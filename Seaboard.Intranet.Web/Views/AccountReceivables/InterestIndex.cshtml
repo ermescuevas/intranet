@@ -2,11 +2,11 @@
 @{
     Layout = "~/Views/Shared/_BillingLayout.cshtml";
     int type = (int)ViewBag.Type;
-    if (type == 0)
+    if (type == 0 || type == 2)
     {
         ViewBag.Title = "Listado de calculos preliminares";
     }
-    else
+    else if (type == 1 || type == 3)
     {
         ViewBag.Title = "Listado de calculos definitivos";
     }
@@ -14,11 +14,11 @@
 
 <div class="row wrapper border-bottom white-bg page-heading">
     <div class="col-lg-10">
-        @if (type == 0)
+        @if (type == 0 || type == 2)
         {
             <h2>Listado de calculos preliminares</h2>
         }
-        else
+        else if (type == 1 || type == 3)
         {
             <h2>Listado de calculos definitivos</h2>
         }
@@ -27,15 +27,14 @@
                 <a href="@Url.Action("Index", "Home")">Inicio</a>
             </li>
             <li class="active">
-                @if (type == 0)
+                @if (type == 0 || type == 2)
                 {
                     <strong>Listado de calculos preliminares</strong>
                 }
-                else
+                else if (type == 1 || type == 3)
                 {
                     <strong>Listado de calculos definitivos</strong>
                 }
-
             </li>
         </ol>
     </div>
@@ -47,11 +46,11 @@
         <div class="col-lg-12">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
-                    @if (type == 0)
+                    @if (type == 0 || type == 2)
                     {
                         <h5>Listado de calculos preliminares</h5>
                     }
-                    else
+                    else if (type == 1 || type == 3)
                     {
                         <h5>Listado de calculos definitivos</h5>
                     }
@@ -69,7 +68,7 @@
                             @Html.ActionLink("NUEVO CALCULO PRELIMINAR SPOT", "InterestEntry", "AccountReceivables", new { type = 0, preliminar = 0 }, new { @class = "btn btn-primary" })
                             @Html.ActionLink("NUEVO CALCULO PRELIMINAR CONTRATO", "InterestEntry", "AccountReceivables", new { type = 1, preliminar = 0 }, new { @class = "btn btn-success" })
                         }
-                        else
+                        else if (type == 1)
                         {
                             @Html.ActionLink("NUEVO CALCULO DEFINITIVO SPOT", "InterestEntry", "AccountReceivables", new { type = 0, preliminar = 1 }, new { @class = "btn btn-primary" })
                             @Html.ActionLink("NUEVO CALCULO DEFINITIVO CONTRATO", "InterestEntry", "AccountReceivables", new { type = 1, preliminar = 0 }, new { @class = "btn btn-success" })
@@ -93,13 +92,13 @@
                             @foreach (var item in Model)
                             {
                                 <tr>
-                                    <td>@Html.ActionLink(item.BatchNumber, "InterestEntry", new { batchNumber = item.BatchNumber })</td>
+                                    <td>@Html.ActionLink(item.BatchNumber, "InterestEntry", new { batchNumber = item.BatchNumber, type = (int)item.MarketType, preliminar = Convert.ToInt32(item.Preliminar) })</td>
                                     <td>@item.Description</td>
                                     <td>@item.BillingMonth.ToString("MM/yyyy")</td>
                                     <td>@item.CutDate</td>
                                     <td>@item.MarketType.ToString()</td>
                                     <td>
-                                        @if (item.Preliminar)
+                                        @if (!item.Preliminar)
                                         {
                                             <i class="label label-success">Preliminar</i>
                                         }
@@ -109,7 +108,7 @@
                                         }
                                     </td>
                                     <td>
-                                        @if (item.Posted)
+                                        @if (!item.Posted)
                                         {
                                             <i class="badge badge-success">Abierto</i>
                                         }

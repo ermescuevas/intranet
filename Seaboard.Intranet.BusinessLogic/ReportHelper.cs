@@ -6,7 +6,7 @@ namespace Seaboard.Intranet.BusinessLogic
 {
     public class ReportHelper
     {
-        public static void Export(string rutaReporte, string rutaDestino, string reportDetail, int tipo, ref string xStatus)
+        public static void Export(string rutaReporte, string rutaDestino, string reportDetail, int tipo, ref string xStatus, int printOption = 0)
         {
             var crystalReport = new CrystalDecisions.CrystalReports.Engine.ReportDocument();
 
@@ -132,6 +132,9 @@ namespace Seaboard.Intranet.BusinessLogic
                     case 38:
                         reporte = "OvertimeReportDetail.rpt";
                         break;
+                    case 39:
+                        reporte = "InterestSpotReport.rpt";
+                        break;
                 }
 
                 const string reportHeader = "SELECT '' CompName, '' Titulo, '' Parametro1, '' Parametro2, '' Parametro3, '' Parametro4, '' Parametro5, '' Parametro6, '' Usuario, 1 Marca";
@@ -155,7 +158,10 @@ namespace Seaboard.Intranet.BusinessLogic
                     crystalReport.Database.Tables[1].SetDataSource(detalle);
                 }
 
-                crystalReport.ExportToDisk(CrystalDecisions.Shared.ExportFormatType.PortableDocFormat, rutaDestino);
+                var type = CrystalDecisions.Shared.ExportFormatType.PortableDocFormat;
+                if (printOption != 0)
+                    type = CrystalDecisions.Shared.ExportFormatType.Excel;
+                crystalReport.ExportToDisk(type, rutaDestino);
             }
             catch (Exception ex)
             {

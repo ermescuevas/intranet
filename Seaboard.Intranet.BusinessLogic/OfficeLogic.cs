@@ -556,6 +556,75 @@ namespace Seaboard.Intranet.BusinessLogic
             }
         }
 
+        public static List<Domain.ViewModels.Lookup> OvertimeHours(string path, ref string message)
+        {
+            try
+            {
+                var lista = new List<Domain.ViewModels.Lookup>();
+
+                _db = new SeaboContext();
+                _repository = new GenericRepository(_db);
+
+                var ruta = path;
+                var isValid = false;
+
+                if (File.Exists(path))
+                    isValid = true;
+
+                if (!isValid)
+                {
+                    message = "No existe el archivo en la ruta " + path;
+                    return lista;
+                }
+                var xlApp = new Application();
+                var xlWorkbook = xlApp.Workbooks.Open(ruta);
+                var xlWorksheet = xlWorkbook.Sheets[2] as _Worksheet;
+                var xlRange = xlWorksheet?.UsedRange;
+                var rowCount = xlRange?.Rows.Count;
+                var colCount = xlRange?.Columns.Count;
+                var tmpVendorId = string.Empty;
+                isValid = false;
+
+                for (var i = 3; i <= rowCount; i++)
+                {
+                    if (xlRange.Cells[i, NumberFromExcelColumn("A")] == null || xlRange.Cells[i, NumberFromExcelColumn("A")]?.Value2 == null) continue;
+                    bool isNumeric = int.TryParse(Convert.ToString(xlRange.Cells[i, NumberFromExcelColumn("A")]?.Value2), out int employeeId);
+                    if (isNumeric)
+                    {
+                        double holidayHour = Convert.ToDouble(xlRange.Cells[i, NumberFromExcelColumn("S")]?.Value2);
+                        double noonHour = Convert.ToDouble(xlRange.Cells[i, NumberFromExcelColumn("T")]?.Value2);
+
+                        if (holidayHour > 0 || noonHour > 0)
+                        {
+                            lista.Add(new Domain.ViewModels.Lookup()
+                            {
+                                Id = employeeId.ToString().PadLeft(6, '0'),
+                                Descripción = _repository.ExecuteScalarQuery<string>($"SELECT RTRIM(FRSTNAME) + ' ' + RTRIM(LASTNAME) FROM {Helpers.InterCompanyId}.dbo.UPR00100 WHERE EMPLOYID = '{employeeId.ToString().PadLeft(6, '0')}'") ?? "",
+                                DataPlus = holidayHour.ToString(),
+                                DataExtended = noonHour.ToString()
+                            });
+                        }
+                    }
+                }
+
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                if (xlRange != null) Marshal.ReleaseComObject(xlRange);
+                if (xlWorksheet != null) Marshal.ReleaseComObject(xlWorksheet);
+                xlWorkbook.Close(false, System.Reflection.Missing.Value, System.Reflection.Missing.Value);
+                Marshal.ReleaseComObject(xlWorkbook);
+                xlApp.Quit();
+                Marshal.ReleaseComObject(xlApp);
+
+                return lista;
+            }
+            catch (Exception e)
+            {
+                message = e.Message;
+                return new List<Domain.ViewModels.Lookup>();
+            }
+        }
+
         #endregion
 
         #region Private Methods

@@ -20,7 +20,7 @@ namespace Seaboard.Intranet.Domain
 
     public enum MarketType
     {
-        SPOT = 1,
-        UNR = 2
+        SPOT = 0,
+        CONTRATO = 1
     }
 }

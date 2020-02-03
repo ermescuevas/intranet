@@ -193,7 +193,12 @@
                     @Html.IsSelected(controller: "AccountReceivables", action: "TransactionInquiry", cssClass: "in")
                     @Html.IsSelected(controller: "AccountReceivables", action: "AgingReport", cssClass: "in")
                     @Html.IsSelected(controller: "AccountReceivables", action: "RelationInvoicePaymentReport", cssClass: "in")
-                    @Html.IsSelected(controller: "AccountReceivables", action: "TransAnalysisReport", cssClass: "in")" aria-expanded="false" style="height: 0px;">
+                    @Html.IsSelected(controller: "AccountReceivables", action: "TransAnalysisReport", cssClass: "in")
+                    @Html.IsSelected(controller: "AccountReceivables", action: "InterestIndex", cssClass: "in")
+                    @Html.IsSelected(controller: "AccountReceivables", action: "InterestEntry", cssClass: "in")
+                    @Html.IsSelected(controller: "AccountReceivables", action: "InterestContract", cssClass: "in")
+                    @Html.IsSelected(controller: "AccountReceivables", action: "InterestConfiguration", cssClass: "in")
+                    @Html.IsSelected(controller: "AccountReceivables", action: "InterestInquiry", cssClass: "in")" aria-expanded="false" style="height: 0px;">
                     <li class="
                     @Html.IsSelected(controller: "AccountReceivables", action: "TransIndex")
                     @Html.IsSelected(controller: "AccountReceivables", action: "TransCreateIndex")
@@ -202,7 +207,8 @@
                     @Html.IsSelected(controller: "PaymentRequest", action: "Index")
                     @Html.IsSelected(controller: "AccountReceivables", action: "ApplyDocuments")
                     @Html.IsSelected(controller: "AccountPayables", action: "ApplyDocuments")
-                    @Html.IsSelected(controller: "AccountReceivables", action: "PostBatch")">
+                    @Html.IsSelected(controller: "AccountReceivables", action: "PostBatch")
+                    @Html.IsSelected(controller: "AccountReceivables", action: "InterestIndex", cssClass: "in")">
                         <a href="#"><i class="fa fa-edit"></i> <span class="nav-label" data-i18n="nav.dashboard">Transacciones</span> <span class="fa arrow"></span></a>
                         <ul class="nav nav-third-level collapse
                         @Html.IsSelected(controller: "AccountReceivables", action: "TransIndex", cssClass: "in")
@@ -224,7 +230,9 @@
                         @Html.IsSelected(controller: "PaymentRequest", action: "Inquiry", cssClass: "in")
                         @Html.IsSelected(controller: "AccountReceivables", action: "ApplyDocuments", cssClass: "in")
                         @Html.IsSelected(controller: "AccountPayables", action: "ApplyDocuments", cssClass: "in")
-                        @Html.IsSelected(controller: "AccountReceivables", action: "PostBatch", cssClass: "in")">
+                        @Html.IsSelected(controller: "AccountReceivables", action: "PostBatch", cssClass: "in")
+                        @Html.IsSelected(controller: "AccountReceivables", action: "InterestIndex", cssClass: "in")
+                        @Html.IsSelected(controller: "AccountReceivables", action: "InterestEntry", cssClass: "in")">
                             <li class="@Html.IsSelected(action: "TransIndex") @Html.IsSelected(action: "TransEntry") @Html.IsSelected(action: "TransInquiry")">
                                 <a href="@Url.Action("TransIndex", "AccountReceivables")">Integracion de transacciones</a>
                             </li>
@@ -234,29 +242,38 @@
                             <li class="@Html.IsSelected(action: "NetIndex") @Html.IsSelected(action: "NetTrans") @Html.IsSelected(action: "NetEdit") @Html.IsSelected(action: "NetInquiry")">
                                 <a href="@Url.Action("NetIndex", "AccountReceivables")">Neteo de documentos</a>
                             </li>
-                            <li class="@Html.IsSelected(action: "CashReceiptIndex") @Html.IsSelected(action: "CashReceipt") @Html.IsSelected(action: "CashReceiptEdit")">
-                                <a href="@Url.Action("CashReceiptIndex", "AccountReceivables")">Recibos de Ingresos</a>
+                            <li class="@Html.IsSelected(action: "InterestIndex") @Html.IsSelected(action: "InterestEntry")">
+                                <a href="@Url.Action("InterestIndex", "AccountReceivables", new {type = 0 })">Calculo de intereses preliminar</a>
                             </li>
+                            <li class="@Html.IsSelected(action: "InterestIndex") @Html.IsSelected(action: "InterestEntry")">
+                                <a href="@Url.Action("InterestIndex", "AccountReceivables", new {type = 1 })">Calculo de intereses definitivo</a>
+                            </li>
+                            <li class="@Html.IsSelected(action: "CashReceiptIndex") @Html.IsSelected(action: "CashReceipt") @Html.IsSelected(action: "CashReceiptEdit")"><a href="@Url.Action("CashReceiptIndex", "AccountReceivables")">Recibos de Ingresos</a></li>
                             <li class="@Html.IsSelected(action: "Index", controller: "PaymentRequest") @Html.IsSelected(action: "Create", controller: "PaymentRequest") @Html.IsSelected(action: "Edit", controller: "PaymentRequest")">
                                 <a href="@Url.Action("Index", "PaymentRequest")">Solicitud de pago</a>
                             </li>
-                            <li class="@Html.IsSelected(action: "ApplyDocuments", controller: "AccountReceivables")">
-                                <a href="@Url.Action("ApplyDocuments", "AccountReceivables")">Aplicar docs. CXC</a>
-                            </li>
-                            <li class="@Html.IsSelected(action: "ApplyDocuments", controller: "AccountPayables")">
-                                <a href="@Url.Action("ApplyDocuments", "AccountPayables")">Aplicar docs. CXP</a>
-                            </li>
-                            <li class="@Html.IsSelected(action: "PostBatch")">
-                                <a href="@Url.Action("PostBatch", "AccountReceivables")">Contabilización lotes</a>
+                            <li class="@Html.IsSelected(action: "ApplyDocuments", controller: "AccountReceivables")"><a href="@Url.Action("ApplyDocuments", "AccountReceivables")">Aplicar docs. CXC</a></li>
+                            <li class="@Html.IsSelected(action: "ApplyDocuments", controller: "AccountPayables")"><a href="@Url.Action("ApplyDocuments", "AccountPayables")">Aplicar docs. CXP</a></li>
+                            <li class="@Html.IsSelected(action: "PostBatch")"><a href="@Url.Action("PostBatch", "AccountReceivables")">Contabilización lotes</a></li>
+                        </ul>
+                    </li>
+                    <li class="@Html.IsSelected(controller: "AccountReceivables", action: "InterestContract")">
+                        <a href="#"><i class="fa fa-th-large"></i> <span class="nav-label" data-i18n="nav.dashboard">Tarjetas</span> <span class="fa arrow"></span></a>
+                        <ul class="nav nav-third-level collapse @Html.IsSelected(controller: "AccountReceivables", action: "InterestContract", cssClass: "in")">
+                            <li class="@Html.IsSelected(action: "InterestContract")">
+                                <a href="@Url.Action("InterestContract", "AccountReceivables")">Contratos</a>
                             </li>
                         </ul>
                     </li>
-                    <li class="@Html.IsSelected(controller: "AccountReceivables", action: "TransactionInquiry")">
+                    <li class="@Html.IsSelected(controller: "AccountReceivables", action: "TransactionInquiry") 
+                        @Html.IsSelected(controller: "AccountReceivables", action: "InterestInquiry")">
                         <a href="#"><i class="fa fa-table"></i> <span class="nav-label" data-i18n="nav.dashboard">Consultas</span> <span class="fa arrow"></span></a>
-                        <ul class="nav nav-third-level collapse @Html.IsSelected(controller: "AccountReceivables", action: "TransactionInquiry", cssClass: "in")">
-                            <li class="@Html.IsSelected(action: "TransactionInquiry")">
-                                <a href="@Url.Action("TransactionInquiry", "AccountReceivables")">Transacciones cliente/proveedor</a>
-                            </li>
+                        <ul class="nav nav-third-level collapse 
+                            @Html.IsSelected(controller: "AccountReceivables", action: "TransactionInquiry", cssClass: "in")
+                            @Html.IsSelected(controller: "AccountReceivables", action: "InterestInquiry", cssClass: "in")">
+                            <li class="@Html.IsSelected(action: "TransactionInquiry")"><a href="@Url.Action("TransactionInquiry", "AccountReceivables")">Transacciones cliente/proveedor</a></li>
+                            <li class="@Html.IsSelected(action: "InterestInquiry")"><a href="@Url.Action("InterestInquiry", "AccountReceivables", new {type = 2 })">Calculo de intereses preliminares</a></li>
+                            <li class="@Html.IsSelected(action: "InterestInquiry")"><a href="@Url.Action("InterestInquiry", "AccountReceivables", new {type = 3 })">Calculo de intereses definitivos</a></li>
                         </ul>
                     </li>
                     <li class="
@@ -271,6 +288,16 @@
                             <li class="@Html.IsSelected(action: "AgingReport")"><a href="@Url.Action("AgingReport", "AccountReceivables")">Saldo de antiguedad</a></li>
                             <li class="@Html.IsSelected(action: "RelationInvoicePaymentReport")"><a href="@Url.Action("RelationInvoicePaymentReport", "AccountReceivables")">Relacion Factura vs Pago</a></li>
                             <li class="@Html.IsSelected(action: "TransAnalysisReport")"><a href="@Url.Action("TransAnalysisReport", "AccountReceivables")">Resumen de analisis transacciones MEM</a></li>
+                        </ul>
+                    </li>
+                    <li class="
+                    @Html.IsSelected(controller: "AccountReceivables", action: "AgingReport")
+                    @Html.IsSelected(controller: "AccountReceivables", action: "RelationInvoicePaymentReport")
+                    @Html.IsSelected(controller: "AccountReceivables", action: "TransAnalysisReport")">
+                        <a href="#"><i class="fa fa-laptop"></i> <span class="nav-label" data-i18n="nav.dashboard">Configuración</span> <span class="fa arrow"></span></a>
+                        <ul class="nav nav-third-level collapse
+                        @Html.IsSelected(controller: "AccountReceivables", action: "InterestConfiguration", cssClass: "in")">
+                            <li class="@Html.IsSelected(action: "InterestConfiguration")"><a href="@Url.Action("InterestConfiguration", "AccountReceivables")">Calculo de intereses</a></li>
                         </ul>
                     </li>
                 </ul>

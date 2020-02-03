@@ -93,3 +93,18 @@ C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard In
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Data\obj\Debug\Seaboard.Intranet.Data.csproj.CopyComplete
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Data\obj\Debug\Seaboard.Intranet.Data.dll
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Data\obj\Debug\Seaboard.Intranet.Data.pdb
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Data\bin\Debug\Seaboard.Intranet.Data.dll.config
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Data\bin\Debug\Seaboard.Intranet.Data.dll
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Data\bin\Debug\Seaboard.Intranet.Data.pdb
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Data\bin\Debug\EntityFramework.dll
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Data\bin\Debug\EntityFramework.SqlServer.dll
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Data\bin\Debug\Seaboard.Intranet.Domain.dll
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Data\bin\Debug\Newtonsoft.Json.dll
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Data\bin\Debug\Seaboard.Intranet.Domain.pdb
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Data\bin\Debug\EntityFramework.xml
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Data\bin\Debug\EntityFramework.SqlServer.xml
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Data\bin\Debug\Newtonsoft.Json.xml
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Data\obj\Debug\Seaboard.Intranet.Data.csprojAssemblyReference.cache
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Data\obj\Debug\Seaboard.Intranet.Data.csproj.CopyComplete
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Data\obj\Debug\Seaboard.Intranet.Data.dll
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Data\obj\Debug\Seaboard.Intranet.Data.pdb

@@ -991,6 +991,8 @@
     <Content Include="Views\AccountReceivables\InterestSpotIndex.cshtml" />
     <Content Include="Views\AccountReceivables\InterestIndex.cshtml" />
     <Content Include="Views\AccountReceivables\InterestContractEntry.cshtml" />
+    <Content Include="Views\AccountReceivables\InterestContract.cshtml" />
+    <Content Include="Views\AccountReceivables\InterestConfiguration.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

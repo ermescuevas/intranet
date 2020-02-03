@@ -14,7 +14,6 @@ using Seaboard.Intranet.Domain.Models;
 using Seaboard.Intranet.Domain.ViewModels;
 using System.Threading;
 
-
 namespace Seaboard.Intranet.Web.Controllers
 {
     [Authorize]
@@ -277,39 +276,25 @@ namespace Seaboard.Intranet.Web.Controllers
 
         public ActionResult TransCreateIndex()
         {
-            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "AccountReceivables",
-                "TransCreate"))
-            {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "AccountReceivables","TransCreate"))
                 return RedirectToAction("NotPermission", "Home");
-            }
 
-
-            var registros = _repository
-                .ExecuteQuery<ItemLookup>(
-                    $"INTRANET.dbo.GetAccountReceivablesBatchTransCreate '{Helpers.InterCompanyId}'").ToList();
-
+            var registros = _repository.ExecuteQuery<ItemLookup>($"INTRANET.dbo.GetAccountReceivablesBatchTransCreate '{Helpers.InterCompanyId}'").ToList();
             return View(registros);
         }
 
         public ActionResult TransCreate(string batchNumber)
         {
-            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "AccountReceivables",
-                "TransCreate"))
-            {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "AccountReceivables","TransCreate"))
                 return RedirectToAction("NotPermission", "Home");
-            }
-
             ViewBag.BatchNumber = batchNumber;
             return View();
         }
 
         public ActionResult TransCreateInquiry(string batchNumber)
         {
-            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "AccountReceivables",
-                "TransCreate"))
-            {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "AccountReceivables","TransCreate"))
                 return RedirectToAction("NotPermission", "Home");
-            }
             ViewBag.BatchNumber = batchNumber;
             return View();
         }
@@ -321,10 +306,7 @@ namespace Seaboard.Intranet.Web.Controllers
             var xRegistros = new List<MemDebtDataTrans>();
             try
             {
-                xRegistros =
-                    _repository.ExecuteQuery<MemDebtDataTrans>(
-                            $"INTRANET.dbo.GetAccountReceivablesBatchTransCreateDetail '{Helpers.InterCompanyId}','{batchId}'")
-                        .ToList();
+                xRegistros =_repository.ExecuteQuery<MemDebtDataTrans>($"INTRANET.dbo.GetAccountReceivablesBatchTransCreateDetail '{Helpers.InterCompanyId}','{batchId}'").ToList();
                 xStatus = "OK";
             }
             catch (Exception ex)
@@ -336,14 +318,12 @@ namespace Seaboard.Intranet.Web.Controllers
         }
 
         [HttpPost]
-        public JsonResult SaveBatchTransCreateDetail(string batchId = "", string customerId = "", string vendorInvoiceNumber = "",
-            string ncf = "", int tipoGastos = 8, string fechaDocumento = "")
+        public JsonResult SaveBatchTransCreateDetail(string batchId = "", string customerId = "", string vendorInvoiceNumber = "", string ncf = "", int tipoGastos = 8, string fechaDocumento = "")
         {
             string xStatus;
             try
             {
-                _repository.ExecuteCommand(
-                    $"INTRANET.dbo.SaveAccountReceivablesBatchTransCreate '{Helpers.InterCompanyId}','{batchId}','{customerId}','{vendorInvoiceNumber}','{ncf}','{tipoGastos}','{DateTime.ParseExact(fechaDocumento, "dd/MM/yyyy", null):yyyyMMdd}','{Account.GetAccount(User.Identity.GetUserName()).UserId}'");
+                _repository.ExecuteCommand($"INTRANET.dbo.SaveAccountReceivablesBatchTransCreate '{Helpers.InterCompanyId}','{batchId}','{customerId}','{vendorInvoiceNumber}','{ncf}','{tipoGastos}','{DateTime.ParseExact(fechaDocumento, "dd/MM/yyyy", null):yyyyMMdd}','{Account.GetAccount(User.Identity.GetUserName()).UserId}'");
                 xStatus = "OK";
             }
             catch (Exception ex)
@@ -362,12 +342,8 @@ namespace Seaboard.Intranet.Web.Controllers
             try
             {
                 ProcessReceipt(records);
-
                 foreach (var item in records)
-                {
                     UpdateDataTransaction(item.Id, item.Descripción);
-                }
-
                 ServiceContract service = new ServiceContract();
                 service.PostBatch("Rcvg Trx Entry", records.FirstOrDefault()?.Id, ref message);
                 xStatus = "OK";
@@ -1705,36 +1681,95 @@ namespace Seaboard.Intranet.Web.Controllers
 
         public ActionResult InterestIndex(int type = 0)
         {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "AccountReceivables", "InterestEntry"))
+                return RedirectToAction("NotPermission", "Home");
             List<InterestHeader> list;
             string sqlQuery;
             if (type == 0)
-                sqlQuery = $"SELECT [BatchNumber],[Description],[CutDate],[SearchDate],[BillingMonth],[DocumentDate],[InterestRate],[Charge],[Preliminar],[Posted],[RowId] " +
-                    $"FROM {Helpers.InterCompanyId}.dbo.EFRM10100 WHERE Preliminar = 0";
+                sqlQuery = $"SELECT [BatchNumber],[Description],[CutDate],[SearchDate],[BillingMonth],[DocumentDate],[InterestRate],[Charge],[Preliminar],[MarketType],[Posted],[RowId] " +
+                    $"FROM {Helpers.InterCompanyId}.dbo.EFRM10100 WHERE Preliminar = 0 AND Posted = 0";
             else
-                sqlQuery = $"SELECT [BatchNumber],[Description],[CutDate],[SearchDate],[BillingMonth],[DocumentDate],[InterestRate],[Charge],[Preliminar],[Posted],[RowId] " +
-                    $"FROM {Helpers.InterCompanyId}.dbo.EFRM10100 WHERE Preliminar = 1";
+                sqlQuery = $"SELECT [BatchNumber],[Description],[CutDate],[SearchDate],[BillingMonth],[DocumentDate],[InterestRate],[Charge],[Preliminar],[MarketType],[Posted],[RowId] " +
+                    $"FROM {Helpers.InterCompanyId}.dbo.EFRM10100 WHERE Preliminar = 1 AND Posted = 0";
             list = _repository.ExecuteQuery<InterestHeader>(sqlQuery).ToList();
             ViewBag.Type = type;
             return View(list);
         }
 
-        public ActionResult InterestEntry(int type = 0, int preliminar = 0)
+        public ActionResult InterestEntry(string batchNumber = "", int type = 0, int preliminar = 0)
         {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "AccountReceivables", "InterestEntry"))
+                return RedirectToAction("NotPermission", "Home");
+            InterestHeader interestHeader;
+
+            interestHeader = _repository.ExecuteScalarQuery<InterestHeader>($"SELECT BatchNumber, Description, CutDate, SearchDate, BillingMonth, DocumentDate, InterestRate, Charge, Preliminar, MarketType, Posted, RowId " +
+                $"FROM {Helpers.InterCompanyId}.dbo.EFRM10100 WHERE BatchNumber = '{batchNumber}'");
+            var total = 0m;
+            var charge = _repository.ExecuteScalarQuery<decimal?>($"SELECT ChargeRate FROM {Helpers.InterCompanyId}.dbo.EFRM40110") ?? 0m;
+            if (interestHeader == null)
+                interestHeader = new InterestHeader
+                {
+                    CutDate = DateTime.Now,
+                    BillingMonth = DateTime.Now,
+                    SearchDate = DateTime.Now,
+                    Charge = charge,
+                    MarketType = (MarketType)type,
+                    Preliminar = Convert.ToBoolean(preliminar),
+                    DocumentDate = DateTime.Now
+                };
+            else
+                total = _repository.ExecuteScalarQuery<decimal?>($"SELECT SUM(TotalAmount) FROM {Helpers.InterCompanyId}.dbo.EFRM10110 WHERE BatchNumber = '{batchNumber}'") ?? 0m;
+            ViewBag.Total = total;
             ViewBag.Type = type;
             ViewBag.Preliminar = preliminar;
-            ViewBag.Total = 0;
-            return View();
+            return View(interestHeader);
         }
 
-        public JsonResult InsertInterestData(string batchNumber, string description, string cutDate, string searchDate, string billingMonth, string documentDate, decimal interestRate, decimal charge, int type)
+        public ActionResult InterestInquiry(int type = 0)
+        {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "AccountReceivables", "InterestEntry"))
+                return RedirectToAction("NotPermission", "Home");
+            List<InterestHeader> list;
+            string sqlQuery;
+            if (type == 2)
+                sqlQuery = $"SELECT [BatchNumber],[Description],[CutDate],[SearchDate],[BillingMonth],[DocumentDate],[InterestRate],[Charge],[Preliminar],[MarketType],[Posted],[RowId] " +
+                    $"FROM {Helpers.InterCompanyId}.dbo.EFRM10100 WHERE Preliminar = 0 AND Posted = 1";
+            else
+                sqlQuery = $"SELECT [BatchNumber],[Description],[CutDate],[SearchDate],[BillingMonth],[DocumentDate],[InterestRate],[Charge],[Preliminar],[MarketType],[Posted],[RowId] " +
+                    $"FROM {Helpers.InterCompanyId}.dbo.EFRM10100 WHERE Preliminar = 1 AND Posted = 1";
+            list = _repository.ExecuteQuery<InterestHeader>(sqlQuery).ToList();
+            ViewBag.Type = type;
+            return View("InterestIndex", list);
+        }
+
+        public JsonResult PostInterestData(string batchNumber, int preliminar)
+        {
+            string xStatus = "";
+            try
+            {
+                var sqlQuery = $"UPDATE {Helpers.InterCompanyId}.dbo.EFRM10100 SET Posted = 1 WHERE BatchNumber = '{batchNumber}' ";
+                _repository.ExecuteCommand(sqlQuery);
+
+                if (preliminar == 1)
+                    _repository.ExecuteCommand($"INTRANET.dbo.PostInterestData '{Helpers.InterCompanyId}','{batchNumber}','{Account.GetAccount(User.Identity.GetUserName()).UserId}'");
+                xStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+            return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult InsertInterestData(string batchNumber, string description, string cutDate, string searchDate, string billingMonth, string documentDate, decimal interestRate, decimal charge, int preliminar, int type)
         {
             string xStatus;
             try
             {
                 _repository.ExecuteCommand($"INTRANET.dbo.InsertInterestTransaction '{Helpers.InterCompanyId}','{batchNumber}','{description}'," +
-                    $"'{DateTime.ParseExact(cutDate,"dd/MM/yyyy", null).ToString("yyyyMMdd")}','{DateTime.ParseExact(searchDate, "dd/MM/yyyy", null).ToString("yyyyMMdd")}'," +
-                    $"'{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null).ToString("yyyyMMdd")}','{DateTime.ParseExact(documentDate, "dd/MM/yyyy", null).ToString("yyyyMMdd")}'," +
-                    $"'{interestRate}','{charge}','{type}','{Account.GetAccount(User.Identity.GetUserName()).UserId}'");
+                   $"'{DateTime.ParseExact(cutDate, "dd/MM/yyyy", null).ToString("yyyyMMdd")}','{DateTime.ParseExact(searchDate, "dd/MM/yyyy", null).ToString("yyyyMMdd")}'," +
+                   $"'{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null).ToString("yyyyMMdd")}','{DateTime.ParseExact(documentDate, "dd/MM/yyyy", null).ToString("yyyyMMdd")}'," +
+                   $"'{interestRate}','{charge}','{preliminar}','{type}','{Account.GetAccount(User.Identity.GetUserName()).UserId}'");
                 xStatus = "OK";
             }
             catch (Exception ex)
@@ -1751,7 +1786,10 @@ namespace Seaboard.Intranet.Web.Controllers
             List<InterestCustomer> customers = null;
             try
             {
-                var sqlQuery = $"SELECT CustomerId, TotalAmount, Exclude FROM {Helpers.InterCompanyId}.dbo.EFRM00110 WHERE BatchNumber = '{batchNumber}'";
+                var sqlQuery = 
+                    $"SELECT CustomerId, TotalAmount, Exclude FROM {Helpers.InterCompanyId}.dbo.EFRM00110 WHERE BatchNumber = '{batchNumber}' " +
+                    $"UNION ALL " +
+                    $"SELECT CustomerId, TotalAmount, Exclude FROM {Helpers.InterCompanyId}.dbo.EFRM10110 WHERE BatchNumber = '{batchNumber}' ";
                 customers = _repository.ExecuteQuery<InterestCustomer>(sqlQuery).ToList();
                 xStatus = "OK";
             }
@@ -1769,8 +1807,12 @@ namespace Seaboard.Intranet.Web.Controllers
             List<InterestDetail> details = null;
             try
             {
-                var sqlQuery = $"SELECT CustomerId, DocumentNumber, DocumentAmount, CurrentAmount, DueDate, CutDate, Days, InterestRate, InterestAmount, Charge, ChargeAmount, TotalAmount " +
-                    $"FROM {Helpers.InterCompanyId}.dbo.EFRM00120 WHERE BatchNumber = '{batchNumber}' AND CustomerId = '{customerId}'";
+                var sqlQuery =
+                    $"SELECT CustomerId, DocumentNumber, DocumentAmount, PreviousBalance PreviousAmount, AppliedAmount, CurrentAmount, DueDate, CutDate, Days, InterestRate, InterestAmount, Charge, ChargeAmount, TotalAmount " +
+                    $"FROM {Helpers.InterCompanyId}.dbo.EFRM00120 WHERE BatchNumber = '{batchNumber}' AND CustomerId = '{customerId}' " +
+                    $"UNION ALL " +
+                    $"SELECT CustomerId, DocumentNumber, DocumentAmount, PreviousBalance PreviousAmount, AppliedAmount, CurrentAmount, DueDate, CutDate, Days, InterestRate, InterestAmount, Charge, ChargeAmount, TotalAmount " +
+                    $"FROM {Helpers.InterCompanyId}.dbo.EFRM10120 WHERE BatchNumber = '{batchNumber}' AND CustomerId = '{customerId}' ";
                 details = _repository.ExecuteQuery<InterestDetail>(sqlQuery).ToList();
                 xStatus = "OK";
             }
@@ -1780,6 +1822,223 @@ namespace Seaboard.Intranet.Web.Controllers
             }
 
             return Json(new { status = xStatus, registros = details }, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult GetDetailPaymentDetails(string batchNumber, string customerId, string documentNumber, int preliminar)
+        {
+            string xStatus;
+            List<InterestDetail> details = null;
+            try
+            {
+                var sqlQuery = $"SELECT DISTINCT A.CustomerId, A.PaymentDocumentNumber DocumentNumber, A.PaymentAmount DocumentAmount, A.PreviousBalance PreviousAmount, A.PendingAmount CurrentAmount, A.DueDate, A.CutDate, A.Days, A.InterestRate, A.InterestAmount, A.Charge, A.ChargeAmount, A.TotalInterestAmount TotalAmount " +
+                    $"FROM {Helpers.InterCompanyId}.dbo.EFRM10130 A INNER JOIN {Helpers.InterCompanyId}.dbo.EFRM10100 B ON A.BatchNumber = B.BatchNumber " +
+                    $"WHERE A.BatchNumber = '{batchNumber}' AND A.CustomerId = '{customerId}' AND A.DocumentNumber = '{documentNumber}' AND B.Preliminar = {preliminar} " +
+                    $"ORDER BY A.DueDate ";
+                details = _repository.ExecuteQuery<InterestDetail>(sqlQuery).ToList();
+                xStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return Json(new { status = xStatus, registros = details }, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult SaveInterest(string batchNumber, string description, string cutDate, string searchDate, string billingMonth, string documentDate, decimal interestRate, decimal charge, int preliminar, int type)
+        {
+            string xStatus;
+            try
+            {
+                _repository.ExecuteCommand($"INTRANET.dbo.SaveInterest '{Helpers.InterCompanyId}','{batchNumber}','{description}'," +
+                    $"'{DateTime.ParseExact(cutDate, "dd/MM/yyyy", null).ToString("yyyyMMdd")}','{DateTime.ParseExact(searchDate, "dd/MM/yyyy", null).ToString("yyyyMMdd")}'," +
+                    $"'{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null).ToString("yyyyMMdd")}','{DateTime.ParseExact(documentDate, "dd/MM/yyyy", null).ToString("yyyyMMdd")}'," +
+                    $"'{interestRate}','{charge}','{preliminar}','{type}','{Account.GetAccount(User.Identity.GetUserName()).UserId}'");
+                xStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult CalculateInterest(string batchNumber, string description, string cutDate, string searchDate, string billingMonth, string documentDate, decimal interestRate, decimal charge, int preliminar, int type)
+        {
+            string xStatus;
+            try
+            {
+                _repository.ExecuteCommand($"INTRANET.dbo.SaveInterest '{Helpers.InterCompanyId}','{batchNumber}','{description}'," +
+                    $"'{DateTime.ParseExact(cutDate, "dd/MM/yyyy", null).ToString("yyyyMMdd")}','{DateTime.ParseExact(searchDate, "dd/MM/yyyy", null).ToString("yyyyMMdd")}'," +
+                    $"'{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null).ToString("yyyyMMdd")}','{DateTime.ParseExact(documentDate, "dd/MM/yyyy", null).ToString("yyyyMMdd")}'," +
+                    $"'{interestRate}','{charge}','{preliminar}','{type}','{Account.GetAccount(User.Identity.GetUserName()).UserId}'");
+                _repository.ExecuteCommand($"INTRANET.dbo.CalculateInterestAmount '{Helpers.InterCompanyId}','{batchNumber}','{Account.GetAccount(User.Identity.GetUserName()).UserId}'");
+                xStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public JsonResult GetInterestRate(string date)
+        {
+            string xStatus;
+            decimal rate = 0;
+            try
+            {
+                var dateTime = DateTime.ParseExact(date, "dd/MM/yyyy", null);
+                rate = _repository.ExecuteScalarQuery<decimal?>($"SELECT Rate FROM INTRANET.dbo.EXCHRATE WHERE [Year] = {dateTime.Year} AND [Month] = {dateTime.Month}") ?? 0m;
+                xStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return Json(new { status = xStatus, rate }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public JsonResult DeleteInterestTransaction(string batchNumber)
+        {
+            string xStatus;
+            try
+            {
+                _repository.ExecuteCommand($"DELETE {Helpers.InterCompanyId}.dbo.EFRM00100 WHERE BatchNumber = '{batchNumber}'");
+                _repository.ExecuteCommand($"DELETE {Helpers.InterCompanyId}.dbo.EFRM00110 WHERE BatchNumber = '{batchNumber}'");
+                _repository.ExecuteCommand($"DELETE {Helpers.InterCompanyId}.dbo.EFRM00120 WHERE BatchNumber = '{batchNumber}'");
+                _repository.ExecuteCommand($"DELETE {Helpers.InterCompanyId}.dbo.EFRM00130 WHERE BatchNumber = '{batchNumber}'");
+                _repository.ExecuteCommand($"DELETE {Helpers.InterCompanyId}.dbo.EFRM10100 WHERE BatchNumber = '{batchNumber}'");
+                _repository.ExecuteCommand($"DELETE {Helpers.InterCompanyId}.dbo.EFRM10110 WHERE BatchNumber = '{batchNumber}'");
+                _repository.ExecuteCommand($"DELETE {Helpers.InterCompanyId}.dbo.EFRM10120 WHERE BatchNumber = '{batchNumber}'");
+                _repository.ExecuteCommand($"DELETE {Helpers.InterCompanyId}.dbo.EFRM10130 WHERE BatchNumber = '{batchNumber}'");
+
+                xStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
+        }
+
+        [OutputCache(Duration = 0)]
+        [HttpPost]
+        public ActionResult InterestReport(string batchNumber, int printOption)
+        {
+            string xStatus;
+            try
+            {
+                xStatus = "OK";
+                var reportName = "InterestReport";
+                if (printOption == 10)
+                    reportName += ".pdf";
+                else
+                    reportName += ".xls";
+
+                ReportHelper.Export(Helpers.ReportPath + "Reportes", Server.MapPath("~/PDF/Reportes/") + reportName,
+                    string.Format("INTRANET.dbo.InterestReport '{0}','{1}'", Helpers.InterCompanyId, batchNumber), 39, ref xStatus, printOption == 10 ? 0 : 1);
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = xStatus } };
+        }
+
+        public ActionResult InterestConfiguration()
+        {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "AccountReceivables", "InterestConfiguration"))
+                return RedirectToAction("NotPermission", "Home");
+            var sqlQuery = $"SELECT ChargeRate, StartDateInvoice, InterestItemCode, RechargeItemCode FROM {Helpers.InterCompanyId}.dbo.EFRM40110";
+            var configuration = _repository.ExecuteScalarQuery<InterestConfiguration>(sqlQuery) ?? new InterestConfiguration { StartDateInvoice = DateTime.Now, ChargeRate = 0 };
+            return View(configuration);
+        }
+
+        public JsonResult SaveInterestConfiguration(decimal ChargeRate, string StartDateInvoice, string InterestItemCode, string RechargeItemCode)
+        {
+            string xStatus;
+            try
+            {
+                int count = _repository.ExecuteScalarQuery<int?>($"SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.EFRM40110") ?? 0;
+                if (count == 0)
+                    _repository.ExecuteCommand($"INSERT {Helpers.InterCompanyId}.dbo.EFRM40110 (ChargeRate, StartDateInvoice, InterestItemCode, RechargeItemCode) " +
+                        $"VALUES ({ChargeRate},'{DateTime.ParseExact(StartDateInvoice, "dd/MM/yyyy", null).ToString("yyyyMMdd")}', '{InterestItemCode}', '{RechargeItemCode}')");
+                else
+                    _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EFRM40110 " +
+                        $"SET ChargeRate = {ChargeRate}, StartDateInvoice = '{DateTime.ParseExact(StartDateInvoice, "dd/MM/yyyy", null).ToString("yyyyMMdd")}', " +
+                        $"InterestItemCode = '{InterestItemCode}', RechargeItemCode = '{RechargeItemCode}'");
+                xStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
+        }
+
+        #endregion
+
+        #region Contracts
+
+        public ActionResult InterestContract()
+        {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "AccountReceivables", "InterestContract"))
+                return RedirectToAction("NotPermission", "Home");
+            var list = _repository.ExecuteQuery<Lookup>($"SELECT A.CustomerNumber Id, RTRIM(B.CUSTNAME) Descripción, CONVERT(NVARCHAR(20), CONVERT(NUMERIC(19,2), A.ChargePercent)) DataExtended " +
+                $"FROM {Helpers.InterCompanyId}.dbo.EFRM00101 A " +
+                $"INNER JOIN {Helpers.InterCompanyId}.dbo.RM00101 B ON A.CustomerNumber = B.CUSTNMBR " +
+                $"ORDER BY A.CustomerNumber").ToList();
+            ViewBag.Customers = _repository.ExecuteQuery<Lookup>("SELECT RTRIM(CUSTNMBR) Id, RTRIM(CUSTNAME) Descripción, '' DataExtended FROM " +
+                "" + Helpers.InterCompanyId + ".dbo.RM00101 WHERE INACTIVE = 0 AND CUSTCLAS <> 'LOCALSPOT'").ToList();
+            return View(list);
+        }
+
+        [HttpPost]
+        public JsonResult SaveContract(string CustomerId, decimal InterestRate)
+        {
+            string xStatus;
+
+            try
+            {
+                var sqlQuery = $"INSERT INTO {Helpers.InterCompanyId}.dbo.EFRM00101 (CustomerNumber, ChargePercent, LastUserId) " +
+                    $"VALUES ('{CustomerId}', '{InterestRate}', '{Account.GetAccount(User.Identity.GetUserName()).UserId}') ";
+                _repository.ExecuteCommand(sqlQuery);
+                xStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = xStatus } };
+        }
+
+        [HttpPost]
+        public JsonResult DeleteContract(string id)
+        {
+            string xStatus;
+
+            try
+            {
+                var sqlQuery = $"DELETE {Helpers.InterCompanyId}.dbo.EFRM00101 WHERE CustomerNumber = '{id}'";
+                _repository.ExecuteCommand(sqlQuery);
+                xStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = xStatus } };
         }
 
         #endregion

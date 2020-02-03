@@ -39,3 +39,11 @@ C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard In
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.csproj.CopyComplete
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.dll
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Seaboard Intranet\Seaboard Intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.pdb
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Domain\bin\Debug\Seaboard.Intranet.Domain.dll
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Domain\bin\Debug\Seaboard.Intranet.Domain.pdb
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Domain\bin\Debug\Newtonsoft.Json.dll
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Domain\bin\Debug\Newtonsoft.Json.xml
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.csprojAssemblyReference.cache
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.csproj.CopyComplete
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.dll
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.pdb

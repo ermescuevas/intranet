@@ -1046,7 +1046,7 @@ namespace Seaboard.Intranet.Web.Controllers
                         Helpers.InterCompanyId, "Overtime" + newRowId, fileName, "0x" + BitConverter.ToString(fileStream).Replace("-", String.Empty),
                         fileType, Account.GetAccount(User.Identity.GetUserName()).UserId, "REQ"));
                 }
-                //ProcessLogic.SendToSharepoint(newRowId.ToString(), 8, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
+                ProcessLogic.SendToSharepoint(newRowId.ToString(), 8, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
             }
             catch (Exception ex)
             {
@@ -1211,6 +1211,83 @@ namespace Seaboard.Intranet.Web.Controllers
             }
 
             return new JsonResult { Data = new { status = xStatus } };
+        }
+
+        [HttpPost]
+        public JsonResult GetImportHours(HttpPostedFileBase fileData)
+        {
+            var xStatus = "";
+            var xRegistros = new List<Lookup>();
+            var totalNocturnas = 0;
+            var totalFeriados = 0;
+            try
+            {
+                var filePath = "";
+                if (fileData != null)
+                {
+                    filePath = Path.Combine(Server.MapPath("~/Content/File/"), fileData.FileName);
+                    if (!Directory.Exists(Server.MapPath("~/Content/File/")))
+                        Directory.CreateDirectory(Server.MapPath("~/Content/File/"));
+                    if (System.IO.File.Exists(filePath))
+                        System.IO.File.Delete(filePath);
+                    fileData.SaveAs(filePath);
+                    xRegistros = OfficeLogic.OvertimeHours(filePath, ref xStatus);
+                }
+                else
+                    xStatus = "No se encontro el archivo especificado por favor verificar si existe o si lo ha especificado";
+
+                if (xRegistros != null && xRegistros.Count > 0)
+                    xStatus = "OK";
+                else
+                    if (string.IsNullOrEmpty(xStatus))
+                    xStatus += "No se encontraron transacciones para este periodo";
+
+                xRegistros.ForEach(p =>
+                {
+                    totalNocturnas += Convert.ToInt32(p.DataExtended);
+                    totalFeriados += Convert.ToInt32(p.DataPlus);
+                });
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = xStatus, registros = xRegistros, totalNocturnas, totalFeriados } };
+        }
+
+        public JsonResult SaveImportOvertime(string overtimeDate, string note, List<Lookup> items)
+        {
+            var status = "";
+            try
+            {
+                string sqlQuery;
+                var aOvertimeDate = DateTime.ParseExact(overtimeDate, "MM/dd/yyyy", null);
+                foreach (var item in items)
+                {
+                    sqlQuery = "";
+                    if (Convert.ToDecimal(item.DataExtended) > 0)
+                    {
+                        sqlQuery = $"INSERT INTO {Helpers.InterCompanyId}.dbo.EFUPR30200 ([EmployeeId],[StartDate],[EndDate],[OvertimeType],[Hours],[Note],[Status],[Module],[LastUserId]) " +
+                        $"VALUES ('{item.Id}','{aOvertimeDate.ToString("yyyyMMdd")}','{aOvertimeDate.ToString("yyyyMMdd")}','{3}','{item.DataExtended}','{note}',0,{2},'{Account.GetAccount(User.Identity.GetUserName()).UserId}') ";
+                        _repository.ExecuteCommand(sqlQuery);
+                    }
+                    if (Convert.ToDecimal(item.DataPlus) > 0)
+                    {
+                        sqlQuery = $"INSERT INTO {Helpers.InterCompanyId}.dbo.EFUPR30200 ([EmployeeId],[StartDate],[EndDate],[OvertimeType],[Hours],[Note],[Status],[Module],[LastUserId]) " +
+                        $"VALUES ('{item.Id}','{aOvertimeDate.ToString("yyyyMMdd")}','{aOvertimeDate.ToString("yyyyMMdd")}','{4}','{item.DataPlus}','{note}',0,{2},'{Account.GetAccount(User.Identity.GetUserName()).UserId}') ";
+                        _repository.ExecuteCommand(sqlQuery);
+                    }
+                }
+
+                status = "OK";
+            }
+            catch (Exception ex)
+            {
+                status = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status } };
         }
 
         #endregion

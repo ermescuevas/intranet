@@ -1,0 +1,234 @@
+﻿@using Microsoft.AspNet.Identity;
+@model IEnumerable<Seaboard.Intranet.Domain.ViewModels.Lookup>
+@{
+    Layout = "~/Views/Shared/_BillingLayout.cshtml";
+    ViewBag.Title = "Contratos";
+    var customers = (List<Seaboard.Intranet.Domain.ViewModels.Lookup>)ViewBag.Customers;
+}
+
+<style>
+    .bootstrap-select:not([class*=col-]):not([class*=form-control]):not(.input-group-btn) {
+        width: 100%;
+    }
+</style>
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Contratos</h2>
+    </div>
+    <div class="col-lg-2">
+
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>Contratos</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <button class="btn btn-primary" onclick="createContract();">NUEVO CONTRATO</button>
+                    <div class="hr-line-dashed"></div>
+                    <table class="table table-striped table-bordered table-hover informationTable">
+                        <thead>
+                            <tr>
+                                <th style="width:20%;">Id. de cliente</th>
+                                <th style="width:50%;">Nombre</th>
+                                <th style="width:15%;">Tasa interes</th>
+                                <th style="width:15%;">#</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.Id</td>
+                                    <td>@item.Descripción</td>
+                                    <td>@item.DataExtended</td>
+                                    <td>
+                                        <button class="btn btn-danger btn-xs" onclick="deleteContract('@item.Id');">Eliminar</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-CreateContract" class="modal inmodal" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content animated fadeIn">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Nuevo contrato</h4>
+                </div>
+
+                <div class="modal-body">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label>Id. de cliente:</label>
+                            <select class="selectpicker" data-live-search="true" id="CustomerId" name="CustomerId">
+                                <option value=""></option>
+                                @foreach (var item in customers)
+                                {
+                                    <option value="@item.Id.Trim()">@(item.Id + " - " + item.Descripción)</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Tasa de interes:</label>
+                            <input type="text" name="InterestRate" id="InterestRate" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="form-actions no-color">
+                        <button type="button" class="btn btn-primary" onclick="saveContract();"> Guardar</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Styles {
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/css/bootstrap-select.min.css">
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/toastr")
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/bootstrap-select.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/i18n/defaults-en_US.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('.informationTable').DataTable({
+                pageLength: 10,
+                dom: '<"html5buttons"B>lTfgitp',
+                order: [[0, "desc"]],
+                language: {
+                    "sProcessing": "Procesando... ",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo":
+                        "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                    "sInfoEmpty":
+                        "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered":
+                        "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:  ",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                },
+                oAria: {
+                    "sSortAscending":
+                        ": Activar para ordenar la columna de manera ascendente",
+                    "sSortDescending":
+                        ": Activar para ordenar la columna de manera descendente"
+                },
+                buttons: [
+                    { extend: 'copy' },
+                    { extend: 'csv' },
+                    { extend: 'excel', title: 'ExampleFile' },
+                    { extend: 'pdf', title: 'ExampleFile' },
+                    {
+                        extend: 'print',
+                        customize: function (win) {
+                            $(win.document.body).addClass('white-bg');
+                            $(win.document.body).css('font-size', '10px');
+
+                            $(win.document.body).find('table')
+                                .addClass('compact')
+                                .css('font-size', 'inherit');
+                        }
+                    }
+                ]
+
+            });
+        });
+
+        function createContract() {
+            $('#modal-CreateContract').modal('show');
+            $('#CountryDesc').val('');
+        }
+
+        function saveContract() {
+            var isAllValid = true;
+            if ($('#CustomerId').val() === '') {
+                toastr.error('Por favor debe de seleccionar un cliente para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#InterestRate').val() === '') {
+                toastr.error('Por favor debe de seleccionar un cliente para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (isAllValid) {
+                var data = {
+                    CustomerId: $('#CustomerId').val().trim(),
+                    InterestRate: $('#InterestRate').val().trim()
+                }
+                $.ajax({
+                    url: '@Url.Action("SaveContract", "AccountReceivables")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            $('#modal-CreateContract').modal('hide');
+                            window.location.reload();
+                        }
+                        else {
+                            alert(result.status);
+                        }
+                    }
+                });
+            }
+        }
+
+        function deleteContract(id) {
+            if (confirm("Esta seguro que desea eliminar este registro ?")) {
+                $.ajax({
+                    url: '@Url.Action("DeleteContract", "AccountReceivables")?id=' + id,
+                    type: "POST",
+                    data: "",
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            window.location.reload();
+                        }
+                        else {
+                            alert(result.status);
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+}

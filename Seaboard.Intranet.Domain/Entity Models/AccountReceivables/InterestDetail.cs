@@ -7,6 +7,8 @@ namespace Seaboard.Intranet.Domain
         public string BatchNumber { get; set; }
         public string CustomerId { get; set; }
         public string DocumentNumber { get; set; }
+        public decimal PreviousAmount { get; set; }
+        public decimal AppliedAmount { get; set; }
         public decimal DocumentAmount { get; set; }
         public decimal CurrentAmount { get; set; }
         public DateTime CutDate { get; set; }
