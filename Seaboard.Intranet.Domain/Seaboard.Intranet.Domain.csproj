@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="Entity Models\AbsenceInquiry.cs" />
     <Compile Include="Entity Models\AccountReceivables\InterestConfiguration.cs" />
+    <Compile Include="Entity Models\AccountReceivables\InterestContract.cs" />
     <Compile Include="Entity Models\HumanResourcesOvertime.cs" />
     <Compile Include="Entity Models\AccountReceivables\InterestHeader.cs" />
     <Compile Include="Entity Models\AccountReceivables\InterestCustomer.cs" />

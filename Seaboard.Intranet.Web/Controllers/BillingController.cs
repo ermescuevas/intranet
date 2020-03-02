@@ -950,7 +950,6 @@ namespace Seaboard.Intranet.Web.Controllers
                                                 Helpers.InterCompanyId, batchNumber, item.Debtor, detail.ReferenceInvoice, Convert.ToInt32(item.BillingType), item.Marker));
                                         }
                                         currency = detail.CurrencyId;
-
                                     }
                                 }
                             }
@@ -1169,7 +1168,7 @@ namespace Seaboard.Intranet.Web.Controllers
                        $"INNER JOIN {Helpers.InterCompanyId}.dbo.Seabo_SOP_Line_Items F ON A.DOCNUMBR = F.SOP_Number " +
                        $"WHERE A.CUSTNMBR = '{customerId}' AND RTRIM(A.CURNCYID) = '{currencyId}' AND (A.ORORGTRX - ISNULL(C.DocumentApply, 0)) > 0 AND A.RMDTYPAL = 1 AND SUBSTRING(A.DOCNUMBR, 1, 3) = 'FAC' " +
                        $"AND (A.ORORGTRX - ISNULL(C.DocumentApply, 0)) - ISNULL(D.ApplyAmount, 0) >= {amount} AND CONVERT(DATE, A.DOCDATE) >= CONVERT(DATE, '{startDateInvoice.ToString("yyyyMMdd")}') " +
-                       $"AND F.Item_Number NOT IN ('INTERESES') ";
+                       $"/*AND F.Item_Number NOT IN ('INTERESES') */ ";
 
                     sqlQuery += "UNION ALL ";
 
@@ -1190,7 +1189,7 @@ namespace Seaboard.Intranet.Web.Controllers
                         $"INNER JOIN {Helpers.InterCompanyId}.dbo.Seabo_SOP_Line_Items F ON A.DOCNUMBR = F.SOP_Number " +
                         $"WHERE A.CUSTNMBR = '{customerId}' AND RTRIM(A.CURNCYID) = '{currencyId}' AND (A.ORORGTRX - ISNULL(C.DocumentApply, 0)) > 0 AND A.RMDTYPAL = 1 AND SUBSTRING(A.DOCNUMBR, 1, 3) = 'FAC' " +
                         $"AND (A.ORORGTRX - ISNULL(C.DocumentApply, 0)) - ISNULL(D.ApplyAmount, 0) >= {amount} AND CONVERT(DATE, A.DOCDATE) >= CONVERT(DATE, '{startDateInvoice.ToString("yyyyMMdd")}') " +
-                        $"AND F.Item_Number NOT IN ('INTERESES') ";
+                        $"/*AND F.Item_Number NOT IN ('INTERESES') */ ";
                 }
                 else
                 {
@@ -1211,7 +1210,7 @@ namespace Seaboard.Intranet.Web.Controllers
                        $"INNER JOIN {Helpers.InterCompanyId}.dbo.Seabo_SOP_Line_Items F ON A.DOCNUMBR = F.SOP_Number " +
                        $"WHERE A.CUSTNMBR = '{customerId}' AND RTRIM(A.CURNCYID) = '{currencyId}' AND (A.ORTRXAMT - ISNULL(C.DocumentApply, 0)) > 0 AND A.RMDTYPAL = 1 AND SUBSTRING(A.DOCNUMBR, 1, 3) = 'FAC' " +
                        $"AND (A.ORTRXAMT - ISNULL(C.DocumentApply, 0)) - ISNULL(D.ApplyAmount, 0) >= {amount} AND CONVERT(DATE, A.DOCDATE) >= CONVERT(DATE, '{startDateInvoice.ToString("yyyyMMdd")}') " +
-                       $"AND F.Item_Number NOT IN ('INTERESES') ";
+                       $"/*AND F.Item_Number NOT IN ('INTERESES') */ ";
 
                     sqlQuery += "UNION ALL ";
 
@@ -1232,7 +1231,7 @@ namespace Seaboard.Intranet.Web.Controllers
                        $"INNER JOIN {Helpers.InterCompanyId}.dbo.Seabo_SOP_Line_Items F ON A.DOCNUMBR = F.SOP_Number " +
                        $"WHERE A.CUSTNMBR = '{customerId}' AND RTRIM(A.CURNCYID) = '{currencyId}' AND (A.ORTRXAMT - ISNULL(C.DocumentApply, 0)) > 0 AND A.RMDTYPAL = 1 AND SUBSTRING(A.DOCNUMBR, 1, 3) = 'FAC' " +
                        $"AND (A.ORTRXAMT - ISNULL(C.DocumentApply, 0)) - ISNULL(D.ApplyAmount, 0) < {amount} AND CONVERT(DATE, A.DOCDATE) >= CONVERT(DATE, '{startDateInvoice.ToString("yyyyMMdd")}') " +
-                       $"AND F.Item_Number NOT IN ('INTERESES') ";
+                       $"/*AND F.Item_Number NOT IN ('INTERESES') */ ";
                 }
 
                 xRegistros = _repository.ExecuteQuery<MemNetTransDetail>(sqlQuery).ToList();
@@ -1274,7 +1273,7 @@ namespace Seaboard.Intranet.Web.Controllers
 
             try
             {
-                var sqlQuery = $"INTRANET.dbo.InsertBillingMemInvoice '{Helpers.InterCompanyId}','{batchNumber}','{customerId}','{sopNumber}','{applyAmount}'," +$"'{ncf}','{billingType}'," +
+                var sqlQuery = $"INTRANET.dbo.InsertBillingMemInvoice '{Helpers.InterCompanyId}','{batchNumber}','{customerId}','{sopNumber}','{applyAmount}'," + $"'{ncf}','{billingType}'," +
                     $"'{flag}'," + $"'{DateTime.ParseExact(documentDate, "yyyy-MM-dd", null).ToString("yyyyMMdd")}','{DateTime.ParseExact(dueDate, "yyyy-MM-dd", null).ToString("yyyyMMdd")}'";
                 _repository.ExecuteCommand(sqlQuery);
                 xStatus = "OK";
@@ -1377,7 +1376,7 @@ namespace Seaboard.Intranet.Web.Controllers
             batch.TotalForeignAmount = totalDolares;
             sqlQuery = $"SELECT Exclude, BatchNumber, SopNumber, SopNumber DocumentNumber, Ncf, DueDate, DocumentDate, CustomerNumber, CustomerName, ContactPerson, TaxRegistrationNumber, " +
                 $"Address, City, State, Country, Subtotal, TaxAmount, Total, CurrencyId, ExchangeRate, CreatedDate, DocumentType " +
-                $"FROM {Helpers.InterCompanyId}.dbo.EFSOP20100 WHERE BatchNumber = '{id}' AND Posted = 0 AND BillingType = {billingType}";
+                $"FROM {Helpers.InterCompanyId}.dbo.EFSOP20100 WHERE BatchNumber = '{id}' AND Posted = 0 AND BillingType = {billingType} ORDER BY SopNumber";
             var invoices = _repository.ExecuteQuery<MemInvoiceHead>(sqlQuery).ToList();
             ViewBag.Invoices = invoices;
             ViewBag.Products = _repository.ExecuteQuery<Lookup>("SELECT ITEMNMBR Id, ITEMDESC Descripción, '' DataExtended FROM " +
@@ -1747,7 +1746,7 @@ namespace Seaboard.Intranet.Web.Controllers
             return Json(new { status = xStatus, sucessMessage, exclusion = xExclusion }, JsonRequestBehavior.AllowGet);
         }
 
-        [OutputCache(Duration =0)]
+        [OutputCache(Duration = 0)]
         [HttpPost]
         public JsonResult BillingInvoiceReport(string sopNumber, string choice, bool duplicate, string preInvoice, int billingType)
         {
@@ -2195,7 +2194,7 @@ namespace Seaboard.Intranet.Web.Controllers
                 $"FROM {Helpers.InterCompanyId}.dbo.GL00100 A INNER JOIN {Helpers.InterCompanyId}.dbo.GL00105 B ON A.ACTINDX = B.ACTINDX ORDER BY A.ACTINDX").ToList();
             return View();
         }
-        
+
         [HttpPost]
         public ActionResult GetIncomeTypes(string id)
         {
@@ -2837,7 +2836,7 @@ namespace Seaboard.Intranet.Web.Controllers
                 xStatus = ex.Message;
             }
 
-            return new JsonResult { Data = new { status = xStatus , registros = list} };
+            return new JsonResult { Data = new { status = xStatus, registros = list } };
         }
 
         public ActionResult CustomerTransactionInquiry()
@@ -2915,7 +2914,7 @@ namespace Seaboard.Intranet.Web.Controllers
                 if (string.IsNullOrEmpty(toClass))
                     toClass = "";
                 ReportHelper.Export(Helpers.ReportPath + "Reportes", Server.MapPath("~/PDF/Reportes/") + "SalesTransDetailReport.pdf",
-                    string.Format("INTRANET.dbo.SalesTransDetailReport '{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}','{8}'", Helpers.InterCompanyId, fromDate, toDate, fromCustomer, toCustomer, fromBatch, toBatch, fromClass, toClass), 
+                    string.Format("INTRANET.dbo.SalesTransDetailReport '{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}','{8}'", Helpers.InterCompanyId, fromDate, toDate, fromCustomer, toCustomer, fromBatch, toBatch, fromClass, toClass),
                     31, ref xStatus);
             }
             catch (Exception ex)
@@ -2958,7 +2957,7 @@ namespace Seaboard.Intranet.Web.Controllers
                 if (string.IsNullOrEmpty(toClass))
                     toClass = "";
                 ReportHelper.Export(Helpers.ReportPath + "Reportes", Server.MapPath("~/PDF/Reportes/") + "SalesTransGeneralLedgerReport.pdf",
-                    string.Format("INTRANET.dbo.SalesTransGeneralLedgerReport '{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}','{8}'", Helpers.InterCompanyId, fromDate, toDate, fromCustomer, toCustomer, fromBatch, toBatch, fromClass, toClass), 
+                    string.Format("INTRANET.dbo.SalesTransGeneralLedgerReport '{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}','{8}'", Helpers.InterCompanyId, fromDate, toDate, fromCustomer, toCustomer, fromBatch, toBatch, fromClass, toClass),
                     32, ref xStatus);
             }
             catch (Exception ex)
@@ -3004,7 +3003,7 @@ namespace Seaboard.Intranet.Web.Controllers
             {
                 var taxRegisterNumber = _repository.ExecuteScalarQuery<string>($"SELECT TAXREGTN FROM {Helpers.InterCompanyId}.dbo.EFRM40101");
                 var list = _repository.ExecuteQuery<FiscalSalesTransaction>($"INTRANET.dbo.FiscalSalesReport '{Helpers.InterCompanyId}','{fromDate}','{toDate}','{printCurrency}','{exchangeRate}'").ToList();
-                OfficeLogic.WriteDataFiscalSalesFile(list, Server.MapPath("~/PDF/Excel/") + "Planilla.xls", Server.MapPath("~/PDF/Excel/") + "607.xls", period.Replace("-",""), taxRegisterNumber);
+                OfficeLogic.WriteDataFiscalSalesFile(list, Server.MapPath("~/PDF/Excel/") + "Planilla.xls", Server.MapPath("~/PDF/Excel/") + "607.xls", period.Replace("-", ""), taxRegisterNumber);
                 xStatus = "OK";
             }
             catch (Exception ex)
@@ -3012,7 +3011,7 @@ namespace Seaboard.Intranet.Web.Controllers
                 xStatus = ex.Message;
             }
 
-            return Json(new { status = xStatus },JsonRequestBehavior.AllowGet);
+            return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
         }
 
         [HttpGet]
@@ -3073,10 +3072,7 @@ namespace Seaboard.Intranet.Web.Controllers
             if (count > 0)
             {
                 string emails = "";
-                _repository.ExecuteQuery<string>($"SELECT Email FROM {Helpers.InterCompanyId}.dbo.EFRM40301").ToList().ForEach(p =>
-                {
-                    emails += p + ";";
-                });
+                _repository.ExecuteQuery<string>($"SELECT Email FROM {Helpers.InterCompanyId}.dbo.EFRM40301").ToList().ForEach(p => { emails += p + ";"; });
                 if (!string.IsNullOrEmpty(emails))
                     _repository.ExecuteCommand($"INTRANET.dbo.SendMailNcfNotification '{Helpers.InterCompanyId}', '{emails}'");
             }

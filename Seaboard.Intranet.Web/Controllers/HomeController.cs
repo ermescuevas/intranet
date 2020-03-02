@@ -745,6 +745,12 @@ namespace Seaboard.Intranet.Web.Controllers
                         $"WHERE A.BCHSOURC = 'Sales Entry' AND (A.BACHNUMB LIKE '%{consulta}%' OR A.BCHCOMNT LIKE '%{consulta}%')) A " +
                         $"ORDER BY A.DATEBACH DESC";
                         break;
+                    case 46:
+                        sqlQuery = "SELECT RTRIM(A.DOCNUMBR) Id, A.CURNCYID Descripción, CONVERT(NVARCHAR(10), A.DOCDATE, 103) DataPlus, CONVERT(NVARCHAR(10), A.DUEDATE, 103) DataExtended " +
+                            "FROM " + Helpers.InterCompanyId + ".dbo.RM20101 A " +
+                            "WHERE A.DOCNUMBR LIKE '%" + consulta + "%' AND A.CUSTNMBR = '" + consultaExtra + "' AND A.RMDTYPAL = 1 " +
+                            "ORDER BY A.DOCDATE DESC";
+                        break;
                 }
 
                 switch (tipo)

@@ -27,7 +27,7 @@ namespace Seaboard.Intranet.BusinessLogic
                 _db = new SeaboContext();
                 _repository = new GenericRepository(_db);
                 var celdas = _repository.ExecuteScalarQuery<MemConfiguration>(
-                    "SELECT RUTA FilePath, HOJA Sheet, ACREEDOR Créditor, CLIENTEID Debtor, PRODUCTO1 Producto1, PRODUCTO2 Producto2, PRODUCTO3 Producto3, " +
+                    "SELECT RUTA FilePath, CONVERT(INT, HOJA) Sheet, ACREEDOR Créditor, CLIENTEID Debtor, PRODUCTO1 Producto1, PRODUCTO2 Producto2, PRODUCTO3 Producto3, " +
                     "PRODUCTO4 Producto4, PRODUCTO5 Producto5, PRODUCTO6 Producto6, PRODUCTO7 Producto7 FROM " +
                     Helpers.InterCompanyId + ".dbo.SESY01502");
 
@@ -37,13 +37,13 @@ namespace Seaboard.Intranet.BusinessLogic
                 if (File.Exists(ruta +".xlsx"))
                 {
                     isValid = true;
-                    ruta = ruta + ".xlsx";
+                    ruta += ".xlsx";
                 }
 
                 if (File.Exists(ruta + ".xlsm"))
                 {
                     isValid = true;
-                    ruta = ruta + ".xlsm";
+                    ruta += ".xlsm";
                 }
 
                 if (!isValid)
@@ -60,14 +60,14 @@ namespace Seaboard.Intranet.BusinessLogic
                 var tmpVendorId = string.Empty;
                 isValid = false;
 
-                var rowInit = celdas.RowBeginningData;
+                var rowInit = 6;
 
                 for (var i = rowInit; i <= rowCount; i++)
                 {
                     for (var j = 1; j <= colCount; j++)
                     {
                         if (j != 1) continue;
-                        var excComp = celdas.Créditor;
+                        var excComp = celdas.Debtor;
                         var excProd1 = celdas.Producto1;
                         var excProd2 = celdas.Producto2;
                         var excProd3 = celdas.Producto3;

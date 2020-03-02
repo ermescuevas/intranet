@@ -126,6 +126,10 @@
                                             <div class="btn-group">
                                                 <button type="button" class="btn btn-primary btn-xs" onclick="createTraining(@item.RowId, @item.Status)">Editar</button>
                                                 <button type="button" class="btn btn-danger btn-xs" onclick="deleteTraining(@item.RowId, @item.Status)">Eliminar</button>
+                                                @if (item.Status == 2)
+                                                {
+                                                    <button type="button" class="btn btn-danger btn-xs" onclick="print(@item.RowId, @item.Status)">Imprimir</button>
+                                                }
                                             </div>
                                         </td>
                                     </tr>
@@ -200,39 +204,37 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <label>Suplidor:</label>
                                 <input name="Supplier" id="Supplier" class="form-control" />
                             </div>
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <label>Duracion:</label>
                                 <input name="Duration" id="Duration" class="form-control" />
                             </div>
                         </div>
-                    </div>
 
-                    <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <label>Fecha Inicio:</label>
                                 <input name="StartDate" id="StartDate" class="form-control" />
                             </div>
                         </div>
+                    </div>
 
-                        <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <label>Costo:</label>
                                 <input name="Cost" id="Cost" class="form-control" value="0.00" />
                             </div>
                         </div>
-                    </div>
 
-                    <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <label>Tipo de Moneda:</label>
                                 <select class="form-control" id="CurrencyId" name="CurrencyId">
@@ -243,7 +245,7 @@
                             </div>
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <label>Ubicacion:</label>
                                 <select class="form-control" id="Location" name="Location">
@@ -274,16 +276,34 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-12">
+                        <div class="col-md-5">
                             <div class="form-group">
                                 <label class="checkbox-inline i-checks">
                                     <input type="checkbox" name="allDocumentation"> Esta toda la documentación ?
                                 </label>
                             </div>
+                            <p>En caso de tener todas las documentaciones de la capacitación, entonces marque el cotejo y someta para el flujo de aprobación, de lo contrario solo someta la capacitación sin poner el cotejo para que Recursos humanos la complete.</p>
                         </div>
-                    </div>
-                    <div>
-                        <p>En caso de tener todas las documentaciones de la capacitación, entonces marque el cotejo y someta para el flujo de aprobación, de lo contrario solo someta la capacitación sin poner el cotejo para que Recursos humanos la complete.</p>
+                        <div class="col-md-7">
+                            <div class="col-md-12">
+                                <form action="javascript:;" method="post" enctype="multipart/form-data" id="attachmentForm" accept-charset="utf-8">
+                                    <div class="col-md-11">
+                                        <div class="fileinput fileinput-new input-group" data-provides="fileinput">
+                                            <div class="form-control" data-trigger="fileinput"><i class="glyphicon glyphicon-file fileinput-exists"></i> <span class="fileinput-filename"></span></div>
+                                            <span class="input-group-addon btn btn-default btn-file"><span class="fileinput-new"><i class="fa fa-search"></i></span><span class="fileinput-exists"><i class="fa fa-edit"></i></span><input type="file" name="FileData" id="FileData"></span>
+                                            <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput"><i class="fa fa-remove"></i></a>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-1">
+                                        <button type="button" class="btn btn-success" onclick="atacharArchivo();"><i class="fa fa-save"></i></button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div id="attachmentFiles">
+
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -608,6 +628,225 @@
                     title: "ERROR",
                     text: "No puede editarse  por que esta en estado aprobado",
                     type: "error"
+                });
+            }
+        }
+
+        function print(id, status) {
+            if (status === 2) {
+                var data = {
+                    rowId: id
+                }
+                var url = '@Url.Content("~/PDF/Reportes/")TrainingRequestReport.pdf';
+                toastr.info('Estamos procesando su solicitud', 'Por favor espere');
+                $.ajax({
+                    url: '@Url.Action("PrintTrainingRequest", "HumanResources")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    cache: false,
+                    contentType: "application/json",
+                    success: function (d) {
+                        if (d.status == "OK") {
+                            window.open(url);
+                        } else {
+                            alert(d.status);
+                        }
+                    }
+                });
+            }
+        }
+
+        function cargarArchivos() {
+            $.ajax({
+                url: '@Url.Action("LoadAttachmentFiles", "HumanResources")?id=TrainingReq' + $('#RowId').val().trim(),
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    attachmentFiles = result;
+                    if (attachmentFiles.length > 0) {
+                        var $ul = $('<ul class="list-unstyled file-list" />');
+                        $.each(attachmentFiles, function (i, val) {
+                            var $li = $('<li/>');
+                            var $a = $('<a href="@Url.Action("Download","HumanResources")?id=TrainingReq' + $('#RowId').val().trim() + '&FileName=' + val.trim() + '" />')
+                            var $delete = $('<a href="#" />')
+                            $a.append($('<i class="fa fa-file-pdf-o" />'));
+                            $delete.html("&nbsp; &nbsp; &nbsp;");
+                            $delete.click(function (e) {
+                                e.preventDefault();
+                                eliminarArchivo(val.trim());
+                            });
+                            $delete.append($('<i class="fa fa-remove fa-2x" />'));
+                            $li.append($a.html("  " + val));
+                            $li.append($delete);
+                            $ul.append($li);
+                        });
+                        $('#attachmentFiles').html($ul);
+                    }
+                    else {
+                        $('#attachmentFiles').html('');
+                    }
+                }
+            });
+        }
+
+        function atacharArchivo() {
+            var isAllValid = true;
+            var isCompleted = false;
+            var rowId = 0;
+            if ($('input[name="allDocumentation"]').is(":checked"))
+                isCompleted = true;
+
+            if ($('#Description').val() === '') {
+                toastr.error('Por favor debe de especificar una descripcion para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#EmployeeId').val() === '') {
+                toastr.error('Por favor debe de especificar un solicitante para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Department').val() === '') {
+                toastr.error('Por favor debe de especificar un departamento para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Participants').val() === '') {
+                toastr.error('Por favor debe de especificar los participantes para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (isCompleted) {
+                if ($('#StartDate').val() === '') {
+                    toastr.error('Por favor debe de especificar una fecha de inicio para procesar', 'Campos requeridos')
+                    isAllValid = false;
+                }
+
+                if ($('#Duration').val() === '') {
+                    toastr.error('Por favor debe de especificar una duración para procesar', 'Campos requeridos')
+                    isAllValid = false;
+                }
+                if ($('#Objectives').val() === '') {
+                    toastr.error('Por favor debe de especificar los objetivos para procesar', 'Campos requeridos')
+                    isAllValid = false;
+                }
+
+                if ($('#Requirements').val() === '') {
+                    toastr.error('Por favor debe de especificar los requerimientos para procesar', 'Campos requeridos')
+                    isAllValid = false;
+                }
+                if ($('#Cost').val() === '') {
+                    toastr.error('Por favor debe de especificar el costo para procesar', 'Campos requeridos')
+                    isAllValid = false;
+                }
+
+                if ($('#CurrencyId').val() === '') {
+                    toastr.error('Por favor debe de especificar la moneda para procesar', 'Campos requeridos')
+                    isAllValid = false;
+                }
+
+                if ($('#Location').val() === '') {
+                    toastr.error('Por favor debe de especificar una ubicacion para procesar', 'Campos requeridos')
+                    isAllValid = false;
+                }
+
+                if ($('#Supplier').val() === '') {
+                    toastr.error('Por favor debe de especificar un suplidor para procesar', 'Campos requeridos')
+                    isAllValid = false;
+                }
+            }
+
+            if (isAllValid) {
+                var data = {
+                    RowId: $('#RowId').val(),
+                    Description: $('#Description').val().trim(),
+                    EmployeeId: $('#EmployeeId').val().trim(),
+                    StartDate: $('#StartDate').val().trim(),
+                    Duration: $('#Duration').val().trim(),
+                    Department: $('#Department').val().trim(),
+                    Cost: $('#Cost').val().trim(),
+                    CurrencyId: $('#CurrencyId').val().trim(),
+                    Location: $('#Location').val().trim(),
+                    Supplier: $('#Supplier').val().trim(),
+                    Objectives: $('#Objectives').val().trim(),
+                    Requirements: $('#Requirements').val().trim(),
+                    Participants: $('#Participants').val().join(','),
+                    IsCompleted: isCompleted,
+                    send: false
+                }
+                $.ajax({
+                    url: '@Url.Action("SaveTrainingRequest", "HumanResources")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    async: false,
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            $('#RowId').val(result.rowId);
+                        }
+                        else {
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+                    }
+                });
+            }
+
+            if (isAllValid) {
+                var data = new FormData();
+                data.append("FileData", document.getElementById("FileData").files[0]);
+                data.append("id", 'TrainingReq' + $('#RowId').val());
+                $.ajax({
+                    url: '@Url.Action("AttachFile", "HumanResources")',
+                    type: "POST",
+                    data: data,
+                    dataType: "JSON",
+                    contentType: false,
+                    processData: false,
+                    async: false,
+                    success: function (d) {
+                        if (d.status == true) {
+                            $('#attachmentForm').each(function () {
+                                this.reset();
+                            });
+                            toastr.success('Archivo adjuntado correctamente', 'Adjuntos')
+                            cargarArchivos();
+                        }
+                        else {
+                            alert('Ha ocurrido un error');
+                        }
+                    },
+                    error: function () {
+                        alert('Error. Por favor trate de nuevo.');
+                    }
+                });
+            }
+        }
+
+        function eliminarArchivo(fileName) {
+            if (confirm("Esta seguro que desea eliminar este archivo ?")) {
+                $.ajax({
+                    url: '@Url.Action("DeleteFile", "HumanResources")?id=TrainingReq' + $('#RowId').val().trim() + "&fileName=" + fileName,
+                    type: "POST",
+                    dataType: "JSON",
+                    contentType: false,
+                    processData: false,
+                    success: function (d) {
+                        if (d.status == "OK") {
+                            toastr.success('Archivo eliminado correctamente', 'Adjuntos');
+                            cargarArchivos();
+                        }
+                        else {
+                            alert(d.status);
+                        }
+                    }
                 });
             }
         }

@@ -466,27 +466,19 @@
             };
             $('#InterestRate').focusout(function () {
                 if (($('#InterestRate').val().trim().replace(/,/g, "") != '' && !isNaN($('#InterestRate').val().replace(/,/g, "").trim()))) {
-                    $('#InterestRate').val(parseFloat($('#InterestRate').val().replace(/,/g, "")).toFixed(2).replace(/./g, function (c, i, a) {
-                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
-                    }));
+                     $('#InterestRate').val(parseFloat($('#InterestRate').val()).toFixed(4));
                 }
             });
             $('#Charge').focusout(function () {
                 if (($('#Charge').val().trim().replace(/,/g, "") != '' && !isNaN($('#Charge').val().replace(/,/g, "").trim()))) {
-                    $('#Charge').val(parseFloat($('#Charge').val().replace(/,/g, "")).toFixed(2).replace(/./g, function (c, i, a) {
-                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
-                    }));
+                     $('#Charge').val(parseFloat($('#Charge').val()).toFixed(4));
                 }
             });
             if (($('#InterestRate').val().trim().replace(/,/g, "") != '' && !isNaN($('#InterestRate').val().trim().replace(/,/g, "")))) {
-                $('#InterestRate').val(parseFloat($('#InterestRate').val().replace(/,/g, "")).toFixed(2).replace(/./g, function (c, i, a) {
-                    return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
-                }));
+                $('#InterestRate').val(parseFloat($('#InterestRate').val()).toFixed(4));
             }
             if (($('#Charge').val().trim().replace(/,/g, "") != '' && !isNaN($('#Charge').val().trim().replace(/,/g, "")))) {
-                $('#Charge').val(parseFloat($('#Charge').val().replace(/,/g, "")).toFixed(2).replace(/./g, function (c, i, a) {
-                    return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
-                }));
+                $('#Charge').val(parseFloat($('#Charge').val()).toFixed(4));
             }
             generateHeader($('#BatchNumber').val());
         });
@@ -701,7 +693,7 @@
                                     $checkInput = $('<input type="checkbox" name="check" checked="checked">');
                                 $checkDiv.append($checkInput).append($labelCheck);
                                 $row.append($('<td/>').html($checkDiv));
-                                $row.append($('<td/>').html(val.CustomerId));
+                                $row.append($('<td/>').html(val.CustomerId.trim()));
                                 $row.append($('<td/>').html(parseFloat(val.TotalAmount).toFixed(2).replace(/./g, function (c, i, a) {
                                     return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
                                 })));
@@ -712,9 +704,9 @@
                                 });
                                 $checkInput.click(function () {
                                     if ($(this).is(':checked'))
-                                        updateMemBillingCustomerExclusion(item.CustomerId, true);
+                                        updateInterestCustomerExclusion(val.CustomerId, true);
                                     else
-                                        updateMemBillingCustomerExclusion(item.CustomerId, false);
+                                        updateInterestCustomerExclusion(val.CustomerId, false);
                                 });
                                 $tbody.append($row);
                             });
@@ -840,9 +832,9 @@
                             })));
                             $checkInput.click(function () {
                                 if ($(this).is(':checked'))
-                                    updateMemBillingProductExclusion(code, val.ProductId, true);
+                                    updateInterestDocumentExclusion(code, val.DocumentNumber, true);
                                 else
-                                    updateMemBillingProductExclusion(code, val.ProductId, false);
+                                    updateInterestDocumentExclusion(code, val.DocumentNumber, false);
                             });
                             $applyButton.click(function () {
                                 getDetailInterest(code, val.DocumentNumber);
@@ -858,6 +850,7 @@
                         order: [[0, "desc"]],
                         paging: false,
                         scrollCollapse: true,
+                        scrollX: true,
                         scrollY: "40vh",
                         language: {
                             "sProcessing": "Procesando... ",
@@ -1150,6 +1143,44 @@
                         }
                     }
                 });
+            });
+        }
+
+        function updateInterestDocumentExclusion(customerId, code, exclude) {
+            $.ajax({
+                url: '@Url.Action("UpdateInterestTransactionInvoiceExclusion", "AccountReceivables")?batchNumber=' + $('#BatchNumber').val() + "&customerId=" + customerId + "&documentNumber=" + code + "&exclude=" + exclude,
+                type: "POST",
+                data: "",
+                cache: false,
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    if (result.status !== "OK")
+                        swal({
+                            title: "ERROR",
+                            text: result.status,
+                            type: "error"
+                        });
+                }
+            });
+        }
+
+        function updateInterestCustomerExclusion(code, exclude) {
+            $.ajax({
+                url: '@Url.Action("UpdateInterestTransactionCustomerExclusion", "AccountReceivables")?batchNumber=' + $('#BatchNumber').val() + "&customerId=" + code + "&exclude=" + exclude,
+                type: "POST",
+                data: "",
+                cache: false,
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    if (result.status !== "OK")
+                       swal({
+                            title: "ERROR",
+                            text: result.status,
+                            type: "error"
+                        });
+                }
             });
         }
     </script>

@@ -973,8 +973,6 @@
     <Content Include="Views\ServiceRequest\_List.cshtml" />
     <Content Include="Views\ServiceRequest\_ListWarehouse.cshtml" />
     <Content Include="Views\PettyCash\_List.cshtml" />
-    <Content Include="Views\Shared\_HRLayout.cshtml" />
-    <Content Include="Views\Shared\_HRNavigation.cshtml" />
     <Content Include="Views\HumanResources\AbsenceConfiguration.cshtml" />
     <Content Include="Views\Home\TestWorkflow.cshtml" />
     <Content Include="Views\Home\ApprovalHistory.cshtml" />
@@ -990,9 +988,12 @@
     <Content Include="Views\AccountReceivables\InterestEntry.cshtml" />
     <Content Include="Views\AccountReceivables\InterestSpotIndex.cshtml" />
     <Content Include="Views\AccountReceivables\InterestIndex.cshtml" />
-    <Content Include="Views\AccountReceivables\InterestContractEntry.cshtml" />
     <Content Include="Views\AccountReceivables\InterestContract.cshtml" />
     <Content Include="Views\AccountReceivables\InterestConfiguration.cshtml" />
+    <Content Include="Views\AccountReceivables\InterestSummaryReport.cshtml" />
+    <Content Include="Views\AccountReceivables\DocumentEdit.cshtml" />
+    <Content Include="Views\AccountReceivables\HolidayConfiguration.cshtml" />
+    <Content Include="Views\AccountReceivables\EstimatedInterestReport.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

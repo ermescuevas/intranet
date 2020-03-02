@@ -1033,10 +1033,12 @@
             }
 
             $('#customerTable > tbody > tr').each(function () {
-                if (parseFloat($(this).find('td:eq(5)').html().trim()) < parseFloat($(this).find('td:eq(4)').html().trim())) {
-                    isAllValid = false;
-                    toastr.error('Existen documentos que no se tienen el monto completo aplicado o no se la ha aplicado alguna factura', 'Campos requeridos')
-                    return false;
+                if ($(this).find('td:eq(2)').html().trim() !== 'ND') {
+                    if (parseFloat($(this).find('td:eq(5)').html().trim()) < parseFloat($(this).find('td:eq(4)').html().trim())) {
+                        isAllValid = false;
+                        toastr.error('Existen documentos que no se tienen el monto completo aplicado o no se la ha aplicado alguna factura', 'Campos requeridos')
+                        return false;
+                    }
                 }
             });
 

@@ -1,5 +1,5 @@
 ﻿@using Microsoft.AspNet.Identity;
-@model IEnumerable<Seaboard.Intranet.Domain.ViewModels.Lookup>
+@model IEnumerable<Seaboard.Intranet.Domain.InterestContract>
 @{
     Layout = "~/Views/Shared/_BillingLayout.cshtml";
     ViewBag.Title = "Contratos";
@@ -39,23 +39,39 @@
                     <table class="table table-striped table-bordered table-hover informationTable">
                         <thead>
                             <tr>
-                                <th style="width:20%;">Id. de cliente</th>
-                                <th style="width:50%;">Nombre</th>
-                                <th style="width:15%;">Tasa interes</th>
-                                <th style="width:15%;">#</th>
+                                <th style="width:11%;">Id. de cliente</th>
+                                <th style="width:25%;">Nombre</th>
+                                <th style="width:12%;">Tasa interes</th>
+                                <th style="width:12%;">Dias de plazo interes</th>
+                                <th style="width:15%;">Incl. dias feriados</th>
+                                <th style="width:15%;">Incl. fin de semana</th>
+                                <th style="width:10%;">#</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var item in Model)
                             {
-                                <tr>
-                                    <td>@item.Id</td>
-                                    <td>@item.Descripción</td>
-                                    <td>@item.DataExtended</td>
-                                    <td>
-                                        <button class="btn btn-danger btn-xs" onclick="deleteContract('@item.Id');">Eliminar</button>
-                                    </td>
-                                </tr>
+                            <tr>
+                                <td>@item.CustomerNumber</td>
+                                <td>@item.CustomerName</td>
+                                <td>@item.ChargePercent.ToString("N2")</td>
+                                <td>@item.DaysDelay</td>
+                                <td>
+                                    @if(item.IncludeHolidays)
+                                    {<i class="badge-danger">Si &nbsp;</i>}
+                                    else
+                                    {<i class="badge-info">No &nbsp;</i>}
+                                </td>
+                                <td>
+                                    @if (item.IncludeWeekends)
+                                    {<i class="badge-danger">Si &nbsp;</i>}
+                                    else
+                                    {<i class="badge-info">No &nbsp;</i>}
+                                </td>
+                                <td>
+                                    <button class="btn btn-danger btn-xs" onclick="deleteContract('@item.CustomerNumber');">Eliminar</button>
+                                </td>
+                            </tr>
                             }
                         </tbody>
                     </table>
@@ -88,6 +104,31 @@
                         <div class="form-group">
                             <label>Tasa de interes:</label>
                             <input type="text" name="InterestRate" id="InterestRate" class="form-control" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Dias de plazo:</label>
+                            <input type="text" name="DaysDelay" id="DaysDelay" class="form-control" />
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="col-sm-6 control-label">Incluir fines de semana:</label>
+                                    <div class="col-sm-6 input-group">
+                                        <input type="checkbox" id="IncludeWeekends" name="IncludeWeekends" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="col-sm-6 control-label">Incluir dias feriados:</label>
+                                    <div class="col-sm-6 input-group">
+                                        <input type="checkbox" id="IncludeHolidays" name="IncludeHolidays" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -183,14 +224,22 @@
             }
 
             if ($('#InterestRate').val() === '') {
-                toastr.error('Por favor debe de seleccionar un cliente para procesar', 'Campos requeridos')
+                toastr.error('Por favor debe de especificar una tasa de interes para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#DaysDelay').val() === '') {
+                toastr.error('Por favor debe de especificar un plazo de dias un  para procesar', 'Campos requeridos')
                 isAllValid = false;
             }
 
             if (isAllValid) {
                 var data = {
-                    CustomerId: $('#CustomerId').val().trim(),
-                    InterestRate: $('#InterestRate').val().trim()
+                    CustomerNumber: $('#CustomerId').val().trim(),
+                    ChargePercent: $('#InterestRate').val().trim(),
+                    DaysDelay: $('#DaysDelay').val().trim(),
+                    IncludeWeekends: $('#IncludeWeekends').is(':checked'),
+                    IncludeHolidays: $('#IncludeHolidays').is(':checked')
                 }
                 $.ajax({
                     url: '@Url.Action("SaveContract", "AccountReceivables")',

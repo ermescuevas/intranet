@@ -135,6 +135,15 @@ namespace Seaboard.Intranet.BusinessLogic
                     case 39:
                         reporte = "InterestSpotReport.rpt";
                         break;
+                    case 40:
+                        reporte = "InterestSummaryReport.rpt";
+                        break;
+                    case 41:
+                        reporte = "TrainingRequestReport.rpt";
+                        break;
+                    case 42:
+                        reporte = "EstimatedInterestReport.rpt";
+                        break;
                 }
 
                 const string reportHeader = "SELECT '' CompName, '' Titulo, '' Parametro1, '' Parametro2, '' Parametro3, '' Parametro4, '' Parametro5, '' Parametro6, '' Usuario, 1 Marca";

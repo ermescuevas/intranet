@@ -676,6 +676,16 @@ namespace Seaboard.Intranet.BusinessLogic
                                 if (!string.IsNullOrEmpty(user))
                                     participantes += user + ",";
                             });
+                            sqlQuery = "SELECT B.fileName NombreArchivo, B.BinaryBlob DataArchivo "
+                                       + "FROM " + Helpers.InterCompanyId + ".dbo.CO00102 A "
+                                       + "INNER JOIN " + Helpers.InterCompanyId + ".dbo.coAttachmentItems B "
+                                       + "ON A.Attachment_ID = B.Attachment_ID "
+                                       + "INNER JOIN " + Helpers.InterCompanyId + ".dbo.CO00105 C "
+                                       + "ON A.Attachment_ID = C.Attachment_ID "
+                                       + "WHERE C.DOCNUMBR = 'TrainingReq" + idSolicitud + "' "
+                                       + "AND C.DELETE1 = 0 ";
+
+                            _attachments = _repository.ExecuteQuery<Attachments>(sqlQuery).ToList();
                             if (trainingRequest != null)
                             {
                                 clientContext = new ClientContext("https://seaboardpowercomdo.sharepoint.com");
@@ -730,6 +740,22 @@ namespace Seaboard.Intranet.BusinessLogic
                                 listItem["Empleado"] = trainingRequest.EmployeeId.Trim() + " - " + trainingRequest.EmployeeName.Trim();
                                 listItem["DB"] = Helpers.InterCompanyId;
                                 listItem.Update();
+
+                                if (_attachments?.Count > 0)
+                                {
+                                    foreach (var item in _attachments)
+                                    {
+                                        var fileInfo = item.DataArchivo;
+                                        attachInfo = new AttachmentCreationInformation
+                                        {
+                                            FileName = item.NombreArchivo.Trim().Replace("^", " ").Replace("@", " ").Replace("#", " ").Replace("$", " ").Replace("&", " ").Replace("*", " "),
+                                            ContentStream = new MemoryStream(fileInfo)
+                                        };
+                                        attach = listItem.AttachmentFiles.Add(attachInfo);
+                                        clientContext.Load(attach);
+                                    }
+                                }
+
                                 clientContext.ExecuteQuery();
                             }
                             status = "OK";
@@ -766,7 +792,7 @@ namespace Seaboard.Intranet.BusinessLogic
                                        + "ON A.Attachment_ID = B.Attachment_ID "
                                        + "INNER JOIN " + Helpers.InterCompanyId + ".dbo.CO00105 C "
                                        + "ON A.Attachment_ID = C.Attachment_ID "
-                                       + "WHERE C.DOCNUMBR = '" + idSolicitud + "' "
+                                       + "WHERE C.DOCNUMBR = 'UserReq" + idSolicitud + "' "
                                        + "AND C.DELETE1 = 0 ";
 
                             _attachments = _repository.ExecuteQuery<Attachments>(sqlQuery).ToList();

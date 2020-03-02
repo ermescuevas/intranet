@@ -1,0 +1,176 @@
+﻿@{
+    Layout = "~/Views/Shared/_BillingLayout.cshtml";
+    ViewBag.Title = "Reporte de resumen de intereses";
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-sm-4">
+        <h2>Reporte de resumen de intereses</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Reporte de resumen de intereses</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="wrapper wrapper-content animated fadeInUp">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="ibox float-e-margins">
+                        <div class="ibox-title">
+                            <h3>Reporte de resumen de intereses</h3>
+                        </div>
+                        <div class="ibox-content">
+                            <div class="col-sm-12 col-sm-offset-1">
+                                <button class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-Print" id="btn-print"><i class="fa fa-print"></i> Imprimir</button>
+                                <br />
+                            </div>
+                            <br />
+                            <br />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ibox">
+                <div class="ibox-content">
+                    <div class="hr-line-dashed"></div>
+                    <br />
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="col-sm-5 control-label">Periodo:</label>
+                                <div class="col-sm-7 input-group">
+                                    <div class="col-sm-12 input-group">
+                                        <select id="period" name="period" data-placeholder="Seleccione un periodo..." class="form-control" tabindex="2">
+                                            <option value="">Seleccione un periodo</option>
+                                            @for (int i = 0; i < 3; i++)
+                                            {
+                                                <option value="@DateTime.Now.AddYears(i * -1).ToString("yyyy")">@DateTime.Now.AddYears(i * -1).ToString("yyyy")</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                &nbsp;
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hr-line-dashed"></div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="col-sm-5 control-label">Tipo:</label>
+                                <div class="col-sm-7 input-group">
+                                    <div class="col-sm-12 input-group">
+                                        <select id="type" name="type" data-placeholder="Seleccione un tipo..." class="form-control" tabindex="2">
+                                            <option value="">Seleccione un tipo</option>
+                                            <option value="0">SPOT</option>
+                                            <option value="1">CONTRATO</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-Print" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Imprimir</h4>
+                </div>
+
+                <div class="modal-body">
+                    <p>Imprimir reporte</p>
+                    <div class="form-group">
+                        <label>Opción</label>
+                        <select class="form-control" id="printOption" name="printOption">
+                            <option value="10">PDF</option>
+                            <option value="20">Excel</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="form-actions no-color">
+                        <button type="button" class="btn btn-primary" onclick="imprimir();"> Imprimir</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles{
+    @Styles.Render("~/Content/plugins/iCheck/iCheckStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/awesomeCheckboxStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/iCheck")
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+
+    <script>
+        $(document).ready(function () {
+            $('.i-checks').iCheck({
+                checkboxClass: 'icheckbox_square-green',
+                radioClass: 'iradio_square-green',
+            });
+        });
+
+        function imprimir() {
+            var data = {
+                marketType: parseInt($('#type').val()),
+                period: $('#period').val(),
+                printOption: parseInt($('#printOption').val())
+            };
+
+            var reportName = 'InterestSummaryReport';
+            if ($('#printOption').val() === '10')
+                reportName += '.pdf';
+            else
+                reportName += '.xls';
+            var url = '@Url.Content("~/PDF/Reportes/")' + reportName;
+
+            toastr.info('Estamos procesando su solicitud', 'Por favor espere');
+            $.ajax({
+                url: '@Url.Action("InterestSummaryReport", "AccountReceivables")',
+                type: "POST",
+                data: JSON.stringify(data),
+                dataType: "JSON",
+                async: false,
+                cache: false,
+                contentType: "application/json",
+                success: function (d) {
+                    if (d.status === "OK") {
+                        window.open(url);
+                    }
+                    else {
+                        alert(d.status);
+                    }
+                }
+            });
+        }
+    </script>
+}

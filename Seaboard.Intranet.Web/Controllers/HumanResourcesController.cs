@@ -557,7 +557,7 @@ namespace Seaboard.Intranet.Web.Controllers
         }
 
         [HttpPost]
-        public JsonResult SaveTrainingRequest(TrainingRequest request)
+        public JsonResult SaveTrainingRequest(TrainingRequest request, bool send = true)
         {
             var newRowId = 0;
             var secuence = "";
@@ -587,9 +587,11 @@ namespace Seaboard.Intranet.Web.Controllers
                         $"[IsCompleted] = '{request.IsCompleted}', [Status] = 1, [LastUserId] = '{Account.GetAccount(User.Identity.GetUserName()).UserId}' " +
                         $"WHERE RowId = {request.RowId}";
                 _repository.ExecuteCommand(sqlQuery);
+                
                 newRowId = request.RowId == 0 ? _repository.ExecuteScalarQuery<int>($"SELECT RowId FROM {Helpers.InterCompanyId}.dbo.EFUPR30400 ORDER BY RowId DESC") : request.RowId;
                 status = "OK";
-                ProcessLogic.SendToSharepoint(newRowId.ToString(), 6, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
+                if (send)
+                    ProcessLogic.SendToSharepoint(newRowId.ToString(), 6, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
             }
             catch (Exception ex)
             {
@@ -601,7 +603,7 @@ namespace Seaboard.Intranet.Web.Controllers
                 }
             }
 
-            return new JsonResult { Data = new { status } };
+            return new JsonResult { Data = new { status, rowId = newRowId } };
         }
 
         [HttpPost]
@@ -620,6 +622,24 @@ namespace Seaboard.Intranet.Web.Controllers
             }
 
             return new JsonResult { Data = new { status } };
+        }
+
+        [HttpPost]
+        public ActionResult PrintTrainingRequest(string requestId)
+        {
+            string xStatus;
+            try
+            {
+                xStatus = "OK";
+                ReportHelper.Export(Helpers.ReportPath + "Reportes", Server.MapPath("~/PDF/Reportes/") + "TrainingRequestReport.pdf",
+                    string.Format("INTRANET.dbo.TrainingRequestReport '{0}','{1}'", Helpers.InterCompanyId, requestId), 41, ref xStatus);
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = xStatus } };
         }
 
         #endregion
@@ -786,6 +806,7 @@ namespace Seaboard.Intranet.Web.Controllers
         #endregion
 
         #region Horas Extras
+
         public ActionResult OvertimeRequest()
         {
             if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "HumanResources", "OvertimeRequest"))
