@@ -1,0 +1,640 @@
+﻿@using Seaboard.Intranet.Domain
+@model Seaboard.Intranet.Domain.Models.AccountingInvoiceHeader
+@{
+    Layout = "~/Views/Shared/_AccountingLayout.cshtml";
+    ViewBag.Title = "Gastos menores";
+    var accounts = (List<Seaboard.Intranet.Domain.ViewModels.Lookup>)ViewBag.Accounts;
+}
+
+<style>
+    .selected {
+        background-color: #e0f3ff;
+    }
+
+    .notAvailable {
+        background-color: #f5efb5;
+    }
+
+    .bootstrap-select:not([class*=col-]):not([class*=form-control]):not(.input-group-btn) {
+        width: 100%;
+    }
+    .invoice-total > tbody > tr > td:last-child {
+        width: 50%;
+    }
+</style>
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <br />
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li>
+                <a href="@Url.Action("MinorExpensesInvoiceIndex", "Accounting")">Listado de facturas</a>
+            </li>
+            <li class="active">
+                <strong>Gastos menores</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="wrapper wrapper-content animated fadeInUp">
+                <div class="ibox">
+                    <div class="ibox-content">
+                        <div class="row m-t-sm">
+                            <div class="col-lg-12">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="m-b-md">
+                                            <div class="btn-group-xs pull-right">
+                                                <button class="btn btn-info btn-xs" onclick="postInvoice();">Contabilizar</button>
+                                                <button class="btn btn-success btn-xs" onclick="saveInvoice();">Guardar</button>
+                                                <button class="btn btn-danger btn-xs" onclick="anular();">Anular</button>
+                                                <button class="btn btn-primary btn-xs" onclick="imprimir();">Imprimir</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="wrapper wrapper-content animated fadeInRight">
+                                    <div class="row">
+                                        <div class="col-sm-8">
+                                            <h1>Factura Gastos menores</h1>
+                                            <div class="form-group col-md-7">
+                                                <label>Tipo de gastos:</label>
+                                                <div class="input-group">
+                                                    <select class="selectpicker" data-live-search="true" id="ExpenseType" name="ExpenseType">
+                                                        <option value="">Seleccione una categorización</option>
+                                                        <option value="1">01 - GASTOS DE PERSONAL</option>
+                                                        <option value="2">02 - GASTOS POR TRABAJOS, SUMINISTROS Y SERVICIOS</option>
+                                                        <option value="3">03 - ARRENDAMIENTOS</option>
+                                                        <option value="4">04 - GASTOS DE ACTIVOS FIJO</option>
+                                                        <option value="5">05 - GASTOS DE REPRESENTACIÓN</option>
+                                                        <option value="6">06 - OTRAS DEDUCCIONES ADMITIDAS</option>
+                                                        <option value="7">07 - GASTOS FINANCIEROS</option>
+                                                        <option value="8">08 - GASTOS EXTRAORDINARIOS</option>
+                                                        <option value="9">09 - COMPRAS Y GASTOS QUE FORMARON PARTE DEL COSTO DE VENTA</option>
+                                                        <option value="10">10 - ADQUISICIONES DE ACTIVOS</option>
+                                                        <option value="11">11 - GASTOS DE SEGURO</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-3">
+                                                <label>Fecha documento:</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                    @Html.TextBoxFor(m => m.DocumentDate, new { @class = "form-control", Value = Model.DocumentDate.ToString("MM/dd/yyyy") })
+                                                </div>
+                                            </div>
+                                            @Html.HiddenFor(m => m.CurrencyId)
+                                        </div>
+                                        <div class="col-sm-4 text-right">
+                                            <h2>No. documento</h2>
+                                            <h3 class="text-navy">@Model.DocumentNumber</h3>
+                                            <h4 class="text-navy">NCF: @Model.Ncf</h4>
+                                            <h5>@Model.NcfType</h5>
+                                            <h5>Valida hasta: @Model.NcfDueDate.ToString("dd/MM/yyyy")</h5>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-8">
+                                            <div class="form-group col-sm-10">
+                                                <label>Referencia:</label>
+                                                <div class="input-group col-sm-12">
+                                                    @Html.TextBoxFor(m => m.SupplierNumber, new { @class = "form-control" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4 text-right">
+                                            <h3>Datos contribuyente</h3>
+                                            <address>
+                                                <strong>Transcontinental Capital Corporation, Inc.</strong><br>
+                                                Av. La Marina, Muelle Timbeque,<br>
+                                                Santo Domingo, Republica Dominicana<br />
+                                                <abbr title="phone">Tel:</abbr> (809) 687-0101<br />
+                                                <abbr title="fax">Fax:</abbr> (809) 685-5145
+                                            </address>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12 col-lg-12 col-sm-12 text-center">
+                                            <div class="table-responsive m-t" id="itemRows">
+                                                <table class="table table-stripped" id="itemTable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width:35%">Cuenta de Catalogo</th>
+                                                            <th style="width:42%">Memo</th>
+                                                            <th style="width:20%">Monto</th>
+                                                            <th style="width:3%"></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var item in Model.Details)
+                                                        {
+                                                        <tr>
+                                                            <td><input type="text" class="form-control" value="@item.ItemDescription"/></td>
+                                                            <td><input type="text" class="form-control" value="@item.Quantity.ToString("N0")" /></td>
+                                                            <td><input type="text" class="form-control" value="@item.Price.ToString("N2")" /></td>
+                                                            <td><input type="text" class="form-control" readonly="readonly" value="@item.TaxAmount.ToString("N2")" /></td>
+                                                            <td><input type="text" class="form-control" readonly="readonly" value="@item.Total.ToString("N2")" /></td>
+                                                        </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <button class="btn btn-success btn-rounded" data-toggle="modal" data-target="#modal-AddItem">Agregar servicio</button>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="hr-line-dashed"></div>
+
+                                        <div class="col-lg-5">
+                                            <label>Notas adicionales</label>
+                                            <div class="form-group">
+                                                <textarea rows="5" id="Note" class="form-control">@Model.Note</textarea>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-7">
+                                            <table class="table invoice-total">
+                                                <tbody>
+                                                    <tr>
+                                                        <td><strong>Total :</strong></td>
+                                                        <td id="Total">@Model.TotalAmount.ToString("C2")</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modal-AddItem" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Agregar servicio</h4>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>No. de cuenta:</label>
+                    <select class="selectpicker" data-live-search="true" id="ItemNumber" name="ItemNumber">
+                        <option value=""></option>
+                        @foreach (var item in accounts)
+                        {
+                            <option value="@item.Id.Trim()">@(item.Id.Trim() + " - " + item.Descripción)</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Memo:</label>
+                    <input name="ItemDescription" id="ItemDescription" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Monto:</label>
+                    <input name="Price" id="Price" type="number" class="form-control" />
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <div class="form-actions no-color">
+                    <button type="button" class="btn btn-primary" onclick="agregarArticulo();"> Agregar</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal"> Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Styles {
+    @Styles.Render("~/plugins/wizardStepsStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/awesomeCheckboxStyles")
+    @Styles.Render("~/plugins/clockpickerStyles")
+    @Styles.Render("~/plugins/dateRangeStyles")
+    @Styles.Render("~/Content/plugins/iCheck/iCheckStyles")
+    @Styles.Render("~/Content/plugins/chosen/chosenStyles")
+    @Styles.Render("~/plugins/switcheryStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/plugins/nouiSliderStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/Content/plugins/ionRangeSlider/ionRangeStyles")
+    @Styles.Render("~/plugins/imagecropperStyles")
+    @Styles.Render("~/Content/plugins/colorpicker/colorpickerStyles")
+    @Styles.Render("~/plugins/select2Styles")
+    @Styles.Render("~/plugins/touchSpinStyles")
+    @Styles.Render("~/plugins/tagInputsStyles")
+    @Styles.Render("~/plugins/duallistStyles")
+    @Styles.Render("~/plugins/sweetAlertStyles")
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/plugins/laddaStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/css/bootstrap-select.min.css">
+}
+
+@section Scripts {
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/wizardSteps")
+    @Scripts.Render("~/plugins/validate")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/iCheck")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/ionRange")
+    @Scripts.Render("~/plugins/nouiSlider")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/plugins/switchery")
+    @Scripts.Render("~/plugins/chosen")
+    @Scripts.Render("~/plugins/knob")
+    @Scripts.Render("~/plugins/imagecropper")
+    @Scripts.Render("~/plugins/colorpicker")
+    @Scripts.Render("~/plugins/clockpicker")
+    @Scripts.Render("~/plugins/dateRange")
+    @Scripts.Render("~/plugins/select2")
+    @Scripts.Render("~/plugins/touchSpin")
+    @Scripts.Render("~/plugins/tagInputs")
+    @Scripts.Render("~/plugins/duallist")
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+    @Scripts.Render("~/plugins/sweetAlert")
+    @Scripts.Render("~/plugins/ladda")
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/bootstrap-select.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/i18n/defaults-en_US.js"></script>
+
+    <script type="text/javascript">
+        var items = [];
+        $(document).ready(function () {
+            $('#Note').EnsureMaxLength({
+                limit: 2000,
+                cssClass: '',
+                separator: '/',
+                placement: null
+            });
+            $('#Description').EnsureMaxLength({
+                limit: 101,
+                cssClass: '',
+                separator: '/',
+                placement: null
+            });
+            $('#DocumentDate').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true
+            });
+            $('.ladda-button').ladda();
+            $.formattedDate = function (dateToFormat) {
+                var dateObject = new Date(dateToFormat);
+                var day = dateObject.getDate();
+                var month = dateObject.getMonth() + 1;
+                var year = dateObject.getFullYear();
+                day = day < 10 ? "0" + day : day;
+                month = month < 10 ? "0" + month : month;
+                var formattedDate = month + "/" + day + "/" + year;
+                return formattedDate;
+            };
+            $("#lookupMoneda").lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookup", "Home")?tipo=5&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function(data) {
+                    $('input[name=CurrencyId]').val(data.Id);
+                },
+                tableHeader: ['Id. de moneda', 'Descripción'],
+                hiddenFields: ['DataExtended','DataPlus']
+            });
+            $("#lookupSuplidor").lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("GetSupplierLookup", "Accounting")?consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function(data) {
+                    $('input[name=SupplierNumber]').val(data.Id);
+                    getSupplierData(data.Id);
+                },
+                tableHeader: ['Id. de proveedor', 'Nombre'],
+                hiddenFields: ['DataExtended','DataPlus']
+            });
+            $('#Quantity').val('1');
+            items = @Html.Raw(Json.Encode(Model.Details));
+            if (@Model.ExpenseType !== 0) {
+                $('select[name=ExpenseType]').val(@Model.ExpenseType);
+                $('select[name=ExpenseType]').selectpicker('refresh');
+            }
+            getItems();
+        });
+
+        window.onbeforeunload = function () { $.ajax({ url: '@Url.Action("UnblockSecuence", "Accounting", new { id = Model.DocumentNumber})' }).done(function () { }); }
+
+        function getSupplierData(id) {
+            $.ajax({
+                url: '@Url.Action("GetSupplierData", "Accounting")?vendorId=' + id,
+                type: "POST",
+                data: "",
+                cache: false,
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    if (result.status === "OK") {
+                        $('#Address').html('<strong>' + result.lookup.CustomerName + '</strong><br />' + result.lookup.CustomerAddress + '<br />' + result.lookup.City + ', ' + result.lookup.Contact + '<br /><abbr title="phone"> Tel:</abbr> ' + result.lookup.CurrencyId);
+                    } else {
+                        swal({
+                            title: "ERROR",
+                            text: result.status,
+                            type: "error"
+                        });
+                    }
+                    $('#saveButton').ladda('stop');
+                }
+            });
+        }
+
+        function agregarArticulo() {
+            var isAllValid = true;
+            if ($('#Quantity').val() === '') {
+                toastr.error('Por favor debe de especificar una cantidad para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Price').val() === '') {
+                toastr.error('Por favor debe de un precio para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#ItemDescription').val() === '') {
+                toastr.error('Por favor debe de una descripcion para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (isAllValid) {
+                items.push({
+                    SopNumber: '',
+                    LineNumber: 0,
+                    ItemNumber: $('#ItemNumber').val().trim(),
+                    ItemDescription: $('#ItemDescription').val().trim(),
+                    Quantity: 1,
+                    Price: parseFloat($('#Price').val().trim()),
+                    TaxAmount: 0,
+                    Total: parseFloat($('#Price').val().trim())
+                });
+                getItems();
+                $('#Price').val('');
+                $('#ItemDescription').val('');
+                $('select[name=ItemNumber]').val('');
+                $('select[name=ItemNumber]').selectpicker('refresh');
+                $('#modal-AddItem').modal('hide');
+            }
+        }
+
+        function getItems() {
+            var $table = $('<table class="table table-stripped" id="itemTable"/>');
+            var thead = '<thead>' +
+                '<tr>' +
+                '<th style="width:25%">Cuenta de Catalogo</th>' +
+                '<th style="width:50%">Memo</th>' +
+                '<th style="width:20%">Monto </th>' +
+                '<th style="width:5%"></th>' +
+                '</tr>' +
+                '</thead>';
+            $table.append(thead);
+            var $tbody = $('<tbody/>');
+            $.each(items,
+                function (x, item) {
+                    var $row = $('<tr/>');
+                    var $remove = $('<button class="btn btn-rounded btn-default"><i class="fa fa-remove"></i></button>');
+                    var $itemNumber = $('<input type="text" class="form-control" readonly="readonly" />');
+                    var $itemDescription = $('<input type="text" class="form-control" />');
+                    var $itemUnitPrice = $('<input type="text" class="form-control" />');
+                    $row.append($('<td/>').html($itemNumber.val(item.ItemNumber)));
+                    $row.append($('<td/>').html($itemDescription.val(item.ItemDescription)));
+                    $row.append($('<td/>').html($itemUnitPrice.val(parseFloat(item.Price).toFixed(2).replace(/./g, function (c, i, a) {
+                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                    }))));
+                    $row.append($('<td/>').html($remove));
+                    $($itemUnitPrice).focusout(function () { sumLines(); });
+                    $tbody.append($row);
+                    $remove.click(function () {
+                        deleteRow(item.ItemDescription, item.Price);
+                        getItems();
+                    });
+                });
+            $table.append($tbody);
+            $('#itemRows').html($table);
+            sumLines();
+        }
+
+        function sumLines() {
+            var price = 0;
+            $('#itemTable > tbody > tr').each(function () {
+                price += parseFloat($(this).find('td:eq(2) input').val().trim().replace(/,/g, ""));
+            });
+            $('#Total').html(parseFloat(price).toFixed(2).replace(/./g, function (c, i, a) {
+                return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+            }));
+        }
+
+        function deleteRow(description, price) {
+            swal({
+                title: "Eliminar",
+                text: "Esta seguro que desea eliminar este registro ?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Si, adelante!",
+                cancelButtonText: "No, cancelar!",
+                closeOnConfirm: true
+            }, function () {
+                for (var i = 0; i < items.length; i++) {
+                    if (items[i].ItemDescription === description && items[i].Price === price) {
+                        items.splice(i, 1);
+                        getItems();
+                        break;
+                    }
+                }
+            });
+        }
+
+        function anular() {
+            swal({
+                title: "Anular",
+                text: "Esta seguro que desea anular este registro ?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Si, adelante!",
+                cancelButtonText: "No, cancelar!",
+                closeOnConfirm: true
+            }, function () {
+                $.ajax({
+                    url: '@Url.Action("VoidInvoice", "Accounting")?documentNumber=' + '@Model.DocumentNumber',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    cache: false,
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK")
+                            window.location.href = '@Url.Action("InformalSupplierInvoiceIndex","Accounting")';
+                        else
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                    }
+                });
+            });
+        }
+
+        function saveInvoice() {
+            var isAllValid = true;
+            if ($('#DocumentDate').val() === '') {
+                toastr.error('Por favor debe de especificar una fecha de documento para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#SupplierNumber').val() === '') {
+                toastr.error('Por favor debe de especificar un proveedor para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#CurrencyId').val() === '') {
+                toastr.error('Por favor debe de especificar una moneda para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#ExpenseType').val() === '') {
+                toastr.error('Por favor debe de especificar un tipo de gastos para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (items.length == 0) {
+                toastr.error('Debe  de especificar al menos un articulo para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+            if (isAllValid) {
+                var data = {
+                    DocumentNumber: '@Model.DocumentNumber',
+                    DocumentDate: $('#DocumentDate').val(),
+                    SupplierNumber: $('#SupplierNumber').val().trim(),
+                    SupplierName: $('#SupplierNumber').val().trim(),
+                    Note: $('#Note').val().trim(),
+                    Ncf: '@Model.Ncf',
+                    NcfType: '@Model.NcfType',
+                    NcfDueDate: '@Model.NcfDueDate',
+                    CurrencyId: 'RDPESO',
+                    Subtotal: 0,
+                    TaxAmount: 0,
+                    TotalAmount: parseFloat($('#Total').html().replace(/,/g, "")),
+                    DocumentType: 13,
+                    ExpenseType: parseInt($('#ExpenseType').val()),
+                    Details: items
+                }
+                $.ajax({
+                    url: '@Url.Action("SaveInvoice", "Accounting")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    cache: false,
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK")
+                            window.location.href = '@Url.Action("MinorExpensesInvoiceIndex","Accounting")';
+                        else
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                    }
+                });
+            }
+        }
+
+        function imprimir() {
+            swal({
+                title: "Guardar",
+                text: "Desea guardar este documento ?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Si, adelante!",
+                cancelButtonText: "No, cancelar!",
+                closeOnConfirm: true
+            }, function () {
+                var isAllValid = true;
+                if ($('#DocumentDate').val() === '') {
+                    toastr.error('Por favor debe de especificar una fecha de documento para procesar', 'Campos requeridos')
+                    isAllValid = false;
+                }
+                if ($('#SupplierNumber').val() === '') {
+                    toastr.error('Por favor debe de especificar un proveedor para procesar', 'Campos requeridos')
+                    isAllValid = false;
+                }
+                if ($('#CurrencyId').val() === '') {
+                    toastr.error('Por favor debe de especificar una moneda para procesar', 'Campos requeridos')
+                    isAllValid = false;
+                }
+                if (items.length == 0) {
+                    toastr.error('Debe  de especificar al menos un articulo para procesar', 'Campos requeridos')
+                    isAllValid = false;
+                    }
+
+                if (isAllValid) {
+                    var data = {
+                        DocumentNumber: '@Model.DocumentNumber',
+                        DocumentDate: $('#DocumentDate').val(),
+                        SupplierNumber: $('#SupplierNumber').val().trim(),
+                        Note: $('#Note').val().trim(),
+                        Ncf: '@Model.Ncf',
+                        NcfType: '@Model.NcfType',
+                        NcfDueDate: '@Model.NcfDueDate',
+                        CurrencyId: $('#CurrencyId').val().trim(),
+                        Subtotal: parseFloat($('#Subtotal').html().replace(/,/g, "")),
+                        TaxAmount: parseFloat($('#TaxAmount').html().replace(/,/g, "")),
+                        TotalAmount: parseFloat($('#Total').html().replace(/,/g, "")),
+                        DocumentType: 11,
+                        Details: items
+                    }
+                    $.ajax({
+                        url: '@Url.Action("SaveInvoice", "Accounting")',
+                        type: "POST",
+                        data: JSON.stringify(data),
+                        dataType: "JSON",
+                        cache: false,
+                        contentType: "application/json",
+                        success: function (result) {
+                            if (result.status === "OK") {
+                                var url = '@Url.Content("~/PDF/Requisicion/")' + $('#PurchaseRequestId').val() + '.pdf';
+                                toastr.info('Estamos procesando su solicitud', 'Por favor espere');
+                                window.open(url);
+                            }
+                            else
+                                swal({
+                                    title: "ERROR",
+                                    text: result.status,
+                                    type: "error"
+                                });
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+}

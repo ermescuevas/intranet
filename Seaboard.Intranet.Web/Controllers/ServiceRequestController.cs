@@ -513,7 +513,7 @@ namespace Seaboard.Intranet.Web.Controllers
         [HttpPost]
         public JsonResult AttachFile(HttpPostedFileBase fileData, string requestId)
         {
-            var status = false;
+            var status = "";
 
             try
             {
@@ -532,11 +532,11 @@ namespace Seaboard.Intranet.Web.Controllers
                     Helpers.InterCompanyId, requestId, fileName,
                     "0x" + BitConverter.ToString(fileStream).Replace("-", String.Empty),
                     fileType, Account.GetAccount(User.Identity.GetUserName()).UserId, "REQ"));
-                status = true;
+                status = "OK";
             }
-            catch
+            catch(Exception ex)
             {
-                status = false;
+                status = ex.Message;
             }
 
             return new JsonResult {Data = new { status } };
@@ -553,15 +553,11 @@ namespace Seaboard.Intranet.Web.Controllers
             try
             {
                 var files = new List<string>();
-                var sqlQuery = "SELECT RTRIM(fileName) FileName FROM " + Helpers.InterCompanyId +
-                                  ".dbo.CO00105 WHERE DOCNUMBR = '" + purchaseRequestId + "' AND DELETE1 = 0";
+                var sqlQuery = "SELECT RTRIM(fileName) FileName FROM " + Helpers.InterCompanyId + ".dbo.CO00105 WHERE DOCNUMBR = '" + purchaseRequestId + "' AND DELETE1 = 0";
                 files = _repository.ExecuteQuery<string>(sqlQuery).ToList();
                 return Json(files, JsonRequestBehavior.AllowGet);
             }
-            catch
-            {
-                return Json("");
-            }
+            catch { return Json(""); }
         }
 
         public ActionResult Download(string documentId, string FileName)

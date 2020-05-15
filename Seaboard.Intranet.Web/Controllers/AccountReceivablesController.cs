@@ -531,9 +531,7 @@ namespace Seaboard.Intranet.Web.Controllers
                 Request.Cookies["UserAccount"]?["password"]);
 
             var bachComment = _repository.ExecuteScalarQuery<string>(
-                string.Format(
-                    "SELECT BACHCMNT FROM " + Helpers.InterCompanyId +
-                    ".dbo.SESOP30302 WHERE BACHNMBR = '{0}'", records.FirstOrDefault()?.Id));
+                string.Format("SELECT BACHCMNT FROM " + Helpers.InterCompanyId +".dbo.SESOP30302 WHERE BACHNMBR = '{0}'", records.FirstOrDefault()?.Id));
 
             _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.SY00500 SET BCHCOMNT = '" +
                                        bachComment + "' WHERE BACHNUMB = '" + records.FirstOrDefault()?.Id +
@@ -542,8 +540,7 @@ namespace Seaboard.Intranet.Web.Controllers
 
         private void UpdateDataTransaction(string batchId, string customerId)
         {
-            var aHeader =
-                _repository.ExecuteScalarQuery<Lookup>(
+            var aHeader = _repository.ExecuteScalarQuery<Lookup>(
                     string.Format(
                         "SELECT VENDORGP Id, DOCNUMBE Descripción, CONVERT(NVARCHAR(10), DOCDATE) DataExtended FROM " +
                         Helpers.InterCompanyId + ".dbo.SESOP30301 WHERE BACHNMBR = '{0}' AND VENDORID = '{1}'", batchId,
@@ -1379,6 +1376,105 @@ namespace Seaboard.Intranet.Web.Controllers
             return new JsonResult { Data = new { status = xStatus } };
         }
 
+        public ActionResult InterestSummaryReport()
+        {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "AccountReceivables", "InterestSummaryReport"))
+                return RedirectToAction("NotPermission", "Home");
+            return View();
+        }
+
+        [OutputCache(Duration = 0)]
+        [HttpPost]
+        public ActionResult InterestSummaryReport(int marketType, string period, int printOption)
+        {
+            string xStatus;
+            try
+            {
+                xStatus = "OK";
+                var reportName = "InterestSummaryReport";
+                if (printOption == 10)
+                    reportName += ".pdf";
+                else
+                    reportName += ".xls";
+
+                ReportHelper.Export(Helpers.ReportPath + "Reportes", Server.MapPath("~/PDF/Reportes/") + reportName,
+                    string.Format("INTRANET.dbo.InterestSummaryReport '{0}','{1}','{2}'", Helpers.InterCompanyId, marketType, period), 40, ref xStatus, printOption == 10 ? 0 : 1);
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = xStatus } };
+        }
+
+        public ActionResult EstimatedInterestReport()
+        {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "AccountReceivables", "EstimatedInterestReport"))
+                return RedirectToAction("NotPermission", "Home");
+            return View();
+        }
+
+        [OutputCache(Duration = 0)]
+        [HttpPost]
+        public ActionResult EstimatedInterestReport(int marketType, string billingMonth, int printOption, int estimated)
+        {
+            string xStatus;
+            try
+            {
+                xStatus = "OK";
+                var reportName = "InterestSummaryReport";
+                if (printOption == 10)
+                    reportName += ".pdf";
+                else
+                    reportName += ".xls";
+
+                ReportHelper.Export(Helpers.ReportPath + "Reportes", Server.MapPath("~/PDF/Reportes/") + reportName,
+                    string.Format("INTRANET.dbo.EstimatedInterestReport '{0}','{1}','{2}','{3}'", Helpers.InterCompanyId, marketType, DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null).ToString("yyyyMMdd"), estimated),
+                    42, ref xStatus, printOption == 10 ? 0 : 1);
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = xStatus } };
+        }
+
+        public ActionResult AccountReceivablesReport()
+        {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "AccountReceivables", "AccountReceivablesReport"))
+                return RedirectToAction("NotPermission", "Home");
+            return View();
+        }
+
+        [OutputCache(Duration = 0)]
+        [HttpPost]
+        public ActionResult AccountReceivablesReport(string date, decimal exchangeRate, int printOption)
+        {
+            string xStatus;
+            try
+            {
+                xStatus = "OK";
+                var reportName = "AccountReceivablesReport";
+                if (printOption == 10)
+                    reportName += ".pdf";
+                else
+                    reportName += ".xls";
+
+                ReportHelper.Export(Helpers.ReportPath + "Reportes", Server.MapPath("~/PDF/Reportes/") + reportName,
+                    string.Format("INTRANET.dbo.AccountReceivablesReport '{0}','{1}','{2}','{3}'", Helpers.InterCompanyId, date, 1, exchangeRate.ToString(new CultureInfo("en-US"))),
+                    43, ref xStatus, printOption == 10 ? 0 : 1,
+                    string.Format("INTRANET.dbo.AccountReceivablesReport '{0}','{1}','{2}','{3}'", Helpers.InterCompanyId, date, 2, exchangeRate.ToString(new CultureInfo("en-US"))));
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = xStatus } };
+        }
+
         #endregion
 
         #region Attachments
@@ -1913,6 +2009,30 @@ namespace Seaboard.Intranet.Web.Controllers
         }
 
         [HttpPost]
+        public JsonResult VoidInterestTransaction(string batchNumber)
+        {
+            string xStatus;
+            try
+            {
+                var count = _repository.ExecuteScalarQuery<int>($"SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.EFSOP20500 WHERE BatchNumber = '{batchNumber}'");
+                if (count > 0)
+                    xStatus = "No se puede anular el lote ya que este lote esta abierto o contabilizado en el modulo de pre-facturacion";
+                else
+                {
+                    _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EFRM10100 SET Posted = 0 WHERE BatchNumber = '{batchNumber}'");
+                    xStatus = "OK";
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
         public JsonResult UpdateInterestTransactionInvoiceExclusion(string batchNumber, string customerId, string documentNumber, bool exclude)
         {
             string xStatus;
@@ -2012,71 +2132,6 @@ namespace Seaboard.Intranet.Web.Controllers
             }
 
             return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
-        }
-
-        public ActionResult InterestSummaryReport()
-        {
-            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "AccountReceivables", "InterestSummaryReport"))
-                return RedirectToAction("NotPermission", "Home");
-            return View();
-        }
-
-        [OutputCache(Duration = 0)]
-        [HttpPost]
-        public ActionResult InterestSummaryReport(int marketType, string period, int printOption)
-        {
-            string xStatus;
-            try
-            {
-                xStatus = "OK";
-                var reportName = "InterestSummaryReport";
-                if (printOption == 10)
-                    reportName += ".pdf";
-                else
-                    reportName += ".xls";
-
-                ReportHelper.Export(Helpers.ReportPath + "Reportes", Server.MapPath("~/PDF/Reportes/") + reportName,
-                    string.Format("INTRANET.dbo.InterestSummaryReport '{0}','{1}','{2}'", Helpers.InterCompanyId, marketType, period), 40, ref xStatus, printOption == 10 ? 0 : 1);
-            }
-            catch (Exception ex)
-            {
-                xStatus = ex.Message;
-            }
-
-            return new JsonResult { Data = new { status = xStatus } };
-        }
-
-        public ActionResult EstimatedInterestReport()
-        {
-            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "AccountReceivables", "EstimatedInterestReport"))
-                return RedirectToAction("NotPermission", "Home");
-            return View();
-        }
-
-        [OutputCache(Duration = 0)]
-        [HttpPost]
-        public ActionResult EstimatedInterestReport(int marketType, string billingMonth, int printOption, int estimated)
-        {
-            string xStatus;
-            try
-            {
-                xStatus = "OK";
-                var reportName = "InterestSummaryReport";
-                if (printOption == 10)
-                    reportName += ".pdf";
-                else
-                    reportName += ".xls";
-
-                ReportHelper.Export(Helpers.ReportPath + "Reportes", Server.MapPath("~/PDF/Reportes/") + reportName,
-                    string.Format("INTRANET.dbo.EstimatedInterestReport '{0}','{1}','{2}','{3}'", Helpers.InterCompanyId, marketType, DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null).ToString("yyyyMMdd"), estimated), 
-                    42, ref xStatus, printOption == 10 ? 0 : 1);
-            }
-            catch (Exception ex)
-            {
-                xStatus = ex.Message;
-            }
-
-            return new JsonResult { Data = new { status = xStatus } };
         }
 
         #endregion

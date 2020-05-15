@@ -332,6 +332,11 @@
         function procesarSolicitud() {
             var isAllValid = true;
 
+            if ($('#RequestId').val().trim() == '') {
+                toastr.error('No se ha asignado un numero de solicitud debera de hacerla de nuevo', 'Campos requeridos')
+                isAllValid = false;
+            }
+
             if ($('#Description').val().trim() == '') {
                 toastr.error('Debe de especificar una descripción', 'Campos requeridos')
                 isAllValid = false;

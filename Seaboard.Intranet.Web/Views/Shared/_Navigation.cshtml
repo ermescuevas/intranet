@@ -202,7 +202,8 @@
                     @Html.IsSelected(controller: "AccountReceivables", action: "InterestSummaryReport", cssClass: "in")
                     @Html.IsSelected(controller: "AccountReceivables", action: "HolidayConfiguration", cssClass: "in")
                     @Html.IsSelected(controller: "AccountReceivables", action: "DocumentEdit", cssClass: "in")
-                    @Html.IsSelected(controller: "AccountReceivables", action: "EstimatedInterestReport", cssClass: "in")" aria-expanded="false" style="height: 0px;">
+                    @Html.IsSelected(controller: "AccountReceivables", action: "EstimatedInterestReport", cssClass: "in")
+                    @Html.IsSelected(controller: "AccountReceivables", action: "AccountReceivablesReport", cssClass: "in")" aria-expanded="false" style="height: 0px;">
                     <li class="
                     @Html.IsSelected(controller: "AccountReceivables", action: "TransIndex")
                     @Html.IsSelected(controller: "AccountReceivables", action: "TransCreateIndex")
@@ -286,19 +287,22 @@
                     @Html.IsSelected(controller: "AccountReceivables", action: "RelationInvoicePaymentReport")
                     @Html.IsSelected(controller: "AccountReceivables", action: "TransAnalysisReport")
                     @Html.IsSelected(controller: "AccountReceivables", action: "InterestSummaryReport", cssClass: "in")
-                    @Html.IsSelected(controller: "AccountReceivables", action: "EstimatedInterestReport", cssClass: "in")">
+                    @Html.IsSelected(controller: "AccountReceivables", action: "EstimatedInterestReport", cssClass: "in")
+                    @Html.IsSelected(controller: "AccountReceivables", action: "AccountReceivablesReport", cssClass: "in")">
                         <a href="#"><i class="fa fa-files-o"></i> <span class="nav-label" data-i18n="nav.dashboard">Reportes</span> <span class="fa arrow"></span></a>
                         <ul class="nav nav-third-level collapse
                         @Html.IsSelected(controller: "AccountReceivables", action: "AgingReport", cssClass: "in")
                         @Html.IsSelected(controller: "AccountReceivables", action: "RelationInvoicePaymentReport", cssClass: "in")
                         @Html.IsSelected(controller: "AccountReceivables", action: "TransAnalysisReport", cssClass: "in")
                         @Html.IsSelected(controller: "AccountReceivables", action: "InterestSummaryReport", cssClass: "in")
-                        @Html.IsSelected(controller: "AccountReceivables", action: "EstimatedInterestReport", cssClass: "in")">
+                        @Html.IsSelected(controller: "AccountReceivables", action: "EstimatedInterestReport", cssClass: "in")
+                        @Html.IsSelected(controller: "AccountReceivables", action: "AccountReceivablesReport", cssClass: "in")">
                             <li class="@Html.IsSelected(action: "AgingReport")"><a href="@Url.Action("AgingReport", "AccountReceivables")">Saldo de antiguedad</a></li>
                             <li class="@Html.IsSelected(action: "RelationInvoicePaymentReport")"><a href="@Url.Action("RelationInvoicePaymentReport", "AccountReceivables")">Relacion Factura vs Pago</a></li>
                             <li class="@Html.IsSelected(action: "TransAnalysisReport")"><a href="@Url.Action("TransAnalysisReport", "AccountReceivables")">Resumen de analisis transacciones MEM</a></li>
                             <li class="@Html.IsSelected(action: "InterestSummaryReport")"><a href="@Url.Action("InterestSummaryReport", "AccountReceivables")">Resumen intereses acumulados</a></li>
                             <li class="@Html.IsSelected(action: "EstimatedInterestReport")"><a href="@Url.Action("EstimatedInterestReport", "AccountReceivables")">Intereses estimados y acumulados mensual</a></li>
+                            <li class="@Html.IsSelected(action: "AccountReceivablesReport")"><a href="@Url.Action("AccountReceivablesReport", "AccountReceivables")">Reporte de CXC</a></li>
                         </ul>
                     </li>
                     <li class="

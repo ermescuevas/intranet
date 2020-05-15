@@ -909,6 +909,25 @@ namespace Seaboard.Intranet.Web.Controllers
             return new JsonResult { Data = new { status, model = overtime } };
         }
 
+        public JsonResult GetOvertimeValid(string employeeId, string startDate, string endDate)
+        {
+            int count = 0;
+            string status;
+            try
+            {
+                var sqlQuery = $"SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.EFUPR30200 " +
+                $"WHERE CONVERT(DATE, StartDate) = '{startDate}' AND CONVERT(DATE, EndDate) = '{endDate}' AND EmployeeId = '{employeeId}' ";
+                count = _repository.ExecuteScalarQuery<int>(sqlQuery);
+                status = "OK";
+            }
+            catch (Exception ex)
+            {
+                status = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status, count } };
+        }
+
         [HttpPost]
         public JsonResult SaveOvertime(string employeeId, string startDate, string endDate, int overtimeType, string note, string startTime, string endTime, int rowId, int module, decimal hours = 0)
         {
@@ -1067,7 +1086,7 @@ namespace Seaboard.Intranet.Web.Controllers
                         Helpers.InterCompanyId, "Overtime" + newRowId, fileName, "0x" + BitConverter.ToString(fileStream).Replace("-", String.Empty),
                         fileType, Account.GetAccount(User.Identity.GetUserName()).UserId, "REQ"));
                 }
-                ProcessLogic.SendToSharepoint(newRowId.ToString(), 8, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
+                //ProcessLogic.SendToSharepoint(newRowId.ToString(), 8, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
             }
             catch (Exception ex)
             {

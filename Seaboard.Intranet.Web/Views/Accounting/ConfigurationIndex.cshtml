@@ -1,0 +1,212 @@
+﻿@using Microsoft.AspNet.Identity;
+@model Seaboard.Intranet.Domain.Models.AccountingConfiguration
+@{
+    Layout = "~/Views/Shared/_AccountingLayout.cshtml";
+    ViewBag.Title = "Configuración modulo de contabilidad";
+}
+
+<style>
+    .bootstrap-select:not([class*=col-]):not([class*=form-control]):not(.input-group-btn) {
+        width: 100%;
+    }
+</style>
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Configuración modulo de contabilidad</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Configuración modulo de contabilidad</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight ecommerce">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h3>Configuración modulo de contabilidad</h3>
+                </div>
+                <div class="ibox-content">
+                    <div class="form-group">
+                        <div class="col-sm-12 col-sm-offset-1">
+                            <button class="btn btn-primary" type="button" onclick="saveConfiguration();"><i class="fa fa-save"></i> Guardar</button>
+                        </div>
+                    </div>
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="tabs-container">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a data-toggle="tab" href="#tab-1"> General</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div id="tab-1" class="tab-pane active">
+                        <div class="panel-body">
+                            <fieldset class="form-horizontal">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="col-sm-6 control-label">Clase proveedor por defecto:</label>
+                                            <div class="col-sm-5 input-group">
+                                                @Html.TextBoxFor(m => m.VendorClassId, new { @class = "form-control" })
+                                                <span class="input-group-btn">
+                                                    <button id="lookupClase" type="button" class="btn btn-primary">
+                                                        <i class="fa fa-search"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-6 control-label">Secuencia factura prefijo:</label>
+                                            <div class="col-sm-5 input-group">
+                                                @Html.TextBoxFor(m => m.PrefixInvoiceNumber, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-6 control-label">Secuencia factura sig. num.:</label>
+                                            <div class="col-sm-5 input-group">
+                                                @Html.TextBoxFor(m => m.InvoiceNextNumber, new { @class = "touchspin3" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label class="col-sm-6 control-label">RNC Contribuyente:</label>
+                                            <div class="col-sm-5 input-group">
+                                                @Html.TextBoxFor(m => m.TaxRegistrationNumber, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-6 control-label">Secuencia factura longitud:</label>
+                                            <div class="col-sm-5 input-group">
+                                                @Html.TextBoxFor(model => model.InvoiceNumberLength, new { @class = "touchspin3" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Styles {
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/summernoteStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/plugins/touchSpinStyles")
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/css/bootstrap-select.min.css">
+}
+
+@section Scripts {
+
+    @Scripts.Render("~/plugins/summernote")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/touchSpin")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/bootstrap-select.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/i18n/defaults-en_US.js"></script>
+
+    <script type="text/javascript">
+        var products;
+        var customers;
+        $(document).ready(function () {
+            $(".touchspin3").TouchSpin({
+                verticalbuttons: true,
+                buttondown_class: 'btn btn-white',
+                buttonup_class: 'btn btn-white'
+            });
+            $('select').selectpicker();
+            $('#lookupClase').lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookup", "Home")?tipo=47&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function (data) {
+                    $('input[name=VendorClassId]').val(data.Id);
+                },
+                tableHeader: ['Id. de clase', 'Descripción'],
+                hiddenFields: ['DataExtended','DataPlus']
+            });
+        });
+
+        function saveConfiguration() {
+            var isAllValid = true;
+            if ($('#VendorClassId').val() === '') {
+                toastr.error('Por favor debe de especificar una clase de proveedor por defecto', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#PrefixInvoiceNumber').val() === '') {
+                toastr.error('Por favor debe de especificar un prefijo de secuencia de factura', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#InvoiceNextNumber').val() === '') {
+                toastr.error('Por favor debe de especificar un siguiente numero de factura', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#InvoiceNumberLength').val() === '') {
+                toastr.error('Por favor debe de especificar una longitud secuencia de factura', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#TaxRegistrationNumber').val() === '') {
+                toastr.error('Por favor debe de especificar RNC de contribuyente', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (isAllValid) {
+                var data = {
+                    VendorClassId: $('#VendorClassId').val().trim(),
+                    PrefixInvoiceNumber: $('#PrefixInvoiceNumber').val().trim(),
+                    InvoiceNextNumber: $('#InvoiceNextNumber').val().trim(),
+                    TaxRegistrationNumber: $('#TaxRegistrationNumber').val().trim(),
+                    InvoiceNumberLength: $('#InvoiceNumberLength').val().trim()
+                }
+                $.ajax({
+                    url: '@Url.Action("SaveConfiguration", "Accounting")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            toastr.success('Registro guardado correctamente', 'Campos requeridos')
+                        }
+                        else {
+                            alert(result.status);
+                        }
+                    }
+                });
+            }
+        }
+
+    </script>
+}

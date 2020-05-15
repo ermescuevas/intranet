@@ -1153,7 +1153,8 @@ namespace Seaboard.Intranet.Web.Controllers
                 {
                     sqlQuery = $"SELECT DISTINCT RTRIM(A.DOCNUMBR) DocumentNumber, CONVERT(NUMERIC(32,2), (A.ORORGTRX - ISNULL(C.DocumentApply, 0)) - ISNULL(D.ApplyAmount, 0)) CurrentAmount, " +
                        $"CONVERT(nvarchar(20), CONVERT(DATE, A.DOCDATE, 112)) DocumentDate, CONVERT(nvarchar(20), CONVERT(DATE, B.DUEDATE, 112)) DueDate, " +
-                       $"CONVERT(NUMERIC(32,2), ISNULL(D.ApplyAmount, 0)) AppliedAmount, ISNULL(E.USRDEF05, '') Ncf, RTRIM(A.CURNCYID) CurrencyId,1DocumentType " +
+                       $"CONVERT(NUMERIC(32,2), ISNULL(D.ApplyAmount, 0)) AppliedAmount, ISNULL(E.USRDEF05, '') Ncf, RTRIM(A.CURNCYID) CurrencyId,1DocumentType, " +
+                       $"CASE (SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.Seabo_SOP_Line_Items AA WHERE AA.SOP_Number = A.DOCNUMBR AND F.Item_Number IN ('INTERESES')) WHEN 0 THEN 'ENERGIA' ELSE 'INTERESES' END Module " +
                        $"FROM {Helpers.InterCompanyId}.dbo.MC020102 A " +
                        $"INNER JOIN {Helpers.InterCompanyId}.dbo.SOP30200 B ON A.DOCNUMBR = B.SOPNUMBE " +
                        $"LEFT JOIN {Helpers.InterCompanyId}.dbo.EFRM30200 C ON A.DOCNUMBR = C.SopNumber " +
@@ -1174,7 +1175,8 @@ namespace Seaboard.Intranet.Web.Controllers
 
                     sqlQuery += $"SELECT DISTINCT RTRIM(A.DOCNUMBR) DocumentNumber, CONVERT(NUMERIC(32,2), (A.ORORGTRX - ISNULL(C.DocumentApply, 0)) - ISNULL(D.ApplyAmount, 0)) CurrentAmount, " +
                         $"CONVERT(nvarchar(20), CONVERT(DATE, A.DOCDATE, 112)) DocumentDate, CONVERT(nvarchar(20), CONVERT(DATE, B.DUEDATE, 112)) DueDate, " +
-                        $"CONVERT(NUMERIC(32,2), ISNULL(D.ApplyAmount, 0)) AppliedAmount, ISNULL(E.USRDEF05, '') Ncf, RTRIM(A.CURNCYID) CurrencyId, 0 DocumentType " +
+                        $"CONVERT(NUMERIC(32,2), ISNULL(D.ApplyAmount, 0)) AppliedAmount, ISNULL(E.USRDEF05, '') Ncf, RTRIM(A.CURNCYID) CurrencyId, 0 DocumentType, " +
+                        $"CASE (SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.Seabo_SOP_Line_Items AA WHERE AA.SOP_Number = A.DOCNUMBR AND F.Item_Number IN ('INTERESES')) WHEN 0 THEN 'ENERGIA' ELSE 'INTERESES' END Module " +
                         $"FROM {Helpers.InterCompanyId}.dbo.MC020102 A " +
                         $"INNER JOIN {Helpers.InterCompanyId}.dbo.SOP30200 B ON A.DOCNUMBR = B.SOPNUMBE " +
                         $"LEFT JOIN {Helpers.InterCompanyId}.dbo.EFRM30200 C ON A.DOCNUMBR = C.SopNumber " +
@@ -1195,7 +1197,8 @@ namespace Seaboard.Intranet.Web.Controllers
                 {
                     sqlQuery = $"SELECT DISTINCT RTRIM(A.DOCNUMBR) DocumentNumber, CONVERT(NUMERIC(32,2), (A.ORTRXAMT - ISNULL(C.DocumentApply, 0)) - ISNULL(D.ApplyAmount, 0)) CurrentAmount, " +
                        $"CONVERT(nvarchar(20), CONVERT(DATE, A.DOCDATE, 112)) DocumentDate, CONVERT(nvarchar(20), CONVERT(DATE, B.DUEDATE, 112)) DueDate, " +
-                       $"CONVERT(NUMERIC(32,2), ISNULL(D.ApplyAmount, 0)) AppliedAmount, ISNULL(E.USRDEF05, '') Ncf, RTRIM(A.CURNCYID) CurrencyId, 1 DocumentType " +
+                       $"CONVERT(NUMERIC(32,2), ISNULL(D.ApplyAmount, 0)) AppliedAmount, ISNULL(E.USRDEF05, '') Ncf, RTRIM(A.CURNCYID) CurrencyId, 1 DocumentType, " +
+                       $"CASE (SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.Seabo_SOP_Line_Items AA WHERE AA.SOP_Number = A.DOCNUMBR AND F.Item_Number IN ('INTERESES')) WHEN 0 THEN 'ENERGIA' ELSE 'INTERESES' END Module " +
                        $"FROM {Helpers.InterCompanyId}.dbo.RM20101 A " +
                        $"INNER JOIN {Helpers.InterCompanyId}.dbo.SOP30200 B ON A.DOCNUMBR = B.SOPNUMBE " +
                        $"LEFT JOIN {Helpers.InterCompanyId}.dbo.EFRM30200 C ON A.DOCNUMBR = C.SopNumber " +
@@ -1216,7 +1219,8 @@ namespace Seaboard.Intranet.Web.Controllers
 
                     sqlQuery += $"SELECT DISTINCT RTRIM(A.DOCNUMBR) DocumentNumber, CONVERT(NUMERIC(32,2), (A.ORTRXAMT - ISNULL(C.DocumentApply, 0)) - ISNULL(D.ApplyAmount, 0)) CurrentAmount, " +
                        $"CONVERT(nvarchar(20), CONVERT(DATE, A.DOCDATE, 112)) DocumentDate, CONVERT(nvarchar(20), CONVERT(DATE, B.DUEDATE, 112)) DueDate, " +
-                       $"CONVERT(NUMERIC(32,2), ISNULL(D.ApplyAmount, 0)) AppliedAmount, ISNULL(E.USRDEF05, '') Ncf, RTRIM(A.CURNCYID) CurrencyId, 0 DocumentType " +
+                       $"CONVERT(NUMERIC(32,2), ISNULL(D.ApplyAmount, 0)) AppliedAmount, ISNULL(E.USRDEF05, '') Ncf, RTRIM(A.CURNCYID) CurrencyId, 0 DocumentType, " +
+                       $"CASE (SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.Seabo_SOP_Line_Items AA WHERE AA.SOP_Number = A.DOCNUMBR AND F.Item_Number IN ('INTERESES')) WHEN 0 THEN 'ENERGIA' ELSE 'INTERESES' END Module " +
                        $"FROM {Helpers.InterCompanyId}.dbo.RM20101 A " +
                        $"INNER JOIN {Helpers.InterCompanyId}.dbo.SOP30200 B ON A.DOCNUMBR = B.SOPNUMBE " +
                        $"LEFT JOIN {Helpers.InterCompanyId}.dbo.EFRM30200 C ON A.DOCNUMBR = C.SopNumber " +

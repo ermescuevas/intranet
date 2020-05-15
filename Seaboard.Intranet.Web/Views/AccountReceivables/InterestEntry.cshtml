@@ -72,6 +72,10 @@
                                 <button class="btn btn-success" type="button" onclick="calcular();"><i class="fa fa-calculator"></i> Calcular</button>
                                 <button class="btn btn-warning" type="button" onclick="eliminar();"><i class="fa fa-remove"></i> Eliminar</button>
                             }
+                            else
+	                        {
+                                <button class="btn btn-warning" type="button" onclick="anular();"><i class="fa fa-remove"></i> Anular</button>
+	                        }
                             <button class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-Print" id="btn-print"><i class="fa fa-print"></i> Imprimir</button>
                         </div>
                     </div>
@@ -238,7 +242,7 @@
         <div class="col-lg-3">
             <div class="ibox">
                 <div class="ibox-title">
-                    <h5>Solicitudes</h5>
+                    <h5>Clientes</h5>
                     <div class="ibox-tools">
                         <a class="collapse-link">
                             <i class="fa fa-chevron-up"></i>
@@ -1033,6 +1037,39 @@
             }, function () {
                 $.ajax({
                     url: '@Url.Action("DeleteInterestTransaction", "AccountReceivables")?batchNumber=' + $('#BatchNumber').val(),
+                    type: "POST",
+                    data: "",
+                    cache: false,
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            window.location.href = '@Url.Action("InterestIndex", "AccountReceivables")?type=' + @preliminar;
+                        } else {
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+                    }
+                });
+            });
+        }
+
+        function anular() {
+            swal({
+                title: "Anular",
+                text: "Esta seguro que desea anular este lote ?, esta accion pondra a este lote disponible para volver a trabajarlo",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Si, proceder!",
+                cancelButtonText: "No, cancelar!",
+                closeOnConfirm: false
+            }, function () {
+                $.ajax({
+                    url: '@Url.Action("VoidInterestTransaction", "AccountReceivables")?batchNumber=' + $('#BatchNumber').val(),
                     type: "POST",
                     data: "",
                     cache: false,

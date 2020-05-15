@@ -559,8 +559,7 @@ namespace Seaboard.Intranet.Web.Controllers
 
         public JsonResult UnblockSecuence(string secuencia, string formulario, string usuario)
         {
-            HelperLogic.DesbloqueoSecuencia(secuencia, "LLIF10100",
-                Account.GetAccount(User.Identity.GetUserName()).UserId);
+            HelperLogic.DesbloqueoSecuencia(secuencia, "LLIF10100",Account.GetAccount(User.Identity.GetUserName()).UserId);
             return Json("");
         }
 

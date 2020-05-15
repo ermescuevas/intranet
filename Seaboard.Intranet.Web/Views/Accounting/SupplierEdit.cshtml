@@ -1,0 +1,439 @@
+﻿@model Seaboard.Intranet.Domain.Models.Supplier
+
+@{
+    Layout = "~/Views/Shared/_AccountingLayout.cshtml";
+    ViewBag.Title = "Proveedor";
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Proveedor</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li>
+                <a href="@Url.Action("SupplierIndex", "Accounting")">Listado de proveedores</a>
+            </li>
+            <li class="active">
+                <strong>Proveedor</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight ecommerce">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h3>Proveedor</h3>
+                </div>
+
+                <div class="ibox-content">
+                    <div class="form-group">
+                        <div class="col-sm-12 col-sm-offset-1">
+                            <button class="ladda-button btn btn-primary" data-style="expand-left" type="button" id="saveButton" onclick="procesarSolicitud();"><i class="fa fa-save"></i> Guardar</button>
+                            <button class="ladda-button btn btn-danger" data-style="expand-rigth" type="button" id="deleteButton" onclick="eliminar();"><i class="fa fa-remove"></i> Eliminar</button>
+                            <br />
+                        </div>
+                    </div>
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="tabs-container">
+            <ul class="nav nav-tabs">
+                <li class="active">
+                    <a data-toggle="tab" href="#tab-1"> Datos Basicos</a>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <div id="tab-1" class="tab-pane active">
+                    <div class="panel-body">
+                        <fieldset class="form-horizontal">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Id. de Proveedor:</label>
+                                        <div class="col-sm-4 input-group">
+                                            @Html.TextBoxFor(m => m.SupplierId, new { @class = "form-control limitChar", @maxlength = "15" })
+                                            @Html.ValidationMessageFor(model => model.SupplierId, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">RNC o Cedula:</label>
+                                        <div class="col-sm-4 input-group">
+                                            @Html.TextBoxFor(m => m.RNC, new { @class = "form-control", @maxlength = "11" })
+                                            @Html.ValidationMessageFor(model => model.RNC, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Nombre:</label>
+                                        <div class="col-sm-8 input-group">
+                                            @Html.TextBoxFor(m => m.SupplierName, new { @class = "form-control", @maxlength = "65" })
+                                            @Html.ValidationMessageFor(model => model.SupplierName, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Nombre corto:</label>
+                                        <div class="col-sm-4 input-group">
+                                            @Html.TextBoxFor(m => m.ShortName, new { @class = "form-control", @maxlength = "15" })
+                                            @Html.ValidationMessageFor(model => model.ShortName, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Email::</label>
+                                        <div class="col-sm-8 input-group">
+                                            @Html.TextBoxFor(model => model.Email, new { @class = "form-control", @maxlength = "50" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Condición de pago:</label>
+                                        <div class="col-sm-8 input-group">
+                                            @Html.TextBoxFor(model => model.PaymentCondition, new { @class = "form-control limitChar", @readonly = "" })
+                                            <span class="input-group-btn">
+                                                <button id="lookupCondicionPago" type="button" class="btn btn-primary">
+                                                    <i class="fa fa-search"></i>
+                                                </button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Contacto:</label>
+                                        <div class="col-sm-8 input-group">
+                                            @Html.TextBoxFor(m => m.Contact, new { @class = "form-control limitChar", @maxlength = "61" })
+                                            @Html.ValidationMessageFor(model => model.Contact, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-5">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Dirección:</label>
+                                        <div class="col-sm-8 input-group">
+                                            @Html.TextBoxFor(m => m.Address1, new { @class = "form-control", @maxlength = "61" })
+                                        </div>
+                                        <label class="col-sm-4 control-label">&nbsp;</label>
+                                        <div class="col-sm-8 input-group">
+                                            @Html.TextBoxFor(m => m.Address2, new { @class = "form-control", @maxlength = "61" })
+                                        </div>
+                                        <label class="col-sm-4 control-label">&nbsp;</label>
+                                        <div class="col-sm-8 input-group">
+                                            @Html.TextBoxFor(m => m.Address3, new { @class = "form-control", @maxlength = "61" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="hidden" name="CountryCode" id="CountryCode" value="01" />
+                                        <a class="col-sm-4 control-label" href="@Url.Action("Country","Billing")" target="_blank">País:</a>
+                                        <div class="col-sm-8 input-group">
+                                            @Html.TextBoxFor(model => model.Country, new { @class = "form-control", @readonly = "" })
+                                            <span class="input-group-btn">
+                                                <button id="lookupPaís" type="button" class="btn btn-primary">
+                                                    <i class="fa fa-search"></i>
+                                                </button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="hidden" name="StateCode" id="StateCode" />
+                                        <a class="col-sm-4 control-label" href="@Url.Action("State","Billing")" target="_blank">Provincia:</a>
+                                        <div class="col-sm-8 input-group">
+                                            @Html.TextBoxFor(model => model.State, new { @class = "form-control", @readonly = "" })
+                                            <span class="input-group-btn">
+                                                <button id="lookupProvincia" type="button" onclick="getProvincia();" class="btn btn-primary">
+                                                    <i class="fa fa-search"></i>
+                                                </button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="hidden" name="CityCode" id="CityCode" />
+                                        <a class="col-sm-4 control-label" href="@Url.Action("City","Billing")" target="_blank">Ciudad:</a>
+                                        <div class="col-sm-8 input-group">
+                                            @Html.TextBoxFor(model => model.City, new { @class = "form-control", @readonly = "" })
+                                            <span class="input-group-btn">
+                                                <button id="lookupCiudad" type="button" onclick="getCiudad();" class="btn btn-primary">
+                                                    <i class="fa fa-search"></i>
+                                                </button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Teléfono 1:</label>
+                                        <div class="col-sm-8 input-group">
+                                            @Html.TextBoxFor(model => model.Phone1, new { @class = "form-control", @maxlength = "21", @data_mask = "(999)999-9999" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Teléfono 2:</label>
+                                        <div class="col-sm-8 input-group">
+                                            @Html.TextBoxFor(model => model.Phone2, new { @class = "form-control", @maxlength = "21", @data_mask = "(999)999-9999" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Fax:</label>
+                                        <div class="col-sm-8 input-group">
+                                            @Html.TextBoxFor(model => model.Fax, new { @class = "form-control", @maxlength = "21", @data_mask = "(999)999-9999" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Styles {
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/plugins/laddaStyles")
+    @Styles.Render("~/plugins/sweetAlertStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+    @Scripts.Render("~/plugins/ladda")
+    @Scripts.Render("~/plugins/sweetAlert")
+
+    <script>
+        $(document).ready(function () {
+            $('#SupplierId').EnsureMaxLength({
+                limit: 15,
+                cssClass: '',
+                separator: '/',
+                placement: null
+            });
+            $('#RNC').EnsureMaxLength({
+                limit: 11,
+                cssClass: '',
+                separator: '/',
+                placement: null
+            });
+            $('#SupplierName').EnsureMaxLength({
+                limit: 65,
+                cssClass: '',
+                separator: '/',
+                placement: null
+            });
+            $('#ShortName').EnsureMaxLength({
+                limit: 15,
+                cssClass: '',
+                separator: '/',
+                placement: null
+            });
+            $('#Contact').EnsureMaxLength({
+                limit: 61,
+                cssClass: '',
+                separator: '/',
+                placement: null
+            });
+            $('#Address1').EnsureMaxLength({
+                limit: 61,
+                cssClass: '',
+                separator: '/',
+                placement: null
+            });
+            $('#Address2').EnsureMaxLength({
+                limit: 61,
+                cssClass: '',
+                separator: '/',
+                placement: null
+            });
+            $('#Address3').EnsureMaxLength({
+                limit: 61,
+                cssClass: '',
+                separator: '/',
+                placement: null
+            });
+            $('#Phone1').EnsureMaxLength({
+                limit: 21,
+                cssClass: '',
+                separator: '/',
+                placement: null
+            });
+            $('#Phone2').EnsureMaxLength({
+                limit: 21,
+                cssClass: '',
+                separator: '/',
+                placement: null
+            });
+            $('#Fax').EnsureMaxLength({
+                limit: 21,
+                cssClass: '',
+                separator: '/',
+                placement: null
+            });
+            @Html.Partial("_Scripts")
+            $('#RNC').focusout(function () {
+                if ($('#RNC').val().trim().length > 0) {
+                    if ($('#RNC').val().trim().length != 9 && $('#RNC').val().trim().length != 11) {
+                        toastr.error("El RNC debe ser de longitud de 9 o 11 caracteres")
+                        $('#RNC').val("");
+                        $('#RNC').focus();
+                    }
+                }
+            });
+
+            $('#lookupPaís').lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookup", "Home")?tipo=38&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function (data) {
+                    $('input[name=Country]').val(data.Descripción);
+                    $('input[name=CountryCode]').val(data.Id);
+                },
+                tableHeader: ['Id. de país', 'Descripción'],
+                hiddenFields: ['DataExtended']
+            });
+
+            $('.ladda-button').ladda();
+        });
+
+        function getProvincia() {
+            if ($('#CountryCode').val().trim().length > 0) {
+                $('#lookupProvincia').lookupbox({
+                    title: 'Busqueda:',
+                    url: '@Url.Action("ListLookup", "Home")?tipo=39&consultaExtra=' + $('#CountryCode').val().trim() + '&consulta=',
+                    imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                    width: 800,
+                    height: 1000,
+                    onItemSelected: function (data) {
+                        $('input[name=StateCode]').val(data.Id);
+                        $('input[name=State]').val(data.Descripción);
+                    },
+                    tableHeader: ['Id. de provincia', 'Descripción'],
+                    hiddenFields: ['DataExtended']
+                });
+
+            } else {
+                toastr.error("Debe de especificar un país antes de poder seleccionar una provincia");
+            }
+        }
+
+        function getCiudad() {
+            if ($('#StateCode').val().trim().length > 0) {
+                $('#lookupCiudad').lookupbox({
+                    title: 'Busqueda:',
+                    url: '@Url.Action("ListLookup", "Home")?tipo=40&consultaExtra=' + $('#CountryCode').val().trim() + "," + $('#StateCode').val().trim() + '&consulta=',
+                    imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                    width: 800,
+                    height: 1000,
+                    onItemSelected: function (data) {
+                        $('input[name=CityCode]').val(data.Id);
+                        $('input[name=City]').val(data.Descripción);
+                    },
+                    tableHeader: ['Id. de ciudad', 'Descripción'],
+                    hiddenFields: ['DataExtended']
+                });
+            } else {
+                toastr.error("Debe de especificar una provincia antes de poder seleccionar una ciudad");
+            }
+        }
+
+        function procesarSolicitud() {
+            var isAllValid = true;
+
+            if ($('#SupplierId').val().trim() == '') {
+                toastr.error('Debe de especificar un id. de proveedor', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#SupplierName').val().trim() == '') {
+                toastr.error('Debe de especificar un nombre', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#PaymentCondition').val().trim() == '') {
+                toastr.error('Debe de especificar una condicion de pago', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (isAllValid) {
+                $('#saveButton').ladda('start');
+                var data = {
+                    SupplierId: $('#SupplierId').val(),
+                    RNC: $('#RNC').val(),
+                    SupplierName: $('#SupplierName').val(),
+                    ShortName: $('#ShortName').val(),
+                    Contact: $('#Contact').val(),
+                    Address1: $('#Address1').val(),
+                    Address2: $('#Address2').val(),
+                    Address3: $('#Address3').val(),
+                    State: $('#State').val(),
+                    City: $('#City').val(),
+                    Country: $('#Country').val(),
+                    Phone1: $('#Phone1').val(),
+                    Phone2: $('#Phone2').val(),
+                    Phone3: $('#Phone3').val(),
+                    Fax: $('#Fax').val(),
+                    PaymentCondition: $('#PaymentCondition').val(),
+                    Email: $('#Email').val(),
+                };
+                $.ajax({
+                    url: '@Url.Action("SaveSupplier", "Accounting")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    cache: false,
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            window.location.href = '@Url.Action("SupplierIndex", "Accounting")';
+                        } else {
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+                        $('#saveButton').ladda('stop');
+                    }
+                });
+            }
+        }
+
+        function eliminar() {
+            if (confirm("Esta seguro que desea eliminar este registro ?")) {
+                $('#deleteButton').ladda('start');
+                $.ajax({
+                    url: '@Url.Action("DeleteSupplier", "Accounting")?supplierId=' + $('#SupplierId').val().trim(),
+                    type: "POST",
+                    data: "",
+                    dataType: "JSON",
+                    async: false,
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            window.location.href = "@Url.Action("SupplierIndex", "Accounting")";
+                        }
+                        else {
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+
+                        $('#deleteButton').ladda('stop');
+                    }
+                });
+            }
+        }
+    </script>
+}

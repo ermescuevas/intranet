@@ -1,0 +1,146 @@
+﻿@model IEnumerable<Seaboard.Intranet.Domain.Models.AccountingInvoiceHeader>
+@{
+    ViewBag.Title = "Proveedor informal";
+    Layout = "~/Views/Shared/_AccountingLayout.cshtml";
+}
+
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Proveedor informal</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Proveedor informal</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>Proveedor informal</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    @Html.ActionLink("NUEVA FACTURA", "InformalSupplierInvoice", "Accounting", null, new { @class = "btn btn-primary" })
+                    <div class="hr-line-dashed"></div>
+                    <table class="table table-striped table-bordered table-hover informationTable">
+                        <thead>
+                            <tr>
+                                <th>No. de factura</th>
+                                <th>Ncf</th>
+                                <th>Id. de proveedor</th>
+                                <th>Nombre</th>
+                                <th>Fecha</th>
+                                <th>Monto total</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                            <tr>
+                                <td>@Html.ActionLink(item.DocumentNumber, "InformalSupplierInvoice", new { @id = item.DocumentNumber }) </td>
+                                <td>@item.Ncf</td>
+                                <td>@item.SupplierNumber</td>
+                                <td>@item.SupplierName</td>
+                                <td>@item.DocumentDate.ToString("dd/MM/yyyy")</td>
+                                <td>@item.TotalAmount.ToString("C2")</td>
+                                <td>
+                                    @if (!item.Posted)
+                                    {
+                                        <i class="badge badge-success">Abierto</i>
+                                    }
+                                    else
+                                    {
+                                        <i class="badge badge-danger">Contabilizado</i>
+                                    }
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Styles {
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/toastr")
+
+    <script>
+        $(document).ready(function () {
+            $('.informationTable').DataTable({
+                pageLength: 10,
+                dom: '<"html5buttons"B>lTfgitp',
+                order: [[0, "desc"]],
+                language: {
+                    "sProcessing": "Procesando... ",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo":
+                        "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                    "sInfoEmpty":
+                        "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered":
+                        "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:  ",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                },
+                oAria: {
+                    "sSortAscending":
+                        ": Activar para ordenar la columna de manera ascendente",
+                    "sSortDescending":
+                        ": Activar para ordenar la columna de manera descendente"
+                },
+                buttons: [
+                    { extend: 'copy' },
+                    { extend: 'csv' },
+                    { extend: 'excel', title: 'ExampleFile' },
+                    { extend: 'pdf', title: 'ExampleFile' },
+                    {
+                        extend: 'print',
+                        customize: function (win) {
+                            $(win.document.body).addClass('white-bg');
+                            $(win.document.body).css('font-size', '10px');
+
+                            $(win.document.body).find('table')
+                                .addClass('compact')
+                                .css('font-size', 'inherit');
+                        }
+                    }
+                ]
+
+            });
+        });
+    </script>
+}

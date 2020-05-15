@@ -635,7 +635,7 @@
         function print(id, status) {
             if (status === 2) {
                 var data = {
-                    rowId: id
+                    requestId: id
                 }
                 var url = '@Url.Content("~/PDF/Reportes/")TrainingRequestReport.pdf';
                 toastr.info('Estamos procesando su solicitud', 'Por favor espere');

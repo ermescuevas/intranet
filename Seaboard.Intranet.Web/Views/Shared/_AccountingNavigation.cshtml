@@ -1,0 +1,104 @@
+﻿@using Microsoft.AspNet.Identity;
+@using Seaboard.Intranet.BusinessLogic
+@{
+    var account = Account.GetAccount(User.Identity.GetUserName());
+}
+<nav class="navbar-default navbar-static-side" role="navigation">
+    <div class="sidebar-collapse">
+        <ul class="nav metismenu" id="side-menu">
+            <li class="nav-header">
+                <div class="dropdown profile-element">
+                    <span>
+                        <i class="fa fa-user-circle fa-4x"></i>
+                    </span>
+                    <a data-toggle="dropdown" class="dropdown-toggle" href="#">
+                        <span class="clear">
+                            <span class="block m-t-xs">
+                                <strong class="font-bold"> @(account?.FirstName + " " + account?.LastName)</strong>
+                            </span>
+                        </span>
+                    </a>
+                    <ul class="dropdown-menu animated fadeInRight m-t-xs">
+                        <li><a href="@Url.Action("ChangePassword", "Account")">Cambiar contraseña</a></li>
+                        <li class="divider"></li>
+                        <li><a href="@Url.Action("Logout", "Account")">Salir</a></li>
+                    </ul>
+                </div>
+                <div class="logo-element">
+                    TCC
+                </div>
+            </li>
+            <li class="landing_link">
+                <a href="@Url.Action("Index","Billing")"><i class="fa fa-star"></i> <span class="nav-label">Inicio</span></a>
+            </li>
+            <li class="@Html.IsSelected(controller: "Accounting", action: "InformalSupplierInvoiceIndex")
+                    @Html.IsSelected(controller: "Accounting", action: "InformalSupplierInvoice")
+                    @Html.IsSelected(controller: "Accounting", action: "MinorExpensesInvoiceIndex")
+                    @Html.IsSelected(controller: "Accounting", action: "MinorExpensesInvoice")">
+                <a href="#"><i class="fa fa-edit"></i> <span class="nav-label" data-i18n="nav.dashboard">Facturación</span> <span class="fa arrow"></span></a>
+                <ul class="nav nav-second-level collapse
+                        @Html.IsSelected(controller: "Accounting", action: "InformalSupplierInvoiceIndex", cssClass: "in")
+                        @Html.IsSelected(controller: "Accounting", action: "InformalSupplierInvoice", cssClass: "in")
+                        @Html.IsSelected(controller: "Accounting", action: "MinorExpensesInvoiceIndex", cssClass: "in")
+                        @Html.IsSelected(controller: "Accounting", action: "MinorExpensesInvoice", cssClass: "in")">
+                    <li class="@Html.IsSelected(action: "InformalSupplierInvoiceIndex") @Html.IsSelected(action: "InformalSupplierInvoice")">
+                        <a href="@Url.Action("InformalSupplierInvoiceIndex", "Accounting")">Proveedor Informal</a>
+                    </li>
+                    <li class="@Html.IsSelected(action: "MinorExpensesInvoiceIndex") @Html.IsSelected(action: "MinorExpensesInvoice")">
+                        <a href="@Url.Action("MinorExpensesInvoiceIndex", "Accounting")">Gastos menores</a>
+                    </li>
+                </ul>
+            </li>
+            <li class="@Html.IsSelected(controller: "Accounting", action: "SupplierIndex")
+                    @Html.IsSelected(controller: "Accounting", action: "SupplierCreate")
+                    @Html.IsSelected(controller: "Accounting", action: "SupplierEdit")">
+                <a href="#"><i class="fa fa-th-large"></i> <span class="nav-label" data-i18n="nav.dashboard">Tarjetas</span> <span class="fa arrow"></span></a>
+                <ul class="nav nav-second-level collapse
+                        @Html.IsSelected(controller: "Accounting", action: "SupplierIndex", cssClass: "in")
+                        @Html.IsSelected(controller: "Accounting", action: "SupplierCreate", cssClass: "in")
+                        @Html.IsSelected(controller: "Accounting", action: "SupplierEdit", cssClass: "in")">
+                    <li class="@Html.IsSelected(action: "SupplierIndex") @Html.IsSelected(action: "SupplierCreate") @Html.IsSelected(action: "SupplierEdit")">
+                        <a href="@Url.Action("SupplierIndex", "Accounting")">Proveedores</a>
+                    </li>
+                </ul>
+            </li>
+            <li class="@Html.IsSelected(controller: "Accounting", action: "SupplierTransactionInquiry")">
+                <a href="#"><i class="fa fa-table"></i> <span class="nav-label" data-i18n="nav.dashboard">Consultas</span> <span class="fa arrow"></span></a>
+                <ul class="nav nav-second-level collapse
+                            @Html.IsSelected(controller: "Accounting", action: "AccountingTransactionInquiry", cssClass: "in")">
+                    <li class="@Html.IsSelected(action: "AccountingTransactionInquiry")">
+                        <a href="@Url.Action("AccountingTransactionInquiry", "Accounting")">Facturas</a>
+                    </li>
+                </ul>
+            </li>
+            <li class="@Html.IsSelected(controller: "Billing", action: "BillingReport")
+                    @Html.IsSelected(controller: "Billing", action: "CustomerDataReport")
+                    @Html.IsSelected(controller: "Billing", action: "SalesTransDetailReport")
+                    @Html.IsSelected(controller: "Billing", action: "SalesTransGeneralLedgerReport")">
+                <a href="#"><i class="fa fa-files-o"></i> <span class="nav-label" data-i18n="nav.dashboard">Reportes</span> <span class="fa arrow"></span></a>
+                <ul class="nav nav-second-level collapse
+                        @Html.IsSelected(controller: "Billing", action: "BillingReport", cssClass: "in")
+                        @Html.IsSelected(controller: "Billing", action: "CustomerDataReport", cssClass: "in")
+                        @Html.IsSelected(controller: "Billing", action: "SalesTransDetailReport", cssClass: "in")
+                        @Html.IsSelected(controller: "Billing", action: "SalesTransGeneralLedgerReport", cssClass: "in")">
+                    <li class="@Html.IsSelected(action: "CustomerDataReport")"><a href="@Url.Action("CustomerDataReport", "Billing")">Datos de cliente</a></li>
+                    <li class="@Html.IsSelected(action: "BillingReport")"><a href="@Url.Action("BillingReport", "Billing")" target="_blank">Trans. ventas resumido</a></li>
+                    <li class="@Html.IsSelected(action: "SalesTransDetailReport")"><a href="@Url.Action("SalesTransDetailReport", "Billing")">Trans. ventas detallado</a></li>
+                    <li class="@Html.IsSelected(action: "SalesTransGeneralLedgerReport")"><a href="@Url.Action("SalesTransGeneralLedgerReport", "Billing")">Trans. ventas cuentas</a></li>
+                    <li class="@Html.IsSelected(action: "FiscalSalesReport")"><a href="@Url.Action("FiscalSalesReport", "Billing")">Reporte 607</a></li>
+                </ul>
+            </li>
+            <li class="
+                    @Html.IsSelected(controller: "Accounting", action: "ConfigurationIndex")
+                    @Html.IsSelected(controller: "Accounting", action: "NCFConfigurationIndex")">
+                <a href="#"><i class="fa fa-laptop"></i> <span class="nav-label" data-i18n="nav.dashboard">Configuración</span> <span class="fa arrow"></span></a>
+                <ul class="nav nav-second-level collapse
+                        @Html.IsSelected(controller: "Accounting", action: "ConfigurationIndex", cssClass: "in")
+                        @Html.IsSelected(controller: "Accounting", action: "NCFConfigurationIndex", cssClass: "in")">
+                    <li class="@Html.IsSelected(action: "ConfigurationIndex")"><a href="@Url.Action("ConfigurationIndex", "Accounting")">General</a></li>
+                    <li class="@Html.IsSelected(action: "NCFConfigurationIndex")"><a href="@Url.Action("NCFConfigurationIndex", "Accounting")">NCF</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</nav>

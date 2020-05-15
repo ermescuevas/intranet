@@ -187,10 +187,12 @@
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="App_Start\Startup.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\AccountingController.cs" />
     <Compile Include="Controllers\AccountPayablesController.cs" />
     <Compile Include="Controllers\AccountReceivablesController.cs" />
     <Compile Include="Controllers\ARController.cs" />
     <Compile Include="Controllers\BillingController.cs" />
+    <Compile Include="Controllers\ComputingController.cs" />
     <Compile Include="Controllers\EmployeeExtensionController.cs" />
     <Compile Include="Controllers\FoodMenuController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
@@ -994,6 +996,24 @@
     <Content Include="Views\AccountReceivables\DocumentEdit.cshtml" />
     <Content Include="Views\AccountReceivables\HolidayConfiguration.cshtml" />
     <Content Include="Views\AccountReceivables\EstimatedInterestReport.cshtml" />
+    <Content Include="Views\AccountReceivables\AccountReceivablesReport.cshtml" />
+    <Content Include="Views\Shared\_AccountingLayout.cshtml" />
+    <Content Include="Views\Shared\_AccountingNavigation.cshtml" />
+    <Content Include="Views\Accounting\Index.cshtml" />
+    <Content Include="Views\Accounting\InformalSupplierInvoiceIndex.cshtml" />
+    <Content Include="Views\Accounting\InformalSupplierInvoice.cshtml" />
+    <Content Include="Views\Accounting\SupplierCreate.cshtml" />
+    <Content Include="Views\Accounting\SupplierEdit.cshtml" />
+    <Content Include="Views\Accounting\SupplierIndex.cshtml" />
+    <Content Include="Views\Accounting\NCFConfigurationIndex.cshtml" />
+    <Content Include="Views\Accounting\ConfigurationIndex.cshtml" />
+    <Content Include="Views\Accounting\MinorExpensesInvoiceIndex.cshtml" />
+    <Content Include="Views\Accounting\MinorExpensesInvoice.cshtml" />
+    <Content Include="Views\Accounting\AccountingTransactionInquiry.cshtml" />
+    <Content Include="Views\Computing\EquipmentIndex.cshtml" />
+    <Content Include="Views\Computing\Equipment.cshtml" />
+    <Content Include="Views\Computing\SimCardIndex.cshtml" />
+    <Content Include="Views\Computing\SimCard.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

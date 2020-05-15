@@ -6,7 +6,7 @@ namespace Seaboard.Intranet.BusinessLogic
 {
     public class ReportHelper
     {
-        public static void Export(string rutaReporte, string rutaDestino, string reportDetail, int tipo, ref string xStatus, int printOption = 0)
+        public static void Export(string rutaReporte, string rutaDestino, string reportDetail, int tipo, ref string xStatus, int printOption = 0, string subQuery = "")
         {
             var crystalReport = new CrystalDecisions.CrystalReports.Engine.ReportDocument();
 
@@ -144,6 +144,9 @@ namespace Seaboard.Intranet.BusinessLogic
                     case 42:
                         reporte = "EstimatedInterestReport.rpt";
                         break;
+                    case 43:
+                        reporte = "AccountReceivablesReport.rpt";
+                        break;
                 }
 
                 const string reportHeader = "SELECT '' CompName, '' Titulo, '' Parametro1, '' Parametro2, '' Parametro3, '' Parametro4, '' Parametro5, '' Parametro6, '' Usuario, 1 Marca";
@@ -167,6 +170,8 @@ namespace Seaboard.Intranet.BusinessLogic
                     crystalReport.Database.Tables[1].SetDataSource(detalle);
                 }
 
+                if (tipo == 43)
+                    crystalReport.Subreports[0].SetDataSource(ConnectionDb.GetDt(subQuery));
                 var type = CrystalDecisions.Shared.ExportFormatType.PortableDocFormat;
                 if (printOption != 0)
                     type = CrystalDecisions.Shared.ExportFormatType.Excel;

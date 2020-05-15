@@ -207,7 +207,7 @@
                 dataType: "JSON",
                 contentType: "application/json",
                 success: function (d) {
-                    if (d.status == true) {
+                    if (d.status == "OK") {
                         window.location.href = "@Url.Action("Index", "PettyCash")";
                     }
                     else {

@@ -624,28 +624,87 @@
                     employeeId: $('#EmployeeId').val(),
                     startDate: $('#StartDate').datepicker({ dateFormat: 'ddMMyyyy' }).val(),
                     endDate: $('#EndDate').datepicker({ dateFormat: 'ddMMyyyy' }).val(),
-                    overtimeType: $('#OvertimeType').val(),
-                    note: $('#Note').val(),
-                    startTime: $('#StartTime').val(),
-                    endTime: $('#EndTime').val(),
-                    rowId: $('#RowId').val(),
-                    module: 1
                 }
                 $.ajax({
-                    url: '@Url.Action("SaveOvertime", "HumanResources")',
+                    url: '@Url.Action("GetOvertimeValid", "HumanResources")',
                     type: "POST",
                     data: JSON.stringify(data),
                     dataType: "JSON",
                     contentType: "application/json",
                     success: function (result) {
-                        if (result.status === "OK") {
-                            window.location.reload();
+                        if (result.count > 0) {
+                            swal({
+                                title: "Duplicado",
+                                text: "Este empleado ya tiene una hora extra registrada en este rango de fecha, desea continuar con el registro ?",
+                                type: "warning",
+                                showCancelButton: true,
+                                confirmButtonColor: "#DD6B55",
+                                confirmButtonText: "Si, proceder!",
+                                cancelButtonText: "No, cancelar!",
+                                closeOnConfirm: true
+                            }, function () {
+                                var data = {
+                                    employeeId: $('#EmployeeId').val(),
+                                    startDate: $('#StartDate').datepicker({ dateFormat: 'ddMMyyyy' }).val(),
+                                    endDate: $('#EndDate').datepicker({ dateFormat: 'ddMMyyyy' }).val(),
+                                    overtimeType: $('#OvertimeType').val(),
+                                    note: $('#Note').val(),
+                                    startTime: $('#StartTime').val(),
+                                    endTime: $('#EndTime').val(),
+                                    rowId: $('#RowId').val(),
+                                    module: 1
+                                }
+                                $.ajax({
+                                    url: '@Url.Action("SaveOvertime", "HumanResources")',
+                                    type: "POST",
+                                    data: JSON.stringify(data),
+                                    dataType: "JSON",
+                                    contentType: "application/json",
+                                    success: function (result) {
+                                        if (result.status === "OK") {
+                                            window.location.reload();
+                                        }
+                                        else {
+                                            swal({
+                                                title: "ERROR",
+                                                text: result.status,
+                                                type: "error"
+                                            });
+                                        }
+                                    }
+                                });
+                            });
                         }
                         else {
-                            swal({
-                                title: "ERROR",
-                                text: result.status,
-                                type: "error"
+                            var data = {
+                                employeeId: $('#EmployeeId').val(),
+                                startDate: $('#StartDate').datepicker({ dateFormat: 'ddMMyyyy' }).val(),
+                                endDate: $('#EndDate').datepicker({ dateFormat: 'ddMMyyyy' }).val(),
+                                overtimeType: $('#OvertimeType').val(),
+                                note: $('#Note').val(),
+                                startTime: $('#StartTime').val(),
+                                endTime: $('#EndTime').val(),
+                                rowId: $('#RowId').val(),
+                                module: 1
+                            }
+                            $.ajax({
+                                url: '@Url.Action("SaveOvertime", "HumanResources")',
+                                type: "POST",
+                                data: JSON.stringify(data),
+                                dataType: "JSON",
+                                contentType: "application/json",
+                                success: function (result) {
+                                    if (result.status === "OK") {
+                                        window.location.reload();
+                                    }
+                                    else {
+                                        swal({
+                                            title: "ERROR",
+                                            text: result.status,
+                                            type: "error"
+                                        });
+                                    }
+                                }
                             });
                         }
                     }

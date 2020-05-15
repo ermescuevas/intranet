@@ -66,7 +66,6 @@ namespace Seaboard.Intranet.Web.Controllers
             ViewBag.Files = GetFiles(Helpers.PublicDocumentsPath);
             ViewBag.Images = GetImagesFiles();
             ViewBag.Currency = currencies;
-
             return View();
         }
 
@@ -750,6 +749,12 @@ namespace Seaboard.Intranet.Web.Controllers
                             "FROM " + Helpers.InterCompanyId + ".dbo.RM20101 A " +
                             "WHERE A.DOCNUMBR LIKE '%" + consulta + "%' AND A.CUSTNMBR = '" + consultaExtra + "' AND A.RMDTYPAL = 1 " +
                             "ORDER BY A.DOCDATE DESC";
+                        break;
+                    case 47:
+                        sqlQuery = "SELECT RTRIM(VNDCLSID) Id, RTRIM(VNDCLDSC) Descripción, '' DataExtended " +
+                            "FROM " + Helpers.InterCompanyId + ".dbo.PM00100 " +
+                            "WHERE VNDCLSID LIKE '%" + consulta + "%' OR VNDCLDSC LIKE '%" + consulta + "%' " +
+                            "ORDER BY VNDCLSID DESC";
                         break;
                 }
 

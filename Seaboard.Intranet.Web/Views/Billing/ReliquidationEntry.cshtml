@@ -21,6 +21,9 @@
     .bootstrap-select:not([class*=col-]):not([class*=form-control]):not(.input-group-btn) {
         width: 100%;
     }
+    .modal-lg{
+        width: 1100px;
+    }
 </style>
 
 <div class="row wrapper border-bottom white-bg page-heading">
@@ -676,11 +679,12 @@
                         '<tr>' +
                         '<th style="width:8%">#</th>' +
                         '<th style="width:14%">Id. de factura</th>' +
-                        '<th style="width:14%">Fecha de documento</th>' +
-                        '<th style="width:14%">Fecha de vencimiento</th>' +
+                        '<th style="width:6%">Tipo</th>' +
+                        '<th style="width:13%">Fecha de documento</th>' +
+                        '<th style="width:13%">Fecha de vencimiento</th>' +
                         '<th style="width:9%">NCF</th>' +
-                        '<th style="width:18%">Monto pendiente</th>' +
-                        '<th style="width:18%">Aplicar monto</th>' +
+                        '<th style="width:16%">Monto pendiente</th>' +
+                        '<th style="width:16%">Aplicar monto</th>' +
                         '<th style="width:5%"></th>' +
                         '</tr>' +
                         '</thead>');
@@ -698,6 +702,7 @@
                             $btnGroup.append($remove);
                             $row.append($('<td/>').html($btnGroup));
                             $row.append($('<td />').html(val.DocumentNumber));
+                            $row.append($('<td />').html(val.Module));
                             $row.append($('<td />').html(val.DocumentDate));
                             $row.append($('<td />').html(val.DueDate));
                             $row.append($('<td />').html(val.Ncf));
@@ -1116,15 +1121,15 @@
             var isAllValid = true;
             if (isAllValid) {
                 $('#invoiceTable > tbody > tr').each(function () {
-                    if (parseFloat($(this).find('td:eq(6) input').val().replace(/,/g, "")) > 0) {
+                    if (parseFloat($(this).find('td:eq(7) input').val().replace(/,/g, "")) > 0) {
                         var data = {
                             batchNumber: $('#BatchNumber').val(),
                             customerId: customerCode,
                             sopNumber: $(this).find('td:eq(1)').html().trim(),
-                            documentDate: $(this).find('td:eq(2)').html(),
-                            dueDate: $(this).find('td:eq(3)').html(),
-                            applyAmount: parseFloat($(this).find('td:eq(6) input').val().replace(/,/g, "")),
-                            ncf: $(this).find('td:eq(4)').html().trim(),
+                            documentDate: $(this).find('td:eq(3)').html(),
+                            dueDate: $(this).find('td:eq(4)').html(),
+                            applyAmount: parseFloat($(this).find('td:eq(7) input').val().replace(/,/g, "")),
+                            ncf: $(this).find('td:eq(5)').html().trim(),
                             flag: markerCode
                         };
                         $.ajax({

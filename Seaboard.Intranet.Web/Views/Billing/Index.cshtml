@@ -44,7 +44,7 @@
             if (@ncfAlert.Length > 0) {
                 swal({
                     title: "INFORMACIÓN",
-                    text: ("@Json.Encode(ncfAlert)").replace("&quot;",""),
+                    text: '@Json.Encode(ncfAlert) '.replace("&quot;","").replace("&quot;",""),
                     type: "warning",
                     showCancelButton: false,
                     confirmButtonColor: "#DD6B55",

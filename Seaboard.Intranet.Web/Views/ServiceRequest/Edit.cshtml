@@ -714,21 +714,18 @@
                 contentType: false,
                 processData: false,
                 success: function (d) {
-                    if (d.status == true) {
+                    if (d.status === "OK") {
                         $('#attachmentForm').each(function () {
                             this.reset();
                         });
                         toastr.success('ARchivo adjuntado correctamente', 'Adjuntos')
                         cargarArchivos();
                     }
-                    else {
-                        alert('Ha ocurrido un error');
-                    }
-                    $('#submit').val('Guardar');
+                    else
+                        alert(d.status);
                 },
-                error: function () {
+                error: function (d) {
                     alert('Error. Por favor trate de nuevo.');
-                    $('#submit').val('Guardar');
                 }
             });
         }
