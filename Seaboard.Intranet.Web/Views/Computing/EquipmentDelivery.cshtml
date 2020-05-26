@@ -1,0 +1,681 @@
+﻿@using Microsoft.AspNet.Identity;
+@using Seaboard.Intranet.BusinessLogic;
+@model Seaboard.Intranet.Domain.EquipmentDelivery
+
+@{
+    ViewBag.Title = "Entrega de equipos de comunicacion";
+    var deliveryTypes = new List<SelectListItem>()
+    {
+        new SelectListItem { Text = "Asignado", Value = "10" },
+        new SelectListItem { Text = "Prestamo", Value = "20" }
+    };
+    Layout = "~/Views/Shared/_ComputingLayout.cshtml";
+    
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Entrega de equipos de comunicacion</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li>
+                <a href="@Url.Action("Index", "EquipmentDeliveryIndex")">Listado de entregas de equipos</a>
+            </li>
+            <li class="active">
+                <strong>Entrega de equipos de comunicacion</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight ecommerce">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h3>Entrega de equipos de comunicacion</h3>
+                </div>
+
+                <div class="ibox-content">
+                    <div class="form-group">
+                        <div class="col-sm-12 col-sm-offset-1">
+                            <button class="btn btn-primary" type="button" onclick="guardar();"><i class="fa fa-save"></i> Guardar</button>
+                            <button class="btn btn-white" type="button" onclick="limpiarCampos();"><i class="fa fa-eraser"></i> Borrar</button>
+                            @if (Model.Status != 4)
+                            {
+                                <button class="btn btn-primary" type="button" onclick="enviarFlujo();"><i class="fa fa-send"></i> Enviar</button>
+                            }
+                            @if (Model.Status != 0)
+                            {
+                                <button class="btn btn-success" type="button" onclick="Print();"><i class="fa fa-print"></i> Imprimir</button>
+                            }
+                            @if (Model.Status == 4)
+                            {
+                                <button class="btn btn-success" type="button" onclick="entregar();"><i class="fa fa-check-square"></i> Entregar</button>
+                            }
+                            <br />
+                        </div>
+                    </div>
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="tabs-container">
+                <ul class="nav nav-tabs">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tab-1"> Datos Basicos</a>
+                    </li>
+                    <li class="">
+                        <a data-toggle="tab" href="#tab-2" onclick="cargarArchivos();"> Adjuntos</a>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                    <div id="tab-1" class="tab-pane active">
+                        @using (Html.BeginForm("SaveEquipmentDelivery", "Computing", FormMethod.Post, new { @id = "form" }))
+                        {
+                            @Html.AntiForgeryToken()
+
+                            @Html.Hidden("PostType", 0)
+                            @Html.HiddenFor(x => x.BaseDocumentNumber)
+                            @Html.HiddenFor(x => x.Status)
+
+                            <div class="panel-body">
+                                <fieldset class="form-horizontal">
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">No. de solicitud:</label>
+                                                <div class="col-sm-8 input-group">
+                                                    @Html.TextBoxFor(m => m.RequestId, new { @class = "form-control", @readonly = "" })
+                                                    @Html.ValidationMessageFor(model => model.RequestId, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Tipo de entrega:</label>
+                                                <div class="col-sm-8 input-group">
+                                                    @Html.DropDownListFor(m => m.DeliveryType, deliveryTypes, "Seleccione una opción", new { @class = "form-control" })
+                                                    @Html.ValidationMessageFor(model => model.DeliveryType, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Dispositivo:</label>
+                                                <div class="col-sm-8 input-group">
+                                                    @Html.TextBoxFor(model => model.Device, new { @class = "form-control" })
+                                                    <span class="input-group-btn">
+                                                        <button id="lookupEquipo" type="button" class="btn btn-primary">
+                                                            <i class="fa fa-search"></i>
+                                                        </button>
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Sim Card:</label>
+                                                <div class="col-sm-8 input-group">
+                                                    @Html.TextBoxFor(model => model.SimCard, new { @class = "form-control" })
+                                                    <span class="input-group-btn">
+                                                        <button id="lookupSimCard" type="button" class="btn btn-primary">
+                                                            <i class="fa fa-search"></i>
+                                                        </button>
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Asignado a:</label>
+                                                <div class="col-sm-8 input-group">
+                                                    @Html.TextBoxFor(model => model.AssignedUser, new { @class = "form-control" })
+                                                    <span class="input-group-btn">
+                                                        <button id="lookupEmpleado" type="button" class="btn btn-primary">
+                                                            <i class="fa fa-search"></i>
+                                                        </button>
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Propiedad de:</label>
+                                                <div class="col-sm-8 input-group">
+                                                    @Html.TextBoxFor(model => model.PropertyBy, new { @class = "form-control" })
+                                                    <span class="input-group-btn">
+                                                        <button id="lookupPropietario" type="button" class="btn btn-primary">
+                                                            <i class="fa fa-search"></i>
+                                                        </button>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-5">
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Valor RD$:</label>
+                                                <div class="col-sm-8 input-group">
+                                                    @Html.TextBoxFor(m => m.CostAmount, new { @class = "form-control" })
+                                                    @Html.ValidationMessageFor(model => model.CostAmount, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Valor cubierto RD$:</label>
+                                                <div class="col-sm-8 input-group">
+                                                    @Html.TextBoxFor(m => m.AmountCoverable, new { @class = "form-control" })
+                                                    @Html.ValidationMessageFor(model => model.AmountCoverable, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Valor CXC RD$:</label>
+                                                <div class="col-sm-8 input-group">
+                                                    @Html.TextBoxFor(m => m.AmountPayable, new { @class = "form-control", @readonly = "readonly" })
+                                                    @Html.ValidationMessageFor(model => model.AmountPayable, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Facturacion por cuenta:</label>
+                                                <div class="col-sm-8 input-group">
+                                                    @Html.TextBoxFor(model => model.InvoiceOwner, new { @class = "form-control" })
+                                                    <span class="input-group-btn">
+                                                        <button id="lookupFacturacion" type="button" class="btn btn-primary">
+                                                            <i class="fa fa-search"></i>
+                                                        </button>
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Accesorios:</label>
+                                                <div class="col-sm-8 input-group">
+                                                    @Html.TextAreaFor(model => model.Accessories, new { @class = "form-control", @rows = "3" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-sm-11">
+                                            <div class="form-group">
+                                                <label class="col-sm-2 control-label">Nota:</label>
+                                                <div class="col-sm-10">
+                                                    @Html.TextAreaFor(m => m.Note, new { @class = "form-control", @rows = "5", @placeholder = "Introduzca la nota" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        }
+                    </div>
+
+                    <div id="tab-2" class="tab-pane">
+                        <div class="panel-body">
+                            <div class="row">
+                                <form action="javascript:;" method="post" enctype="multipart/form-data" id="attachmentForm" accept-charset="utf-8">
+                                    <div class="col-md-9">
+                                        <div class="fileinput fileinput-new input-group" data-provides="fileinput">
+                                            <div class="form-control" data-trigger="fileinput">
+                                                <i class="glyphicon glyphicon-file fileinput-exists"></i>
+                                                <span class="fileinput-filename"></span>
+                                            </div>
+                                            <span class="input-group-addon btn btn-default btn-file"><span class="fileinput-new">Seleccionar archivo</span><span class="fileinput-exists">Cambiar</span><input type="file" name="FileData" id="FileData"></span>
+                                            <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">Borrar</a>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <button type="button" class="btn btn-success" onclick="atacharArchivo();" data-dismiss="modal">Adjuntar</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div class="hr-line-dashed"></div>
+
+                            <div class="row" id="attachmentFiles">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Styles {
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/plugins/switcheryStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/plugins/sweetAlertStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+    @Scripts.Render("~/plugins/switchery")
+    @Scripts.Render("~/plugins/sweetAlert")
+
+    <script>
+        var cost;
+        var cover;
+        $(document).ready(function () {
+            $("#lookupSimCard").lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("LookupData", "Computing")?tipo=2&consultaExtra=' + $('#Brand').val() + '&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function (data) {
+                    $('input[name=SimCard]').val(data.Id);
+                },
+                tableHeader: ['Id. de tarjeta SIM', 'Numero de telefono', 'Operadora'],
+                hiddenFields: ['DataPlus']
+            });
+            $("#lookupEquipo").lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("LookupData", "Computing")?tipo=3&consultaExtra=&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function (data) {
+                    $('input[name=Device]').val(data.Id.trim() + ' - ' + data.Descripción);
+                    verificarAsignacion();
+                    $('#CostAmount').val(parseFloat(data.DataPlus.replace(/,/g, "")).toFixed(2).replace(/./g, function (c, i, a) {
+                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                    }));
+                    if (($('#AmountCoverable').val().trim().replace(/,/g, "") != '' && !isNaN($('#AmountCoverable').val().replace(/,/g, "").trim()))) {
+                        $('#AmountCoverable').val(parseFloat($('#AmountCoverable').val().replace(/,/g, "")).toFixed(2).replace(/./g, function (c, i, a) {
+                            return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                        }));
+                        cover = parseFloat($('#AmountCoverable').val().replace(/,/g, "")).toFixed(2);
+                    }
+                    if (($('#CostAmount').val().trim().replace(/,/g, "") != '' && !isNaN($('#CostAmount').val().replace(/,/g, "").trim()))) {
+                        $('#CostAmount').val(parseFloat($('#CostAmount').val().replace(/,/g, "")).toFixed(2).replace(/./g, function (c, i, a) {
+                            return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                        }));
+                        cost = parseFloat($('#CostAmount').val().replace(/,/g, "")).toFixed(2);
+                    }
+                    $('#AmountPayable').val(parseFloat(Math.abs(cover - cost)).toFixed(2).replace(/./g, function (c, i, a) {
+                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                    }));
+                },
+                tableHeader: ['Id. de dispositivo', 'Modelo', 'Numero de serie'],
+                hiddenFields: ['DataPlus']
+            });
+            $("#lookupEmpleado").lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookup", "Home")?tipo=18&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function (data) {
+                    $('input[name=AssignedUser]').val(data.EmployeeId.trim() + ' - ' + data.Name.trim());
+                },
+                tableHeader: ['Id. de empleado', 'Nombre', 'Departamento'],
+                hiddenFields: ['FirstName','LastName','Identification','JobTitle','Email']
+            });
+            $("#lookupPropietario").lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookup", "Home")?tipo=18&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function (data) {
+                    $('input[name=PropertyBy]').val(data.EmployeeId.trim() + ' - ' + data.Name.trim());
+                },
+                tableHeader: ['Id. de empleado', 'Nombre', 'Departamento'],
+                hiddenFields: ['FirstName','LastName','Identification','JobTitle','Email']
+            });
+            $("#lookupFacturacion").lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookup", "Home")?tipo=18&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function (data) {
+                    $('input[name=InvoiceOwner]').val(data.EmployeeId.trim() + ' - ' + data.Name.trim());
+                },
+                tableHeader: ['Id. de empleado', 'Nombre', 'Departamento'],
+                hiddenFields: ['FirstName','LastName','Identification','JobTitle','Email']
+            });
+            $('#CostAmount').focusout(function () {
+                if (($('#CostAmount').val().trim().replace(/,/g, "") != '' && !isNaN($('#CostAmount').val().replace(/,/g, "").trim()))) {
+                    $('#CostAmount').val(parseFloat($('#CostAmount').val().replace(/,/g, "")).toFixed(2).replace(/./g, function (c, i, a) {
+                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                    }));
+                    cost = parseFloat($('#CostAmount').val().replace(/,/g, "")).toFixed(2);
+                }
+
+                if (($('#AmountCoverable').val().trim().replace(/,/g, "") != '' && !isNaN($('#AmountCoverable').val().trim().replace(/,/g, "")))) {
+                    $('#AmountCoverable').val(parseFloat($('#AmountCoverable').val().replace(/,/g, "")).toFixed(2).replace(/./g, function (c, i, a) {
+                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                    }));
+                    cover = parseFloat($('#AmountCoverable').val().replace(/,/g, "")).toFixed(2);
+                }
+                $('#AmountPayable').val(parseFloat(Math.abs(cover - cost)).toFixed(2).replace(/./g, function (c, i, a) {
+                    return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                }));
+
+            });
+            if (($('#CostAmount').val().trim().replace(/,/g, "") != '' && !isNaN($('#CostAmount').val().trim().replace(/,/g, "")))) {
+                $('#CostAmount').val(parseFloat($('#CostAmount').val().replace(/,/g, "")).toFixed(2).replace(/./g, function (c, i, a) {
+                    return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                }));
+            }
+            $('#AmountCoverable').focusout(function () {
+                if (($('#AmountCoverable').val().trim().replace(/,/g, "") != '' && !isNaN($('#AmountCoverable').val().replace(/,/g, "").trim()))) {
+                    $('#AmountCoverable').val(parseFloat($('#AmountCoverable').val().replace(/,/g, "")).toFixed(2).replace(/./g, function (c, i, a) {
+                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                    }));
+                    cover = parseFloat($('#AmountCoverable').val().replace(/,/g, "")).toFixed(2);
+                }
+                if (($('#CostAmount').val().trim().replace(/,/g, "") != '' && !isNaN($('#CostAmount').val().replace(/,/g, "").trim()))) {
+                    $('#CostAmount').val(parseFloat($('#CostAmount').val().replace(/,/g, "")).toFixed(2).replace(/./g, function (c, i, a) {
+                        return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                    }));
+                    cost = parseFloat($('#CostAmount').val().replace(/,/g, "")).toFixed(2);
+                }
+                $('#AmountPayable').val(parseFloat(Math.abs(cover - cost)).toFixed(2).replace(/./g, function (c, i, a) {
+                    return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                }));
+            });
+            if (($('#AmountCoverable').val().trim().replace(/,/g, "") != '' && !isNaN($('#AmountCoverable').val().trim().replace(/,/g, "")))) {
+                $('#AmountCoverable').val(parseFloat($('#AmountCoverable').val().replace(/,/g, "")).toFixed(2).replace(/./g, function (c, i, a) {
+                    return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                }));
+            }
+        });
+        window.onbeforeunload = function () { $.ajax({ url: '@Url.Action("UnblockSecuence", "Computing", new { id = Model.RequestId, formulario = "EIPM10200"})' }).done(function () { }); }
+
+        function guardar() {
+            $('#PostType').val(0);
+            procesarSolicitud();
+        }
+
+        function enviarFlujo() {
+             swal({
+                title: "Eliminar",
+                text: "Esta seguro que desea enviar este registro al flujo de aprobacion?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Si, proceder!",
+                cancelButtonText: "No, cancelar!",
+                closeOnConfirm: false
+            }, function () {
+                $('#PostType').val(1);
+                procesarSolicitud();
+            });
+        }
+
+        function cargarArchivos() {
+            $.ajax({
+                url: '@Url.Action("LoadAttachmentFiles", "Computing")?id=' + $('#RequestId').val().trim(),
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    attachmentFiles = result;
+                    if (attachmentFiles.length > 0) {
+                        var $ul = $('<ul class="list-unstyled file-list" />');
+                        $.each(attachmentFiles, function (i, val) {
+                            var $li = $('<li/>');
+                            var $a = $('<a href="@Url.Action("Download", "Computing")?id=' + $('#RequestId').val().trim() + '&FileName=' + val.trim() + '" />')
+                            var $delete = $('<a href="#" />')
+                            $a.append($('<i class="fa fa-file-pdf-o" />'));
+                            $delete.html("&nbsp; &nbsp; &nbsp;");
+                            $delete.click(function (e) {
+                                e.preventDefault();
+                                eliminarArchivo(val.trim());
+                            });
+                            $delete.append($('<i class="fa fa-remove fa-2x" />'));
+                            $li.append($a.html("  " + val));
+                            $li.append($delete);
+                            $ul.append($li);
+                        });
+                        $('#attachmentFiles').html($ul);
+                    }
+                    else {
+                        $('#attachmentFiles').html('');
+                    }
+                }
+            });
+        }
+
+        function atacharArchivo() {
+            var data = new FormData();
+            data.append("FileData", document.getElementById("FileData").files[0]);
+            data.append("id", $('#RequestId').val());
+
+            $.ajax({
+                url: '@Url.Action("AttachFile", "Computing")',
+                type: "POST",
+                data: data,
+                dataType: "JSON",
+                contentType: false,
+                processData: false,
+                success: function (d) {
+                    if (d.status == true) {
+                        $('#attachmentForm').each(function () {
+                            this.reset();
+                        });
+                        toastr.success('Archivo adjuntado correctamente', 'Adjuntos')
+                        cargarArchivos();
+                    }
+                    else {
+                        alert('Ha ocurrido un error');
+                    }
+                    $('#submit').val('Guardar');
+                },
+                error: function () {
+                    alert('Error. Por favor trate de nuevo.');
+                    $('#submit').val('Guardar');
+                }
+            });
+        }
+
+        function eliminarArchivo(fileName) {
+            if (confirm("Esta seguro que desea eliminar este archivo ?")) {
+                $.ajax({
+                    url: '@Url.Action("DeleteFile", "Computing")?id=' + $('#RequestId').val().trim() + "&fileName=" + fileName,
+                    type: "POST",
+                    dataType: "JSON",
+                    contentType: false,
+                    processData: false,
+                    success: function (d) {
+                        if (d.status == "OK") {
+                            toastr.success('Archivo eliminado correctamente', 'Adjuntos');
+                            cargarArchivos();
+                        }
+                        else {
+                            alert(d.status);
+                        }
+                    }
+                });
+            }
+        }
+
+        function procesarSolicitud() {
+            var isAllValid = true;
+
+            if ($('#RequestId').val().trim() == '') {
+                toastr.error('Debe de especificar un codigo', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#DeliveryType').val().trim() == '') {
+                toastr.error('Debe de especificar un tipo de entrega', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Device').val().trim() == '') {
+                toastr.error('Debe de especificar un dispositivo', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#AssignedUser').val().trim() == '') {
+                toastr.error('Debe de especificar un usuario a asignar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#PropertyBy').val().trim() == '') {
+                toastr.error('Debe de especificar un propietario', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#CostAmount').val().trim() == '') {
+                toastr.error('Debe de especificar un costo', 'Campos requeridos')
+                isAllValid = false;
+            } else $('#CostAmount').val($('#CostAmount').val().replace(/,/g, ""));
+
+            if ($('#AmountCoverable').val().trim() == '') {
+                toastr.error('Debe de especificar un monto cubierto', 'Campos requeridos')
+                isAllValid = false;
+            } else $('#AmountCoverable').val($('#AmountCoverable').val().replace(/,/g, ""));
+
+            if ($('#InvoiceOwner').val().trim() == '') {
+                toastr.error('Debe de especificar una facturacion por cuenta de', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            $('#AmountPayable').val($('#AmountPayable').val().replace(/,/g, ""));
+
+            if (isAllValid) {
+                $.ajax({
+                    url: '@Url.Action("SaveEquipmentDelivery", "Computing")',
+                    type: "POST",
+                    data: $('#form').serialize() + '&postType=' + $('#PostType').val(),
+                    success: function (result) {
+                        if (result.status == "OK")
+                            window.location.href = "@Url.Action("EquipmentDeliveryIndex","Computing")";
+                        else
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                    }
+                });
+            }
+        }
+
+        function verificarAsignacion() {
+            if ($('#AssignedUser').val() !== '') {
+                $.ajax({
+                    url: '@Url.Action("VerifyAssignedEquipment", "Computing")?id=' + $('#AssignedUser').val().padStart(6, '0').substring(0, 6),
+                    type: "POST",
+                    data: "",
+                    success: function (result) {
+                        if (result.status == "ASIGNADO")
+                            swal({
+                                title: "Advertencia",
+                                text: "Este usuario ya tiene un equipo asignado",
+                                type: "warning"
+                            });
+                        else if (result.status !== "OK")
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                    }
+                });
+            }
+        }
+
+        function entregar() {
+            var unAssign = false;
+            swal({
+                title: "Entrega",
+                text: "Esta seguro que desea completar la entrega del equipo ?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Si, adelante!",
+                cancelButtonText: "No, cancelar!",
+                closeOnConfirm: false
+            }, function () {
+                $.ajax({
+                    url: '@Url.Action("VerifyAssignedEquipment", "Computing")?id=' + $('#AssignedUser').val().padStart(6, '0').substring(0, 6),
+                    type: "POST",
+                    async: false,
+                    data: "",
+                    success: function (result) {
+                        if (result.status === "ASIGNADO")
+                            swal({
+                                title: "Cerrar",
+                                text: "Este usuario ya tiene un dispositivo asignado desea que se le desasigne el anterior ?",
+                                type: "warning",
+                                showCancelButton: true,
+                                confirmButtonColor: "#DD6B55",
+                                confirmButtonText: "Si, adelante!",
+                                cancelButtonText: "No, dejalo!",
+                                closeOnConfirm: false
+                            }, function (confirm) {
+                                if (confirm) {
+                                    unAssign = true;
+                                }
+                                $.ajax({
+                                    url: '@Url.Action("DeliverEquipment", "Computing")?id=' + '@Model.RequestId' + '&unAssign=' + unAssign,
+                                    type: "POST",
+                                    data: "",
+                                    cache: false,
+                                    async: false,
+                                    dataType: "JSON",
+                                    contentType: "application/json",
+                                    success: function (result) {
+                                        if (result.status === "OK") {
+                                            window.location.href = '@Url.Action("EquipmentDeliveryIndex","Computing")';
+                                        } else {
+                                            swal({
+                                                title: "ERROR",
+                                                text: result.status,
+                                                type: "error"
+                                            });
+                                        }
+                                    }
+                                });
+                            });
+                        else if (result.status === "OK")
+                            $.ajax({
+                                url: '@Url.Action("DeliverEquipment", "Computing")?id=' + '@Model.RequestId' + '&unAssign=' + true,
+                                type: "POST",
+                                data: "",
+                                cache: false,
+                                async: false,
+                                dataType: "JSON",
+                                contentType: "application/json",
+                                success: function (result) {
+                                    if (result.status === "OK") {
+                                        window.location.href = '@Url.Action("EquipmentDeliveryIndex","Computing")';
+                                    } else {
+                                        swal({
+                                            title: "ERROR",
+                                            text: result.status,
+                                            type: "error"
+                                        });
+                                    }
+                                }
+                            });
+                    }
+                });
+
+            });
+        }
+    </script>
+}

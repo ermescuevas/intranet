@@ -131,6 +131,29 @@ namespace Seaboard.Intranet.BusinessLogic
             return isPermit;
         }
 
+        public static string GetEmailEmployee(string employeeId)
+        {
+            try
+            {
+                _db = new SeaboContext();
+                _repository = new GenericRepository(_db);
+                var sqlQuery = "SELECT ISNULL(D.INET1, '') Email "
+                            + "FROM " + Helpers.InterCompanyId + ".dbo.UPR00100 A "
+                            + "LEFT JOIN " + Helpers.InterCompanyId + ".dbo.SY01200 D "
+                            + "ON A.EMPLOYID = D.Master_ID AND D.Master_Type = 'EMP' "
+                            + $"WHERE (A.INACTIVE = 0 OR UPPER(A.USERDEF2) = 'SI') AND A.EMPLOYID = '{employeeId}' "
+                            + "ORDER BY A.EMPLOYID ";
+
+                var approver = _repository.ExecuteScalarQuery<string>(sqlQuery);
+
+                if (approver != null)
+                    return approver.Trim();
+                else
+                    return "";
+            }
+            catch { return ""; }
+        }
+
         public static DateTime GetLastDate()
         {
             try

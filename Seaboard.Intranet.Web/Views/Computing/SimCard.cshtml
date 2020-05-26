@@ -5,6 +5,7 @@
     ViewBag.Title = "Tarjeta SIM";
     var operators = (List<SelectListItem>)ViewBag.Operators;
     var status = (List<SelectListItem>)ViewBag.Status;
+    Layout = "~/Views/Shared/_ComputingLayout.cshtml";
 }
 
 <div class="row wrapper border-bottom white-bg page-heading">
@@ -123,7 +124,7 @@
 
                                     <div class="col-sm-5">
                                         <div class="form-group">
-                                            <label class="col-sm-4 control-label">Cantidad de megas:</label>
+                                            <label class="col-sm-4 control-label">Cantidad de gigas(GB):</label>
                                             <div class="col-sm-8 input-group">
                                                 @Html.TextBoxFor(model => model.DataQuantity, new { @class = "form-control" })
                                             </div>
@@ -255,7 +256,7 @@
             $('#Status').val('@Model.Status.ToString()');
         });
 
-        window.onbeforeunload = function () { $.ajax({ url: '@Url.Action("UnblockSecuence", "Computing", new { id = Model.SimCardCode, formulario = "SimCard"})' }).done(function () { }); }
+        window.onbeforeunload = function () { $.ajax({ url: '@Url.Action("UnblockSecuence", "Computing", new { id = Model.SimCardCode, formulario = "EIIV00201"})' }).done(function () { }); }
 
         function cargarArchivos() {
             $.ajax({

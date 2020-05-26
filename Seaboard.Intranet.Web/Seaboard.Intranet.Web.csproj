@@ -1014,6 +1014,15 @@
     <Content Include="Views\Computing\Equipment.cshtml" />
     <Content Include="Views\Computing\SimCardIndex.cshtml" />
     <Content Include="Views\Computing\SimCard.cshtml" />
+    <Content Include="Views\Computing\EquipmentRequest.cshtml" />
+    <Content Include="Views\Computing\EquipmentRequestIndex.cshtml" />
+    <Content Include="Views\Shared\_ComputingLayout.cshtml" />
+    <Content Include="Views\Shared\_ComputingNavigation.cshtml" />
+    <Content Include="Views\Computing\Index.cshtml" />
+    <Content Include="Views\Computing\EquipmentDeliveryIndex.cshtml" />
+    <Content Include="Views\Computing\EquipmentDelivery.cshtml" />
+    <Content Include="Views\Computing\EquipmentRepair.cshtml" />
+    <Content Include="Views\Computing\EquipmentRepairIndex.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

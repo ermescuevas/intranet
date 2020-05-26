@@ -7,6 +7,7 @@
     var operators = (List<SelectListItem>)ViewBag.Operators;
     var technologies = (List<SelectListItem>)ViewBag.Technologies;
     var status = (List<SelectListItem>)ViewBag.Status;
+    Layout = "~/Views/Shared/_ComputingLayout.cshtml";
 }
 
 <div class="row wrapper border-bottom white-bg page-heading">
@@ -170,6 +171,8 @@
                                                 @Html.TextBoxFor(model => model.PhoneNumber, new { @class = "form-control" })
                                             </div>
                                         </div>
+
+                                        
 
                                         <div class="form-group">
                                             <label class="col-sm-4 control-label">Asignado a:</label>
@@ -335,7 +338,7 @@
             }
         });
 
-        window.onbeforeunload = function () { $.ajax({ url: '@Url.Action("UnblockSecuence", "Computing", new { id = Model.DeviceCode, formulario = "Equipment"})' }).done(function () { }); }
+        window.onbeforeunload = function () { $.ajax({ url: '@Url.Action("UnblockSecuence", "Computing", new { id = Model.DeviceCode, formulario = "EIIV00101"})' }).done(function () { }); }
 
         function getMobileModels() {
             $("#lookupModelo").lookupbox({
@@ -473,11 +476,6 @@
                 isAllValid = false;
             } else $('#Cost').val($('#Cost').val().replace(/,/g, ""));
             
-
-            if ($('#SerialNumber').val().trim() == '') {
-                toastr.error('Debe de especificar un numero de serie', 'Campos requeridos')
-                isAllValid = false;
-            }
 
             if ($('#MobileTechnology').val().trim() == '') {
                 toastr.error('Debe de especificar una tecnologia', 'Campos requeridos')

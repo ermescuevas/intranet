@@ -46,6 +46,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entity Models\Computing\EquipmentDelivery.cs" />
+    <Compile Include="Entity Models\Computing\EquipmentRepair.cs" />
+    <Compile Include="Entity Models\Computing\EquipmentRequest.cs" />
+    <Compile Include="Entity Models\Computing\EquipmentRequestLog.cs" />
     <Compile Include="Entity Models\Computing\SimCard.cs" />
     <Compile Include="Entity Models\Computing\Equipment.cs" />
     <Compile Include="Entity Models\Human Resources\AbsenceInquiry.cs" />

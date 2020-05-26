@@ -1,0 +1,197 @@
+﻿@using Seaboard.Intranet.Domain;
+@using Seaboard.Intranet.BusinessLogic;
+@using Microsoft.AspNet.Identity;
+@model IEnumerable<EquipmentRequest>
+@{
+    ViewBag.Title = "Listado de solicitudes de equipos";
+    if (Account.GetAccount(User.Identity.GetUserName()).Department == "INFORMATICA")
+    {
+        Layout = "~/Views/Shared/_ComputingLayout.cshtml";
+    }
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Listado  de solicitudes de equipos</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Listado  de solicitudes de equipos</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+
+    </div>
+</div>
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>Listado  de solicitudes de equipos</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <div class="row m-t-sm">
+                        <div class="col-lg-12">
+                            @if (Account.GetAccount(User.Identity.GetUserName()).Department != "INFORMATICA")
+                            {
+                                @Html.ActionLink("NUEVA SOLICITUD", "EquipmentRequest", "Computing", new { id = "" }, new { @class = "btn btn-primary" })
+                            }
+                            <div class="hr-line-dashed"></div>
+                            <table class="table table-striped table-bordered table-hover informationTable">
+                                <thead>
+                                    <tr>
+                                        <th>No. de solicitud</th>
+                                        <th>Tipo de solicitud adquisición</th>
+                                        <th>Departamento</th>
+                                        <th>Solicitante</th>
+                                        <th>Fecha</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td>@Html.ActionLink(item.RequestId, "EquipmentRequest", new { id = item.RequestId })</td>
+                                            <td>
+                                                @switch (item.RequestType)
+                                                {
+                                                    case "10":
+                                                        <i class="label label-primary">Equipo nuevo</i>
+                                                        break;
+                                                    case "20":
+                                                        <i class="label label-warning">Reparación de equipo</i>
+                                                        break;
+                                                    case "30":
+                                                        <i class="label label-info">Cambio de plan</i>
+                                                        break;
+                                                    case "40":
+                                                        <i class="label label-success">Cancelación de plan</i>
+                                                        break;
+                                                    case "50":
+                                                        <i class="label label-warning-light">Cambiazo o redención de fidepuntos</i>
+                                                        break;
+                                                    case "60":
+                                                        <i class="label label-success">Perdida de equipo</i>
+                                                        break;
+                                                    case "70":
+                                                        <i class="label label-success">Perdida de Tarjeta SIM</i>
+                                                        break;
+                                                    case "80":
+                                                        <i class="label label-success">Tarjeta SIM dañada</i>
+                                                        break;
+                                                }
+                                            </td>
+                                            <td>@item.DepartmentId</td>
+                                            <td>@item.Requester</td>
+                                            <td>@item.DocumentDate.ToShortDateString()</td>
+                                            <td>
+                                                @switch (item.Status)
+                                                {
+                                                    case 1:
+                                                        <i class="badge badge-danger">Nuevo</i>
+                                                        break;
+                                                    case 2:
+                                                        <i class="badge badge-warning-light">Enviado</i>
+                                                        break;
+                                                    case 3:
+                                                        <i class="badge badge-primary">Rechazado</i>
+                                                        break;
+                                                    case 4:
+                                                        <i class="badge badge-warning">Aprobado</i>
+                                                        break;
+                                                    case 5:
+                                                        <i class="badge badge-info">Anulado</i>
+                                                        break;
+                                                    case 6:
+                                                        <i class="badge badge-info">Procesando</i>
+                                                        break;
+                                                    case 7:
+                                                        <i class="badge badge-success">Completado</i>
+                                                        break;
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/dataPicker")
+
+    <script>
+        $(document).ready(function () {
+            $('.informationTable').DataTable({
+                pageLength: 10,
+                order: [[0, "desc"]],
+                dom: '<"html5buttons"B>lTfgitp',
+                language: {
+                    "sProcessing": "Procesando... ",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:  ",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                },
+                oAria: {
+                    "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                },
+                buttons: [
+                    { extend: 'copy' },
+                    { extend: 'csv' },
+                    { extend: 'excel', title: 'ExampleFile' },
+                    { extend: 'pdf', title: 'ExampleFile' },
+
+                    {
+                        extend: 'print',
+                        customize: function (win) {
+                            $(win.document.body).addClass('white-bg');
+                            $(win.document.body).css('font-size', '10px');
+
+                            $(win.document.body).find('table')
+                                .addClass('compact')
+                                .css('font-size', 'inherit');
+                        }
+                    }
+                ]
+            });
+        });
+    </script>
+}

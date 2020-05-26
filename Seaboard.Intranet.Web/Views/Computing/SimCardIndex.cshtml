@@ -2,6 +2,7 @@
 @model IEnumerable<SimCard>
 @{
     ViewBag.Title = "Listado de tajetas SIM";
+    Layout = "~/Views/Shared/_ComputingLayout.cshtml";
 }
 
 <div class="row wrapper border-bottom white-bg page-heading">
@@ -65,10 +66,10 @@
                                                 @switch (item.Status)
                                                 {
                                                     case 1:
-                                                        <i class="badge badge-danger">Nuevo</i>
+                                                        <i class="badge badge-danger">Asignado</i>
                                                         break;
                                                     case 2:
-                                                        <i class="badge badge-warning-light">Usado</i>
+                                                        <i class="badge badge-warning-light">Libre</i>
                                                         break;
                                                     case 3:
                                                         <i class="badge badge-primary">Dañado</i>

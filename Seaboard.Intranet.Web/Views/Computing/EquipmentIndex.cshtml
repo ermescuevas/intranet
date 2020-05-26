@@ -2,6 +2,7 @@
 @model IEnumerable<Equipment>
 @{
     ViewBag.Title = "Listado de equipos";
+   Layout = "~/Views/Shared/_ComputingLayout.cshtml";
 }
 
 <div class="row wrapper border-bottom white-bg page-heading">
@@ -66,25 +67,22 @@
                                                 @switch (item.Status)
                                                 {
                                                     case 1:
-                                                        <i class="badge badge-danger">Nuevo</i>
+                                                        <i class="badge badge-danger">Asignado</i>
                                                         break;
                                                     case 2:
-                                                        <i class="badge badge-warning-light">Usado</i>
+                                                        <i class="badge badge-warning-light">Prestado</i>
                                                         break;
                                                     case 3:
-                                                        <i class="badge badge-primary">Dañado</i>
+                                                        <i class="badge badge-primary">Perdido</i>
                                                         break;
                                                     case 4:
-                                                        <i class="badge badge-warning">Reparado</i>
+                                                        <i class="badge badge-warning">Dañado</i>
                                                         break;
                                                     case 5:
                                                         <i class="badge badge-info">En Reparacion</i>
                                                         break;
                                                     case 6:
-                                                        <i class="badge badge-success">Prestamo</i>
-                                                        break;
-                                                    case 7:
-                                                        <i class="badge badge-success">Perdido</i>
+                                                        <i class="badge badge-default">Libre</i>
                                                         break;
                                                 }
                                             </td>
