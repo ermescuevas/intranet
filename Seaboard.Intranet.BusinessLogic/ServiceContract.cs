@@ -394,57 +394,6 @@ namespace Seaboard.Intranet.BusinessLogic
             }
         }
 
-        public bool CreateVendor(Domain.Models.Supplier gpSupplier, ref string message)
-        {
-            try
-            {
-                var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
-                var context = new Context() { OrganizationKey = new CompanyKey { Id = Helpers.CompanyIdWebServices } };
-                var vendor = new Vendor
-                {
-                    Key = new VendorKey { Id = gpSupplier.SupplierId },
-                    Name = gpSupplier.SupplierName,
-                    CheckName = gpSupplier.SupplierName,
-                    ShortName = gpSupplier.ShortName,
-                    TaxRegistrationNumber = gpSupplier.RNC,
-                    ClassKey = new VendorClassKey { Id = "OTROS" },
-                    DefaultAddressKey = new VendorAddressKey { Id = "PRINCIPAL" },
-                    HistoryOptions = new HistoryOptions
-                    {
-                        KeepCalendarHistory = true,
-                        KeepDistributionHistory = true,
-                        KeepFiscalHistory = true,
-                        KeepTransactionHistory = true
-                    },
-                    Addresses = new VendorAddress[] {new VendorAddress
-                    {
-                        Key = new VendorAddressKey{ Id = "PRINCIPAL", VendorKey = new VendorKey{ Id = gpSupplier.SupplierId} },
-                        City = gpSupplier.City,
-                        ContactPerson = gpSupplier.Contact,
-                        Fax = new PhoneNumber { Value = gpSupplier.Fax },
-                        Line1 = gpSupplier.Address1,
-                        Line2 = gpSupplier.Address2,
-                        Line3 = gpSupplier.Address3,
-                        Phone1 = new PhoneNumber { Value = gpSupplier.Phone1 },
-                        Phone2 = new PhoneNumber { Value = gpSupplier.Phone2 },
-                        Phone3 = new PhoneNumber { Value = gpSupplier.Phone3 },
-                        State = gpSupplier.State,
-                        CountryRegion = gpSupplier.Country
-                    }},
-                    PaymentTermsKey = new PaymentTermsKey { Id = gpSupplier.PaymentCondition }
-                };
-                var policy = wsDynamicsGp.GetPolicyByOperation("CreateVendor", context);
-                wsDynamicsGp.CreateVendor(vendor, context, policy);
-                message = "OK";
-                return true;
-            }
-            catch (Exception ex)
-            {
-                message = ex.Message;
-                return false;
-            }
-        }
-
         public bool CreateCustomer(Domain.Models.Customer gpCustomer, ref string message)
         {
             try
@@ -536,57 +485,6 @@ namespace Seaboard.Intranet.BusinessLogic
                         CountryRegion = gpCustomer.Country
                     }},
                     Comment1 = gpCustomer.NCFType
-                };
-                var policy = wsDynamicsGp.GetPolicyByOperation("UpdateVendor", context);
-                wsDynamicsGp.UpdateVendor(vendor, context, policy);
-                message = "OK";
-                return true;
-            }
-            catch (Exception ex)
-            {
-                message = ex.Message;
-                return false;
-            }
-        }
-
-        public bool UpdateVendor(Domain.Models.Supplier gpSupplier, ref string message)
-        {
-            try
-            {
-                var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
-                var context = new Context() { OrganizationKey = new CompanyKey { Id = Helpers.CompanyIdWebServices } };
-                var vendor = new Vendor
-                {
-                    Key = new VendorKey { Id = gpSupplier.SupplierId },
-                    Name = gpSupplier.SupplierName,
-                    CheckName = gpSupplier.SupplierName,
-                    ShortName = gpSupplier.ShortName,
-                    TaxRegistrationNumber = gpSupplier.RNC,
-                    ClassKey = new VendorClassKey { Id = "OTROS" },
-                    DefaultAddressKey = new VendorAddressKey { Id = "PRINCIPAL" },
-                    HistoryOptions = new HistoryOptions
-                    {
-                        KeepCalendarHistory = true,
-                        KeepDistributionHistory = true,
-                        KeepFiscalHistory = true,
-                        KeepTransactionHistory = true
-                    },
-                    Addresses = new VendorAddress[] {new VendorAddress
-                    {
-                        Key = new VendorAddressKey{ Id = "PRINCIPAL", VendorKey = new VendorKey{ Id = gpSupplier.SupplierId } },
-                        City = gpSupplier.City,
-                        ContactPerson = gpSupplier.Contact,
-                        Fax = new PhoneNumber { Value = gpSupplier.Fax },
-                        Line1 = gpSupplier.Address1,
-                        Line2 = gpSupplier.Address2,
-                        Line3 = gpSupplier.Address3,
-                        Phone1 = new PhoneNumber { Value = gpSupplier.Phone1 },
-                        Phone2 = new PhoneNumber { Value = gpSupplier.Phone2 },
-                        Phone3 = new PhoneNumber { Value = gpSupplier.Phone3 },
-                        State = gpSupplier.State,
-                        CountryRegion = gpSupplier.Country
-                    }},
-                    PaymentTermsKey = new PaymentTermsKey { Id = gpSupplier.PaymentCondition }
                 };
                 var policy = wsDynamicsGp.GetPolicyByOperation("UpdateVendor", context);
                 wsDynamicsGp.UpdateVendor(vendor, context, policy);

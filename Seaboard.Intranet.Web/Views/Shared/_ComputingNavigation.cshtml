@@ -31,22 +31,30 @@
             <li class="landing_link">
                 <a href="@Url.Action("Index","Computing")"><i class="fa fa-star"></i> <span class="nav-label">Inicio</span></a>
             </li>
-            <li class="@Html.IsSelected(controller: "Computing", action: "EquipmentRequestIndex")
-                    @Html.IsSelected(controller: "Computing", action: "EquipmentRequest")
+            <li class="@Html.IsSelected(controller: "Computing", action: "EquipmentRequestHandlingIndex")
+                    @Html.IsSelected(controller: "Computing", action: "EquipmentRequestHandling")
                     @Html.IsSelected(controller: "Computing", action: "EquipmentDeliveryIndex")
                     @Html.IsSelected(controller: "Computing", action: "EquipmentDelivery")
                     @Html.IsSelected(controller: "Computing", action: "EquipmentRepairIndex")
-                    @Html.IsSelected(controller: "Computing", action: "EquipmentRepair")">
+                    @Html.IsSelected(controller: "Computing", action: "EquipmentRepair")
+                    @Html.IsSelected(controller: "Computing", action: "EquipmentUnassignIndex", cssClass: "in")
+                    @Html.IsSelected(controller: "Computing", action: "EquipmentUnassign", cssClass: "in")
+                    @Html.IsSelected(controller: "Computing", action: "CaseIndex", cssClass: "in")
+                    @Html.IsSelected(controller: "Computing", action: "Case", cssClass: "in")">
                 <a href="#"><i class="fa fa-edit"></i> <span class="nav-label" data-i18n="nav.dashboard">Transacciones</span> <span class="fa arrow"></span></a>
                 <ul class="nav nav-second-level collapse
-                        @Html.IsSelected(controller: "Computing", action: "EquipmentRequestIndex", cssClass: "in")
-                        @Html.IsSelected(controller: "Computing", action: "EquipmentRequest", cssClass: "in")
+                        @Html.IsSelected(controller: "Computing", action: "EquipmentRequestHandlingIndex", cssClass: "in")
+                        @Html.IsSelected(controller: "Computing", action: "EquipmentRequestHandling", cssClass: "in")
                         @Html.IsSelected(controller: "Computing", action: "EquipmentDeliveryIndex", cssClass: "in")
                         @Html.IsSelected(controller: "Computing", action: "EquipmentDelivery", cssClass: "in")
                         @Html.IsSelected(controller: "Computing", action: "EquipmentRepairIndex", cssClass: "in")
-                        @Html.IsSelected(controller: "Computing", action: "EquipmentRepair", cssClass: "in")">
-                    <li class="@Html.IsSelected(action: "EquipmentRequestIndex") @Html.IsSelected(action: "EquipmentRequest")">
-                        <a href="@Url.Action("EquipmentRequestIndex", "Computing")">Solicitud de equipos</a>
+                        @Html.IsSelected(controller: "Computing", action: "EquipmentRepair", cssClass: "in")
+                        @Html.IsSelected(controller: "Computing", action: "EquipmentUnassignIndex", cssClass: "in")
+                        @Html.IsSelected(controller: "Computing", action: "EquipmentUnassign", cssClass: "in")
+                        @Html.IsSelected(controller: "Computing", action: "CaseIndex", cssClass: "in")
+                        @Html.IsSelected(controller: "Computing", action: "Case", cssClass: "in")">
+                    <li class="@Html.IsSelected(action: "EquipmentRequestHandlingIndex") @Html.IsSelected(action: "EquipmentRequestHandling")">
+                        <a href="@Url.Action("EquipmentRequestHandlingIndex", "Computing")">Solicitud de equipos</a>
                     </li>
                     <li class="@Html.IsSelected(action: "EquipmentDeliveryIndex") @Html.IsSelected(action: "EquipmentDelivery")">
                         <a href="@Url.Action("EquipmentDeliveryIndex", "Computing")">Entrega de equipos</a>
@@ -54,61 +62,50 @@
                     <li class="@Html.IsSelected(action: "EquipmentRepairIndex") @Html.IsSelected(action: "EquipmentRepair")">
                         <a href="@Url.Action("EquipmentRepairIndex", "Computing")">Reparación de equipos</a>
                     </li>
+                    <li class="@Html.IsSelected(action: "EquipmentUnassignIndex") @Html.IsSelected(action: "EquipmentUnassign")">
+                        <a href="@Url.Action("EquipmentUnassignIndex", "Computing")">Desasignación</a>
+                    </li>
+                    <li class="@Html.IsSelected(action: "CaseIndex") @Html.IsSelected(action: "Case")">
+                        <a href="@Url.Action("CaseIndex", "Computing")">Casos</a>
+                    </li>
                 </ul>
             </li>
             <li class="@Html.IsSelected(controller: "Computing", action: "EquipmentIndex")
                     @Html.IsSelected(controller: "Computing", action: "Equipment")
                     @Html.IsSelected(controller: "Computing", action: "SimCardIndex")
-                    @Html.IsSelected(controller: "Computing", action: "SimCard")">
+                    @Html.IsSelected(controller: "Computing", action: "SimCard")
+                    @Html.IsSelected(controller: "Computing", action: "EarnedPoints")">
                 <a href="#"><i class="fa fa-th-large"></i> <span class="nav-label" data-i18n="nav.dashboard">Tarjetas</span> <span class="fa arrow"></span></a>
                 <ul class="nav nav-second-level collapse
                         @Html.IsSelected(controller: "Computing", action: "EquipmentIndex", cssClass: "in")
                         @Html.IsSelected(controller: "Computing", action: "Equipment", cssClass: "in")
                         @Html.IsSelected(controller: "Computing", action: "SimCardIndex", cssClass: "in")
-                        @Html.IsSelected(controller: "Computing", action: "SimCard", cssClass: "in")">
+                        @Html.IsSelected(controller: "Computing", action: "SimCard", cssClass: "in")
+                        @Html.IsSelected(controller: "Computing", action: "EarnedPoints", cssClass: "in")">
                     <li class="@Html.IsSelected(action: "EquipmentIndex") @Html.IsSelected(action: "Equipment")">
                         <a href="@Url.Action("EquipmentIndex", "Computing")">Equipos</a>
                     </li>
                     <li class="@Html.IsSelected(action: "SimCardIndex") @Html.IsSelected(action: "SimCard")">
                         <a href="@Url.Action("SimCardIndex", "Computing")">Tarjeta SIM</a>
                     </li>
-                </ul>
-            </li>
-            <li class="@Html.IsSelected(controller: "Accounting", action: "SupplierTransactionInquiry")">
-                <a href="#"><i class="fa fa-table"></i> <span class="nav-label" data-i18n="nav.dashboard">Consultas</span> <span class="fa arrow"></span></a>
-                <ul class="nav nav-second-level collapse
-                            @Html.IsSelected(controller: "Accounting", action: "AccountingTransactionInquiry", cssClass: "in")">
-                    <li class="@Html.IsSelected(action: "AccountingTransactionInquiry")">
-                        <a href="@Url.Action("AccountingTransactionInquiry", "Accounting")">Facturas</a>
+                    <li class="@Html.IsSelected(action: "EarnedPoints")">
+                        <a href="@Url.Action("EarnedPoints", "Computing")">Fidepuntos</a>
                     </li>
                 </ul>
             </li>
-            <li class="@Html.IsSelected(controller: "Billing", action: "BillingReport")
-                    @Html.IsSelected(controller: "Billing", action: "CustomerDataReport")
-                    @Html.IsSelected(controller: "Billing", action: "SalesTransDetailReport")
-                    @Html.IsSelected(controller: "Billing", action: "SalesTransGeneralLedgerReport")">
-                <a href="#"><i class="fa fa-files-o"></i> <span class="nav-label" data-i18n="nav.dashboard">Reportes</span> <span class="fa arrow"></span></a>
+            <li class="@Html.IsSelected(controller: "Computing", action: "EquipmentRequestInquiry")
+                @Html.IsSelected(controller: "Computing", action: "EquipmentInquiry")
+                @Html.IsSelected(controller: "Computing", action: "SimCardInquiry")
+                @Html.IsSelected(controller: "Computing", action: "EquipmentDeliveryInquiry")">
+                <a href="#"><i class="fa fa-table"></i> <span class="nav-label" data-i18n="nav.dashboard">Consultas</span> <span class="fa arrow"></span></a>
                 <ul class="nav nav-second-level collapse
-                        @Html.IsSelected(controller: "Billing", action: "BillingReport", cssClass: "in")
-                        @Html.IsSelected(controller: "Billing", action: "CustomerDataReport", cssClass: "in")
-                        @Html.IsSelected(controller: "Billing", action: "SalesTransDetailReport", cssClass: "in")
-                        @Html.IsSelected(controller: "Billing", action: "SalesTransGeneralLedgerReport", cssClass: "in")">
-                    <li class="@Html.IsSelected(action: "CustomerDataReport")"><a href="@Url.Action("CustomerDataReport", "Billing")">Datos de cliente</a></li>
-                    <li class="@Html.IsSelected(action: "BillingReport")"><a href="@Url.Action("BillingReport", "Billing")" target="_blank">Trans. ventas resumido</a></li>
-                    <li class="@Html.IsSelected(action: "SalesTransDetailReport")"><a href="@Url.Action("SalesTransDetailReport", "Billing")">Trans. ventas detallado</a></li>
-                    <li class="@Html.IsSelected(action: "SalesTransGeneralLedgerReport")"><a href="@Url.Action("SalesTransGeneralLedgerReport", "Billing")">Trans. ventas cuentas</a></li>
-                    <li class="@Html.IsSelected(action: "FiscalSalesReport")"><a href="@Url.Action("FiscalSalesReport", "Billing")">Reporte 607</a></li>
-                </ul>
-            </li>
-            <li class="
-                    @Html.IsSelected(controller: "Accounting", action: "ConfigurationIndex")
-                    @Html.IsSelected(controller: "Accounting", action: "NCFConfigurationIndex")">
-                <a href="#"><i class="fa fa-laptop"></i> <span class="nav-label" data-i18n="nav.dashboard">Configuración</span> <span class="fa arrow"></span></a>
-                <ul class="nav nav-second-level collapse
-                        @Html.IsSelected(controller: "Accounting", action: "ConfigurationIndex", cssClass: "in")
-                        @Html.IsSelected(controller: "Accounting", action: "NCFConfigurationIndex", cssClass: "in")">
-                    <li class="@Html.IsSelected(action: "ConfigurationIndex")"><a href="@Url.Action("ConfigurationIndex", "Accounting")">General</a></li>
-                    <li class="@Html.IsSelected(action: "NCFConfigurationIndex")"><a href="@Url.Action("NCFConfigurationIndex", "Accounting")">NCF</a></li>
+                    @Html.IsSelected(controller: "Computing", action: "EquipmentRequestInquiry", cssClass: "in")
+                    @Html.IsSelected(controller: "Computing", action: "EquipmentInquiry", cssClass: "in")
+                    @Html.IsSelected(controller: "Computing", action: "EquipmentDeliveryInquiry", cssClass: "in")">
+                    <li class="@Html.IsSelected(action: "EquipmentRequestInquiry")"><a href="@Url.Action("EquipmentRequestInquiry", "Computing")">Solicitudes</a></li>
+                    <li class="@Html.IsSelected(action: "EquipmentDeliveryInquiry")"><a href="@Url.Action("EquipmentDeliveryInquiry", "Computing")">Entrega de Equipo</a></li>
+                    <li class="@Html.IsSelected(action: "EquipmentInquiry")"><a href="@Url.Action("EquipmentInquiry", "Computing")">Equipos</a></li>
+                    <li class="@Html.IsSelected(action: "SimCardInquiry")"><a href="@Url.Action("SimCardInquiry", "Computing")">Tarjetas SIM</a></li>
                 </ul>
             </li>
         </ul>

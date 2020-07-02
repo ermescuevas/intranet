@@ -82,7 +82,7 @@
                                             <div class="col-sm-8 input-group">
                                                 @Html.TextBoxFor(model => model.DepartmentId, new { @class = "form-control", @readonly = "" })
                                                 <span class="input-group-btn">
-                                                    <button type="button" class="btn btn-primary">
+                                                    <button id="lookupDepartamento" type="button" class="btn btn-primary">
                                                         <i class="fa fa-search"></i>
                                                     </button>
                                                 </span>
@@ -94,7 +94,7 @@
                                             <div class="col-sm-8 input-group">
                                                 @Html.TextBoxFor(model => model.Priority, new { @class = "form-control", @readonly = "" })
                                                 <span class="input-group-btn">
-                                                    <button type="button" class="btn btn-primary">
+                                                    <button id="lookupPrioridad" type="button" class="btn btn-primary">
                                                         <i class="fa fa-search"></i>
                                                     </button>
                                                 </span>
@@ -334,18 +334,25 @@
 @Html.Partial("Delete", Model)
 
 @section Styles {
+    @Styles.Render("~/plugins/summernoteStyles")
     @Styles.Render("~/plugins/dataPickerStyles")
-    @Styles.Render("~/plugins/jasnyBootstrapStyles")
     @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/plugins/footableStyles")
     <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
-    <link href="@Url.Content("~/Content/plugins/datatables/datatables.min.css")" rel="stylesheet" type="text/css" />
+
 }
 
 @section Scripts {
+
+    @Scripts.Render("~/plugins/summernote")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
     @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
     @Scripts.Render("~/plugins/dataPicker")
-    @Scripts.Render("~/plugins/jasnyBootstrap")
     @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/footable")
     @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
 
 

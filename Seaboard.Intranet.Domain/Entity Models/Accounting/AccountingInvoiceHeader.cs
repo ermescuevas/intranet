@@ -26,7 +26,7 @@ namespace Seaboard.Intranet.Domain.Models
         public string Note { get; set; }
         public int DocumentType { get; set; }
         public int ExpenseType { get; set; }
-        public bool Posted { get; set; }
+        public int Status { get; set; }
 
         public List<AccountingInvoiceDetail> Details { get; set; }
     }

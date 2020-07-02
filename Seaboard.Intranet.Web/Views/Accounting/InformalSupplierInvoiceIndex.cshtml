@@ -35,7 +35,7 @@
                     </div>
                 </div>
                 <div class="ibox-content">
-                    @Html.ActionLink("NUEVA FACTURA", "InformalSupplierInvoice", "Accounting", null, new { @class = "btn btn-primary" })
+                    <button class="btn btn-primary" onclick="openNewInvoice();">NUEVA FACTURA</button>
                     <div class="hr-line-dashed"></div>
                     <table class="table table-striped table-bordered table-hover informationTable">
                         <thead>
@@ -52,24 +52,33 @@
                         <tbody>
                             @foreach (var item in Model)
                             {
-                            <tr>
-                                <td>@Html.ActionLink(item.DocumentNumber, "InformalSupplierInvoice", new { @id = item.DocumentNumber }) </td>
-                                <td>@item.Ncf</td>
-                                <td>@item.SupplierNumber</td>
-                                <td>@item.SupplierName</td>
-                                <td>@item.DocumentDate.ToString("dd/MM/yyyy")</td>
-                                <td>@item.TotalAmount.ToString("C2")</td>
-                                <td>
-                                    @if (!item.Posted)
-                                    {
-                                        <i class="badge badge-success">Abierto</i>
-                                    }
-                                    else
-                                    {
-                                        <i class="badge badge-danger">Contabilizado</i>
-                                    }
-                                </td>
-                            </tr>
+                                <tr>
+                                    <td>@Html.ActionLink(item.DocumentNumber, "InformalSupplierInvoice", new { @id = item.DocumentNumber }) </td>
+                                    <td>@item.Ncf</td>
+                                    <td>@item.SupplierNumber</td>
+                                    <td>@item.SupplierName</td>
+                                    <td>@item.DocumentDate.ToString("dd/MM/yyyy")</td>
+                                    <td>@item.TotalAmount.ToString("C2")</td>
+                                    <td>
+                                        @switch (item.Status)
+                                        {
+                                            case 0:
+                                                <i class="badge badge-primary">Nuevo</i>
+                                                break;
+                                            case 1:
+                                                <i class="badge badge-danger">Borrador</i>
+                                                break;
+                                            case 2:
+                                                <i class="badge badge-success">Registrada</i>
+                                                break;
+                                            case 3:
+                                                <i class="badge badge-info">Anulada</i>
+                                                break;
+                                            default:
+                                                break;
+                                        }
+                                    </td>
+                                </tr>
                             }
                         </tbody>
                     </table>
@@ -81,11 +90,13 @@
 @section Styles {
     @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
     @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/sweetAlertStyles")
 }
 
 @section Scripts {
     @Scripts.Render("~/plugins/dataTables")
     @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/sweetAlert")
 
     <script>
         $(document).ready(function () {
@@ -142,5 +153,26 @@
 
             });
         });
+
+        function openNewInvoice() {
+            $.ajax({
+                url: '@Url.Action("CheckSequenceNcf", "Accounting")?type=11',
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                cache: false,
+                contentType: "application/json",
+                success: function (result) {
+                    if (result.status === "OK")
+                        window.location.href = '@Url.Action("InformalSupplierInvoice","Accounting")';
+                    else
+                        swal({
+                            title: "ERROR",
+                            text: result.status,
+                            type: "error"
+                        });
+                }
+            });
+        }
     </script>
 }

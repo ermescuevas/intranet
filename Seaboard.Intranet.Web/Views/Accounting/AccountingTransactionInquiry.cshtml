@@ -69,6 +69,17 @@
                                     </select>
                                 </div>
                             </div>
+                            <div class="form-group">
+                                <label class="col-sm-5 control-label">Estado :</label>
+                                <div class="col-sm-7 input-group">
+                                    <select class="form-control" id="DocumentStatus" name="DocumentStatus">
+                                        <option value="0">Todos</option>
+                                        <option value="1">En borrador</option>
+                                        <option value="2">Registrado</option>
+                                        <option value="3">Anulado</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
@@ -270,6 +281,7 @@
                 toastr.info('Estamos procesando su solicitud', 'Por favor espere');
                 var data = {
                     documentType: parseInt($('#DocumentType').val()),
+                    documentStatus: parseInt($('#DocumentStatus').val()),
                     supplierNumber: $('#SupplierNumber').val(),
                     ncf: $('#Ncf').val(),
                     accountNumber: $('#AccountNumber').val(),
@@ -319,12 +331,10 @@
                                     $row.append($('<td/>').html($group.append($details).append($print)));
                                     $tbody.append($row);
                                     $details.click(function () {
-                                        e.preventDefault();
-                                        $(this).attr('data-target', '#modal-container');
-                                        $(this).attr('data-toggle', 'modal');
+                                        window.location.href = (val.PhoneNumber == "Proveedor Informal" ? '@Url.Action("InformalSupplierInvoice","Accounting")' : '@Url.Action("MinorExpensesInvoice","Accounting")') + '?id=' + val.DocumentNumber;
                                     });
                                     $print.click(function () {
-                                        imprimirReporte(val.SopNumber);
+                                        imprimir(val.PhoneNumber == "Proveedor Informal" ? 0 : 1, val.DocumentNumber)
                                     });
                                 });
                                 $table.append($tbody);
@@ -386,28 +396,36 @@
             }
         }
 
-        function imprimirReporte(sopNumber) {
-            var isValid = true;
-
-            if (isValid) {
-                var url = '@Url.Content("~/PDF/Reportes/")BillingInvoice.pdf';
-                toastr.info('Estamos procesando su solicitud', 'Por favor espere');
-                $.ajax({
-                    url: '@Url.Action("BillingInvoiceReport", "Billing")?sopNumber=' + sopNumber + '&choice=10&duplicate=false&preInvoice=1&billingType=10',
-                    type: "POST",
-                    data: '',
-                    dataType: "JSON",
-                    async: false,
-                    contentType: "application/json",
-                    success: function(d) {
-                        if (d.status === "OK") {
-                            window.open(url);
-                        } else {
-                            alert(d.status);
-                        }
-                    }
-                });
+        function imprimir(type, id) {
+            var url = '';
+            var urlAction = '';
+            if (type == 0) {
+                url = '@Url.Content("~/PDF/Reportes/")InformalSupplierInvoiceReport.pdf';
+                urlAction = '@Url.Action("InformalSupplierInvoiceReport", "Accounting")?id=' + id
+            } else {
+                url = '@Url.Content("~/PDF/Reportes/")MinorExpensesInvoiceReport.pdf';
+                urlAction = '@Url.Action("MinorExpensesInvoiceReport", "Accounting")?id=' + id
             }
+            toastr.info('Estamos procesando su solicitud', 'Por favor espere')
+            $.ajax({
+                url: urlAction,
+                type: "POST",
+                data: "",
+                cache: false,
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    if (result.status === "OK")
+                        window.open(url);
+                    else
+                        swal({
+                            title: "ERROR",
+                            text: result.status,
+                            type: "error"
+                        });
+
+                }
+            });
         }
 
         function borrar() {

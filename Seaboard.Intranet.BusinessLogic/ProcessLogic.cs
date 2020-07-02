@@ -338,7 +338,7 @@ namespace Seaboard.Intranet.BusinessLogic
                     } while (retryCount < 3);
                     break;
 
-                    #endregion
+                #endregion
                 case 3:
                     #region Solicitud de Articulo
 
@@ -437,7 +437,7 @@ namespace Seaboard.Intranet.BusinessLogic
                     } while (retryCount < 3);
                     break;
 
-                    #endregion
+                #endregion
                 case 4:
                     #region Solicitud de Almacen
 
@@ -551,7 +551,7 @@ namespace Seaboard.Intranet.BusinessLogic
                     } while (retryCount < 3);
                     break;
 
-                    #endregion
+                #endregion
                 case 5:
                     #region Solicitud de ausencia
 
@@ -1070,7 +1070,7 @@ namespace Seaboard.Intranet.BusinessLogic
                             }
                             break;
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             status = ex.Message;
                             retryCount++;
@@ -1528,263 +1528,399 @@ namespace Seaboard.Intranet.BusinessLogic
                 case 13:
                     #region Solicitud de Equipo
 
-                    DataTable equipmentRequest = ConnectionDb.GetDt($"SELECT RequestId, DocumentDate, DepartmentId, Requester, CASE HasData WHEN 1 THEN 'SI' ELSE 'NO' END HasData, " +
-                        $"CASE OpenMinutes WHEN 1 THEN 'SI' ELSE 'NO' END OpenMinutes, CASE RequestType WHEN '10' THEN 'Equipo Nuevo' WHEN '20' THEN 'Reparación de equipo' " +
-                        $"WHEN '30' THEN 'Cambio de plan' WHEN '40' THEN 'Cancelación de plan' WHEN '50' THEN 'Cambiazo o redención de fidepuntos' WHEN '60' THEN 'Perdida de equipo' " +
-                        $"WHEN '70' THEN 'Perdida de Tarjeta SIM' WHEN '80' THEN 'Tarjeta SIM dañada' ELSE 'Equipo Nuevo' END RequestType, Note " +
-                        $"FROM {Helpers.InterCompanyId}.dbo.EIPM10000 WHERE RequestId = '{idSolicitud}'");
-                    Attachments = ConnectionDb.GetDt(String.Format("LODYNDEV.dbo.LPCO00100S1 '{0}','{1}'", Helpers.InterCompanyId, idSolicitud));
-
-                    if (equipmentRequest != null)
+                    do
                     {
-                        if (equipmentRequest.Rows.Count > 0)
+                        try
                         {
-                            clientContext = new ClientContext("https://seaboardpowercomdo.sharepoint.com");
-                            foreach (char c in "Servicios2.4")
-                                securePassword.AppendChar(c);
-                            clientContext.Credentials = new SharePointOnlineCredentials("no-reply@seaboardpower.com.do", securePassword);
-                            listCollection = clientContext.Web.Lists.GetByTitle("Equipo");
-                            listInformation = new ListItemCreationInformation();
+                            var equipmentRequest = ConnectionDb.GetDt($"SELECT RequestId, DocumentDate, DepartmentId, Requester, CASE HasData WHEN 1 THEN 'SI' ELSE 'NO' END HasData, " +
+                                           $"OpenMinutes, CASE RequestType WHEN '10' THEN 'Equipo Nuevo' WHEN '20' THEN 'Reparación de equipo' " +
+                                           $"WHEN '30' THEN 'Cambio de plan' WHEN '40' THEN 'Cancelación de plan' WHEN '50' THEN 'Cambiazo o redención de fidepuntos' WHEN '60' THEN 'Perdida de equipo' " +
+                                           $"WHEN '70' THEN 'Perdida de Tarjeta SIM' WHEN '80' THEN 'Tarjeta SIM dañada' WHEN '90' THEN 'Reemplazo de equipo' ELSE 'Equipo Nuevo' END RequestType, Note " +
+                                           $"FROM {Helpers.InterCompanyId}.dbo.EIPM10000 WHERE RequestId = '{idSolicitud}'");
+                            Attachments = ConnectionDb.GetDt(String.Format("LODYNDEV.dbo.LPCO00100S1 '{0}','{1}'", Helpers.InterCompanyId, idSolicitud));
 
-                            using (clientContext)
+                            if (equipmentRequest != null)
                             {
-                                clientContext.Load(clientContext.Web);
-                                clientContext.Load(listCollection);
-                                var builder = new StringBuilder();
-                                builder.Append("<View><Query>");
-                                builder.Append("<Where><Eq><FieldRef Name='Solicitud'/>");
-                                builder.Append("<Value Type='Text'>" + equipmentRequest.Rows[0]["RequestId"].ToString().Trim() + "</Value></Eq></Where>");
-                                builder.Append("</Query><RowLimit>1</RowLimit></View>");
-
-                                var query = new CamlQuery { ViewXml = builder.ToString().Trim() };
-                                var collection = listCollection.GetItems(query);
-                                clientContext.Load(collection);
-                                clientContext.ExecuteQuery();
-
-                                if (collection.Count > 0)
+                                if (equipmentRequest.Rows.Count > 0)
                                 {
-                                    foreach (var item in collection)
+                                    clientContext = new ClientContext("https://seaboardpowercomdo.sharepoint.com");
+                                    foreach (char c in "Servicios2.4")
+                                        securePassword.AppendChar(c);
+                                    clientContext.Credentials = new SharePointOnlineCredentials("no-reply@seaboardpower.com.do", securePassword);
+                                    listCollection = clientContext.Web.Lists.GetByTitle("Equipo");
+                                    listInformation = new ListItemCreationInformation();
+
+                                    using (clientContext)
                                     {
-                                        listItem = listCollection.GetItemById(item["ID"].ToString().Trim());
-                                        listItem.DeleteObject();
+                                        clientContext.Load(clientContext.Web);
+                                        clientContext.Load(listCollection);
+                                        var builder = new StringBuilder();
+                                        builder.Append("<View><Query>");
+                                        builder.Append("<Where><Eq><FieldRef Name='Solicitud'/>");
+                                        builder.Append("<Value Type='Text'>" + equipmentRequest.Rows[0]["RequestId"].ToString().Trim() + "</Value></Eq></Where>");
+                                        builder.Append("</Query><RowLimit>1</RowLimit></View>");
+
+                                        var query = new CamlQuery { ViewXml = builder.ToString().Trim() };
+                                        var collection = listCollection.GetItems(query);
+                                        clientContext.Load(collection);
                                         clientContext.ExecuteQuery();
-                                    }
-                                }
-                            }
 
-                            listItem = listCollection.AddItem(listInformation);
-                            listItem["Solicitud"] = equipmentRequest.Rows[0]["RequestId"].ToString().Trim();
-                            listItem["Departamento"] = equipmentRequest.Rows[0]["DepartmentId"].ToString().Trim();
-                            listItem["Fecha"] = equipmentRequest.Rows[0]["DocumentDate"].ToString().Trim();
-                            listItem["Empleado"] = equipmentRequest.Rows[0]["Requester"].ToString().Trim();
-                            listItem["TipoSolicitud"] = equipmentRequest.Rows[0]["RequestType"].ToString().Trim();
-                            listItem["ConDatos"] = equipmentRequest.Rows[0]["HasData"].ToString().Trim();
-                            listItem["FlotaAbierta"] = equipmentRequest.Rows[0]["OpenMinutes"].ToString().Trim();
-                            listItem["Nota"] = equipmentRequest.Rows[0]["Note"].ToString().Trim();
-                            listItem["Solicitante"] = email;
-                            listItem["EmpleadoMail"] = HelperLogic.GetEmailEmployee(equipmentRequest.Rows[0]["Requester"].ToString().Trim().Substring(0, 6));
-                            listItem["DB"] = "TEST1";  //Helpers.InterCompanyId;
-                            listItem.Update();
-
-                            if (Attachments != null)
-                            {
-                                if (Attachments.Rows.Count > 0)
-                                {
-                                    foreach (DataRow item in Attachments.Rows)
-                                    {
-                                        byte[] FileInfo;
-                                        FileInfo = Encoding.UTF8.GetBytes(String.Empty);
-                                        FileInfo = (byte[])item[1];
-                                        attachInfo = new AttachmentCreationInformation
+                                        if (collection.Count > 0)
                                         {
-                                            FileName = item[0].ToString().Trim()
-                                            .Replace("^", " ").Replace("@", " ").Replace("#", " ")
-                                            .Replace("$", " ").Replace("&", " ").Replace("*", " "),
-                                            ContentStream = new MemoryStream(FileInfo)
-                                        };
-
-                                        attach = listItem.AttachmentFiles.Add(attachInfo);
-                                        clientContext.Load(attach);
+                                            foreach (var item in collection)
+                                            {
+                                                listItem = listCollection.GetItemById(item["ID"].ToString().Trim());
+                                                listItem.DeleteObject();
+                                                clientContext.ExecuteQuery();
+                                            }
+                                        }
                                     }
+
+                                    listItem = listCollection.AddItem(listInformation);
+                                    listItem["Solicitud"] = equipmentRequest.Rows[0]["RequestId"].ToString().Trim();
+                                    listItem["Departamento"] = equipmentRequest.Rows[0]["DepartmentId"].ToString().Trim();
+                                    listItem["Fecha"] = equipmentRequest.Rows[0]["DocumentDate"].ToString().Trim();
+                                    listItem["Empleado"] = equipmentRequest.Rows[0]["Requester"].ToString().Trim();
+                                    listItem["TipoSolicitud"] = equipmentRequest.Rows[0]["RequestType"].ToString().Trim();
+                                    listItem["ConDatos"] = equipmentRequest.Rows[0]["HasData"].ToString().Trim();
+                                    listItem["FlotaAbierta"] = equipmentRequest.Rows[0]["OpenMinutes"].ToString().Trim();
+                                    listItem["Nota"] = equipmentRequest.Rows[0]["Note"].ToString().Trim();
+                                    listItem["Solicitante"] = email;
+                                    listItem["EmpleadoMail"] = HelperLogic.GetEmailEmployee(equipmentRequest.Rows[0]["Requester"].ToString().Trim().Substring(0, 6));
+                                    listItem["DB"] = Helpers.InterCompanyId;
+                                    listItem.Update();
+
+                                    if (Attachments != null)
+                                    {
+                                        if (Attachments.Rows.Count > 0)
+                                        {
+                                            foreach (DataRow item in Attachments.Rows)
+                                            {
+                                                byte[] FileInfo;
+                                                FileInfo = Encoding.UTF8.GetBytes(String.Empty);
+                                                FileInfo = (byte[])item[1];
+                                                attachInfo = new AttachmentCreationInformation
+                                                {
+                                                    FileName = item[0].ToString().Trim()
+                                                    .Replace("^", " ").Replace("@", " ").Replace("#", " ")
+                                                    .Replace("$", " ").Replace("&", " ").Replace("*", " "),
+                                                    ContentStream = new MemoryStream(FileInfo)
+                                                };
+
+                                                attach = listItem.AttachmentFiles.Add(attachInfo);
+                                                clientContext.Load(attach);
+                                            }
+                                        }
+                                    }
+                                    clientContext.ExecuteQuery();
                                 }
                             }
-                            clientContext.ExecuteQuery();
+
+                            break;
                         }
-                    }
+                        catch (Exception ex)
+                        {
+                            status = ex.Message;
+                            retryCount++;
+                        }
+                    } while (retryCount < 3);
                     break;
 
                 #endregion
                 case 14:
                     #region Entrega de Equipo
-
-                    DataTable equipmentDelivery = ConnectionDb.GetDt($"SELECT RequestId, Device, SimCard, PropertyBy, CostAmount, AmountCoverable, InvoiceOwner, AssignedUser, DocumentDate, Note, " +
-                        $"CASE DeliveryType WHEN '10' THEN 'Asignación' ELSE 'Prestamo' END DeliveryType " +
-                        $"FROM {Helpers.InterCompanyId}.dbo.EIPM10200 WHERE RequestId = '{idSolicitud}'");
-                    Attachments = ConnectionDb.GetDt(String.Format("LODYNDEV.dbo.LPCO00100S1 '{0}','{1}'", Helpers.InterCompanyId, idSolicitud));
-
-                    if (equipmentDelivery != null)
+                    do
                     {
-                        if (equipmentDelivery.Rows.Count > 0)
+                        try
                         {
-                            clientContext = new ClientContext("https://seaboardpowercomdo.sharepoint.com");
-                            foreach (char c in "Servicios2.4")
-                                securePassword.AppendChar(c);
-                            clientContext.Credentials = new SharePointOnlineCredentials("no-reply@seaboardpower.com.do", securePassword);
-                            listCollection = clientContext.Web.Lists.GetByTitle("Entrega");
-                            listInformation = new ListItemCreationInformation();
+                            DataTable equipmentDelivery = ConnectionDb.GetDt($"SELECT RequestId, Device, SimCard, PropertyBy, CostAmount, AmountCoverable, InvoiceOwner, AssignedUser, DocumentDate, Note, " +
+                                                $"CASE DeliveryType WHEN '10' THEN 'Asignación' ELSE 'Prestamo' END DeliveryType " +
+                                                $"FROM {Helpers.InterCompanyId}.dbo.EIPM10200 WHERE RequestId = '{idSolicitud}'");
+                            Attachments = ConnectionDb.GetDt(String.Format("LODYNDEV.dbo.LPCO00100S1 '{0}','{1}'", Helpers.InterCompanyId, idSolicitud));
 
-                            using (clientContext)
+                            if (equipmentDelivery != null)
                             {
-                                clientContext.Load(clientContext.Web);
-                                clientContext.Load(listCollection);
-                                var builder = new StringBuilder();
-                                builder.Append("<View><Query>");
-                                builder.Append("<Where><Eq><FieldRef Name='Solicitud'/>");
-                                builder.Append("<Value Type='Text'>" + equipmentDelivery.Rows[0]["RequestId"].ToString().Trim() + "</Value></Eq></Where>");
-                                builder.Append("</Query><RowLimit>1</RowLimit></View>");
-
-                                var query = new CamlQuery { ViewXml = builder.ToString().Trim() };
-                                var collection = listCollection.GetItems(query);
-                                clientContext.Load(collection);
-                                clientContext.ExecuteQuery();
-
-                                if (collection.Count > 0)
+                                if (equipmentDelivery.Rows.Count > 0)
                                 {
-                                    foreach (var item in collection)
+                                    clientContext = new ClientContext("https://seaboardpowercomdo.sharepoint.com");
+                                    foreach (char c in "Servicios2.4")
+                                        securePassword.AppendChar(c);
+                                    clientContext.Credentials = new SharePointOnlineCredentials("no-reply@seaboardpower.com.do", securePassword);
+                                    listCollection = clientContext.Web.Lists.GetByTitle("Entrega");
+                                    listInformation = new ListItemCreationInformation();
+
+                                    using (clientContext)
                                     {
-                                        listItem = listCollection.GetItemById(item["ID"].ToString().Trim());
-                                        listItem.DeleteObject();
+                                        clientContext.Load(clientContext.Web);
+                                        clientContext.Load(listCollection);
+                                        var builder = new StringBuilder();
+                                        builder.Append("<View><Query>");
+                                        builder.Append("<Where><Eq><FieldRef Name='Solicitud'/>");
+                                        builder.Append("<Value Type='Text'>" + equipmentDelivery.Rows[0]["RequestId"].ToString().Trim() + "</Value></Eq></Where>");
+                                        builder.Append("</Query><RowLimit>1</RowLimit></View>");
+
+                                        var query = new CamlQuery { ViewXml = builder.ToString().Trim() };
+                                        var collection = listCollection.GetItems(query);
+                                        clientContext.Load(collection);
                                         clientContext.ExecuteQuery();
-                                    }
-                                }
-                            }
 
-                            listItem = listCollection.AddItem(listInformation);
-                            listItem["Solicitud"] = equipmentDelivery.Rows[0]["RequestId"].ToString().Trim();
-                            listItem["Dispositivo"] = equipmentDelivery.Rows[0]["Device"].ToString().Trim();
-                            listItem["Asignado"] = equipmentDelivery.Rows[0]["AssignedUser"].ToString().Trim();
-                            listItem["Fecha"] = equipmentDelivery.Rows[0]["DocumentDate"].ToString().Trim();
-                            listItem["Costo"] = equipmentDelivery.Rows[0]["CostAmount"].ToString().Trim();
-                            listItem["CostoCubierto"] = equipmentDelivery.Rows[0]["AmountCoverable"].ToString().Trim();
-                            listItem["Propiedad"] = equipmentDelivery.Rows[0]["PropertyBy"].ToString().Trim();
-                            listItem["Facturacion"] = equipmentDelivery.Rows[0]["InvoiceOwner"].ToString().Trim();
-                            listItem["TipoEntrega"] = equipmentDelivery.Rows[0]["DeliveryType"].ToString().Trim();
-                            listItem["Nota"] = equipmentDelivery.Rows[0]["Note"].ToString().Trim();
-                            listItem["Solicitante"] = email;
-                            listItem["DB"] = "TEST1";  //Helpers.InterCompanyId;
-                            listItem.Update();
-
-                            if (Attachments != null)
-                            {
-                                if (Attachments.Rows.Count > 0)
-                                {
-                                    foreach (DataRow item in Attachments.Rows)
-                                    {
-                                        byte[] FileInfo;
-                                        FileInfo = Encoding.UTF8.GetBytes(String.Empty);
-                                        FileInfo = (byte[])item[1];
-                                        attachInfo = new AttachmentCreationInformation
+                                        if (collection.Count > 0)
                                         {
-                                            FileName = item[0].ToString().Trim()
-                                            .Replace("^", " ").Replace("@", " ").Replace("#", " ")
-                                            .Replace("$", " ").Replace("&", " ").Replace("*", " "),
-                                            ContentStream = new MemoryStream(FileInfo)
-                                        };
-
-                                        attach = listItem.AttachmentFiles.Add(attachInfo);
-                                        clientContext.Load(attach);
+                                            foreach (var item in collection)
+                                            {
+                                                listItem = listCollection.GetItemById(item["ID"].ToString().Trim());
+                                                listItem.DeleteObject();
+                                                clientContext.ExecuteQuery();
+                                            }
+                                        }
                                     }
+
+                                    listItem = listCollection.AddItem(listInformation);
+                                    listItem["Solicitud"] = equipmentDelivery.Rows[0]["RequestId"].ToString().Trim();
+                                    listItem["Dispositivo"] = equipmentDelivery.Rows[0]["Device"].ToString().Trim();
+                                    listItem["Asignado"] = equipmentDelivery.Rows[0]["AssignedUser"].ToString().Trim();
+                                    listItem["Fecha"] = equipmentDelivery.Rows[0]["DocumentDate"].ToString().Trim();
+                                    listItem["Costo"] = equipmentDelivery.Rows[0]["CostAmount"].ToString().Trim();
+                                    listItem["CostoCubierto"] = equipmentDelivery.Rows[0]["AmountCoverable"].ToString().Trim();
+                                    listItem["Propiedad"] = equipmentDelivery.Rows[0]["PropertyBy"].ToString().Trim();
+                                    listItem["Facturacion"] = equipmentDelivery.Rows[0]["InvoiceOwner"].ToString().Trim();
+                                    listItem["TipoEntrega"] = equipmentDelivery.Rows[0]["DeliveryType"].ToString().Trim();
+                                    listItem["Nota"] = equipmentDelivery.Rows[0]["Note"].ToString().Trim();
+                                    listItem["Solicitante"] = email;
+                                    listItem["DB"] = Helpers.InterCompanyId;
+                                    listItem.Update();
+
+                                    if (Attachments != null)
+                                    {
+                                        if (Attachments.Rows.Count > 0)
+                                        {
+                                            foreach (DataRow item in Attachments.Rows)
+                                            {
+                                                byte[] FileInfo;
+                                                FileInfo = Encoding.UTF8.GetBytes(String.Empty);
+                                                FileInfo = (byte[])item[1];
+                                                attachInfo = new AttachmentCreationInformation
+                                                {
+                                                    FileName = item[0].ToString().Trim()
+                                                    .Replace("^", " ").Replace("@", " ").Replace("#", " ")
+                                                    .Replace("$", " ").Replace("&", " ").Replace("*", " "),
+                                                    ContentStream = new MemoryStream(FileInfo)
+                                                };
+
+                                                attach = listItem.AttachmentFiles.Add(attachInfo);
+                                                clientContext.Load(attach);
+                                            }
+                                        }
+                                    }
+
+                                    clientContext.ExecuteQuery();
                                 }
                             }
-
-                            clientContext.ExecuteQuery();
+                            break;
                         }
-                    }
+                        catch (Exception ex)
+                        {
+                            status = ex.Message;
+                            retryCount++;
+                        }
+                    } while (retryCount < 3);
                     break;
 
                 #endregion
                 case 15:
                     #region Reparacion de Equipo
-
-                    DataTable equipmentRepair = ConnectionDb.GetDt($"SELECT RequestId, Device, Diagnostics, Supplier, Cost, BaseDocumentNumber, DocumentDate, Note " +
-                        $"FROM {Helpers.InterCompanyId}.dbo.EIPM10300 WHERE RequestId = '{idSolicitud}'");
-                    Attachments = ConnectionDb.GetDt(String.Format("LODYNDEV.dbo.LPCO00100S1 '{0}','{1}'", Helpers.InterCompanyId, idSolicitud));
-
-                    if (equipmentRepair != null)
+                    do
                     {
-                        if (equipmentRepair.Rows.Count > 0)
+                        try
                         {
-                            clientContext = new ClientContext("https://seaboardpowercomdo.sharepoint.com");
-                            foreach (char c in "Servicios2.4")
-                                securePassword.AppendChar(c);
-                            clientContext.Credentials = new SharePointOnlineCredentials("no-reply@seaboardpower.com.do", securePassword);
-                            listCollection = clientContext.Web.Lists.GetByTitle("Reparacion");
-                            listInformation = new ListItemCreationInformation();
+                            DataTable equipmentRepair = ConnectionDb.GetDt($"SELECT RequestId, Device, Diagnostics, Supplier, Cost, BaseDocumentNumber, DocumentDate, Note " +
+                                            $"FROM {Helpers.InterCompanyId}.dbo.EIPM10300 WHERE RequestId = '{idSolicitud}'");
+                            Attachments = ConnectionDb.GetDt(String.Format("LODYNDEV.dbo.LPCO00100S1 '{0}','{1}'", Helpers.InterCompanyId, idSolicitud));
 
-                            using (clientContext)
+                            if (equipmentRepair != null)
                             {
-                                clientContext.Load(clientContext.Web);
-                                clientContext.Load(listCollection);
-                                var builder = new StringBuilder();
-                                builder.Append("<View><Query>");
-                                builder.Append("<Where><Eq><FieldRef Name='Solicitud'/>");
-                                builder.Append("<Value Type='Text'>" + equipmentRepair.Rows[0]["RequestId"].ToString().Trim() + "</Value></Eq></Where>");
-                                builder.Append("</Query><RowLimit>1</RowLimit></View>");
-
-                                var query = new CamlQuery { ViewXml = builder.ToString().Trim() };
-                                var collection = listCollection.GetItems(query);
-                                clientContext.Load(collection);
-                                clientContext.ExecuteQuery();
-
-                                if (collection.Count > 0)
+                                if (equipmentRepair.Rows.Count > 0)
                                 {
-                                    foreach (var item in collection)
+                                    clientContext = new ClientContext("https://seaboardpowercomdo.sharepoint.com");
+                                    foreach (char c in "Servicios2.4")
+                                        securePassword.AppendChar(c);
+                                    clientContext.Credentials = new SharePointOnlineCredentials("no-reply@seaboardpower.com.do", securePassword);
+                                    listCollection = clientContext.Web.Lists.GetByTitle("Reparacion");
+                                    listInformation = new ListItemCreationInformation();
+
+                                    using (clientContext)
                                     {
-                                        listItem = listCollection.GetItemById(item["ID"].ToString().Trim());
-                                        listItem.DeleteObject();
+                                        clientContext.Load(clientContext.Web);
+                                        clientContext.Load(listCollection);
+                                        var builder = new StringBuilder();
+                                        builder.Append("<View><Query>");
+                                        builder.Append("<Where><Eq><FieldRef Name='Solicitud'/>");
+                                        builder.Append("<Value Type='Text'>" + equipmentRepair.Rows[0]["RequestId"].ToString().Trim() + "</Value></Eq></Where>");
+                                        builder.Append("</Query><RowLimit>1</RowLimit></View>");
+
+                                        var query = new CamlQuery { ViewXml = builder.ToString().Trim() };
+                                        var collection = listCollection.GetItems(query);
+                                        clientContext.Load(collection);
                                         clientContext.ExecuteQuery();
-                                    }
-                                }
-                            }
 
-                            listItem = listCollection.AddItem(listInformation);
-                            listItem["Solicitud"] = equipmentRepair.Rows[0]["RequestId"].ToString().Trim();
-                            listItem["Dispositivo"] = equipmentRepair.Rows[0]["Device"].ToString().Trim();
-                            listItem["Diagnostico"] = equipmentRepair.Rows[0]["Diagnostics"].ToString().Trim();
-                            listItem["Fecha"] = equipmentRepair.Rows[0]["DocumentDate"].ToString().Trim();
-                            listItem["Costo"] = equipmentRepair.Rows[0]["Cost"].ToString().Trim();
-                            listItem["Suplidor"] = equipmentRepair.Rows[0]["Supplier"].ToString().Trim();
-                            listItem["Nota"] = equipmentRepair.Rows[0]["Note"].ToString().Trim();
-                            listItem["Solicitante"] = email;
-                            listItem["DB"] = "TEST1";  //Helpers.InterCompanyId;
-                            listItem.Update();
-
-                            if (Attachments != null)
-                            {
-                                if (Attachments.Rows.Count > 0)
-                                {
-                                    foreach (DataRow item in Attachments.Rows)
-                                    {
-                                        byte[] FileInfo;
-                                        FileInfo = Encoding.UTF8.GetBytes(String.Empty);
-                                        FileInfo = (byte[])item[1];
-                                        attachInfo = new AttachmentCreationInformation
+                                        if (collection.Count > 0)
                                         {
-                                            FileName = item[0].ToString().Trim()
-                                            .Replace("^", " ").Replace("@", " ").Replace("#", " ")
-                                            .Replace("$", " ").Replace("&", " ").Replace("*", " "),
-                                            ContentStream = new MemoryStream(FileInfo)
-                                        };
-
-                                        attach = listItem.AttachmentFiles.Add(attachInfo);
-                                        clientContext.Load(attach);
+                                            foreach (var item in collection)
+                                            {
+                                                listItem = listCollection.GetItemById(item["ID"].ToString().Trim());
+                                                listItem.DeleteObject();
+                                                clientContext.ExecuteQuery();
+                                            }
+                                        }
                                     }
+
+                                    listItem = listCollection.AddItem(listInformation);
+                                    listItem["Solicitud"] = equipmentRepair.Rows[0]["RequestId"].ToString().Trim();
+                                    listItem["Dispositivo"] = equipmentRepair.Rows[0]["Device"].ToString().Trim();
+                                    listItem["Diagnostico"] = equipmentRepair.Rows[0]["Diagnostics"].ToString().Trim();
+                                    listItem["Fecha"] = equipmentRepair.Rows[0]["DocumentDate"].ToString().Trim();
+                                    listItem["Costo"] = equipmentRepair.Rows[0]["Cost"].ToString().Trim();
+                                    listItem["Suplidor"] = equipmentRepair.Rows[0]["Supplier"].ToString().Trim();
+                                    listItem["Nota"] = equipmentRepair.Rows[0]["Note"].ToString().Trim();
+                                    listItem["Solicitante"] = email;
+                                    listItem["DB"] = Helpers.InterCompanyId;
+                                    listItem.Update();
+
+                                    if (Attachments != null)
+                                    {
+                                        if (Attachments.Rows.Count > 0)
+                                        {
+                                            foreach (DataRow item in Attachments.Rows)
+                                            {
+                                                byte[] FileInfo;
+                                                FileInfo = Encoding.UTF8.GetBytes(String.Empty);
+                                                FileInfo = (byte[])item[1];
+                                                attachInfo = new AttachmentCreationInformation
+                                                {
+                                                    FileName = item[0].ToString().Trim()
+                                                    .Replace("^", " ").Replace("@", " ").Replace("#", " ")
+                                                    .Replace("$", " ").Replace("&", " ").Replace("*", " "),
+                                                    ContentStream = new MemoryStream(FileInfo)
+                                                };
+
+                                                attach = listItem.AttachmentFiles.Add(attachInfo);
+                                                clientContext.Load(attach);
+                                            }
+                                        }
+                                    }
+
+                                    clientContext.ExecuteQuery();
                                 }
                             }
-
-                            clientContext.ExecuteQuery();
+                            break;
                         }
-                    }
+                        catch (Exception ex)
+                        {
+                            status = ex.Message;
+                            retryCount++;
+                        }
+                    } while (retryCount < 3);
+                    break;
+
+                #endregion
+                case 16:
+                    #region Solicitud de Equipo Completado
+
+                    do
+                    {
+                        try
+                        {
+                            var equipmentRequest = ConnectionDb.GetDt($"SELECT RequestId, DocumentDate, DepartmentId, Requester, CASE HasData WHEN 1 THEN 'SI' ELSE 'NO' END HasData, " +
+                                           $"OpenMinutes, CASE RequestType WHEN '10' THEN 'Equipo Nuevo' WHEN '20' THEN 'Reparación de equipo' " +
+                                           $"WHEN '30' THEN 'Cambio de plan' WHEN '40' THEN 'Cancelación de plan' WHEN '50' THEN 'Cambiazo o redención de fidepuntos' WHEN '60' THEN 'Perdida de equipo' " +
+                                           $"WHEN '70' THEN 'Perdida de Tarjeta SIM' WHEN '80' THEN 'Tarjeta SIM dañada' WHEN '90' THEN 'Reemplazo de equipo' ELSE 'Equipo Nuevo' END RequestType, Note " +
+                                           $"FROM {Helpers.InterCompanyId}.dbo.EIPM10000 WHERE RequestId = '{idSolicitud}'");
+                            Attachments = ConnectionDb.GetDt(String.Format("LODYNDEV.dbo.LPCO00100S1 '{0}','{1}'", Helpers.InterCompanyId, idSolicitud));
+
+                            if (equipmentRequest != null)
+                            {
+                                if (equipmentRequest.Rows.Count > 0)
+                                {
+                                    clientContext = new ClientContext("https://seaboardpowercomdo.sharepoint.com");
+                                    foreach (char c in "Servicios2.4")
+                                        securePassword.AppendChar(c);
+                                    clientContext.Credentials = new SharePointOnlineCredentials("no-reply@seaboardpower.com.do", securePassword);
+                                    listCollection = clientContext.Web.Lists.GetByTitle("Equipo");
+                                    listInformation = new ListItemCreationInformation();
+
+                                    using (clientContext)
+                                    {
+                                        clientContext.Load(clientContext.Web);
+                                        clientContext.Load(listCollection);
+                                        var builder = new StringBuilder();
+                                        builder.Append("<View><Query>");
+                                        builder.Append("<Where><Eq><FieldRef Name='Solicitud'/>");
+                                        builder.Append("<Value Type='Text'>" + "C" + equipmentRequest.Rows[0]["RequestId"].ToString().Trim() + "</Value></Eq></Where>");
+                                        builder.Append("</Query><RowLimit>1</RowLimit></View>");
+
+                                        var query = new CamlQuery { ViewXml = builder.ToString().Trim() };
+                                        var collection = listCollection.GetItems(query);
+                                        clientContext.Load(collection);
+                                        clientContext.ExecuteQuery();
+
+                                        if (collection.Count > 0)
+                                        {
+                                            foreach (var item in collection)
+                                            {
+                                                listItem = listCollection.GetItemById(item["ID"].ToString().Trim());
+                                                listItem.DeleteObject();
+                                                clientContext.ExecuteQuery();
+                                            }
+                                        }
+                                    }
+
+                                    listItem = listCollection.AddItem(listInformation);
+                                    listItem["Solicitud"] = "C" + equipmentRequest.Rows[0]["RequestId"].ToString().Trim();
+                                    listItem["Departamento"] = equipmentRequest.Rows[0]["DepartmentId"].ToString().Trim();
+                                    listItem["Fecha"] = equipmentRequest.Rows[0]["DocumentDate"].ToString().Trim();
+                                    listItem["Empleado"] = equipmentRequest.Rows[0]["Requester"].ToString().Trim();
+                                    listItem["TipoSolicitud"] = equipmentRequest.Rows[0]["RequestType"].ToString().Trim();
+                                    listItem["ConDatos"] = equipmentRequest.Rows[0]["HasData"].ToString().Trim();
+                                    listItem["FlotaAbierta"] = equipmentRequest.Rows[0]["OpenMinutes"].ToString().Trim();
+                                    listItem["Nota"] = equipmentRequest.Rows[0]["Note"].ToString().Trim();
+                                    listItem["Solicitante"] = "COMPLETADO";
+                                    listItem["EmpleadoMail"] = HelperLogic.GetEmailEmployee(equipmentRequest.Rows[0]["Requester"].ToString().Trim().Substring(0, 6));
+                                    listItem["DB"] = Helpers.InterCompanyId;
+                                    listItem.Update();
+
+                                    if (Attachments != null)
+                                    {
+                                        if (Attachments.Rows.Count > 0)
+                                        {
+                                            foreach (DataRow item in Attachments.Rows)
+                                            {
+                                                byte[] FileInfo;
+                                                FileInfo = Encoding.UTF8.GetBytes(String.Empty);
+                                                FileInfo = (byte[])item[1];
+                                                attachInfo = new AttachmentCreationInformation
+                                                {
+                                                    FileName = item[0].ToString().Trim()
+                                                    .Replace("^", " ").Replace("@", " ").Replace("#", " ")
+                                                    .Replace("$", " ").Replace("&", " ").Replace("*", " "),
+                                                    ContentStream = new MemoryStream(FileInfo)
+                                                };
+
+                                                attach = listItem.AttachmentFiles.Add(attachInfo);
+                                                clientContext.Load(attach);
+                                            }
+                                        }
+                                    }
+                                    clientContext.ExecuteQuery();
+                                }
+                            }
+                            break;
+                        }
+                        catch (Exception ex)
+                        {
+                            status = ex.Message;
+                            retryCount++;
+                        }
+                    } while (retryCount < 3);
                     break;
 
                     #endregion

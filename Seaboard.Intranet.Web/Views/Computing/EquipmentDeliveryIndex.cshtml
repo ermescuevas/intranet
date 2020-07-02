@@ -4,10 +4,8 @@
 @model IEnumerable<EquipmentDelivery>
 @{
     ViewBag.Title = "Listado de entrega de equipos";
-    if (Account.GetAccount(User.Identity.GetUserName()).Department == "INFORMATICA")
-    {
-        Layout = "~/Views/Shared/_ComputingLayout.cshtml";
-    }
+    Layout = "~/Views/Shared/_ComputingLayout.cshtml";
+    
 }
 
 <div class="row wrapper border-bottom white-bg page-heading">

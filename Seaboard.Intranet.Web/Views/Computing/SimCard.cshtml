@@ -5,6 +5,7 @@
     ViewBag.Title = "Tarjeta SIM";
     var operators = (List<SelectListItem>)ViewBag.Operators;
     var status = (List<SelectListItem>)ViewBag.Status;
+    var minute = (List<SelectListItem>)ViewBag.Minute;
     Layout = "~/Views/Shared/_ComputingLayout.cshtml";
 }
 
@@ -115,9 +116,10 @@
                                         </div>
 
                                         <div class="form-group">
-                                            <label class="col-sm-4 control-label">Minutos abiertos:</label>
+                                            <label class="col-sm-4 control-label">Tipo flota:</label>
                                             <div class="col-sm-8 input-group">
-                                                @Html.CheckBoxFor(model => model.MinuteOpen, new { @class = "js-switch1" })
+                                                @Html.DropDownListFor(m => m.MinuteOpen, minute, "Seleccione una opción", new { @class = "form-control" })
+                                                @Html.ValidationMessageFor(model => model.MinuteOpen, "", new { @class = "text-danger" })
                                             </div>
                                         </div>
                                     </div>
@@ -231,8 +233,6 @@
     <script>
         $(document).ready(function () {
             var elem = document.querySelector('.js-switch');
-            var switchery = new Switchery(elem, { color: '#1AB394' });
-            var elem = document.querySelector('.js-switch1');
             var switchery = new Switchery(elem, { color: '#1AB394' });
             $('#AcquiredDate').datepicker({
                 todayBtn: "linked",
@@ -363,6 +363,13 @@
                 toastr.error('Debe de especificar una operadora', 'Campos requeridos')
                 isAllValid = false;
             }
+
+            if ($('#MinuteOpen').val().trim() == '') {
+                toastr.error('Debe de especificar un tipo de flota', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            
 
             if (isAllValid) {
                 $.ajax({

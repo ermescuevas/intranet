@@ -54,45 +54,69 @@
                         <div class="panel-body">
                             <fieldset class="form-horizontal">
                                 <div class="row">
-                                    <div class="col-sm-6">
+                                    <div class="col-sm-5">
                                         <div class="form-group">
-                                            <label class="col-sm-6 control-label">Clase proveedor por defecto:</label>
-                                            <div class="col-sm-5 input-group">
-                                                @Html.TextBoxFor(m => m.VendorClassId, new { @class = "form-control" })
-                                                <span class="input-group-btn">
-                                                    <button id="lookupClase" type="button" class="btn btn-primary">
-                                                        <i class="fa fa-search"></i>
-                                                    </button>
-                                                </span>
+                                            <label class="col-sm-4 control-label">RNC Contribuyente:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(m => m.TaxRegistrationNumber, new { @class = "form-control" })
                                             </div>
-
                                         </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Razon Social Contribuyente:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(m => m.CompanyName, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Direccion Contribuyente:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextAreaFor(m => m.CompanyAddress, new { @class = "form-control", @rows = "3" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Telefono Contribuyente:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(m => m.CompanyPhoneNumber, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Fax Contribuyente:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(m => m.CompanyFaxNumber, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-5">
                                         <div class="form-group">
                                             <label class="col-sm-6 control-label">Secuencia factura prefijo:</label>
-                                            <div class="col-sm-5 input-group">
+                                            <div class="col-sm-6 input-group">
                                                 @Html.TextBoxFor(m => m.PrefixInvoiceNumber, new { @class = "form-control" })
                                             </div>
                                         </div>
 
                                         <div class="form-group">
                                             <label class="col-sm-6 control-label">Secuencia factura sig. num.:</label>
-                                            <div class="col-sm-5 input-group">
-                                                @Html.TextBoxFor(m => m.InvoiceNextNumber, new { @class = "touchspin3" })
+                                            <div class="col-sm-6 input-group">
+                                                @Html.TextBoxFor(m => m.InvoiceNextNumber, new { @class = "form-control" })
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <div class="col-sm-6">
-                                        <div class="form-group">
-                                            <label class="col-sm-6 control-label">RNC Contribuyente:</label>
-                                            <div class="col-sm-5 input-group">
-                                                @Html.TextBoxFor(m => m.TaxRegistrationNumber, new { @class = "form-control" })
-                                            </div>
-                                        </div>
                                         <div class="form-group">
                                             <label class="col-sm-6 control-label">Secuencia factura longitud:</label>
-                                            <div class="col-sm-5 input-group">
-                                                @Html.TextBoxFor(model => model.InvoiceNumberLength, new { @class = "touchspin3" })
+                                            <div class="col-sm-6 input-group">
+                                                @Html.TextBoxFor(model => model.InvoiceNumberLength, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-6 control-label">Id. de perfil correo SQL:</label>
+                                            <div class="col-sm-6 input-group">
+                                                @Html.TextBoxFor(model => model.SqlEmailProfile, new { @class = "form-control" })
                                             </div>
                                         </div>
                                     </div>
@@ -135,30 +159,23 @@
         var products;
         var customers;
         $(document).ready(function () {
-            $(".touchspin3").TouchSpin({
-                verticalbuttons: true,
-                buttondown_class: 'btn btn-white',
-                buttonup_class: 'btn btn-white'
-            });
             $('select').selectpicker();
-            $('#lookupClase').lookupbox({
-                title: 'Busqueda:',
-                url: '@Url.Action("ListLookup", "Home")?tipo=47&consulta=',
-                imgLoader: '<img src="~/Images/ajaxloader.gif">',
-                width: 800,
-                height: 1000,
-                onItemSelected: function (data) {
-                    $('input[name=VendorClassId]').val(data.Id);
-                },
-                tableHeader: ['Id. de clase', 'Descripción'],
-                hiddenFields: ['DataExtended','DataPlus']
-            });
         });
 
         function saveConfiguration() {
             var isAllValid = true;
-            if ($('#VendorClassId').val() === '') {
-                toastr.error('Por favor debe de especificar una clase de proveedor por defecto', 'Campos requeridos')
+            if ($('#CompanyName').val() === '') {
+                toastr.error('Por favor debe de especificar una razon social', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#CompanyAddress').val() === '') {
+                toastr.error('Por favor debe de especificar una direccion', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#CompanyPhoneNumber').val() === '') {
+                toastr.error('Por favor debe de especificar un telefono', 'Campos requeridos')
                 isAllValid = false;
             }
 
@@ -184,11 +201,15 @@
 
             if (isAllValid) {
                 var data = {
-                    VendorClassId: $('#VendorClassId').val().trim(),
+                    TaxRegistrationNumber: $('#TaxRegistrationNumber').val().trim(),
+                    CompanyName: $('#CompanyName').val().trim(),
+                    CompanyAddress: $('#CompanyAddress').val().trim(),
+                    CompanyPhoneNumber: $('#CompanyPhoneNumber').val().trim(),
+                    CompanyFaxNumber: $('#CompanyFaxNumber').val().trim(),
                     PrefixInvoiceNumber: $('#PrefixInvoiceNumber').val().trim(),
                     InvoiceNextNumber: $('#InvoiceNextNumber').val().trim(),
-                    TaxRegistrationNumber: $('#TaxRegistrationNumber').val().trim(),
-                    InvoiceNumberLength: $('#InvoiceNumberLength').val().trim()
+                    InvoiceNumberLength: $('#InvoiceNumberLength').val().trim(),
+                    SqlEmailProfile: $('#SqlEmailProfile').val().trim()
                 }
                 $.ajax({
                     url: '@Url.Action("SaveConfiguration", "Accounting")',

@@ -4,6 +4,7 @@
     Layout = "~/Views/Shared/_AccountingLayout.cshtml";
     ViewBag.Title = "Gastos menores";
     var accounts = (List<Seaboard.Intranet.Domain.ViewModels.Lookup>)ViewBag.Accounts;
+    var voidTypes = (List<Seaboard.Intranet.Domain.ViewModels.Lookup>)ViewBag.VoidTypes;
 }
 
 <style>
@@ -52,14 +53,32 @@
                                     <div class="col-md-12">
                                         <div class="m-b-md">
                                             <div class="btn-group-xs pull-right">
-                                                <button class="btn btn-info btn-xs" onclick="postInvoice();">Contabilizar</button>
-                                                <button class="btn btn-success btn-xs" onclick="saveInvoice();">Guardar</button>
-                                                <button class="btn btn-danger btn-xs" onclick="anular();">Anular</button>
-                                                <button class="btn btn-primary btn-xs" onclick="imprimir();">Imprimir</button>
+                                                @if (Model.Status < 2)
+                                                {
+                                                    <button class="btn btn-info btn-xs" onclick="postInvoice();">Registrar</button>
+                                                    <button class="btn btn-success btn-xs" onclick="saveInvoice();">Guardar en borrador</button>
+                                                }
+                                                @if (Model.Status != 3)
+                                                {
+                                                    <button class="btn btn-danger btn-xs" onclick="eliminar();">@(Model.Status == 1 ? "Eliminar" : "Anular")</button>
+                                                }
+                                                @if (Model.Status != 0)
+                                                {
+
+                                                    <button class="btn btn-primary btn-xs" onclick="imprimir();">Imprimir</button>
+                                                }
                                             </div>
+                                            @if (Model.Status == 3)
+                                            {
+                                                <div class=" btn-group-xs pull-left">
+                                                    <h1>ANULADA</h1>
+                                                    <button class="btn btn-success btn-xs" onclick="verMotivo();">Ver Motivo</button>
+                                                </div>
+                                            }
                                         </div>
                                     </div>
                                 </div>
+                                @Html.HiddenFor(x => x.Status)
                                 <div class="wrapper wrapper-content animated fadeInRight">
                                     <div class="row">
                                         <div class="col-sm-8">
@@ -135,18 +154,21 @@
                                                     <tbody>
                                                         @foreach (var item in Model.Details)
                                                         {
-                                                        <tr>
-                                                            <td><input type="text" class="form-control" value="@item.ItemDescription"/></td>
-                                                            <td><input type="text" class="form-control" value="@item.Quantity.ToString("N0")" /></td>
-                                                            <td><input type="text" class="form-control" value="@item.Price.ToString("N2")" /></td>
-                                                            <td><input type="text" class="form-control" readonly="readonly" value="@item.TaxAmount.ToString("N2")" /></td>
-                                                            <td><input type="text" class="form-control" readonly="readonly" value="@item.Total.ToString("N2")" /></td>
-                                                        </tr>
+                                                            <tr>
+                                                                <td><input type="text" class="form-control" value="@item.ItemDescription" /></td>
+                                                                <td><input type="text" class="form-control" value="@item.Quantity.ToString("N0")" /></td>
+                                                                <td><input type="text" class="form-control" value="@item.Price.ToString("N2")" /></td>
+                                                                <td><input type="text" class="form-control" readonly="readonly" value="@item.TaxAmount.ToString("N2")" /></td>
+                                                                <td><input type="text" class="form-control" readonly="readonly" value="@item.Total.ToString("N2")" /></td>
+                                                            </tr>
                                                         }
                                                     </tbody>
                                                 </table>
                                             </div>
-                                            <button class="btn btn-success btn-rounded" data-toggle="modal" data-target="#modal-AddItem">Agregar servicio</button>
+                                            @if (Model.Status < 2)
+                                            {
+                                                <button class="btn btn-success btn-rounded" data-toggle="modal" data-target="#modal-AddItem">Agregar servicio</button>
+                                            }
                                         </div>
                                     </div>
                                     <div class="row">
@@ -211,6 +233,44 @@
             <div class="modal-footer">
                 <div class="form-actions no-color">
                     <button type="button" class="btn btn-primary" onclick="agregarArticulo();"> Agregar</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal"> Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modal-VoidInvoice" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Anular factura</h4>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Tipo anulacion:</label>
+                    <select class="selectpicker" data-live-search="true" id="VoidType" name="VoidType">
+                        <option value=""></option>
+                        @foreach (var item in voidTypes)
+                        {
+                            <option value="@item.Id.Trim()">@(item.Descripción)</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Motivo</label>
+                    <textarea class="form-control" rows="4" id="VoidReason"></textarea>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <div class="form-actions no-color">
+                    @if (Model.Status != 3)
+                    {
+                        <button type="button" class="btn btn-primary" onclick="anularFactura();"> Anular</button>
+                    }
                     <button type="button" class="btn btn-primary" data-dismiss="modal"> Cancelar</button>
                 </div>
             </div>
@@ -318,19 +378,6 @@
                 tableHeader: ['Id. de moneda', 'Descripción'],
                 hiddenFields: ['DataExtended','DataPlus']
             });
-            $("#lookupSuplidor").lookupbox({
-                title: 'Busqueda:',
-                url: '@Url.Action("GetSupplierLookup", "Accounting")?consulta=',
-                imgLoader: '<img src="~/Images/ajaxloader.gif">',
-                width: 800,
-                height: 1000,
-                onItemSelected: function(data) {
-                    $('input[name=SupplierNumber]').val(data.Id);
-                    getSupplierData(data.Id);
-                },
-                tableHeader: ['Id. de proveedor', 'Nombre'],
-                hiddenFields: ['DataExtended','DataPlus']
-            });
             $('#Quantity').val('1');
             items = @Html.Raw(Json.Encode(Model.Details));
             if (@Model.ExpenseType !== 0) {
@@ -342,9 +389,9 @@
 
         window.onbeforeunload = function () { $.ajax({ url: '@Url.Action("UnblockSecuence", "Accounting", new { id = Model.DocumentNumber})' }).done(function () { }); }
 
-        function getSupplierData(id) {
+        function verMotivo() {
             $.ajax({
-                url: '@Url.Action("GetSupplierData", "Accounting")?vendorId=' + id,
+                url: '@Url.Action("GetVoidReasonInfo", "Accounting")?id=' + '@Model.DocumentNumber',
                 type: "POST",
                 data: "",
                 cache: false,
@@ -352,7 +399,10 @@
                 contentType: "application/json",
                 success: function (result) {
                     if (result.status === "OK") {
-                        $('#Address').html('<strong>' + result.lookup.CustomerName + '</strong><br />' + result.lookup.CustomerAddress + '<br />' + result.lookup.City + ', ' + result.lookup.Contact + '<br /><abbr title="phone"> Tel:</abbr> ' + result.lookup.CurrencyId);
+                        $('#modal-VoidInvoice').modal('show');
+                        $('#VoidReason').val(result.lookup.Descripción);
+                        $('select[name=VoidType]').val(result.lookup.Id);
+                        $('.selectpicker').selectpicker('refresh');
                     } else {
                         swal({
                             title: "ERROR",
@@ -360,7 +410,6 @@
                             type: "error"
                         });
                     }
-                    $('#saveButton').ladda('stop');
                 }
             });
         }
@@ -430,8 +479,10 @@
                     $($itemUnitPrice).focusout(function () { sumLines(); });
                     $tbody.append($row);
                     $remove.click(function () {
-                        deleteRow(item.ItemDescription, item.Price);
-                        getItems();
+                        if (@Model.Status < 2) {
+                            deleteRow(item.ItemDescription, item.Price);
+                            getItems();
+                        }
                     });
                 });
             $table.append($tbody);
@@ -470,10 +521,19 @@
             });
         }
 
-        function anular() {
+        function eliminar() {
+            var voidText = "";
+            var voidTitle = "";
+            if (@Model.Status === 2) {
+                voidText = "Esta seguro que desea anular este registro ?";
+                voidTitle = "Anulacion";
+            } else {
+                voidText = "Esta seguro que desea eliminar este registro ?";
+                voidTitle = "Eliminar";
+            }
             swal({
-                title: "Anular",
-                text: "Esta seguro que desea anular este registro ?",
+                title: voidTitle,
+                text: voidText,
                 type: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#DD6B55",
@@ -481,8 +541,53 @@
                 cancelButtonText: "No, cancelar!",
                 closeOnConfirm: true
             }, function () {
+                if (@Model.Status !== 2) {
+                    $.ajax({
+                        url: '@Url.Action("VoidInvoice", "Accounting")?id=' + '@Model.DocumentNumber',
+                        type: "POST",
+                        data: '',
+                        dataType: "JSON",
+                        cache: false,
+                        contentType: "application/json",
+                        success: function (result) {
+                            if (result.status === "OK")
+                                window.location.href = '@Url.Action("MinorExpensesInvoiceIndex","Accounting")';
+                            else
+                                swal({
+                                    title: "ERROR",
+                                    text: result.status,
+                                    type: "error"
+                                });
+                        }
+                    });
+                }
+                else {
+                    $('#modal-VoidInvoice').modal('show');
+                    $('#VoidReason').val('');
+                    $('select[name=VoidType]').val('');
+                    $('.selectpicker').selectpicker('refresh');
+                }
+            });
+        }
+
+        function anularFactura() {
+            var isAllValid = true;
+            if ($('#VoidType').val() === '') {
+                toastr.error('Por favor debe de especificar un tipo de anulacion para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+            if ($('#VoidReason').val() === '') {
+                toastr.error('Por favor debe de especificar un motivo para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+            if (isAllValid) {
+                var data = {
+                    id: '@Model.DocumentNumber',
+                    voidReason: $('#VoidType').val(),
+                    reason: $('#VoidReason').val()
+                }
                 $.ajax({
-                    url: '@Url.Action("VoidInvoice", "Accounting")?documentNumber=' + '@Model.DocumentNumber',
+                    url: '@Url.Action("VoidInvoice", "Accounting")',
                     type: "POST",
                     data: JSON.stringify(data),
                     dataType: "JSON",
@@ -490,7 +595,7 @@
                     contentType: "application/json",
                     success: function (result) {
                         if (result.status === "OK")
-                            window.location.href = '@Url.Action("InformalSupplierInvoiceIndex","Accounting")';
+                            window.location.href = '@Url.Action("MinorExpensesInvoiceIndex","Accounting")';
                         else
                             swal({
                                 title: "ERROR",
@@ -499,10 +604,31 @@
                             });
                     }
                 });
+            }
+        }
+
+        function postInvoice() {
+            swal({
+                title: "Registrar",
+                text: "Esta seguro que desea registrar este documento",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Si, adelante!",
+                cancelButtonText: "No, cancelar!",
+                closeOnConfirm: false
+            }, function () {
+                $('#Status').val(2);
+                procesarSolicitud();
             });
         }
 
         function saveInvoice() {
+            $('#Status').val(1);
+            procesarSolicitud();
+        }
+
+        function procesarSolicitud() {
             var isAllValid = true;
             if ($('#DocumentDate').val() === '') {
                 toastr.error('Por favor debe de especificar una fecha de documento para procesar', 'Campos requeridos')
@@ -510,12 +636,7 @@
             }
 
             if ($('#SupplierNumber').val() === '') {
-                toastr.error('Por favor debe de especificar un proveedor para procesar', 'Campos requeridos')
-                isAllValid = false;
-            }
-
-            if ($('#CurrencyId').val() === '') {
-                toastr.error('Por favor debe de especificar una moneda para procesar', 'Campos requeridos')
+                toastr.error('Por favor debe de especificar una referencia para procesar', 'Campos requeridos')
                 isAllValid = false;
             }
 
@@ -544,7 +665,8 @@
                     TotalAmount: parseFloat($('#Total').html().replace(/,/g, "")),
                     DocumentType: 13,
                     ExpenseType: parseInt($('#ExpenseType').val()),
-                    Details: items
+                    Details: items,
+                    Status: parseInt($('#Status').val())
                 }
                 $.ajax({
                     url: '@Url.Action("SaveInvoice", "Accounting")',
@@ -554,8 +676,27 @@
                     cache: false,
                     contentType: "application/json",
                     success: function (result) {
-                        if (result.status === "OK")
-                            window.location.href = '@Url.Action("MinorExpensesInvoiceIndex","Accounting")';
+                        if (result.status === "OK") {
+                            if (parseInt($('#Status').val()) === 2) {
+                                swal({
+                                    title: "Imprimir",
+                                    text: "Desea imprimir el documento ?",
+                                    type: "warning",
+                                    showCancelButton: true,
+                                    confirmButtonColor: "#DD6B55",
+                                    confirmButtonText: "Si, adelante!",
+                                    cancelButtonText: "No, cancelar!",
+                                    closeOnConfirm: true
+                                }, function (confirm) {
+                                    if (confirm)
+                                        imprimir(true);
+                                    else
+                                         window.location.href = '@Url.Action("MinorExpensesInvoiceIndex","Accounting")';
+                                });
+                            }
+                            else
+                                 window.location.href = '@Url.Action("MinorExpensesInvoiceIndex","Accounting")';
+                        }
                         else
                             swal({
                                 title: "ERROR",
@@ -567,72 +708,29 @@
             }
         }
 
-        function imprimir() {
-            swal({
-                title: "Guardar",
-                text: "Desea guardar este documento ?",
-                type: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#DD6B55",
-                confirmButtonText: "Si, adelante!",
-                cancelButtonText: "No, cancelar!",
-                closeOnConfirm: true
-            }, function () {
-                var isAllValid = true;
-                if ($('#DocumentDate').val() === '') {
-                    toastr.error('Por favor debe de especificar una fecha de documento para procesar', 'Campos requeridos')
-                    isAllValid = false;
-                }
-                if ($('#SupplierNumber').val() === '') {
-                    toastr.error('Por favor debe de especificar un proveedor para procesar', 'Campos requeridos')
-                    isAllValid = false;
-                }
-                if ($('#CurrencyId').val() === '') {
-                    toastr.error('Por favor debe de especificar una moneda para procesar', 'Campos requeridos')
-                    isAllValid = false;
-                }
-                if (items.length == 0) {
-                    toastr.error('Debe  de especificar al menos un articulo para procesar', 'Campos requeridos')
-                    isAllValid = false;
+        function imprimir(redirect = false) {
+            var url = '@Url.Content("~/PDF/Reportes/")MinorExpensesInvoiceReport.pdf';
+            toastr.info('Estamos procesando su solicitud', 'Por favor espere')
+            $.ajax({
+                url: '@Url.Action("MinorExpensesInvoiceReport", "Accounting")?id=' + '@Model.DocumentNumber',
+                type: "POST",
+                data: "",
+                cache: false,
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    if (result.status === "OK") {
+                        window.open(url);
+                        if (redirect)
+                            window.location.href = '@Url.Action("MinorExpensesInvoiceIndex","Accounting")';
                     }
+                    else
+                        swal({
+                            title: "ERROR",
+                            text: result.status,
+                            type: "error"
+                        });
 
-                if (isAllValid) {
-                    var data = {
-                        DocumentNumber: '@Model.DocumentNumber',
-                        DocumentDate: $('#DocumentDate').val(),
-                        SupplierNumber: $('#SupplierNumber').val().trim(),
-                        Note: $('#Note').val().trim(),
-                        Ncf: '@Model.Ncf',
-                        NcfType: '@Model.NcfType',
-                        NcfDueDate: '@Model.NcfDueDate',
-                        CurrencyId: $('#CurrencyId').val().trim(),
-                        Subtotal: parseFloat($('#Subtotal').html().replace(/,/g, "")),
-                        TaxAmount: parseFloat($('#TaxAmount').html().replace(/,/g, "")),
-                        TotalAmount: parseFloat($('#Total').html().replace(/,/g, "")),
-                        DocumentType: 11,
-                        Details: items
-                    }
-                    $.ajax({
-                        url: '@Url.Action("SaveInvoice", "Accounting")',
-                        type: "POST",
-                        data: JSON.stringify(data),
-                        dataType: "JSON",
-                        cache: false,
-                        contentType: "application/json",
-                        success: function (result) {
-                            if (result.status === "OK") {
-                                var url = '@Url.Content("~/PDF/Requisicion/")' + $('#PurchaseRequestId').val() + '.pdf';
-                                toastr.info('Estamos procesando su solicitud', 'Por favor espere');
-                                window.open(url);
-                            }
-                            else
-                                swal({
-                                    title: "ERROR",
-                                    text: result.status,
-                                    type: "error"
-                                });
-                        }
-                    });
                 }
             });
         }

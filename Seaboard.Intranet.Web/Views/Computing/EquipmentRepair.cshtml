@@ -16,7 +16,7 @@
                 <a href="@Url.Action("Index", "Home")">Inicio</a>
             </li>
             <li>
-                <a href="@Url.Action("Index", "EquipmentRepairIndex")">Listado de reparación de equipos</a>
+                <a href="@Url.Action("EquipmentRepairIndex", "Computing")">Listado de reparación de equipos</a>
             </li>
             <li class="active">
                 <strong>Reparación de equipos</strong>
@@ -36,28 +36,30 @@
                 <div class="ibox-content">
                     <div class="form-group">
                         <div class="col-sm-12 col-sm-offset-1">
-                            <button class="btn btn-primary" type="button" onclick="guardar();"><i class="fa fa-save"></i> Guardar</button>
-                            <button class="btn btn-white" type="button" onclick="limpiarCampos();"><i class="fa fa-eraser"></i> Borrar</button>
-                            @if (Model.Status != 4 && Model.Status != 7)
+                            @if (Model.Status != 6)
                             {
-                                <button class="btn btn-primary" type="button" onclick="enviarFlujo();"><i class="fa fa-send"></i> Enviar</button>
-                            }
-                            @if (Model.Status != 0 && Model.Status != 7)
-                            {
-                                <button class="btn btn-danger" type="button" onclick="eliminar();"><i class="fa fa-eraser"></i> @(Model.Status == 1 ? "Eliminar" : "Anular")</button>
-                            }
-                            @if (Model.Status == 4)
-                            {
-                                <button class="btn btn-success" type="button" onclick="reparar();"><i class="fa fa-check-square"></i> Reparar</button>
-
-                            }
-                            @if (Model.Status == 4 || Model.Status == 7)
-                            {
-                                <button class="btn btn-success" type="button" onclick="entregar();"><i class="fa fa-send-o"></i> Entregar</button>
+                                if (Model.Status < 4)
+                                {
+                                    <button class="btn btn-primary" type="button" onclick="guardar();"><i class="fa fa-save"></i> Guardar</button>
+                                    <button class="btn btn-white" type="button" onclick="limpiarCampos();"><i class="fa fa-eraser"></i> Borrar</button>
+                                    <button class="btn btn-success" type="button" onclick="enviarFlujo();"><i class="fa fa-send"></i> Enviar</button>
+                                }
+                                if (Model.Status > 0 && Model.Status != 6)
+                                {
+                                    <button class="btn btn-danger" type="button" onclick="eliminar();"><i class="fa fa-eraser"></i> @(Model.Status == 1 ? "Eliminar" : "Anular")</button>
+                                }
+                                if (Model.Status == 4)
+                                {
+                                    <button class="btn btn-info" type="button" onclick="reparar();"><i class="fa fa-check-square"></i> Reparar</button>
+                                }
+                                if (Model.Status == 4 || Model.Status == 7)
+                                {
+                                    <button class="btn btn-success" type="button" onclick="entregar();"><i class="fa fa-send-o"></i> Entregar</button>
+                                }
                             }
                             @if (Model.Status != 0)
                             {
-                                <button class="btn btn-success" type="button" onclick="Print();"><i class="fa fa-print"></i> Imprimir</button>
+                                <button class="btn btn-default" type="button" onclick="imprimir();"><i class="fa fa-print"></i> Imprimir</button>
                             }
                             <br />
                         </div>
@@ -158,22 +160,25 @@
                     <div id="tab-2" class="tab-pane">
                         <div class="panel-body">
                             <div class="row">
-                                <form action="javascript:;" method="post" enctype="multipart/form-data" id="attachmentForm" accept-charset="utf-8">
-                                    <div class="col-md-9">
-                                        <div class="fileinput fileinput-new input-group" data-provides="fileinput">
-                                            <div class="form-control" data-trigger="fileinput">
-                                                <i class="glyphicon glyphicon-file fileinput-exists"></i>
-                                                <span class="fileinput-filename"></span>
+                                @if (Model.Status != 6)
+                                {
+                                    <form action="javascript:;" method="post" enctype="multipart/form-data" id="attachmentForm" accept-charset="utf-8">
+                                        <div class="col-md-9">
+                                            <div class="fileinput fileinput-new input-group" data-provides="fileinput">
+                                                <div class="form-control" data-trigger="fileinput">
+                                                    <i class="glyphicon glyphicon-file fileinput-exists"></i>
+                                                    <span class="fileinput-filename"></span>
+                                                </div>
+                                                <span class="input-group-addon btn btn-default btn-file"><span class="fileinput-new">Seleccionar archivo</span><span class="fileinput-exists">Cambiar</span><input type="file" name="FileData" id="FileData"></span>
+                                                <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">Borrar</a>
                                             </div>
-                                            <span class="input-group-addon btn btn-default btn-file"><span class="fileinput-new">Seleccionar archivo</span><span class="fileinput-exists">Cambiar</span><input type="file" name="FileData" id="FileData"></span>
-                                            <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">Borrar</a>
                                         </div>
-                                    </div>
 
-                                    <div class="col-md-3">
-                                        <button type="button" class="btn btn-success" onclick="atacharArchivo();" data-dismiss="modal">Adjuntar</button>
-                                    </div>
-                                </form>
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn btn-success" onclick="atacharArchivo();" data-dismiss="modal">Adjuntar</button>
+                                        </div>
+                                    </form>
+                                }
                             </div>
 
                             <div class="hr-line-dashed"></div>
@@ -234,8 +239,20 @@
                     return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
                 }));
             }
+            deshabilitarControles();
         });
         window.onbeforeunload = function () { $.ajax({ url: '@Url.Action("UnblockSecuence", "Computing", new { id = Model.RequestId, formulario = "EIPM10300"})' }).done(function () { }); }
+
+        function deshabilitarControles() {
+            if (@Model.Status > 3) {
+                $('#Device').prop("readonly", true);
+                $('#Supplier').prop('readonly', true);
+                $('#Cost').prop('readonly', true);
+                $('#Diagnostics').prop('readonly', true);
+                $('#Note').prop('readonly', true);
+                $('#lookupEquipo').css('display', 'none');
+            }
+        }
 
         function guardar() {
             $('#PostType').val(0);
@@ -463,6 +480,64 @@
                     success: function (result) {
                         if (result.status === "OK") {
                             window.location.href = result.url;
+                        } else {
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+                    }
+                });
+            });
+        }
+
+        function imprimir() {
+            var url = '@Url.Content("~/PDF/Reportes/")EquipmentRepairReport.pdf';
+            toastr.info('Estamos procesando su solicitud', 'Por favor espere')
+            $.ajax({
+                url: '@Url.Action("EquipmentRepairReport", "Computing")?id=' + $('#RequestId').val(),
+                type: "POST",
+                data: "",
+                cache: false,
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    if (result.status === "OK") 
+                        window.open(url);
+                    else
+                        swal({
+                            title: "ERROR",
+                            text: result.status,
+                            type: "error"
+                        });
+                    
+                }
+            });
+        }
+
+         function anular() {
+            swal({
+                title: "Anulacion",
+                text: "Esta seguro que desea anular esta reparacion de equipo ?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Si, adelante!",
+                cancelButtonText: "No, cancelar!",
+                closeOnConfirm: false
+            }, function () {
+                $.ajax({
+                    url: '@Url.Action("DeleteEquipmentRepair", "Computing")?id=' + '@Model.RequestId',
+                    type: "POST",
+                    data: "",
+                    cache: false,
+                    async: false,
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                           window.location.href = "@Url.Action("EquipmentRepairIndex","Computing")";
                         } else {
                             swal({
                                 title: "ERROR",

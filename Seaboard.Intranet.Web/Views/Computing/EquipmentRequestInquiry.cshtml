@@ -1,0 +1,420 @@
+﻿@{
+    Layout = "~/Views/Shared/_ComputingLayout.cshtml";
+    ViewBag.Title = "Listado de solicitudes de equipo";
+}
+
+<style>
+    .glyphicon.fa {
+        font-family: 'Glyphicons Halflings';
+    }
+</style>
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-sm-4">
+        <h2>Listado de solicitudes de equipo</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Computing")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Listado de solicitudes de equipo</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="wrapper wrapper-content animated fadeInUp">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="ibox float-e-margins">
+                        <div class="ibox-title">
+                            <h3>Listado de solicitudes de equipo</h3>
+                        </div>
+                        <div class="ibox-content">
+                            <div class="col-sm-12 col-sm-offset-1">
+                                <button class="btn btn-primary" type="button" onclick="consultar();"><i class="fa fa-search"></i> Consultar</button>
+                                <button class="btn btn-info" type="button" onclick="borrar();"><i class="fa fa-eraser"></i> Borrar</button>
+                                <br />
+                            </div>
+                            <br />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ibox">
+                <div class="ibox-content">
+                    <div class="hr-line-dashed"></div>
+                    <br />
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="col-sm-5 control-label">Tipo de solicitud:</label>
+                                <div class="col-sm-7 input-group">
+                                    <select class="form-control" id="RequestType" name="RequestType">
+                                        <option value="0">Todos</option>
+                                        <option value="10">Equipo nuevo</option>
+                                        <option value="20">Reparación de equipo</option>
+                                        <option value="30">Cambio de plan</option>
+                                        <option value="40">Cancelación de plan</option>
+                                        <option value="50">Cambiazo o redención de fidepuntos</option>
+                                        <option value="60">Perdida de equipo</option>
+                                        <option value="70">Perdida de Tarjeta SIM</option>
+                                        <option value="80">Tarjeta SIM dañada</option>
+                                        <option value="90">Reemplazo de equipo</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-5 control-label">Estado:</label>
+                                <div class="col-sm-7 input-group">
+                                    <select class="form-control" id="Status" name="Status">
+                                        <option value="0">Todos</option>
+                                        <option value="1">Nuevo</option>
+                                        <option value="2">Enviado</option>
+                                        <option value="3">Rechazado</option>
+                                        <option value="4">Aprobado</option>
+                                        <option value="5">Anulado</option>
+                                        <option value="6">Procesando</option>
+                                        <option value="7">Completado</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="col-sm-5 control-label">Departamento:</label>
+                                <div class="col-sm-7 input-group">
+                                    <input type="text" name="Department" id="Department" class="form-control" />
+                                    <span class="input-group-btn">
+                                        <button id="lookupDepartamento" type="button" class="btn btn-primary">
+                                            <i class="fa fa-search"></i>
+                                        </button>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-5 control-label">Requerimiento a:</label>
+                                <div class="col-sm-7 input-group">
+                                    <input type="text" name="Employee" id="Employee" class="form-control" />
+                                    <span class="input-group-btn">
+                                        <button id="lookupEmpleado" type="button" class="btn btn-primary">
+                                            <i class="fa fa-search"></i>
+                                        </button>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="col-sm-5 control-label">Fecha solicitud:</label>
+                                <div class="col-sm-7 input-group">
+                                    <input type="text" name="daterange" id="daterange" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hr-line-dashed"></div>
+                    <div class="table-responsive" id="invoiceRows">
+                        <table class="table table-striped table-bordered table-hover informationTable">
+                            <thead>
+                                <tr>
+                                    <th>No. de solicitud</th>
+                                    <th>Tipo de solicitud</th>
+                                    <th>Departamento</th>
+                                    <th>Solicitante</th>
+                                    <th>Fecha</th>
+                                    <th>Tipo flota</th>
+                                    <th>Nota</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles{
+    @Styles.Render("~/plugins/dateRangeStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/dateRange")
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+    @Scripts.Render("~/plugins/dataTables")
+
+    <script>
+        var date;
+        $(document).ready(function () {
+            $.formattedDate = function (dateToFormat) {
+                var dateObject = new Date(dateToFormat);
+                var day = dateObject.getDate();
+                var month = dateObject.getMonth() + 1;
+                var year = dateObject.getFullYear();
+                day = day < 10 ? "0" + day : day;
+                month = month < 10 ? "0" + month : month;
+                var formattedDate = month + "/" + day + "/" + year;
+                return formattedDate;
+            };
+            $('.informationTable').DataTable({
+                pageLength: 10,
+                dom: '<"html5buttons"B>lTfgitp',
+                language: {
+                    "sProcessing": "Procesando... ",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo":
+                        "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                    "sInfoEmpty":
+                        "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered":
+                        "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:  ",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                },
+                oAria: {
+                    "sSortAscending":
+                        ": Activar para ordenar la columna de manera ascendente",
+                    "sSortDescending":
+                        ": Activar para ordenar la columna de manera descendente"
+                },
+                buttons: [
+                    { extend: 'copy' },
+                    { extend: 'csv' },
+                    { extend: 'excel', title: 'ExampleFile' },
+                    { extend: 'pdf', title: 'ExampleFile' },
+                    {
+                        extend: 'print',
+                        customize: function (win) {
+                            $(win.document.body).addClass('white-bg');
+                            $(win.document.body).css('font-size', '10px');
+
+                            $(win.document.body).find('table')
+                                .addClass('compact')
+                                .css('font-size', 'inherit');
+                        }
+                    }
+                ]
+            });
+            $("#lookupEmpleado").lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookup", "Home")?tipo=18&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function (data) {
+                    $('input[name=Employee]').val(data.EmployeeId.trim() + ' - ' + data.Name.trim());
+                },
+                tableHeader: ['Id. de empleado', 'Nombre', 'Departamento'],
+                hiddenFields: ['FirstName','LastName','Identification','JobTitle','Email']
+            });
+            $("#lookupDepartamento").lookupbox({
+                title: 'Busqueda: ',
+                url: '@Url.Action("ListLookup", "Home")?tipo=1&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function (data) {
+                    $('input[name=DepartmentId]').val(data.Descripción);
+                    $('input[name=PurchaseOrder]').val(data.Descripción);
+                    $('input[name=Department]').val(data.Descripción);
+                },
+                tableHeader: ['Id. de departamento', 'Descripción'],
+                hiddenFields: ['DataExtended','DataPlus']
+            });
+            $('#daterange').daterangepicker({
+                format: 'MM/DD/YYYY',
+            }, function (start, end, label) {
+                date = start.format('MM/DD/YYYY') + ' - ' + end.format('MM/DD/YYYY');
+            });
+        });
+
+        function consultar() {
+            var isValid = true;
+
+            if (isValid) {
+                toastr.info('Estamos procesando su solicitud', 'Por favor espere');
+                var data = {
+                    requestType: $('#RequestType').val(),
+                    status: parseInt($('#Status').val()),
+                    department: $('#Department').val(),
+                    employee: $('#Employee').val(),
+                    dateRange: date
+                }
+                $.ajax({
+                    url: '@Url.Action("EquipmentRequestInquiry", "Computing")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    async: false,
+                    cache: false,
+                    contentType: "application/json",
+                    success: function (d) {
+                        if (d.status === "OK") {
+                            var $table = $(' <table class="table table-striped table-bordered table-hover informationTable">');
+                            $table.append(
+                                '<thead>' +
+                                '<tr>' +
+                                '<th>No. de solicitud</th>' +
+                                '<th>Tipo de solicitud</th>' +
+                                '<th>Departamento</th>' +
+                                '<th>Solicitante</th>' +
+                                '<th>Fecha</th>' +
+                                '<th>Tipo flota</th>' +
+                                '<th>Nota</th>' +
+                                '<th>Estado</th>' +
+                                '</tr>' +
+                                '</thead>');
+                            if (d.registros.length > 0) {
+                                var $tbody = $('<tbody/>');
+                                $.each(d.registros, function (i, val) {
+                                    var $row = $('<tr/>');
+                                    var url = '@Url.Action("EquipmentRequest","Computing")/' + val.RequestId;
+                                    var $a = $('<a href="' + url + '"/>').html(val.RequestId);
+                                    var $status;
+                                    var $requestType;
+                                    switch (parseInt(val.Status)) {
+                                        case 1:
+                                            $status = $('<i class="badge badge-danger">Nuevo</i>');
+                                            break;
+                                        case 2:
+                                            $status = $('<i class="badge badge-warning-light">Enviado</i>');
+                                            break;
+                                        case 3:
+                                            $status = $('<i class="badge badge-primary">Rechazado</i>');
+                                            break;
+                                        case 4:
+                                            $status = $('<i class="badge badge-warning">Aprobado</i>');
+                                            break;
+                                        case 5:
+                                            $status = $('<i class="badge badge-info">Anulado</i>');
+                                            break;
+                                        case 6:
+                                            $status = $('<i class="badge badge-default">Procesando</i>');
+                                            break;
+                                        case 7:
+                                            $status = $('<i class="badge badge-success">Completado</i>');
+                                            break;
+                                    }
+                                    switch (val.RequestType) {
+                                        case "10":
+                                            $requestType = $('<i class="label label-primary">Equipo nuevo</i>');
+                                            break;
+                                        case "20":
+                                            $requestType = $('<i class="label label-warning">Reparación de equipo</i>');
+                                            break;
+                                        case "30":
+                                            $requestType = $('<i class="label label-info">Cambio de plan</i>');
+                                            break;
+                                        case "40":
+                                            $requestType = $('<i class="label label-success">Cancelación de plan</i>');
+                                            break;
+                                        case "50":
+                                            $requestType = $('<i class="label label-warning-light">Cambiazo o redención de fidepuntos</i>');
+                                            break;
+                                        case "60":
+                                            $requestType = $('<i class="label label-success">Perdida de equipo</i>');
+                                            break;
+                                        case "70":
+                                            $requestType = $('<i class="label label-success">Perdida de Tarjeta SIM</i>');
+                                            break;
+                                        case "80":
+                                            $requestType = $('<i class="label label-success">Tarjeta SIM dañada</i>');
+                                            break;
+                                        case "90":
+                                            $requestType = $('<i class="label label-success">Reemplazo de equipo</i>');
+                                            break;
+                                    }
+                                    $row.append($('<td/>').html($a));
+                                    $row.append($('<td/>').html($requestType));
+                                    $row.append($('<td/>').html(val.DepartmentId));
+                                    $row.append($('<td/>').html(val.Requester));
+                                    $row.append($('<td/>').html($.formattedDate(new Date(parseInt(val.DocumentDate.substr(6))))));
+                                    $row.append($('<td/>').html(val.OpenMinutes));
+                                    $row.append($('<td/>').html(val.Note));
+                                    $row.append($('<td/>').html($status));
+                                    $tbody.append($row);
+                                });
+                                $table.append($tbody);
+                            }
+                            $('#invoiceRows').html($table);
+                            $($table).DataTable({
+                                pageLength: 10,
+                                order: [[0, "desc"]],
+                                dom: '<"html5buttons"B>lTfgitp',
+                                language: {
+                                    "sProcessing": "Procesando... ",
+                                    "sLengthMenu": "Mostrar _MENU_ registros",
+                                    "sZeroRecords": "No se encontraron resultados",
+                                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                                    "sInfoPostFix": "",
+                                    "sSearch": "Buscar:  ",
+                                    "sUrl": "",
+                                    "sInfoThousands": ",",
+                                    "sLoadingRecords": "Cargando...",
+                                    "oPaginate": {
+                                        "sFirst": "Primero",
+                                        "sLast": "Último",
+                                        "sNext": "Siguiente",
+                                        "sPrevious": "Anterior"
+                                    }
+                                },
+                                oAria: {
+                                    "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                                    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                                },
+                                buttons: [
+                                    { extend: 'copy' },
+                                    { extend: 'csv' },
+                                    { extend: 'excel', title: 'ExampleFile' },
+                                    { extend: 'pdf', title: 'ExampleFile' },
+
+                                    {
+                                        extend: 'print',
+                                        customize: function (win) {
+                                            $(win.document.body).addClass('white-bg');
+                                            $(win.document.body).css('font-size', '10px');
+
+                                            $(win.document.body).find('table')
+                                                .addClass('compact')
+                                                .css('font-size', 'inherit');
+                                        }
+                                    }
+                                ]
+                            });
+                        }
+                        else {
+                            alert(d.status);
+                        }
+                    }
+                });
+            }
+        }
+
+        function borrar() {
+            $('#Department,#Employee,#daterange').val('');
+        }
+    </script>
+}

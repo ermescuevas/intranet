@@ -186,13 +186,13 @@ namespace Seaboard.Intranet.BusinessLogic
                 if (File.Exists(ruta + ".xlsx"))
                 {
                     isValid = true;
-                    ruta = ruta + ".xlsx";
+                    ruta += ".xlsx";
                 }
 
                 if (File.Exists(ruta + ".xlsm"))
                 {
                     isValid = true;
-                    ruta = ruta + ".xlsm";
+                    ruta += ".xlsm";
                 }
 
                 if (!isValid)
@@ -550,10 +550,7 @@ namespace Seaboard.Intranet.BusinessLogic
                 xlApp.Quit();
                 Marshal.ReleaseComObject(xlApp);
             }
-            catch
-            {
-
-            }
+            catch { }
         }
 
         public static List<Domain.ViewModels.Lookup> OvertimeHours(string path, ref string message)

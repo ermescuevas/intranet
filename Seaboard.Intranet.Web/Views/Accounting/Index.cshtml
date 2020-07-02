@@ -1,46 +1,194 @@
-﻿
+﻿@using Seaboard.Intranet.Domain.Models
+
 @{
     Layout = "~/Views/Shared/_AccountingLayout.cshtml";
     ViewBag.Title = "Inicio";
     string ncfAlert = ViewBag.NcfAlert;
+    var monthlyAmount = (double)ViewBag.MonthlyAmount;
+    var dailyAmount = (double)ViewBag.DailyAmount;
+    var totalAmount = (double)ViewBag.TotalAmount;
+    var dailyInvoices = (int)ViewBag.DailyInvoices;
+    var monthlyInvoices = (int)ViewBag.MonthlyInvoices;
+    var suppliers = (int)ViewBag.Suppliers;
+    var invoices = (List<AccountingInvoiceHeader>)ViewBag.LastInvoices;
+    var series = string.Format("'{0}'", string.Join("','", ((List<string>)ViewBag.Series).Select(i => i.Replace("'", "''"))));
+    var valuesSupplier = string.Join(",", (List<double?>)ViewBag.ValuesSupplier);
+    var valuesMinor = string.Join(",", (List<double?>)ViewBag.ValuesMinor);
 }
 
-<style>
-    .iframe-container {
-        overflow: hidden;
-        padding-top: 56.25%;
-        position: relative;
-    }
+<div class="wrapper wrapper-content">
+    <div class="row animated bounceInDown">
+        <div class="col-lg-4">
+            <div class="widget navy-bg no-padding">
+                <div class="p-m">
+                    <h1 class="m-xs">$ @dailyAmount.ToString("N2")</h1>
+                    <h3 class="font-bold no-margins">Total del dia</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="widget lazur-bg no-padding">
+                <div class="p-m">
+                    <h1 class="m-xs">$ @monthlyAmount.ToString("N2")</h1>
+                    <h3 class="font-bold no-margins">Total del mes</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="widget lazur-bg no-padding">
+                <div class="p-m">
+                    <h1 class="m-xs"> <i class="fa fa-users"></i> @suppliers.ToString("N0")</h1>
+                    <h3 class="font-bold no-margins">Suplidores</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row animated bounceInRight">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-content">
+                    <div>
+                        <span class="pull-right text-right">
+                            Total facturado: $ @totalAmount.ToString("N2")
+                        </span>
+                        <h3 class="font-bold no-margins">
+                            Resumen de facturacion
+                        </h3>
+                    </div>
 
-    .iframe-container iframe {
-        border: 0;
-        height: 100%;
-        left: 0;
-        position: absolute;
-        top: 0;
-        width: 100%;
-    }
+                    <div class="m-t-sm">
+                        <div class="row">
+                            <div class="col-md-10">
+                                <div><canvas id="barChart" height="70"></canvas></div>
+                            </div>
+                            <div class="col-md-2">
+                                <ul class="stat-list m-t-lg">
+                                    <li>
+                                        <h2 class="no-margins">@dailyInvoices.ToString("N0")</h2>
+                                        <small>Total de facturas en el ultimo año</small>
+                                        <div class="progress progress-mini">
+                                            <div class="progress-bar" style="width: 48%;"></div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <h2 class="no-margins ">@monthlyInvoices.ToString("N0")</h2>
+                                        <small>Total de facturas en el ultimo mes</small>
+                                        <div class="progress progress-mini">
+                                            <div class="progress-bar" style="width: 60%;"></div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
 
-    .iframe-container-4x3 {
-        padding-top: 75%;
-    }
-</style>
+                    </div>
 
-<div class="wrapper wrapper-content"></div>
+                    <div class="m-t-md">
+                        <small class="pull-right">
+                            <i class="fa fa-clock-o"> </i>
+                            Actualizado en @DateTime.Now.ToString("dd.MM.yyyy")
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row animated bounceInUp">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>Ultimas facturas </h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th style="width: 11% ">No. de documento</th>
+                                    <th style="width:11%">Tipo de doc.</th>
+                                    <th style="width:11%">Ncf</th>
+                                    <th style="width:25%">Proveedor / Referencia</th>
+                                    <th style="width:6%">Moneda</th>
+                                    <th style="width:11%">Fecha de doc.</th>
+                                    <th style="width:15%">Monto</th>
+                                    <th style="width:10%">#</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in invoices)
+                                {
+                                    <tr>
+                                        <td>@item.DocumentNumber</td>
+                                        <td>@item.PhoneNumber</td>
+                                        <td>@item.Ncf</td>
+                                        <td>@item.SupplierName</td>
+                                        <td>@item.CurrencyId</td>
+                                        <td>@item.DocumentDate.ToString("dd/MM/yyyy")</td>
+                                        <td>@item.TotalAmount.ToString("C2")</td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <button class="btn btn-primary btn-xs" onclick="detail('@item.PhoneNumber', '@item.DocumentNumber')"><i class="fa fa-bars"></i></button>
+                                                <button class="btn btn-success btn-xs" onclick="imprimir('@item.PhoneNumber', '@item.DocumentNumber')"><i class="fa fa-print"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Styles {
     @Styles.Render("~/plugins/sweetAlertStyles")
+    @Styles.Render("~/plugins/toastrStyles")
 }
 
 @section Scripts {
     @Scripts.Render("~/plugins/sweetAlert")
+    @Scripts.Render("~/plugins/iCheck")
+    @Scripts.Render("~/plugins/flot")
+    @Scripts.Render("~/plugins/vectorMap")
+    @Scripts.Render("~/plugins/chartjs")
+    @Scripts.Render("~/plugins/toastr")
 
     <script type="text/javascript">
         $(document).ready(function () {
+            var barData = {
+                labels: [@Html.Raw(series)],
+                datasets: [
+                    {
+                        label: "Proveedor informal",
+                        backgroundColor: 'rgba(220, 220, 220, 0.5)',
+                        pointBorderColor: "#fff",
+                        data: [@valuesSupplier]
+                    },
+                    {
+                        label: "Gastos menores",
+                        backgroundColor: 'rgba(26,179,148,0.5)',
+                        borderColor: "rgba(26,179,148,0.7)",
+                        pointBackgroundColor: "rgba(26,179,148,1)",
+                        pointBorderColor: "#fff",
+                        data: [@valuesMinor]
+                    }
+                ]
+            };
+
+            var barOptions = { responsive: true };
+            var ctx2 = document.getElementById("barChart").getContext("2d");
+            new Chart(ctx2, { type: 'bar', data: barData, options: barOptions });
             if (@ncfAlert.Length > 0) {
                 swal({
                     title: "INFORMACIÓN",
-                    text: '@Json.Encode(ncfAlert) '.replace("&quot;","").replace("&quot;",""),
+                    text: '@Json.Encode(ncfAlert) '.replace("&quot;", "").replace("&quot;", ""),
                     type: "warning",
                     showCancelButton: false,
                     confirmButtonColor: "#DD6B55",
@@ -49,5 +197,42 @@
                 });
             }
         });
+
+        function imprimir(documentType, documentNumber) {
+            var type = documentType == "Proveedor Informal" ? 0 : 1;
+            var url = '';
+            var urlAction = '';
+            if (type == 0) {
+                url = '@Url.Content("~/PDF/Reportes/")InformalSupplierInvoiceReport.pdf';
+                urlAction = '@Url.Action("InformalSupplierInvoiceReport", "Accounting")?id=' + documentNumber
+            } else {
+                url = '@Url.Content("~/PDF/Reportes/")MinorExpensesInvoiceReport.pdf';
+                urlAction = '@Url.Action("MinorExpensesInvoiceReport", "Accounting")?id=' + documentNumber
+            }
+            toastr.info('Estamos procesando su solicitud', 'Por favor espere')
+            $.ajax({
+                url: urlAction,
+                type: "POST",
+                data: "",
+                cache: false,
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    if (result.status === "OK")
+                        window.open(url);
+                    else
+                        swal({
+                            title: "ERROR",
+                            text: result.status,
+                            type: "error"
+                        });
+
+                }
+            });
+        }
+
+        function detail(documentType, documentNumber) {
+            window.location.href = (documentType == "Proveedor Informal" ? '@Url.Action("InformalSupplierInvoice","Accounting")' : '@Url.Action("MinorExpensesInvoice","Accounting")') + '?id=' + documentNumber;
+        }
     </script>
 }

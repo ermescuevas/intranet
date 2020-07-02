@@ -1,0 +1,460 @@
+﻿@using Microsoft.AspNet.Identity;
+@using Seaboard.Intranet.BusinessLogic;
+@model Seaboard.Intranet.Domain.Case
+
+@{
+    ViewBag.Title = "Caso";
+    Layout = "~/Views/Shared/_ComputingLayout.cshtml";
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Caso</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li>
+                <a href="@Url.Action("CaseIndex", "Computing")">Listado de casos</a>
+            </li>
+            <li class="active">
+                <strong>Caso</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight ecommerce">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h3>Caso</h3>
+                </div>
+
+                <div class="ibox-content">
+                    <div class="form-group">
+                        <div class="col-sm-12 col-sm-offset-1">
+                            @if (Model.Status != 2)
+                            {
+                                <button class="btn btn-primary" type="button" onclick="guardar();"><i class="fa fa-save"></i> Guardar</button>
+                                if (Model.Status == 1)
+                                {
+                                    <button class="btn btn-danger" type="button" onclick="eliminar();"><i class="fa fa-remove"></i> Eliminar</button>
+                                    <button class="btn btn-default" type="button" onclick="cerrar();"><i class="fa fa-print"></i> Cerrar Caso</button>
+                                }
+                            }
+                            <br />
+                        </div>
+                    </div>
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="tabs-container">
+                <ul class="nav nav-tabs">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tab-1"> Datos Basicos</a>
+                    </li>
+                    <li class="">
+                        <a data-toggle="tab" href="#tab-2" onclick="cargarArchivos();"> Adjuntos</a>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                    <div id="tab-1" class="tab-pane active">
+                        @using (Html.BeginForm("SaveCase", "Computing", FormMethod.Post, new { @id = "form" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <div class="panel-body">
+                                <fieldset class="form-horizontal">
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">No. de caso:</label>
+                                                <div class="col-sm-8 input-group">
+                                                    @Html.TextBoxFor(m => m.CaseNumber, new { @class = "form-control" })
+                                                    @Html.ValidationMessageFor(model => model.CaseNumber, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Descripcion:</label>
+                                                <div class="col-sm-8 input-group">
+                                                    @Html.TextBoxFor(model => model.Description, new { @class = "form-control" })
+                                                    @Html.ValidationMessageFor(model => model.Description, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Empleado:</label>
+                                                <div class="col-sm-8 input-group">
+                                                    @Html.TextBoxFor(model => model.EmployeeId, new { @class = "form-control" })
+                                                    <span class="input-group-btn">
+                                                        <button id="lookupEmpleado" type="button" class="btn btn-primary">
+                                                            <i class="fa fa-search"></i>
+                                                        </button>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-5">
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Fecha de caso:</label>
+                                                <div class="col-sm-8 input-group date">
+                                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                    @Html.TextBoxFor(model => model.DocumentDate, new { @class = "form-control", @Value = Model.DocumentDate.ToString("MM/dd/yyyy") })
+                                                    @Html.ValidationMessageFor(model => model.DocumentDate, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Numero de contrato:</label>
+                                                <div class="col-sm-8 input-group">
+                                                    @Html.TextBoxFor(model => model.PhoneNumber, new { @class = "form-control" })
+                                                    @Html.ValidationMessageFor(model => model.PhoneNumber, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Diagnostico:</label>
+                                                <div class="col-sm-8 input-group">
+                                                    @Html.TextBoxFor(model => model.Diagnostics, new { @class = "form-control" })
+                                                    @Html.ValidationMessageFor(model => model.Diagnostics, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    <div class="row">
+                                        <div class="col-sm-11">
+                                            <div class="form-group">
+                                                <label class="col-sm-2 control-label">Texto de explicacion:</label>
+                                                <div class="col-sm-10">
+                                                    @Html.TextAreaFor(m => m.Note, new { @class = "form-control", @rows = "5", @placeholder = "Introduzca la nota" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        }
+                    </div>
+
+                    <div id="tab-2" class="tab-pane">
+                        <div class="panel-body">
+                            <div class="row">
+                                <form action="javascript:;" method="post" enctype="multipart/form-data" id="attachmentForm" accept-charset="utf-8">
+                                    <div class="col-md-9">
+                                        <div class="fileinput fileinput-new input-group" data-provides="fileinput">
+                                            <div class="form-control" data-trigger="fileinput">
+                                                <i class="glyphicon glyphicon-file fileinput-exists"></i>
+                                                <span class="fileinput-filename"></span>
+                                            </div>
+                                            <span class="input-group-addon btn btn-default btn-file"><span class="fileinput-new">Seleccionar archivo</span><span class="fileinput-exists">Cambiar</span><input type="file" name="FileData" id="FileData"></span>
+                                            <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">Borrar</a>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <button type="button" class="btn btn-success" onclick="atacharArchivo();" data-dismiss="modal">Adjuntar</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div class="hr-line-dashed"></div>
+                            <div class="row" id="attachmentFiles"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Styles {
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/plugins/switcheryStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/plugins/sweetAlertStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+    @Scripts.Render("~/plugins/switchery")
+    @Scripts.Render("~/plugins/sweetAlert")
+
+    <script>
+        $(document).ready(function () {
+            $('#DocumentDate').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true
+            });
+            $("#lookupEmpleado").lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookup", "Home")?tipo=18&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function (data) {
+                    $('input[name=EmployeeId]').val(data.EmployeeId.trim() + ' - ' + data.Name.trim());
+                },
+                tableHeader: ['Id. de empleado', 'Nombre', 'Departamento'],
+                hiddenFields: ['FirstName','LastName','Identification','JobTitle','Email']
+            });
+            deshabilitarControles();
+        });
+
+        function deshabilitarControles() {
+            if ('@(Model.Status)' === '2') {
+                $('#CaseNumber').prop("readonly", true);
+                $('#Description').prop('readonly', true);
+                $('#EmployeeId').prop('readonly', true);
+                $('#DocumentDate').prop('readonly', true);
+                $('#PhoneNumber').prop('readonly', true);
+                $('#Diagnostics').prop('readonly', true);
+                $('#Note').prop('readonly', true);
+                $('#lookupEmpleado').css('display', 'none');
+            }
+        }
+        function guardar() {
+            procesarSolicitud();
+        }
+
+        function cargarArchivos() {
+            $.ajax({
+                url: '@Url.Action("LoadAttachmentFiles", "Computing")?id=' + $('#CaseNumber').val().trim(),
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    attachmentFiles = result;
+                    if (attachmentFiles.length > 0) {
+                        var $ul = $('<ul class="list-unstyled file-list" />');
+                        $.each(attachmentFiles, function (i, val) {
+                            var $li = $('<li/>');
+                            var $a = $('<a href="@Url.Action("Download", "Computing")?id=' + $('#CaseNumber').val().trim() + '&FileName=' + val.trim() + '" />')
+                            var $delete = $('<a href="#" />')
+                            $a.append($('<i class="fa fa-file-pdf-o" />'));
+                            $delete.html("&nbsp; &nbsp; &nbsp;");
+                            $delete.click(function (e) {
+                                e.preventDefault();
+                                eliminarArchivo(val.trim());
+                            });
+                            $delete.append($('<i class="fa fa-remove fa-2x" />'));
+                            $li.append($a.html("  " + val));
+                            $li.append($delete);
+                            $ul.append($li);
+                        });
+                        $('#attachmentFiles').html($ul);
+                    }
+                    else {
+                        $('#attachmentFiles').html('');
+                    }
+                }
+            });
+        }
+
+        function atacharArchivo() {
+            var data = new FormData();
+            data.append("FileData", document.getElementById("FileData").files[0]);
+            data.append("id", $('#CaseNumber').val());
+
+            $.ajax({
+                url: '@Url.Action("AttachFile", "Computing")',
+                type: "POST",
+                data: data,
+                dataType: "JSON",
+                contentType: false,
+                processData: false,
+                success: function (d) {
+                    if (d.status == true) {
+                        $('#attachmentForm').each(function () {
+                            this.reset();
+                        });
+                        toastr.success('Archivo adjuntado correctamente', 'Adjuntos')
+                        cargarArchivos();
+                    }
+                    else {
+                        alert('Ha ocurrido un error');
+                    }
+                    $('#submit').val('Guardar');
+                },
+                error: function () {
+                    alert('Error. Por favor trate de nuevo.');
+                    $('#submit').val('Guardar');
+                }
+            });
+        }
+
+        function eliminarArchivo(fileName) {
+            swal({
+                title: "Eliminar",
+                text: "Esta seguro que desea eliminar este archivo ?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Si, proceder!",
+                cancelButtonText: "No, cancelar!",
+                closeOnConfirm: false
+            }, function () {
+                $.ajax({
+                    url: '@Url.Action("DeleteFile", "Computing")?id=' + $('#CaseNumber').val().trim() + "&fileName=" + fileName,
+                    type: "POST",
+                    dataType: "JSON",
+                    contentType: false,
+                    processData: false,
+                    success: function (d) {
+                        if (d.status == "OK") {
+                            toastr.success('Archivo eliminado correctamente', 'Adjuntos');
+                            cargarArchivos();
+                        }
+                        else {
+                            swal({
+                                title: "ERROR",
+                                text: d.status,
+                                type: "error"
+                            });
+                        }
+                    }
+                });
+            });
+        }
+
+        function procesarSolicitud() {
+            var isAllValid = true;
+
+            if ($('#CaseNumber').val().trim() == '') {
+                toastr.error('Debe de especificar un numnero de caso', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Description').val().trim() == '') {
+                toastr.error('Debe de especificar una descripcion', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#EmployeeId').val().trim() == '') {
+                toastr.error('Debe de especificar un empleado', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#PhoneNumber').val().trim() == '') {
+                toastr.error('Debe de especificar un numero de contrato', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#DocumentDate').val().trim() == '') {
+                toastr.error('Debe de especificar una fecha', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Note').val().trim() == '') {
+                toastr.error('Debe de especificar un texto de explicacion', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (isAllValid) {
+                $.ajax({
+                    url: '@Url.Action("SaveCase", "Computing")',
+                    type: "POST",
+                    data: $('#form').serialize(),
+                    success: function (result) {
+                        if (result.status == "OK")
+                            window.location.href = "@Url.Action("CaseIndex","Computing")";
+                        else
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                    }
+                });
+            }
+        }
+
+        function eliminar() {
+            swal({
+                title: "Eliminar",
+                text: "Esta seguro que desea eliminar este caso ?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Si, adelante!",
+                cancelButtonText: "No, cancelar!",
+                closeOnConfirm: false
+            }, function () {
+                $.ajax({
+                    url: '@Url.Action("DeleteCase", "Computing")?id=' + '@Model.CaseNumber',
+                    type: "POST",
+                    data: "",
+                    cache: false,
+                    async: false,
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            window.location.href = "@Url.Action("CaseIndex","Computing")";
+                        } else {
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+                    }
+                });
+            });
+        }
+
+        function cerrar() {
+            swal({
+                title: "Cerrar",
+                text: "Esta seguro que desea cerrar este caso ?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Si, adelante!",
+                cancelButtonText: "No, cancelar!",
+                closeOnConfirm: false
+            }, function () {
+                $.ajax({
+                    url: '@Url.Action("CloseCase", "Computing")?id=' + '@Model.CaseNumber',
+                    type: "POST",
+                    data: "",
+                    cache: false,
+                    async: false,
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            window.location.href = "@Url.Action("CaseIndex","Computing")";
+                        } else {
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+                    }
+                });
+            });
+        }
+    </script>
+}

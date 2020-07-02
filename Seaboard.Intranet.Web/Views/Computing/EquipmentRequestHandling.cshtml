@@ -1,0 +1,730 @@
+﻿@using Microsoft.AspNet.Identity;
+@using Seaboard.Intranet.Domain;
+@model Seaboard.Intranet.Domain.EquipmentRequest
+
+@{
+    ViewBag.Title = "Solicitud de equipo de comunicacion";
+
+    var types = new List<SelectListItem>()
+{
+        new SelectListItem { Text = "Equipo nuevo", Value = "10" },
+        new SelectListItem { Text = "Reparación de equipo", Value = "20" },
+        new SelectListItem { Text = "Cambio de plan", Value = "30" },
+        new SelectListItem { Text = "Cancelación de plan", Value = "40" },
+        new SelectListItem { Text = "Cambiazo o redención de fidepuntos", Value = "50" },
+        new SelectListItem { Text = "Perdida de equipo", Value = "60" },
+        new SelectListItem { Text = "Perdida de Tarjeta SIM", Value = "70" },
+        new SelectListItem { Text = "Tarjeta SIM dañada", Value = "80" },
+        new SelectListItem { Text = "Reemplazo de equipo", Value = "90" }
+    };
+    var minute = new List<SelectListItem>()
+    {
+        new SelectListItem { Value = "Abierta", Text = "Abierta" },
+        new SelectListItem { Value = "Cerrada", Text = "Cerrada" }
+    };
+    Layout = "~/Views/Shared/_ComputingLayout.cshtml";
+    
+    var logs = (List<EquipmentRequestLog>)ViewBag.Logs;
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Solicitud de equipo de comunicacion</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li>
+                <a href="@Url.Action("EquipmentRequestHandlingIndex", "Computing")">Listado de solicitudes</a>
+            </li>
+            <li class="active">
+                <strong>Solicitud de equipo de comunicacion</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight ecommerce">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h3>Solicitud de equipo de comunicacion</h3>
+                </div>
+
+                <div class="ibox-content">
+                    <div class="form-group">
+                        <div class="col-sm-12 col-sm-offset-1">
+                            @if (Model.Status != 7)
+                            {
+                                if (Model.Status < 4)
+                                {
+                                    <button class="btn btn-primary" type="button" onclick="guardar();"><i class="fa fa-save"></i> Guardar</button>
+                                }
+
+                                if (!string.IsNullOrEmpty(Model.RequestBy) && Seaboard.Intranet.BusinessLogic.Account.GetAccount(User.Identity.GetUserName()).Department != "INFORMATICA" && Model.Status < 5)
+                                {
+                                    <button class="btn btn-white" type="button" onclick="limpiarCampos();"><i class="fa fa-eraser"></i> Borrar</button>
+                                    <button class="btn btn-danger" type="button" onclick="eliminar();"><i class="fa fa-eraser"></i> @(Model.Status == 1 ? "Eliminar" : "Anular")</button>
+                                }
+                                if (Seaboard.Intranet.BusinessLogic.Account.GetAccount(User.Identity.GetUserName()).Department != "INFORMATICA" && Model.Status < 4)
+                                {
+                                    <button class="btn btn-success" type="button" onclick="enviarFlujo();"><i class="fa fa-send"></i> Enviar</button>
+                                }
+                                else if (Seaboard.Intranet.BusinessLogic.Account.GetAccount(User.Identity.GetUserName()).Department == "INFORMATICA")
+                                {
+                                    <button class="btn btn-success" type="button" onclick="completar();"><i class="fa fa-check-square"></i> Completar</button>
+                                    if (Model.RequestType != "30" || Model.RequestType != "40")
+                                    {
+                                        <button class="btn btn-info" type="button" onclick="entregar();"><i class="fa fa-send"></i> Entregar equipo</button>
+                                    }
+                                    if (Model.RequestType == "20")
+                                    {
+                                        <button class="btn btn-warning" type="button" onclick="reparar();"><i class="fa fa-wrench"></i> Reparar equipo</button>
+                                    }
+                                }
+                            }
+                            @if (Model.Status > 0)
+                            {
+                                <button class="btn btn-default" type="button" onclick="imprimir();"><i class="fa fa-print"></i> Imprimir</button>
+                            }
+                            <br />
+                        </div>
+                    </div>
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-9">
+            <div class="tabs-container">
+                <ul class="nav nav-tabs">
+                    <li class="active">
+                        <a data-toggle="tab" href="#tab-1"> Datos Basicos</a>
+                    </li>
+                    <li class="">
+                        <a data-toggle="tab" href="#tab-2" onclick="cargarArchivos();"> Adjuntos</a>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                    <div id="tab-1" class="tab-pane active">
+                        @using (Html.BeginForm("SaveEquipmentRequest", "Computing", FormMethod.Post, new { @id = "form" }))
+                        {
+                            @Html.AntiForgeryToken()
+
+                            @Html.Hidden("PostType", 0);
+
+                            <div class="panel-body">
+                                <fieldset class="form-horizontal">
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">No. de solicitud:</label>
+                                                <div class="col-sm-8 input-group">
+                                                    @Html.TextBoxFor(m => m.RequestId, new { @class = "form-control", @readonly = "" })
+                                                    @Html.ValidationMessageFor(model => model.RequestId, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Tipo de solicitud:</label>
+                                                <div class="col-sm-8 input-group">
+                                                    @Html.DropDownListFor(m => m.RequestType, types, "Seleccione una opción", new { @class = "form-control" })
+                                                    @Html.ValidationMessageFor(model => model.RequestType, "", new { @class = "text-danger" })
+                                                </div>
+                                            </div>
+
+                                            <div id="additionalInfo" style="display:none">
+                                                <div class="form-group">
+                                                    <label class="col-sm-4 control-label">Con datos:</label>
+                                                    <div class="col-sm-2 input-group">
+                                                        @Html.CheckBoxFor(model => model.HasData, new { @class = "js-switch" })
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label class="col-sm-4 control-label">Tipo flota:</label>
+                                                    <div class="col-sm-5 input-group">
+                                                        @Html.DropDownListFor(model => model.OpenMinutes, minute, "Seleccione una opción", new { @class = "form-control" })
+                                                        @Html.ValidationMessageFor(model => model.RequestType, "", new { @class = "text-danger" })
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-5">
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Requerimiento para:</label>
+                                                <div class="col-sm-8 input-group">
+                                                    @Html.TextBoxFor(m => m.Requester, new { @class = "form-control" })
+                                                    @Html.ValidationMessageFor(model => model.Requester, "", new { @class = "text-danger" })
+                                                    <span class="input-group-btn">
+                                                        <button id="lookupEmpleado" type="button" class="btn btn-primary">
+                                                            <i class="fa fa-search"></i>
+                                                        </button>
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-sm-4 control-label">Departamento:</label>
+                                                <div class="col-sm-8 input-group">
+                                                    @Html.TextBoxFor(model => model.DepartmentId, new { @class = "form-control", @readonly = "" })
+                                                    <span class="input-group-btn">
+                                                        <button id="lookupDepartamento" type="button" class="btn btn-primary">
+                                                            <i class="fa fa-search"></i>
+                                                        </button>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-sm-11">
+                                            <div class="form-group">
+                                                <label class="col-sm-2 control-label">Nota:</label>
+                                                <div class="col-sm-10">
+                                                    @Html.TextAreaFor(m => m.Note, new { @class = "form-control", @rows = "5", @placeholder = "Introduzca la nota" })
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        }
+                    </div>
+
+                    <div id="tab-2" class="tab-pane">
+                        <div class="panel-body">
+                            <div class="row">
+                                @if (Model.Status != 7)
+                                {
+                                    <form action="javascript:;" method="post" enctype="multipart/form-data" id="attachmentForm" accept-charset="utf-8">
+                                        <div class="col-md-9">
+                                            <div class="fileinput fileinput-new input-group" data-provides="fileinput">
+                                                <div class="form-control" data-trigger="fileinput">
+                                                    <i class="glyphicon glyphicon-file fileinput-exists"></i>
+                                                    <span class="fileinput-filename"></span>
+                                                </div>
+                                                <span class="input-group-addon btn btn-default btn-file"><span class="fileinput-new">Seleccionar archivo</span><span class="fileinput-exists">Cambiar</span><input type="file" name="FileData" id="FileData"></span>
+                                                <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">Borrar</a>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <button type="button" class="btn btn-success" onclick="atacharArchivo();" data-dismiss="modal">Adjuntar</button>
+                                        </div>
+                                    </form>
+                                }
+
+                            </div>
+
+                            <div class="hr-line-dashed"></div>
+
+                            <div class="row" id="attachmentFiles">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 m-b-lg">
+            @if (Seaboard.Intranet.BusinessLogic.Account.GetAccount(User.Identity.GetUserName()).Department == "INFORMATICA" && Model.Status != 0 && Model.Status != 3 && Model.Status != 5 && Model.Status != 7)
+            {
+                <button class="btn btn-success" onclick="nuevaNota();">Agregar Nota</button>
+                <br />
+                <br />
+            }
+            <div id="vertical-timeline" class="vertical-container light-timeline no-margins">
+                @foreach (var item in logs)
+                {
+                    <div class="vertical-timeline-block">
+                        <div class="vertical-timeline-icon navy-bg">
+                            <i class="fa fa-file-text"></i>
+                        </div>
+
+                        <div class="vertical-timeline-content">
+                            @if (item.Note.StartsWith("NOTA:"))
+                            {
+                                <h3>NOTA</h3>
+                            }
+                            <p>@item.Note.Replace("NOTA:", "")</p>
+                            <span class="vertical-date">
+                                <small>@item.LogDate.ToLongDateString() por @item.UserId</small>
+                            </span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-note" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Nueva nota</h4>
+                </div>
+
+                <div class="modal-body">
+                    <textarea class="form-control" rows="6" placeholder="Escriba aqui su nota" id="NewNote" name="NewNote"></textarea>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="form-actions no-color">
+                        <button type="button" class="btn btn-primary" onclick="registrarNota();"> Registrar</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Styles {
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/plugins/switcheryStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/plugins/sweetAlertStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+    @Scripts.Render("~/plugins/switchery")
+    @Scripts.Render("~/plugins/sweetAlert")
+
+    <script>
+        var logs;
+        var switchery
+        $(document).ready(function () {
+            $("#lookupEmpleado").lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookup", "Home")?tipo=18&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function (data) {
+                    $('input[name=Requester]').val(data.EmployeeId.trim() + ' - ' + data.Name.trim());
+                },
+                tableHeader: ['Id. de empleado', 'Nombre', 'Departamento'],
+                hiddenFields: ['FirstName','LastName','Identification','JobTitle','Email']
+            });
+            $("#lookupDepartamento").lookupbox({
+                title: 'Busqueda: ',
+                url: '@Url.Action("ListLookup", "Home")?tipo=1&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function (data) {
+                    $('input[name=DepartmentId]').val(data.Descripción);
+                    $('input[name=PurchaseOrder]').val(data.Descripción);
+                    $('input[name=Department]').val(data.Descripción);
+                },
+                tableHeader: ['Id. de departamento', 'Descripción'],
+                hiddenFields: ['DataExtended','DataPlus']
+            });
+            var elem = document.querySelector('.js-switch');
+            switchery = new Switchery(elem, { color: '#1AB394' });
+            if ('@Model.RequestType' === "10" || '@Model.RequestType' === "30") $('#additionalInfo').css('display', '');
+            $('#RequestType').on('change', function () {
+                if (this.value === "10") $('#additionalInfo').css('display', '');
+                else if (this.value === "30") $('#additionalInfo').css('display', '');
+                else $('#additionalInfo').css('display', 'none');
+            });
+            logs = @Html.Raw(Json.Encode(logs));
+            deshabilitarControles();
+        });
+        window.onbeforeunload = function () { $.ajax({ url: '@Url.Action("UnblockSecuence", "Computing", new { id = Model.RequestId, formulario = "EIPM10000"})' }).done(function () { }); }
+
+        function deshabilitarControles() {
+            if (@Model.Status > 3) {
+                $('#OpenMinutes').prop("disabled", true);
+                switchery.disable();
+                $('#RequestType').prop("disabled", true);
+                $('#RequestId').prop('readonly', true);
+                $('#Note').prop('readonly', true);
+                $('#Requester').prop('readonly', true);
+                $('#lookupEmpleado').css('display', 'none');
+                $('#lookupDepartamento').css('display', 'none');
+            }
+        }
+
+        function guardar() {
+            $('#PostType').val(0);
+            procesarSolicitud();
+        }
+
+        function nuevaNota() {
+            $('#modal-note').modal('show');
+            $('#NewNote').val('');
+        }
+
+        function registrarNota() {
+            var isAllValid = true;
+
+            if ($('#NewNote').val().trim() == '') {
+                toastr.error('Debe de especificar una nota', 'Campos requeridos')
+                isAllValid = false;
+            }
+            if (isAllValid) {
+                $.ajax({
+                    url: '@Url.Action("SaveEquipmentRequestNote", "Computing")?id=' + '@Model.RequestId' + '&note=' + $('#NewNote').val().trim(),
+                    type: "POST",
+                    data: "",
+                    success: function (result) {
+                        if (result.status == "OK") {
+                            $('#modal-note').modal('hide');
+                            window.location.reload();
+                        }
+                        else
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                    }
+                });
+            }
+        }
+
+        function enviarFlujo() {
+            swal({
+                title: "Enviar",
+                text: "Esta seguro que desea enviar este registro al flujo de aprobacion?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Si, proceder!",
+                cancelButtonText: "No, cancelar!",
+                closeOnConfirm: false
+            }, function () {
+                $('#PostType').val(1);
+                procesarSolicitud();
+            });
+        }
+
+        function cargarArchivos() {
+            $.ajax({
+                url: '@Url.Action("LoadAttachmentFiles", "Computing")?id=' + $('#RequestId').val().trim(),
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    attachmentFiles = result;
+                    if (attachmentFiles.length > 0) {
+                        var $ul = $('<ul class="list-unstyled file-list" />');
+                        $.each(attachmentFiles, function (i, val) {
+                            var $li = $('<li/>');
+                            var $a = $('<a href="@Url.Action("Download", "Computing")?id=' + $('#RequestId').val().trim() + '&FileName=' + val.trim() + '" />')
+                            var $delete = $('<a href="#" />')
+                            $a.append($('<i class="fa fa-file-pdf-o" />'));
+                            $delete.html("&nbsp; &nbsp; &nbsp;");
+                            $delete.click(function (e) {
+                                e.preventDefault();
+                                eliminarArchivo(val.trim());
+                            });
+                            $delete.append($('<i class="fa fa-remove fa-2x" />'));
+                            $li.append($a.html("  " + val));
+                            $li.append($delete);
+                            $ul.append($li);
+                        });
+                        $('#attachmentFiles').html($ul);
+                    }
+                    else {
+                        $('#attachmentFiles').html('');
+                    }
+                }
+            });
+        }
+
+        function atacharArchivo() {
+            var data = new FormData();
+            data.append("FileData", document.getElementById("FileData").files[0]);
+            data.append("id", $('#RequestId').val());
+
+            $.ajax({
+                url: '@Url.Action("AttachFile", "Computing")',
+                type: "POST",
+                data: data,
+                dataType: "JSON",
+                contentType: false,
+                processData: false,
+                success: function (d) {
+                    if (d.status == true) {
+                        $('#attachmentForm').each(function () {
+                            this.reset();
+                        });
+                        toastr.success('Archivo adjuntado correctamente', 'Adjuntos')
+                        cargarArchivos();
+                    }
+                    else {
+                        alert('Ha ocurrido un error');
+                    }
+                    $('#submit').val('Guardar');
+                },
+                error: function () {
+                    alert('Error. Por favor trate de nuevo.');
+                    $('#submit').val('Guardar');
+                }
+            });
+        }
+
+        function eliminarArchivo(fileName) {
+            swal({
+                title: "Eliminar",
+                text: "Esta seguro que desea eliminar este archivo ?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Si, eliminalo!",
+                cancelButtonText: "No, cancelar!",
+                closeOnConfirm: false
+            }, function () {
+                $.ajax({
+                    url: '@Url.Action("DeleteFile", "Computing")?id=' + $('#RequestId').val().trim() + "&fileName=" + fileName,
+                    type: "POST",
+                    dataType: "JSON",
+                    contentType: false,
+                    processData: false,
+                    success: function (d) {
+                        if (d.status == "OK") {
+                            toastr.success('Archivo eliminado correctamente', 'Adjuntos');
+                            cargarArchivos();
+                        }
+                        else {
+                            alert(d.status);
+                        }
+                    }
+                });
+            });
+        }
+
+        function procesarSolicitud() {
+            var isAllValid = true;
+
+            if ($('#RequestId').val().trim() == '') {
+                toastr.error('Debe de especificar un codigo', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#RequestType').val().trim() == '') {
+                toastr.error('Debe de especificar un tipo de solicitud', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Requester').val().trim() == '') {
+                toastr.error('Debe de especificar un solicitante', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#DepartmentId').val().trim() == '') {
+                toastr.error('Debe de especificar un departamento', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Note').val().trim() == '') {
+                toastr.error('Debe de especificar una nota para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#OpenMinutes').val().trim() == '') {
+                toastr.error('Debe de especificar un tipo de flota para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (isAllValid) {
+                $.ajax({
+                    url: '@Url.Action("SaveEquipmentRequest", "Computing")',
+                    type: "POST",
+                    data: $('#form').serialize() + '&postType=' + $('#PostType').val(),
+                    success: function (result) {
+                        if (result.status == "OK")
+                            window.location.href = "@Url.Action("EquipmentRequestHandlingIndex","Computing")";
+                        else
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                    }
+                });
+            }
+        }
+
+        function entregar() {
+            swal({
+                title: "Entrega",
+                text: "Esta seguro que desea entregar el equipo ?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Si, adelante!",
+                cancelButtonText: "No, cancelar!",
+                closeOnConfirm: false
+            }, function () {
+                $.ajax({
+                    url: '@Url.Action("SendEquipmentDelivery", "Computing")?id=' + '@Model.RequestId',
+                    type: "POST",
+                    data: "",
+                    cache: false,
+                    async: false,
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            window.location.href = result.url;
+                        } else {
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+                    }
+                });
+            });
+        }
+
+        function reparar() {
+            swal({
+                title: "Reparación",
+                text: "Esta seguro que desea enviar esta solicitud a reparación de equipos ?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Si, adelante!",
+                cancelButtonText: "No, cancelar!",
+                closeOnConfirm: false
+            }, function () {
+                $.ajax({
+                    url: '@Url.Action("SendEquipmentRepair", "Computing")?id=' + '@Model.RequestId',
+                    type: "POST",
+                    data: "",
+                    cache: false,
+                    async: false,
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            window.location.href = result.url;
+                        } else {
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+                    }
+                });
+            });
+        }
+
+        function imprimir() {
+            var url = '@Url.Content("~/PDF/Reportes/")EquipmentRequestReport.pdf';
+            toastr.info('Estamos procesando su solicitud', 'Por favor espere')
+            $.ajax({
+                url: '@Url.Action("EquipmentRequestReport", "Computing")?id=' + $('#RequestId').val(),
+                type: "POST",
+                data: "",
+                cache: false,
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    if (result.status === "OK") 
+                        window.open(url);
+                    else
+                        swal({
+                            title: "ERROR",
+                            text: result.status,
+                            type: "error"
+                        });
+                    
+                }
+            });
+        }
+
+        function completar() {
+            swal({
+                title: "Completar",
+                text: "Esta seguro que desea completar esta solicitud ?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Si, adelante!",
+                cancelButtonText: "No, cancelar!",
+                closeOnConfirm: false
+            }, function () {
+                $.ajax({
+                    url: '@Url.Action("CloseEquipmentRequest", "Computing")?id=' + '@Model.RequestId',
+                    type: "POST",
+                    data: "",
+                    cache: false,
+                    async: false,
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                           window.location.href = "@Url.Action("EquipmentRequestHandlingIndex","Computing")";
+                        } else {
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+                    }
+                });
+            });
+        }
+
+        function eliminar() {
+            swal({
+                title: "Eliminar",
+                text: "Esta seguro que desea eliminar esta solicitud de equipo ?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Si, adelante!",
+                cancelButtonText: "No, cancelar!",
+                closeOnConfirm: false
+            }, function () {
+                $.ajax({
+                    url: '@Url.Action("DeleteEquipmentRequest", "Computing")?id=' + '@Model.RequestId',
+                    type: "POST",
+                    data: "",
+                    cache: false,
+                    async: false,
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                           window.location.href = "@Url.Action("EquipmentRequestHandlingIndex","Computing")";
+                        } else {
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+                    }
+                });
+            });
+        }
+    </script>
+
+    }

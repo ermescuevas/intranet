@@ -32,15 +32,12 @@
             $('#FoodFoodName').siblings('span.error').css('visibility', 'visible');
             isAllValid = false;
         }
-        else {
+        else
             $('#FoodFoodName').siblings('span.error').css('visibility', 'hidden');
-        }
+
 
         if (isAllValid) {
-            var data = {
-                FoodName: $('#FoodFoodName').val().trim()
-            }
-
+            var data = { FoodName: $('#FoodFoodName').val().trim() }
             $.ajax({
                 url: '@Url.Action("SaveFood", "Home")',
                 type: "POST",

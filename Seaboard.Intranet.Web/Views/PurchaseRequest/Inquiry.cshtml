@@ -36,7 +36,7 @@
                             @if (status != "4" && Seaboard.Intranet.BusinessLogic.Account.GetAccount(User.Identity.GetUserName()).Department != "ALMACEN")
                             {
                                 @*<button class="btn btn-success" type="button" data-toggle="modal" data-target="#modal-SendRequest"><i class="fa fa-send"></i> Enviar</button>
-                                <button class="btn btn-danger" data-toggle="modal" data-target="#modal-container"><i class="fa fa-remove"></i> Anular</button>*@
+                                    <button class="btn btn-danger" data-toggle="modal" data-target="#modal-container"><i class="fa fa-remove"></i> Anular</button>*@
                             }
 
                             <br />
@@ -93,7 +93,7 @@
                                         <div class="form-group">
                                             <label class="col-sm-4 control-label">Prioridad:</label>
                                             <div class="col-sm-8 input-group">
-                                                @Html.TextBoxFor(model => model.Priority, new { @class = "form-control", @readonly = ""})
+                                                @Html.TextBoxFor(model => model.Priority, new { @class = "form-control", @readonly = "" })
                                                 <span class="input-group-btn">
                                                     <button type="button" class="btn btn-primary">
                                                         <i class="fa fa-search"></i>
@@ -226,16 +226,32 @@
 @Html.Partial("Delete")
 
 @section Styles {
-    <link href="@Url.Content("~/Content/plugins/datatables/datatables.min.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/summernoteStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
     @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/plugins/footableStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+
 }
 
 @section Scripts {
 
-    @Scripts.Render("~/Scripts/plugins/datatables/datatables.min.js")
-    <link href="@Url.Content("~/Content/plugins/datatables.min.css")" rel="stylesheet" type="text/css" />
+    @Scripts.Render("~/plugins/summernote")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/dataPicker")
     @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/footable")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
     <script type="text/javascript">
+
+         $(document).ready(function () {
+            @Html.Partial("_Scripts")
+
+        });
 
         var purchaseRequestItems = [];
 

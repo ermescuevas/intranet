@@ -41,13 +41,13 @@
                     <table class="table table-striped table-bordered table-hover informationTable">
                         <thead>
                             <tr>
-                                <th style="width:15%;">@Html.DisplayName("Id de proveedor")</th>
-                                <th style="width:8%;">@Html.DisplayName("RNC")</th>
+                                <th style="width:13%;">@Html.DisplayName("Id de proveedor")</th>
+                                <th style="width:9%;">@Html.DisplayName("RNC")</th>
                                 <th style="width:25%;">@Html.DisplayName("Nombre")</th>
-                                <th style="width:15%;">@Html.DisplayName("Condicion de pago")</th>
-                                <th style="width:15%;">@Html.DisplayName("Contacto")</th>
+                                <th style="width:12%;">@Html.DisplayName("Email")</th>
                                 <th style="width:10%;">@Html.DisplayName("Teléfono")</th>
-                                <th style="width:13%;">@Html.DisplayName("Provincia")</th>
+                                <th style="width:15%;">@Html.DisplayName("Pais")</th>
+                                <th style="width:13%;">@Html.DisplayName("Ciudad")</th>
                             </tr>
                         </thead>
 
@@ -55,12 +55,12 @@
                             @foreach (var item in Model)
                             {
                             <tr>
-                                <td>@Html.ActionLink(item.SupplierId, "SupplierEdit", new { @id = item.SupplierId }) </td>
+                                <td>@Html.ActionLink(item.SupplierNumber, "SupplierEdit", new { @id = item.SupplierNumber }) </td>
                                 <td>@Html.DisplayFor(modelItem => item.RNC)</td>
                                 <td>@Html.DisplayFor(modelItem => item.SupplierName)</td>
-                                <td>@Html.DisplayFor(modelItem => item.PaymentCondition)</td>
-                                <td>@Html.DisplayFor(modelItem => item.Contact)</td>
-                                <td>@Html.DisplayFor(modelItem => item.Phone1)</td>
+                                <td>@Html.DisplayFor(modelItem => item.Email)</td>
+                                <td>@Html.DisplayFor(modelItem => item.PhoneNumber)</td>
+                                <td>@Html.DisplayFor(modelItem => item.Country)</td>
                                 <td>@Html.DisplayFor(modelItem => item.City)</td>
                             </tr>
                             }

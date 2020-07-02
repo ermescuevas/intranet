@@ -8,7 +8,7 @@ namespace Seaboard.Intranet.Domain
         public string RequestType { get; set; }
         public DateTime DocumentDate { get; set; }
         public bool HasData { get; set; }
-        public bool OpenMinutes { get; set; }
+        public string OpenMinutes { get; set; }
         public string Note { get; set; }
         public string DepartmentId { get; set; }
         public string Requester { get; set; }

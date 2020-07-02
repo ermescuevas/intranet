@@ -829,9 +829,8 @@
     <Content Include="Views\ServiceRequest\Edit.cshtml" />
     <Content Include="Views\ServiceRequest\Delete.cshtml" />
     <Content Include="Views\ServiceRequest\Inquiry.cshtml" />
-    <Content Include="Views\Shared\_Navigation.cshtml" />
+    <Content Include="Views\Shared\_BillingNavigation.cshtml" />
     <Content Include="Views\Shared\_TopNavbar.cshtml" />
-    <Content Include="Views\Shared\_Footer.cshtml" />
     <Content Include="Scripts\plugins\topojson\LICENSE" />
     <Content Include="Scripts\plugins\justified-gallery\README.md" />
     <Content Include="Scripts\plugins\diff_match_patch\COPYING" />
@@ -1023,6 +1022,26 @@
     <Content Include="Views\Computing\EquipmentDelivery.cshtml" />
     <Content Include="Views\Computing\EquipmentRepair.cshtml" />
     <Content Include="Views\Computing\EquipmentRepairIndex.cshtml" />
+    <Content Include="Views\Computing\EquipmentInquiry.cshtml" />
+    <Content Include="Views\Computing\SimCardInquiry.cshtml" />
+    <Content Include="Views\Computing\EquipmentRequestInquiry.cshtml" />
+    <Content Include="Views\Computing\EquipmentDeliveryInquiry.cshtml" />
+    <Content Include="Views\Computing\EquipmentUnassign.cshtml" />
+    <Content Include="Views\Computing\EquipmentUnassignIndex.cshtml" />
+    <Content Include="Views\Computing\CaseIndex.cshtml" />
+    <Content Include="Views\Computing\Case.cshtml" />
+    <Content Include="Views\Computing\EquipmentRequestHandling.cshtml" />
+    <Content Include="Views\Computing\EquipmentRequestHandlingIndex.cshtml" />
+    <Content Include="Views\Accounting\FiscalSalesReport.cshtml" />
+    <Content Include="Views\Accounting\TransGeneralLedgerReport.cshtml" />
+    <Content Include="Views\Computing\EarnedPoints.cshtml" />
+    <Content Include="Views\Accounting\AccountingTransDetailReport.cshtml" />
+    <Content Include="Views\Accounting\AccountingTransSummaryReport.cshtml" />
+    <Content Include="Views\Accounting\VoidType.cshtml" />
+    <Content Include="Views\Accounting\Tax.cshtml" />
+    <Content Include="Views\Accounting\BillingConfigurationIndex.cshtml" />
+    <Content Include="Views\Accounting\EmailAlert.cshtml" />
+    <Content Include="Views\Accounting\FinancialAccount.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -1,0 +1,267 @@
+﻿@{
+    Layout = "~/Views/Shared/_AccountingLayout.cshtml";
+    ViewBag.Title = "Reporte de transacciones sumarizado";
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-sm-4">
+        <h2>Reporte de transacciones sumarizado</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Accounting")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Reporte de transacciones sumarizado</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="wrapper wrapper-content animated fadeInUp">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="ibox float-e-margins">
+                        <div class="ibox-title">
+                            <h3>Reporte de transacciones sumarizado</h3>
+                        </div>
+                        <div class="ibox-content">
+                            <div class="col-sm-12 col-sm-offset-1">
+                                <button class="btn btn-success" type="button" onclick="imprimirReporte();"><i class="fa fa-print"></i> Imprimir</button>
+                                <button class="btn btn-info" type="button" onclick="borrar();"><i class="fa fa-eraser"></i> Borrar</button>
+                                <br />
+                            </div>
+                            <br />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ibox">
+                <div class="ibox-content">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="col-sm-5 control-label">Tipo de factura:</label>
+                                <div class="col-sm-7 input-group">
+                                    <select class="form-control" id="documentType" name="documentType">
+                                        <option value="">Seleccione una opcion</option>
+                                        <option value="11">Proveedor informal</option>
+                                        <option value="13">Gasto menor</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="col-sm-5 control-label">Estado :</label>
+                                <div class="col-sm-7 input-group">
+                                    <select class="form-control" id="DocumentStatus" name="DocumentStatus">
+                                        <option value="0">Todos</option>
+                                        <option value="1">En borrador</option>
+                                        <option value="2">Registrado</option>
+                                        <option value="3">Anulado</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    Filtrar por fecha
+                                </div>
+                                <div class="panel-body">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="col-sm-5 control-label">Desde:</label>
+                                            <div class="col-sm-7 input-group">
+                                                <div class="col-sm-12 input-group date">
+                                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                    <input type="text" id="fromDate" name="fromDate" class="form-control" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="col-sm-5 control-label">Hasta:</label>
+                                            <div class="col-sm-7 input-group">
+                                                <div class="col-sm-12 input-group date">
+                                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                                    <input type="text" id="toDate" name="toDate" class="form-control" value="@DateTime.Now.ToShortDateString()" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="panel panel-default" id="filterPanel" style="display:none">
+                                <div class="panel-heading" id="filterText">
+                                    Filtrar por proveedor
+                                </div>
+                                <div class="panel-body">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="col-sm-6 control-label">Desde:</label>
+                                            <div class="col-sm-6 input-group">
+                                                <input type="text" name="from" id="from" class="form-control" />
+                                                <span class="input-group-btn">
+                                                    <button id="lookupFrom" onclick="lookupDesde();" type="button" class="btn btn-primary">
+                                                        <i class="fa fa-search"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="col-sm-6 control-label">Hasta:</label>
+                                            <div class="col-sm-6 input-group">
+                                                <input type="text" name="to" id="to" class="form-control" />
+                                                <span class="input-group-btn">
+                                                    <button id="lookupTo" onclick="lookupHasta();" type="button" class="btn btn-primary">
+                                                        <i class="fa fa-search"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Styles{
+    @Styles.Render("~/Content/plugins/iCheck/iCheckStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/awesomeCheckboxStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/iCheck")
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+
+    <script>
+        $(document).ready(function () {
+            $('#fromDate').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true
+            });
+            $('#toDate').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true
+            });
+
+            $('#documentType').on('change', function () {
+                if (this.value === "11") {
+                    $('#filterPanel').css('display', '');
+                    $('#filterText').html('Filtrar por proveedor');
+                }
+                else if (this.value === "13") {
+                    $('#filterPanel').css('display', '');
+                    $('#filterText').html('Filtrar por cuenta contable');
+                }
+                else {
+                    $('#filterPanel').css('display', 'none');
+                }
+            });
+        });
+
+        function lookupDesde() {
+            var tipo;
+            if ($('#documentType').val() === "11") tipo = 1;
+            if ($('#documentType').val() === "13") tipo = 2;
+            $('#lookupFrom').lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("LookupData", "Accounting")?tipo=' + tipo + '&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function (data) {
+                    $('input[name=from]').val(data.Id);
+                    $('input[name=to]').val(data.Id);
+                },
+                tableHeader: ['Codigo', 'Descripción'],
+                hiddenFields: ['DataExtended', 'DataPlus']
+            });
+        }
+
+        function lookupHasta() {
+            var tipo;
+            if ($('#documentType').val() === "11") tipo = 1;
+            if ($('#documentType').val() === "13") tipo = 2;
+            $('#lookupTo').lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("LookupData", "Accounting")?tipo=' + tipo + '&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function (data) {
+                    $('input[name=from]').val(data.Id);
+                    $('input[name=to]').val(data.Id);
+                },
+                tableHeader: ['Codigo', 'Descripción'],
+                hiddenFields: ['DataExtended', 'DataPlus']
+            });
+        }
+
+        function imprimirReporte() {
+            var isValid = true;
+            if ($('#documentType').val() === '') {
+                toastr.error('Por favor debe un tipo de documento para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (isValid) {
+                var data = {
+                    documentType: parseInt($('#documentType').val()),
+                    documentStatus: parseInt($('#DocumentStatus').val()),
+                    fromDate: $('#fromDate').datepicker('getDate'),
+                    toDate: $('#toDate').datepicker('getDate'),
+                    fromSupplier: $('#from').val().trim(),
+                    toSupplier: $('#to').val().trim()
+                }
+                var url = '@Url.Content("~/PDF/Reportes/")AccountingTransSummaryReport.pdf';
+                toastr.info('Estamos procesando su solicitud', 'Por favor espere');
+                $.ajax({
+                    url: '@Url.Action("AccountingTransSummaryReport", "Accounting")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    async: false,
+                    contentType: "application/json",
+                    success: function(d) {
+                        if (d.status === "OK") {
+                            window.open(url);
+                        } else {
+                            alert(d.status);
+                        }
+                    }
+                });
+            }
+        }
+
+        function borrar() {
+            $('#fromDate, #toDate, #fromSupplier, #toSupplier').val('');
+        }
+    </script>
+}

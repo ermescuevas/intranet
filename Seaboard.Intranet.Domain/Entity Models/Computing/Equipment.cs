@@ -17,8 +17,10 @@ namespace Seaboard.Intranet.Domain
         public DateTime AcquiredDate { get; set; }
         public string AsignedUser { get; set; }
         public string PhoneNumber { get; set; }
+        public string Department { get; set; }
         public string SimCard { get; set; }
         public DateTime DeliveryDate { get; set; }
+        public int UsedPoints { get; set; }
         public int Status { get; set; }
     }
 }

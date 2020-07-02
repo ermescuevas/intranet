@@ -435,7 +435,7 @@ namespace Seaboard.Intranet.Web.Controllers
                         sqlQuery = "SELECT RTRIM(ACTALIAS) [Id], ACTDESCR [Descripción], (RTRIM(LTRIM(ACTNUMBR_1)) + '-' + RTRIM(LTRIM(ACTNUMBR_2)) + '-' + RTRIM(LTRIM(ACTNUMBR_3))) [DataExtended] FROM " +
                             Helpers.InterCompanyId +
                             ".dbo.GL00100 WITH (NOLOCK, READUNCOMMITTED) WHERE ACTALIAS <> '' AND ((RTRIM(LTRIM(ACTNUMBR_1)) + '-' + RTRIM(LTRIM(ACTNUMBR_2)) + '-' + RTRIM(LTRIM(ACTNUMBR_3))) LIKE '%" +
-                            consulta + "%' OR ACTDESCR LIKE '%" + consulta + "%') ORDER BY [Id] ASC ";
+                            consulta + "%' OR ACTDESCR LIKE '%" + consulta + "%' OR ACTALIAS LIKE '%" + consulta + "%') ORDER BY [Id] ASC ";
                         break;
                     case 12:
                         if (Account.GetAccount(User.Identity.GetUserName()).Department == "INFORMATICA" ||
@@ -755,6 +755,12 @@ namespace Seaboard.Intranet.Web.Controllers
                             "FROM " + Helpers.InterCompanyId + ".dbo.PM00100 " +
                             "WHERE VNDCLSID LIKE '%" + consulta + "%' OR VNDCLDSC LIKE '%" + consulta + "%' " +
                             "ORDER BY VNDCLSID DESC";
+                        break;
+                    case 48:
+                        sqlQuery = "SELECT RTRIM(DEPRTMNT) Id, RTRIM(DSCRIPTN) Descripción, '' DataExtended " +
+                            "FROM " + Helpers.InterCompanyId + ".dbo.UPR40300 " +
+                            "WHERE DEPRTMNT LIKE '%" + consulta + "%' OR DSCRIPTN LIKE '%" + consulta + "%' " +
+                            "ORDER BY DSCRIPTN";
                         break;
                 }
 

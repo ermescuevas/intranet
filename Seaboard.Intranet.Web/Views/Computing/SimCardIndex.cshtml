@@ -43,10 +43,12 @@
                                     <tr>
                                         <th>Id. de tarjeta</th>
                                         <th>Numero de telefono</th>
-                                        <th>Numero de serie</th>
+                                        <th>Asignado a</th>
+                                        <th>Departamento</th>
                                         <th>Operadora</th>
-                                        <th>Fecha adquisición</th>
+                                        <th>Fecha entrega</th>
                                         <th>Equipo asignado</th>
+                                        <th>Tipo flota</th>
                                         <th>Tiene datos</th>
                                         <th>Estado</th>
                                     </tr>
@@ -54,32 +56,34 @@
                                 <tbody>
                                     @foreach (var item in Model)
                                     {
-                                        <tr>
-                                            <td>@Html.ActionLink(item.SimCardCode, "SimCard", new { id = item.SimCardCode })</td>
-                                            <td>@item.PhoneNumber</td>
-                                            <td>@item.SerialNumber</td>
-                                            <td>@item.Operator.ToUpper()</td>
-                                            <td>@item.AcquiredDate.ToShortDateString()</td>
-                                            <td>@item.AsignedEquipment</td>
-                                            <td>@(item.HasData ? "SI" : "NO")</td>
-                                            <td>
-                                                @switch (item.Status)
-                                                {
-                                                    case 1:
-                                                        <i class="badge badge-danger">Asignado</i>
-                                                        break;
-                                                    case 2:
-                                                        <i class="badge badge-warning-light">Libre</i>
-                                                        break;
-                                                    case 3:
-                                                        <i class="badge badge-primary">Dañado</i>
-                                                        break;
-                                                    case 4:
-                                                        <i class="badge badge-warning">Perdido</i>
-                                                        break;
-                                                }
-                                            </td>
-                                        </tr>
+                                    <tr>
+                                        <td>@Html.ActionLink(item.SimCardCode, "SimCard", new { id = item.SimCardCode })</td>
+                                        <td>@item.PhoneNumber</td>
+                                        <td>@item.AssignedUser</td>
+                                        <td>@item.Department</td>
+                                        <td>@item.Operator.ToUpper()</td>
+                                        <td>@item.DeliveryDate.ToShortDateString()</td>
+                                        <td>@item.AsignedEquipment</td>
+                                        <td>@item.MinuteOpen</td>
+                                        <td>@(item.HasData ? "SI" : "NO")</td>
+                                        <td>
+                                            @switch (item.Status)
+                                            {
+                                                case 1:
+                                                    <i class="badge badge-danger">Asignado</i>
+                                                    break;
+                                                case 2:
+                                                    <i class="badge badge-warning-light">En stock</i>
+                                                    break;
+                                                case 3:
+                                                    <i class="badge badge-primary">Dañado</i>
+                                                    break;
+                                                case 4:
+                                                    <i class="badge badge-warning">Perdido</i>
+                                                    break;
+                                            }
+                                        </td>
+                                    </tr>
                                     }
                                 </tbody>
                             </table>
@@ -107,7 +111,7 @@
         $(document).ready(function () {
             $('.informationTable').DataTable({
                 pageLength: 10,
-                order: [[0, "desc"]],
+                order: [[0, "asc"]],
                 dom: '<"html5buttons"B>lTfgitp',
                 language: {
                                                     "sProcessing": "Procesando... ",

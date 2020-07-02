@@ -42,13 +42,13 @@
                             <table class="table table-striped table-bordered table-hover informationTable">
                                 <thead>
                                     <tr>
-                                        <th>No. de solicitud</th>
+                                        <th>No. de equipo</th>
                                         <th>Marca</th>
                                         <th>Modelo</th>
-                                        <th>Numero de serie</th>
-                                        <th>Fecha adquisición</th>
+                                        <th>Fecha entrega</th>
                                         <th>Costo</th>
                                         <th>Asignado a</th>
+                                        <th>Departamento</th>
                                         <th>Estado</th>
                                     </tr>
                                 </thead>
@@ -59,10 +59,10 @@
                                             <td>@Html.ActionLink(item.DeviceCode, "Equipment", new { id = item.DeviceCode })</td>
                                             <td>@item.Brand.ToUpper()</td>
                                             <td>@item.Model</td>
-                                            <td>@item.SerialNumber</td>
-                                            <td>@item.AcquiredDate.ToShortDateString()</td>
+                                            <td>@item.DeliveryDate.ToShortDateString()</td>
                                             <td>@item.Cost.ToString("C2")</td>
                                             <td>@item.AsignedUser</td>
+                                            <td>@item.Department</td>
                                             <td>
                                                 @switch (item.Status)
                                                 {
@@ -82,7 +82,7 @@
                                                         <i class="badge badge-info">En Reparacion</i>
                                                         break;
                                                     case 6:
-                                                        <i class="badge badge-default">Libre</i>
+                                                        <i class="badge badge-default">En stock</i>
                                                         break;
                                                 }
                                             </td>
@@ -113,7 +113,7 @@
         $(document).ready(function () {
             $('.informationTable').DataTable({
                 pageLength: 10,
-                order: [[0, "desc"]],
+                order: [[0, "asc"]],
                 dom: '<"html5buttons"B>lTfgitp',
                 language: {
                     "sProcessing": "Procesando... ",

@@ -3,6 +3,7 @@ using Seaboard.Intranet.BusinessLogic;
 using Seaboard.Intranet.Data;
 using Seaboard.Intranet.Data.Repository;
 using Seaboard.Intranet.Domain;
+using Seaboard.Intranet.Domain.Models;
 using Seaboard.Intranet.Domain.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ using System.Web.Mvc;
 
 namespace Seaboard.Intranet.Web
 {
+    [Authorize]
     public class ComputingController : Controller
     {
         private readonly GenericRepository _repository;
@@ -25,6 +27,8 @@ namespace Seaboard.Intranet.Web
 
         public ActionResult Index()
         {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Computing", "Index"))
+                return RedirectToAction("NotPermission", "Home");
             return View();
         }
 
@@ -32,15 +36,21 @@ namespace Seaboard.Intranet.Web
 
         public ActionResult EquipmentIndex()
         {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Computing", "Equipment"))
+                return RedirectToAction("NotPermission", "Home");
             string sqlQuery = $"SELECT AcquireMode, AsignedUser, Brand, CanUseData, Cost, DeliveryDate, Description, MobileTechnology, Model, Operator, PhoneNumber, " +
-                    $"SerialNumber, SimCard, Status, DeviceCode, AcquiredDate " +
-                    $"FROM {Helpers.InterCompanyId}.dbo.EIIV00101";
+                    $"SerialNumber, SimCard, Status, DeviceCode, AcquiredDate, RTRIM(C.DSCRIPTN) Department " +
+                    $"FROM {Helpers.InterCompanyId}.dbo.EIIV00101 A " +
+                    $"LEFT JOIN {Helpers.InterCompanyId}.dbo.UPR00100  B ON SUBSTRING(A.AsignedUser, 1, 6) = RTRIM(B.EMPLOYID) " +
+                    $"LEFT JOIN {Helpers.InterCompanyId}.dbo.UPR40300  C ON RTRIM(B.DEPRTMNT) = RTRIM(C.DEPRTMNT) ";
             var equipments = _repository.ExecuteQuery<Equipment>(sqlQuery).ToList();
             return View(equipments);
         }
 
         public ActionResult Equipment(string id = "")
         {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Computing", "Equipment"))
+                return RedirectToAction("NotPermission", "Home");
             Equipment equipment;
             if (string.IsNullOrEmpty(id))
                 equipment = new Equipment()
@@ -48,11 +58,12 @@ namespace Seaboard.Intranet.Web
                     Status = 6,
                     DeviceCode = HelperLogic.AsignaciónSecuencia("EIIV00101", Account.GetAccount(User.Identity.GetUserName()).UserId),
                     AcquiredDate = DateTime.Now,
-                    DeliveryDate = new DateTime(1900, 1, 1)
+                    DeliveryDate = new DateTime(1900, 1, 1),
+                    UsedPoints = 0
                 };
             else
             {
-                string sqlQuery = $"SELECT AcquireMode, AsignedUser, Brand, CanUseData, Cost, DeliveryDate, Description, MobileTechnology, Model, Operator, PhoneNumber, " +
+                string sqlQuery = $"SELECT AcquireMode, AsignedUser, Brand, CanUseData, Cost, DeliveryDate, Description, MobileTechnology, Model, Operator, PhoneNumber, UsedPoints, " +
                     $"SerialNumber, SimCard, Status, DeviceCode, AcquiredDate " +
                     $"FROM {Helpers.InterCompanyId}.dbo.EIIV00101 WHERE DeviceCode = '{id}'";
                 equipment = _repository.ExecuteScalarQuery<Equipment>(sqlQuery);
@@ -71,7 +82,9 @@ namespace Seaboard.Intranet.Web
                 new SelectListItem { Value = "zte", Text = "ZTE" },
                 new SelectListItem { Value = "BLU", Text = "BLU" },
                 new SelectListItem { Value = "microsoft", Text = "Microsoft" },
-                new SelectListItem { Value = "xiaomi", Text = "Xiaomi" }
+                new SelectListItem { Value = "xiaomi", Text = "Xiaomi" },
+                new SelectListItem { Value = "altice", Text = "Altice" },
+                new SelectListItem { Value = "otro", Text = "Otros" }
             };
             var operators = new List<SelectListItem>()
             {
@@ -94,7 +107,7 @@ namespace Seaboard.Intranet.Web
                 new SelectListItem { Value = "3", Text = "Perdido" },
                 new SelectListItem { Value = "4", Text = "Dañado" },
                 new SelectListItem { Value = "5", Text = "En Reparacion" },
-                new SelectListItem { Value = "6", Text = "Libre" }
+                new SelectListItem { Value = "6", Text = "En stock" }
             };
             ViewBag.Brands = brands;
             ViewBag.Operators = operators;
@@ -113,16 +126,26 @@ namespace Seaboard.Intranet.Web
                 if (count > 0)
                     _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIIV00101 SET AcquireMode = '{Convert.ToInt32(equipment.AcquireMode)}', AsignedUser = '{equipment.AsignedUser}', Brand = '{equipment.Brand}', " +
                         $"CanUseData = '{equipment.CanUseData}', Cost = '{equipment.Cost}', Description = '{equipment.Description}', MobileTechnology = '{equipment.MobileTechnology}', Model = '{equipment.Model}', " +
-                        $"Operator = '{equipment.Operator}', PhoneNumber = '{equipment.PhoneNumber}', SerialNumber = '{equipment.SerialNumber}', SimCard = '{equipment.SimCard}', Status = '{equipment.Status}', " +
-                        $"AcquiredDate = '{equipment.AcquiredDate.ToString("yyyyMMdd")}', ModifiedDate = GETDATE(), LastUserId = '{Account.GetAccount(User.Identity.GetUserName()).UserId}' " +
+                        $"Operator = '{equipment.Operator}', UsedPoints = '{equipment.UsedPoints}', PhoneNumber = '{equipment.PhoneNumber}', SerialNumber = '{equipment.SerialNumber}', SimCard = '{equipment.SimCard}', Status = '{equipment.Status}', " +
+                        $"AcquiredDate = '{equipment.AcquiredDate.ToString("yyyyMMdd")}', DeliveryDate = '{equipment.DeliveryDate.ToString("yyyyMMdd")}', ModifiedDate = GETDATE(), LastUserId = '{Account.GetAccount(User.Identity.GetUserName()).UserId}' " +
                         $"WHERE DeviceCode = '{equipment.DeviceCode}'");
                 else
+                {
                     _repository.ExecuteCommand($"INSERT INTO {Helpers.InterCompanyId}.dbo.EIIV00101 (AcquireMode, AsignedUser, Brand, CanUseData, Cost, Description, MobileTechnology, Model, " +
-                        $"Operator, PhoneNumber, SerialNumber, SimCard, Status, DeviceCode, AcquiredDate, CreatedDate, ModifiedDate, LastUserId) " +
+                        $"Operator, PhoneNumber, SerialNumber, SimCard, Status, DeviceCode, AcquiredDate, DeliveryDate, UsedPoints, CreatedDate, ModifiedDate, LastUserId) " +
                         $"VALUES ('{Convert.ToInt32(equipment.AcquireMode)}', '{equipment.AsignedUser}', '{equipment.Brand}', '{equipment.CanUseData}', '{equipment.Cost}', " +
                         $"'{equipment.Description}', '{equipment.MobileTechnology}', '{equipment.Model}', '{equipment.Operator}', '{equipment.PhoneNumber}', '{equipment.SerialNumber}', '{equipment.SimCard}', " +
-                        $"'{equipment.Status}', '{equipment.DeviceCode}', '{equipment.AcquiredDate.ToString("yyyyMMdd")}', GETDATE(), GETDATE(), '{Account.GetAccount(User.Identity.GetUserName()).UserId}')");
-
+                        $"'{equipment.Status}', '{equipment.DeviceCode}', '{equipment.AcquiredDate.ToString("yyyyMMdd")}', '{equipment.DeliveryDate.ToString("yyyyMMdd")}', '{equipment.UsedPoints}', " +
+                        $"GETDATE(), GETDATE(), '{Account.GetAccount(User.Identity.GetUserName()).UserId}')");
+                    if (equipment.AcquireMode == MobileAcquireMode.Fidepuntos)
+                        SaveEarnedPointEntity(new EarnedPoint
+                        {
+                            Description = "Puntos redimidos de la compra del equipo " + equipment.Model,
+                            DocumentDate = DateTime.Now,
+                            Points = equipment.UsedPoints,
+                            SummaryType = 1
+                        });
+                }
                 if (!string.IsNullOrEmpty(equipment.SimCard))
                     _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIIV00201 SET AsignedEquipment = '{equipment.DeviceCode + " - " + equipment.Model}' WHERE SimCardCode = '{equipment.SimCard}'");
 
@@ -167,15 +190,22 @@ namespace Seaboard.Intranet.Web
 
         public ActionResult SimCardIndex()
         {
-            string sqlQuery = $"SELECT SimCardCode, SerialNumber, Operator, PhoneNumber, AcquiredDate, HasData, DataQuantity, MinuteOpen, QuantityMinutes, AsignedEquipment, " +
-                    $"DeliveryDate, ChangePoints, Status " +
-                    $"FROM {Helpers.InterCompanyId}.dbo.EIIV00201";
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Computing", "SimCard"))
+                return RedirectToAction("NotPermission", "Home");
+            string sqlQuery = $"SELECT DISTINCT A.SimCardCode, A.SerialNumber, A.Operator, A.PhoneNumber, A.AcquiredDate, A.HasData, A.DataQuantity, A.MinuteOpen, A.QuantityMinutes, A.AsignedEquipment, " +
+                   $"A.DeliveryDate, A.ChangePoints, A.Status, B.AsignedUser AssignedUser, RTRIM(D.DSCRIPTN) Department " +
+                   $"FROM {Helpers.InterCompanyId}.dbo.EIIV00201 A " +
+                   $"LEFT JOIN {Helpers.InterCompanyId}.dbo.EIIV00101 B ON A.SimCardCode = B.SimCard " +
+                   $"LEFT JOIN {Helpers.InterCompanyId}.dbo.UPR00100  C ON SUBSTRING(B.AsignedUser, 1, 6) = RTRIM(C.EMPLOYID) " +
+                   $"LEFT JOIN {Helpers.InterCompanyId}.dbo.UPR40300  D ON RTRIM(C.DEPRTMNT) = RTRIM(D.DEPRTMNT) ";
             var simCards = _repository.ExecuteQuery<SimCard>(sqlQuery).ToList();
             return View(simCards);
         }
 
         public ActionResult SimCard(string id = "")
         {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Computing", "SimCard"))
+                return RedirectToAction("NotPermission", "Home");
             SimCard simCard;
             if (string.IsNullOrEmpty(id))
                 simCard = new SimCard()
@@ -187,9 +217,13 @@ namespace Seaboard.Intranet.Web
                 };
             else
             {
-                string sqlQuery = $"SELECT SimCardCode, SerialNumber, Operator, PhoneNumber, AcquiredDate, HasData, DataQuantity, MinuteOpen, QuantityMinutes, AsignedEquipment, " +
-                   $"DeliveryDate, ChangePoints, Status " +
-                   $"FROM {Helpers.InterCompanyId}.dbo.EIIV00201 WHERE SimCardCode = '{id}'";
+                string sqlQuery = $"SELECT A.SimCardCode, A.SerialNumber, A.Operator, A.PhoneNumber, A.AcquiredDate, A.HasData, A.DataQuantity, A.MinuteOpen, A.QuantityMinutes, A.AsignedEquipment, " +
+                   $"A.DeliveryDate, A.ChangePoints, A.Status, B.AsignedUser AssignedUser, RTRIM(D.DSCRIPTN) Department " +
+                   $"FROM {Helpers.InterCompanyId}.dbo.EIIV00201 A " +
+                   $"LEFT JOIN {Helpers.InterCompanyId}.dbo.EIIV00101 B ON A.SimCardCode = B.SimCard " +
+                   $"LEFT JOIN {Helpers.InterCompanyId}.dbo.UPR00100  C ON SUBSTRING(B.AsignedUser, 1, 6) = RTRIM(C.EMPLOYID) " +
+                   $"LEFT JOIN {Helpers.InterCompanyId}.dbo.UPR40300  D ON RTRIM(C.DEPRTMNT) = RTRIM(D.DEPRTMNT) " +
+                   $"WHERE SimCardCode = '{id}'";
                 simCard = _repository.ExecuteScalarQuery<SimCard>(sqlQuery);
             }
             var operators = new List<SelectListItem>()
@@ -202,12 +236,18 @@ namespace Seaboard.Intranet.Web
             var status = new List<SelectListItem>()
             {
                 new SelectListItem { Value = "1", Text = "Asignado" },
-                new SelectListItem { Value = "2", Text = "Libre" },
+                new SelectListItem { Value = "2", Text = "En stock" },
                 new SelectListItem { Value = "3", Text = "Dañado" },
                 new SelectListItem { Value = "4", Text = "Perdido" }
             };
+            var minute = new List<SelectListItem>()
+            {
+                new SelectListItem { Value = "Abierta", Text = "Abierta" },
+                new SelectListItem { Value = "Cerrada", Text = "Cerrada" }
+            };
             ViewBag.Operators = operators;
             ViewBag.Status = status;
+            ViewBag.Minute = minute;
             return View(simCard);
         }
 
@@ -364,14 +404,19 @@ namespace Seaboard.Intranet.Web
 
         public ActionResult EquipmentRequestIndex()
         {
-            string sqlQuery = $"SELECT RequestId, RequestType, DocumentDate, DepartmentId, Requester, RequestBy, HasData, OpenMinutes, Status " +
-                    $"FROM {Helpers.InterCompanyId}.dbo.EIPM10000 ";
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Computing", "EquipmentRequest"))
+                return RedirectToAction("NotPermission", "Home");
+            string sqlQuery = $"SELECT RequestId, RequestType, DocumentDate, DepartmentId, Requester, RequestBy, HasData, OpenMinutes, Note, Status " +
+                   $"FROM {Helpers.InterCompanyId}.dbo.EIPM10000 " +
+                   $"WHERE DepartmentId = '{Account.GetAccount(User.Identity.GetUserName()).Department}' ";
             var equipmentRequests = _repository.ExecuteQuery<EquipmentRequest>(sqlQuery).ToList();
             return View(equipmentRequests);
         }
 
         public ActionResult EquipmentRequest(string id = "")
         {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Computing", "EquipmentRequest"))
+                return RedirectToAction("NotPermission", "Home");
             EquipmentRequest equipmentRequest;
             var account = Account.GetAccount(User.Identity.GetUserName());
             if (string.IsNullOrEmpty(id))
@@ -380,16 +425,54 @@ namespace Seaboard.Intranet.Web
                     RequestId = HelperLogic.AsignaciónSecuencia("EIPM10000", Account.GetAccount(User.Identity.GetUserName()).UserId),
                     Status = 0,
                     DepartmentId = account.Department,
-                    Requester = account.EmployeeId.Trim() + " - " + account.FirstName.Trim() + " " + account.LastName.Trim()
+                    Requester = account.EmployeeId.Trim() + " - " + account.FirstName.Trim() + " " + account.LastName.Trim(),
+                    OpenMinutes = "Abierta"
                 };
             else
             {
-                string sqlQuery = $"SELECT RequestId, RequestType, DocumentDate, DepartmentId, Requester, RequestBy, HasData, OpenMinutes, Status " +
+                string sqlQuery = $"SELECT RequestId, RequestType, DocumentDate, DepartmentId, Requester, RequestBy, HasData, OpenMinutes, Note, Status " +
                     $"FROM {Helpers.InterCompanyId}.dbo.EIPM10000 WHERE RequestId = '{id}'";
                 equipmentRequest = _repository.ExecuteScalarQuery<EquipmentRequest>(sqlQuery);
             }
 
-            ViewBag.Logs = _repository.ExecuteQuery<EquipmentRequestLog>($"SELECT RequestId, LogDate, UserId, Note FROM {Helpers.InterCompanyId}.dbo.EIPM10001 WHERE RequestId = '{id}'").ToList();
+            ViewBag.Logs = _repository.ExecuteQuery<EquipmentRequestLog>($"SELECT RequestId, LogDate, UserId, Note FROM {Helpers.InterCompanyId}.dbo.EIPM10001 WHERE RequestId = '{id}' ORDER BY LogDate").ToList();
+            return View(equipmentRequest);
+        }
+
+        public ActionResult EquipmentRequestHandlingIndex()
+        {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Computing", "EquipmentRequest"))
+                return RedirectToAction("NotPermission", "Home");
+            string sqlQuery = $"SELECT RequestId, RequestType, DocumentDate, DepartmentId, Requester, RequestBy, HasData, OpenMinutes, Note, Status " +
+                    $"FROM {Helpers.InterCompanyId}.dbo.EIPM10000 " +
+                    $"WHERE Status > 3 ";
+            var equipmentRequests = _repository.ExecuteQuery<EquipmentRequest>(sqlQuery).ToList();
+            return View(equipmentRequests);
+        }
+
+        public ActionResult EquipmentRequestHandling(string id = "")
+        {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Computing", "EquipmentRequest"))
+                return RedirectToAction("NotPermission", "Home");
+            EquipmentRequest equipmentRequest;
+            var account = Account.GetAccount(User.Identity.GetUserName());
+            if (string.IsNullOrEmpty(id))
+                equipmentRequest = new EquipmentRequest()
+                {
+                    RequestId = HelperLogic.AsignaciónSecuencia("EIPM10000", Account.GetAccount(User.Identity.GetUserName()).UserId),
+                    Status = 0,
+                    DepartmentId = account.Department,
+                    Requester = account.EmployeeId.Trim() + " - " + account.FirstName.Trim() + " " + account.LastName.Trim(),
+                    OpenMinutes = "Abierta"
+                };
+            else
+            {
+                string sqlQuery = $"SELECT RequestId, RequestType, DocumentDate, DepartmentId, Requester, RequestBy, HasData, OpenMinutes, Note, Status " +
+                    $"FROM {Helpers.InterCompanyId}.dbo.EIPM10000 WHERE RequestId = '{id}'";
+                equipmentRequest = _repository.ExecuteScalarQuery<EquipmentRequest>(sqlQuery);
+            }
+
+            ViewBag.Logs = _repository.ExecuteQuery<EquipmentRequestLog>($"SELECT RequestId, LogDate, UserId, Note FROM {Helpers.InterCompanyId}.dbo.EIPM10001 WHERE RequestId = '{id}' ORDER BY LogDate").ToList();
             return View(equipmentRequest);
         }
 
@@ -401,14 +484,14 @@ namespace Seaboard.Intranet.Web
             {
                 var count = _repository.ExecuteScalarQuery<int>($"SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.EIPM10000 WHERE RequestId = '{equipmentRequest.RequestId}'");
                 if (count > 0)
-                    _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIPM10000 SET RequestType = '{equipmentRequest.RequestType}', DepartmentId = '{equipmentRequest.DepartmentId}', " +
+                    _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIPM10000 SET Note = '{equipmentRequest.Note}', RequestType = '{equipmentRequest.RequestType}', " +
                         $"Requester = '{equipmentRequest.Requester}', RequestBy = '{equipmentRequest.RequestBy}', HasData = '{equipmentRequest.HasData}', OpenMinutes = '{equipmentRequest.OpenMinutes}', " +
-                        $"ModifiedDate = GETDATE(), LastUserId = '{Account.GetAccount(User.Identity.GetUserName()).UserId}' " +
+                        $"DepartmentId = '{equipmentRequest.DepartmentId}', ModifiedDate = GETDATE(), LastUserId = '{Account.GetAccount(User.Identity.GetUserName()).UserId}' " +
                         $"WHERE RequestId = '{equipmentRequest.RequestId}'");
                 else
-                    _repository.ExecuteCommand($"INSERT INTO {Helpers.InterCompanyId}.dbo.EIPM10000 (RequestId, RequestType, DocumentDate, DepartmentId, Requester, RequestBy, HasData, " +
+                    _repository.ExecuteCommand($"INSERT INTO {Helpers.InterCompanyId}.dbo.EIPM10000 (RequestId, RequestType, DocumentDate, DepartmentId, Note, Requester, RequestBy, HasData, " +
                         $"OpenMinutes, Status, CreatedDate, ModifiedDate, LastUserId) " +
-                        $"VALUES ('{equipmentRequest.RequestId}', '{equipmentRequest.RequestType}', '{DateTime.Now.ToString("yyyyMMdd")}', '{equipmentRequest.DepartmentId}', " +
+                        $"VALUES ('{equipmentRequest.RequestId}', '{equipmentRequest.RequestType}', '{DateTime.Now.ToString("yyyyMMdd")}', '{equipmentRequest.DepartmentId}', '{equipmentRequest.Note}', " +
                         $"'{equipmentRequest.Requester}', '{Account.GetAccount(User.Identity.GetUserName()).UserId}', '{equipmentRequest.HasData}', '{equipmentRequest.OpenMinutes}', 1, GETDATE(), GETDATE(), '{Account.GetAccount(User.Identity.GetUserName()).UserId}')");
 
                 if (postType == 1)
@@ -518,13 +601,72 @@ namespace Seaboard.Intranet.Web
             return Json(new { status = xStatus, url }, JsonRequestBehavior.AllowGet);
         }
 
+        [HttpPost]
+        public JsonResult SaveEquipmentRequestNote(string id, string note)
+        {
+            string xStatus;
+            try
+            {
+                note = "NOTA:" + note;
+                   var count = _repository.ExecuteScalarQuery<int>($"SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.EIPM10001 WHERE RequestId = '{id}' AND Note = '{note}'");
+                if (count == 0)
+                    _repository.ExecuteCommand($"INSERT INTO {Helpers.InterCompanyId}.dbo.EIPM10001 (RequestId, UserId, Note, LogDate, CreatedDate, ModifiedDate, LastUserId) " +
+                        $"VALUES ('{id}', '{Account.GetAccount(User.Identity.GetUserName()).UserId}', '{note}', GETDATE(), GETDATE(), GETDATE(), '{Account.GetAccount(User.Identity.GetUserName()).UserId}')");
+                xStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+            return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
+        }
+
+        [OutputCache(Duration = 0)]
+        [HttpPost]
+        public JsonResult EquipmentRequestReport(string id)
+        {
+            string xStatus;
+            try
+            {
+                xStatus = "OK";
+                ReportHelper.Export(Helpers.ReportPath + "Reportes", Server.MapPath("~/PDF/Reportes/") + "EquipmentRequestReport.pdf",
+                    $"INTRANET.dbo.EquipmentRequestReport '{Helpers.InterCompanyId}','{id}'", 44, ref xStatus);
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = xStatus } };
+        }
+
+        [HttpPost]
+        public JsonResult CloseEquipmentRequest(string id)
+        {
+            string xStatus = "";
+            try
+            {
+                _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIPM10000 SET Status = 7 WHERE RequestId = '{id}'");
+                LogRequest(id, Account.GetAccount(User.Identity.GetUserName()).FirstName + " " + Account.GetAccount(User.Identity.GetUserName()).LastName, "Solicitud marcada como completada");
+                ProcessLogic.SendToSharepoint(id, 16, Account.GetAccount(User.Identity.GetUserName()).Email, ref xStatus);
+                xStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+            return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
+        }
+
         #endregion
 
         #region Entrega de equipos
 
         public ActionResult EquipmentDeliveryIndex()
         {
-            string sqlQuery = $"SELECT RequestId, Device, DocumentDate, AssignedUser, DeliveryType, SimCard, PropertyBy, CostAmount, InvoiceOwner, AmountPayable, AmountCoverable, BaseDocumentNumber, Status " +
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Computing", "EquipmentDelivery"))
+                return RedirectToAction("NotPermission", "Home");
+            string sqlQuery = $"SELECT RequestId, Device, DocumentDate, AssignedUser, DeliveryType, SimCard, PropertyBy, CostAmount, InvoiceOwner, AmountPayable, Accesories, AmountCoverable, Note, BaseDocumentNumber, Status " +
                     $"FROM {Helpers.InterCompanyId}.dbo.EIPM10200";
             var equipmentRequests = _repository.ExecuteQuery<EquipmentDelivery>(sqlQuery).ToList();
             return View(equipmentRequests);
@@ -532,6 +674,8 @@ namespace Seaboard.Intranet.Web
 
         public ActionResult EquipmentDelivery(string id = "")
         {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Computing", "EquipmentDelivery"))
+                return RedirectToAction("NotPermission", "Home");
             EquipmentDelivery equipmentDelivery;
             if (string.IsNullOrEmpty(id))
                 equipmentDelivery = new EquipmentDelivery()
@@ -546,7 +690,7 @@ namespace Seaboard.Intranet.Web
             }
             else
             {
-                string sqlQuery = $"SELECT RequestId, Device, DocumentDate, AssignedUser, DeliveryType, SimCard, PropertyBy, CostAmount, InvoiceOwner, AmountPayable, AmountCoverable, BaseDocumentNumber, Status " +
+                string sqlQuery = $"SELECT RequestId, Device, DocumentDate, AssignedUser, DeliveryType, SimCard, PropertyBy, CostAmount, Accesories, InvoiceOwner, AmountPayable, AmountCoverable, Note, BaseDocumentNumber, Status " +
                     $"FROM {Helpers.InterCompanyId}.dbo.EIPM10200 WHERE RequestId = '{id}'";
                 equipmentDelivery = _repository.ExecuteScalarQuery<EquipmentDelivery>(sqlQuery);
             }
@@ -563,15 +707,16 @@ namespace Seaboard.Intranet.Web
                 if (count > 0)
                     _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIPM10200 SET Device = '{equipmentRequest.Device}', AssignedUser = '{equipmentRequest.AssignedUser}', " +
                         $"DeliveryType = '{equipmentRequest.DeliveryType}', SimCard = '{equipmentRequest.SimCard}', PropertyBy = '{equipmentRequest.PropertyBy}', CostAmount = '{equipmentRequest.CostAmount}', " +
-                        $"InvoiceOwner = '{equipmentRequest.InvoiceOwner}', AmountPayable = '{equipmentRequest.AmountPayable}', AmountCoverable = '{equipmentRequest.AmountCoverable}', Status = '{equipmentRequest.Status}', " +
-                        $"ModifiedDate = GETDATE(), LastUserId = '{Account.GetAccount(User.Identity.GetUserName()).UserId}' " +
+                        $"InvoiceOwner = '{equipmentRequest.InvoiceOwner}', AmountPayable = '{equipmentRequest.AmountPayable}', AmountCoverable = '{equipmentRequest.AmountCoverable}', " +
+                        $"Status = '{equipmentRequest.Status}', Note = '{equipmentRequest.Note}', Accesories = '{equipmentRequest.Accessories}', ModifiedDate = GETDATE(), LastUserId = '{Account.GetAccount(User.Identity.GetUserName()).UserId}' " +
                         $"WHERE RequestId = '{equipmentRequest.RequestId}'");
                 else
                     _repository.ExecuteCommand($"INSERT INTO {Helpers.InterCompanyId}.dbo.EIPM10200 (RequestId, Device, DocumentDate, AssignedUser, DeliveryType, SimCard, PropertyBy, CostAmount, " +
-                        $"InvoiceOwner, AmountPayable, AmountCoverable, BaseDocumentNumber, Status, CreatedDate, ModifiedDate, LastUserId) " +
+                        $"InvoiceOwner, AmountPayable, AmountCoverable, BaseDocumentNumber, Status, Accesories, Note, CreatedDate, ModifiedDate, LastUserId) " +
                         $"VALUES ('{equipmentRequest.RequestId}', '{equipmentRequest.Device}', '{DateTime.Now.ToString("yyyyMMdd")}', '{equipmentRequest.AssignedUser}', " +
                         $"'{equipmentRequest.DeliveryType}', '{equipmentRequest.SimCard}', '{equipmentRequest.PropertyBy}', '{equipmentRequest.CostAmount}', '{equipmentRequest.InvoiceOwner}', " +
-                        $"'{equipmentRequest.AmountPayable}', '{equipmentRequest.AmountCoverable}', '{equipmentRequest.BaseDocumentNumber}', 1, GETDATE(), GETDATE(), '{Account.GetAccount(User.Identity.GetUserName()).UserId}')");
+                        $"'{equipmentRequest.AmountPayable}', '{equipmentRequest.AmountCoverable}', '{equipmentRequest.BaseDocumentNumber}', 1, '{equipmentRequest.Accessories}', " +
+                        $"'{equipmentRequest.Note}', GETDATE(), GETDATE(), '{Account.GetAccount(User.Identity.GetUserName()).UserId}')");
 
                 _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIPM10000 SET Status = 6 WHERE RequestId = '{equipmentRequest.BaseDocumentNumber}'");
                 if (postType == 1)
@@ -613,34 +758,93 @@ namespace Seaboard.Intranet.Web
         [HttpPost]
         public JsonResult DeliverEquipment(string id, bool unAssign)
         {
-            string xStatus;
+            string xStatus = "";
             try
             {
                 string sqlQuery = $"SELECT RequestId, Device, DocumentDate, AssignedUser, DeliveryType, SimCard, PropertyBy, CostAmount, InvoiceOwner, AmountPayable, AmountCoverable, BaseDocumentNumber, Status " +
                    $"FROM {Helpers.InterCompanyId}.dbo.EIPM10200 WHERE RequestId = '{id}'";
                 var equipmentDelivery = _repository.ExecuteScalarQuery<EquipmentDelivery>(sqlQuery);
-                
+
+                var requestType = _repository.ExecuteScalarQuery<string>($"SELECT RequestType FROM {Helpers.InterCompanyId}.dbo.EIPM10000 WHERE RequestId = '{equipmentDelivery.BaseDocumentNumber}'");
+
                 sqlQuery = $"SELECT DeviceCode " +
                     $"FROM {Helpers.InterCompanyId}.dbo.EIIV00101 WHERE SUBSTRING(AsignedUser, 1, 6) = '{equipmentDelivery.AssignedUser.PadLeft(6, '0').Substring(0, 6)}'";
                 var deviceCode = _repository.ExecuteScalarQuery<string>(sqlQuery) ?? "";
                 _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIPM10200 SET Status = 6 WHERE RequestId = '{equipmentDelivery.RequestId}'");
-                
+
                 if (equipmentDelivery.DeliveryType == "20")
                     LogRequest(equipmentDelivery.BaseDocumentNumber, Account.GetAccount(User.Identity.GetUserName()).FirstName + " " + Account.GetAccount(User.Identity.GetUserName()).LastName, "Equipo entregado en prestamo");
                 else
                 {
                     _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIPM10000 SET Status = 7 WHERE RequestId = '{equipmentDelivery.BaseDocumentNumber}'");
                     LogRequest(equipmentDelivery.BaseDocumentNumber, Account.GetAccount(User.Identity.GetUserName()).FirstName + " " + Account.GetAccount(User.Identity.GetUserName()).LastName, "Equipo entregado");
+                    ProcessLogic.SendToSharepoint(equipmentDelivery.BaseDocumentNumber, 16, Account.GetAccount(User.Identity.GetUserName()).Email, ref xStatus);
                 }
-                
+
                 if (unAssign && !string.IsNullOrEmpty(deviceCode))
-                    _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIIV00101 SET AsignedUser = '', SimCard = '', Status = 6 WHERE DeviceCode = '{deviceCode}'");
-                
+                {
+                    if (requestType == "60")
+                        _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIIV00101 SET AsignedUser = '', SimCard = '', Status = 3 WHERE DeviceCode = '{deviceCode}'");
+                    else
+                        _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIIV00101 SET AsignedUser = '', SimCard = '', Status = 6 WHERE DeviceCode = '{deviceCode}'");
+                }
+
                 if (equipmentDelivery.DeliveryType == "20")
                     _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIIV00101 SET AsignedUser = '{equipmentDelivery.AssignedUser}', SimCard = '{(equipmentDelivery.SimCard ?? "").PadLeft(6, ' ').Substring(0, 6).Trim()}', Status = 2 WHERE DeviceCode = '{equipmentDelivery.Device.Split('-')[0].Trim()}'");
                 else
-                    _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIIV00101 SET AsignedUser = '{equipmentDelivery.AssignedUser}', DeliveryDate = GETDATE(), SimCard = '{(equipmentDelivery.SimCard ?? "").PadLeft(6, ' ').Substring(0,6).Trim()}', Status = 1 WHERE DeviceCode = '{equipmentDelivery.Device.Split('-')[0].Trim()}'");
-                _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIIV00201 SET AsignedEquipment = '{equipmentDelivery.Device}', DeliveryDate = GETDATE() WHERE SimCardCode = '{equipmentDelivery.SimCard.Split('-')[0].Trim()}'");
+                {
+                    var simCard = _repository.ExecuteScalarQuery<SimCard>($"SELECT SimCardCode, SerialNumber, Operator, PhoneNumber, AcquiredDate, HasData, DataQuantity, MinuteOpen, QuantityMinutes, AsignedEquipment, " +
+                    $"DeliveryDate, ChangePoints, Status FROM {Helpers.InterCompanyId}.dbo.EIIV00201 WHERE SimCardCode = '{(equipmentDelivery.SimCard ?? "").PadLeft(6, ' ').Substring(0, 6).Trim()}'");
+                    _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIIV00101 SET AsignedUser = '{equipmentDelivery.AssignedUser}', DeliveryDate = GETDATE(), " +
+                        $"SimCard = '{(equipmentDelivery.SimCard ?? "").PadLeft(6, ' ').Substring(0, 6).Trim()}', Status = 1, PhoneNumber = '{simCard?.PhoneNumber ?? ""}' " +
+                        $"WHERE DeviceCode = '{equipmentDelivery.Device.Split('-')[0].Trim()}'");
+                }
+                _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIIV00201 SET AsignedEquipment = '{equipmentDelivery.Device}', DeliveryDate = GETDATE(), Status = 1 WHERE SimCardCode = '{equipmentDelivery.SimCard.Split('-')[0].Trim()}'");
+                xStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+            return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
+        }
+
+        [OutputCache(Duration = 0)]
+        [HttpPost]
+        public JsonResult EquipmentDeliveryReport(string id)
+        {
+            string xStatus;
+            try
+            {
+                xStatus = "OK";
+                ReportHelper.Export(Helpers.ReportPath + "Reportes", Server.MapPath("~/PDF/Reportes/") + "EquipmentDeliveryReport.pdf",
+                    $"INTRANET.dbo.EquipmentDeliveryReport '{Helpers.InterCompanyId}','{id}'", 45, ref xStatus);
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = xStatus } };
+        }
+
+        [HttpPost]
+        public JsonResult DeleteEquipmentDelivery(string id)
+        {
+            string xStatus = "";
+            try
+            {
+                string sqlQuery = $"SELECT BaseDocumentNumber FROM {Helpers.InterCompanyId}.dbo.EIPM10200 WHERE RequestId = '{id}'";
+                var baseDocument = _repository.ExecuteScalarQuery<string>(sqlQuery);
+                sqlQuery = $"SELECT DeliveryType FROM {Helpers.InterCompanyId}.dbo.EIPM10200 WHERE RequestId = '{id}'";
+                var type = _repository.ExecuteScalarQuery<string>(sqlQuery);
+                _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIPM10200 SET Status = 5 WHERE RequestId = '{id}'");
+                LogRequest(baseDocument, Account.GetAccount(User.Identity.GetUserName()).FirstName + " " + Account.GetAccount(User.Identity.GetUserName()).LastName, "Solicitud de entrega de equipo anulada");
+                if (type == "10")
+                {
+                    _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIPM10000 SET Status = 7 WHERE RequestId = '{baseDocument}'");
+                    ProcessLogic.SendToSharepoint(baseDocument, 16, Account.GetAccount(User.Identity.GetUserName()).Email, ref xStatus);
+                }
                 xStatus = "OK";
             }
             catch (Exception ex)
@@ -656,13 +860,17 @@ namespace Seaboard.Intranet.Web
 
         public ActionResult EquipmentRepairIndex()
         {
-            string sqlQuery = $"SELECT RequestId, Device, Diagnostics, Supplier, Cost, DocumentDate, BaseDocumentNumber, Status FROM {Helpers.InterCompanyId}.dbo.EIPM10300";
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Computing", "EquipmentRepair"))
+                return RedirectToAction("NotPermission", "Home");
+            string sqlQuery = $"SELECT RequestId, Device, Diagnostics, Supplier, Cost, DocumentDate, BaseDocumentNumber, Note, Status FROM {Helpers.InterCompanyId}.dbo.EIPM10300";
             var equipmentRepairs = _repository.ExecuteQuery<EquipmentRepair>(sqlQuery).ToList();
             return View(equipmentRepairs);
         }
 
         public ActionResult EquipmentRepair(string id = "")
         {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Computing", "EquipmentRepair"))
+                return RedirectToAction("NotPermission", "Home");
             EquipmentRepair equipmentRepair;
             if (string.IsNullOrEmpty(id))
                 equipmentRepair = new EquipmentRepair()
@@ -677,7 +885,7 @@ namespace Seaboard.Intranet.Web
             }
             else
             {
-                string sqlQuery = $"SELECT RequestId, Device, Diagnostics, DocumentDate, Supplier, Cost, BaseDocumentNumber, Status FROM {Helpers.InterCompanyId}.dbo.EIPM10300 WHERE RequestId = '{id}'";
+                string sqlQuery = $"SELECT RequestId, Device, Diagnostics, DocumentDate, Supplier, Cost, BaseDocumentNumber, Note, Status FROM {Helpers.InterCompanyId}.dbo.EIPM10300 WHERE RequestId = '{id}'";
                 equipmentRepair = _repository.ExecuteScalarQuery<EquipmentRepair>(sqlQuery);
             }
             return View(equipmentRepair);
@@ -691,13 +899,13 @@ namespace Seaboard.Intranet.Web
             {
                 var count = _repository.ExecuteScalarQuery<int>($"SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.EIPM10300 WHERE RequestId = '{equipmentRepair.RequestId}'");
                 if (count > 0)
-                    _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIPM10300 SET Device = '{equipmentRepair.Device}', Diagnostics = '{equipmentRepair.Diagnostics}', " +
+                    _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIPM10300 SET Note = '{equipmentRepair.Note}', Device = '{equipmentRepair.Device}', Diagnostics = '{equipmentRepair.Diagnostics}', " +
                         $"Supplier = '{equipmentRepair.Supplier}', Cost = '{equipmentRepair.Cost}', ModifiedDate = GETDATE(), LastUserId = '{Account.GetAccount(User.Identity.GetUserName()).UserId}' " +
                         $"WHERE RequestId = '{equipmentRepair.RequestId}'");
                 else
-                    _repository.ExecuteCommand($"INSERT INTO {Helpers.InterCompanyId}.dbo.EIPM10300 (RequestId, Device, DocumentDate, Diagnostics, Supplier, Cost, BaseDocumentNumber, Status, CreatedDate, ModifiedDate, LastUserId) " +
+                    _repository.ExecuteCommand($"INSERT INTO {Helpers.InterCompanyId}.dbo.EIPM10300 (RequestId, Device, DocumentDate, Diagnostics, Supplier, Cost, BaseDocumentNumber, Note, Status, CreatedDate, ModifiedDate, LastUserId) " +
                         $"VALUES ('{equipmentRepair.RequestId}', '{equipmentRepair.Device}', '{DateTime.Now.ToString("yyyyMMdd")}', '{equipmentRepair.Diagnostics}', " +
-                        $"'{equipmentRepair.Supplier}', '{equipmentRepair.Cost}', '{equipmentRepair.BaseDocumentNumber}', 1, GETDATE(), GETDATE(), '{Account.GetAccount(User.Identity.GetUserName()).UserId}')");
+                        $"'{equipmentRepair.Supplier}', '{equipmentRepair.Cost}', '{equipmentRepair.BaseDocumentNumber}', '{equipmentRepair.Note}', 1, GETDATE(), GETDATE(), '{Account.GetAccount(User.Identity.GetUserName()).UserId}')");
 
                 _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIPM10000 SET Status = 6 WHERE RequestId = '{equipmentRepair.BaseDocumentNumber}'");
                 if (postType == 1)
@@ -739,11 +947,16 @@ namespace Seaboard.Intranet.Web
                     AmountCoverable = cost,
                     InvoiceOwner = "TCC",
                     PropertyBy = "TCC",
-                    RequestId = HelperLogic.AsignaciónSecuencia("EIPM10200", Account.GetAccount(User.Identity.GetUserName()).UserId)
+                    RequestId = HelperLogic.AsignaciónSecuencia("EIPM10200", Account.GetAccount(User.Identity.GetUserName()).UserId),
+                    DeliveryType = "10",
+                    DocumentDate = DateTime.Now,
+                    Note = "",
+                    Status = 4,
+                    Accessories = ""
                 };
+                SaveEquipmentDelivery(equipmentDelivery);
                 xStatus = "OK";
-                HttpContext.Cache["EquipmentDelivery"] = equipmentDelivery;
-                url = Url.Action("EquipmentDelivery", "Computing", new { id = "-1" });
+                url = Url.Action("EquipmentDelivery", "Computing", new { id = equipmentDelivery.RequestId });
                 LogRequest(equipmentRequest.RequestId, Account.GetAccount(User.Identity.GetUserName()).FirstName + " " + Account.GetAccount(User.Identity.GetUserName()).LastName, "Enviado a entrega de equipo desde reparacion");
                 _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIPM10300 SET Status = 6 WHERE RequestId = '{repairId}'");
             }
@@ -752,6 +965,25 @@ namespace Seaboard.Intranet.Web
                 xStatus = ex.Message;
             }
             return Json(new { status = xStatus, url }, JsonRequestBehavior.AllowGet);
+        }
+
+        private void SaveEquipmentDelivery(EquipmentDelivery equipmentRequest)
+        {
+            var count = _repository.ExecuteScalarQuery<int>($"SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.EIPM10200 WHERE RequestId = '{equipmentRequest.RequestId}'");
+            if (count > 0)
+                _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIPM10200 SET Device = '{equipmentRequest.Device}', AssignedUser = '{equipmentRequest.AssignedUser}', " +
+                    $"DeliveryType = '{equipmentRequest.DeliveryType}', SimCard = '{equipmentRequest.SimCard}', PropertyBy = '{equipmentRequest.PropertyBy}', CostAmount = '{equipmentRequest.CostAmount}', " +
+                    $"InvoiceOwner = '{equipmentRequest.InvoiceOwner}', AmountPayable = '{equipmentRequest.AmountPayable}', AmountCoverable = '{equipmentRequest.AmountCoverable}', Status = '{equipmentRequest.Status}', " +
+                    $"ModifiedDate = GETDATE(), LastUserId = '{Account.GetAccount(User.Identity.GetUserName()).UserId}' " +
+                    $"WHERE RequestId = '{equipmentRequest.RequestId}'");
+            else
+                _repository.ExecuteCommand($"INSERT INTO {Helpers.InterCompanyId}.dbo.EIPM10200 (RequestId, Device, DocumentDate, AssignedUser, DeliveryType, SimCard, PropertyBy, CostAmount, " +
+                    $"InvoiceOwner, AmountPayable, AmountCoverable, BaseDocumentNumber, Status, CreatedDate, ModifiedDate, LastUserId) " +
+                    $"VALUES ('{equipmentRequest.RequestId}', '{equipmentRequest.Device}', '{DateTime.Now.ToString("yyyyMMdd")}', '{equipmentRequest.AssignedUser}', " +
+                    $"'{equipmentRequest.DeliveryType}', '{equipmentRequest.SimCard}', '{equipmentRequest.PropertyBy}', '{equipmentRequest.CostAmount}', '{equipmentRequest.InvoiceOwner}', " +
+                    $"'{equipmentRequest.AmountPayable}', '{equipmentRequest.AmountCoverable}', '{equipmentRequest.BaseDocumentNumber}', 4, GETDATE(), GETDATE(), '{Account.GetAccount(User.Identity.GetUserName()).UserId}')");
+
+            _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIPM10000 SET Status = 6 WHERE RequestId = '{equipmentRequest.BaseDocumentNumber}'");
         }
 
         [HttpPost]
@@ -772,6 +1004,445 @@ namespace Seaboard.Intranet.Web
                 xStatus = ex.Message;
             }
             return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
+        }
+
+        [OutputCache(Duration = 0)]
+        [HttpPost]
+        public JsonResult EquipmentRepairReport(string id)
+        {
+            string xStatus;
+            try
+            {
+                xStatus = "OK";
+                ReportHelper.Export(Helpers.ReportPath + "Reportes", Server.MapPath("~/PDF/Reportes/") + "EquipmentRepairReport.pdf",
+                    $"INTRANET.dbo.EquipmentRepairReport '{Helpers.InterCompanyId}','{id}'", 46, ref xStatus);
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = xStatus } };
+        }
+
+        [HttpPost]
+        public JsonResult DeleteEquipmentRepair(string id)
+        {
+            string xStatus = "";
+            try
+            {
+                string sqlQuery = $"SELECT BaseDocumentNumber FROM {Helpers.InterCompanyId}.dbo.EIPM10300 WHERE RequestId = '{id}'";
+                var baseDocument = _repository.ExecuteScalarQuery<string>(sqlQuery);
+                sqlQuery = $"SELECT RequestType FROM {Helpers.InterCompanyId}.dbo.EIPM10000 WHERE RequestId = '{baseDocument}'";
+                var type = _repository.ExecuteScalarQuery<string>(sqlQuery);
+                _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIPM10300 SET Status = 5 WHERE RequestId = '{id}'");
+                LogRequest(baseDocument, Account.GetAccount(User.Identity.GetUserName()).FirstName + " " + Account.GetAccount(User.Identity.GetUserName()).LastName, "Solicitud de reparacion del equipo anulada");
+                if (type == "20")
+                {
+                    _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIPM10000 SET Status = 7 WHERE RequestId = '{baseDocument}'");
+                    ProcessLogic.SendToSharepoint(baseDocument, 16, Account.GetAccount(User.Identity.GetUserName()).Email, ref xStatus);
+                }
+                xStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+            return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
+        }
+
+        #endregion
+
+        #region Desasignacion
+
+        public ActionResult EquipmentUnassignIndex()
+        {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Computing", "EquipmentUnassign"))
+                return RedirectToAction("NotPermission", "Home");
+            string sqlQuery = $"SELECT RequestId, DocumentDate, DeviceSimCard, DeviceType, EmployeeId, Reason, Note FROM {Helpers.InterCompanyId}.dbo.EIPM10400 ";
+            var equipmentUnassing = _repository.ExecuteQuery<EquipmentUnassign>(sqlQuery).ToList();
+            return View(equipmentUnassing);
+        }
+
+        public ActionResult EquipmentUnassign(string id = "")
+        {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Computing", "EquipmentUnassign"))
+                return RedirectToAction("NotPermission", "Home");
+            EquipmentUnassign equipmentUnassign;
+            if (string.IsNullOrEmpty(id))
+                equipmentUnassign = new EquipmentUnassign()
+                {
+                    RequestId = HelperLogic.AsignaciónSecuencia("EIPM10400", Account.GetAccount(User.Identity.GetUserName()).UserId)
+                };
+            else
+            {
+                string sqlQuery = $"SELECT RequestId, DocumentDate, DeviceSimCard, DeviceType, EmployeeId, Reason, Note FROM {Helpers.InterCompanyId}.dbo.EIPM10400 WHERE RequestId = '{id}'";
+                equipmentUnassign = _repository.ExecuteScalarQuery<EquipmentUnassign>(sqlQuery);
+            }
+            return View(equipmentUnassign);
+        }
+
+        [HttpPost]
+        public JsonResult SaveEquipmentUnassign(EquipmentUnassign equipmentUnassign)
+        {
+            string xStatus = "";
+            try
+            {
+                var count = _repository.ExecuteScalarQuery<int>($"SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.EIPM10400 WHERE RequestId = '{equipmentUnassign.RequestId}'");
+                if (count > 0)
+                    _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIPM10400 SET DeviceSimCard = '{equipmentUnassign.DeviceSimCard}', Reason = '{equipmentUnassign.Reason}', " +
+                        $"EmployeeId = '{equipmentUnassign.EmployeeId}', DeviceType = '{equipmentUnassign.DeviceType}', Note = '{equipmentUnassign.Note}', ModifiedDate = GETDATE(), " +
+                        $"LastUserId = '{Account.GetAccount(User.Identity.GetUserName()).UserId}' WHERE RequestId = '{equipmentUnassign.RequestId}'");
+                else
+                    _repository.ExecuteCommand($"INSERT INTO {Helpers.InterCompanyId}.dbo.EIPM10400 (RequestId, DeviceSimCard, DocumentDate, Reason, EmployeeId, DeviceType, Note, CreatedDate, ModifiedDate, LastUserId) " +
+                        $"VALUES ('{equipmentUnassign.RequestId}', '{equipmentUnassign.DeviceSimCard}', '{DateTime.Now.ToString("yyyyMMdd")}', '{equipmentUnassign.Reason}', " +
+                        $"'{equipmentUnassign.EmployeeId}', '{equipmentUnassign.DeviceType}', '{equipmentUnassign.Note}', GETDATE(), GETDATE(), '{Account.GetAccount(User.Identity.GetUserName()).UserId}')");
+                if (equipmentUnassign.DeviceType == "10")
+                    _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIIV00101 SET AsignedUser = '', Status = 6 WHERE DeviceCode = '{equipmentUnassign.DeviceSimCard.Substring(0, 6).Trim()}' ");
+                else
+                {
+                    var equipment = _repository.ExecuteScalarQuery<string>($"SELECT SUBSTRING(AsignedEquipment, 1, 6) FROM {Helpers.InterCompanyId}.dbo.EIIV00201 " +
+                        $"WHERE SimCardCode = '{equipmentUnassign.DeviceSimCard.Substring(0, 6).Trim()}'");
+                    _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIIV00101 SET SimCard = '', PhoneNumber = '' WHERE DeviceCode = '{equipment}' ");
+                    _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIIV00201 SET AsignedEquipment = '' WHERE SimCardCode = '{equipmentUnassign.DeviceSimCard.Substring(0, 6).Trim()}' ");
+                }
+
+                xStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+            return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
+        }
+
+        [OutputCache(Duration = 0)]
+        [HttpPost]
+        public JsonResult EquipmentUnassignReport(string id)
+        {
+            string xStatus;
+            try
+            {
+                xStatus = "OK";
+                ReportHelper.Export(Helpers.ReportPath + "Reportes", Server.MapPath("~/PDF/Reportes/") + "EquipmentUnassignReport.pdf",
+                    $"INTRANET.dbo.EquipmentUnassignReport '{Helpers.InterCompanyId}','{id}'", 47, ref xStatus);
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = xStatus } };
+        }
+
+        #endregion
+
+        #region Fidepuntos
+
+        public ActionResult EarnedPoints()
+        {
+            var sqlQuery = $"SELECT Description, Points, DocumentDate, SummaryType FROM {Helpers.InterCompanyId}.dbo.EIIV00301 ORDER BY DocumentDate DESC ";
+            var list = _repository.ExecuteQuery<EarnedPoint>(sqlQuery).ToList();
+            ViewBag.Total = list.Sum(x => x.Points);
+            return View(list);
+        }
+        [HttpPost]
+        public JsonResult SaveEarnedPoint(EarnedPoint point)
+        {
+            string status;
+            try
+            {
+                SaveEarnedPointEntity(point);
+                status = "OK";
+            }
+            catch (Exception ex)
+            {
+                status = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status } };
+        }
+
+        public void SaveEarnedPointEntity(EarnedPoint point)
+        {
+            var sqlQuery = $"INSERT INTO {Helpers.InterCompanyId}.dbo.EIIV00301 (Description, Points, DocumentDate, SummaryType, CreatedDate, ModifiedDate, LastUserId) " +
+                     $"VALUES ('{point.Description}','{(point.SummaryType == 0 ? point.Points : point.Points * -1)}','{DateTime.Now.ToString("yyyyMMdd")}','{point.SummaryType}', GETDATE(), GETDATE(), '{Account.GetAccount(User.Identity.GetUserName()).UserId}') ";
+            _repository.ExecuteCommand(sqlQuery);
+        }
+
+        #endregion
+
+        #region Casos
+
+        public ActionResult CaseIndex()
+        {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Computing", "Case"))
+                return RedirectToAction("NotPermission", "Home");
+            string sqlQuery = $"SELECT CaseNumber, Description, EmployeeId, Diagnostics, Note, PhoneNumber, DocumentDate, Status FROM {Helpers.InterCompanyId}.dbo.EIPM10500 ";
+            var caseEntity = _repository.ExecuteQuery<Case>(sqlQuery).ToList();
+            return View(caseEntity);
+        }
+
+        public ActionResult Case(string id = "")
+        {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Computing", "Case"))
+                return RedirectToAction("NotPermission", "Home");
+            Case caseEntity;
+            if (string.IsNullOrEmpty(id))
+                caseEntity = new Case()
+                {
+                    Status = 0,
+                    DocumentDate = DateTime.Now
+                };
+            else
+            {
+                string sqlQuery = $"SELECT CaseNumber, Description, EmployeeId, Diagnostics, Note, PhoneNumber, DocumentDate, Status FROM {Helpers.InterCompanyId}.dbo.EIPM10500 WHERE CaseNumber = '{id}'";
+                caseEntity = _repository.ExecuteScalarQuery<Case>(sqlQuery);
+            }
+            return View(caseEntity);
+        }
+
+        [HttpPost]
+        public JsonResult SaveCase(Case caseEntity)
+        {
+            string xStatus = "";
+            try
+            {
+                var count = _repository.ExecuteScalarQuery<int>($"SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.EIPM10500 WHERE CaseNumber = '{caseEntity.CaseNumber}'");
+                if (count > 0)
+                    _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIPM10500 SET Diagnostics = '{caseEntity.Diagnostics}', Description = '{caseEntity.Description}', " +
+                        $"EmployeeId = '{caseEntity.EmployeeId}', PhoneNumber = '{caseEntity.PhoneNumber}', Note = '{caseEntity.Note}', ModifiedDate = GETDATE(), " +
+                        $"LastUserId = '{Account.GetAccount(User.Identity.GetUserName()).UserId}' WHERE CaseNumber = '{caseEntity.CaseNumber}'");
+                else
+                    _repository.ExecuteCommand($"INSERT INTO {Helpers.InterCompanyId}.dbo.EIPM10500 (CaseNumber, Description, DocumentDate, EmployeeId, PhoneNumber, Diagnostics, Note, Status, CreatedDate, ModifiedDate, LastUserId) " +
+                        $"VALUES ('{caseEntity.CaseNumber}', '{caseEntity.Description}', '{caseEntity.DocumentDate.ToString("yyyyMMdd")}', '{caseEntity.EmployeeId}', '{caseEntity.PhoneNumber}', " +
+                        $"'{caseEntity.Diagnostics}', '{caseEntity.Note}', 1, GETDATE(), GETDATE(), '{Account.GetAccount(User.Identity.GetUserName()).UserId}')");
+                xStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+            return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public JsonResult DeleteCase(string id)
+        {
+            string xStatus;
+            try
+            {
+                _repository.ExecuteCommand($"DELETE {Helpers.InterCompanyId}.dbo.EIPM10500 WHERE CaseNumber = '{id}'");
+                xStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+            return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public JsonResult CloseCase(string id)
+        {
+            string xStatus;
+            try
+            {
+                _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIPM10500 SET Status = 2 WHERE CaseNumber = '{id}'");
+                xStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+            return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
+        }
+
+        #endregion
+
+        #region Consultas
+
+        public ActionResult EquipmentInquiry()
+        {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Computing", "Equipment"))
+                return RedirectToAction("NotPermission", "Home");
+            return View();
+        }
+
+        [OutputCache(Duration = 0)]
+        [HttpPost]
+        public ActionResult EquipmentInquiry(int status, string dateRange, string department)
+        {
+            string xStatus;
+            var equipments = new List<Equipment>();
+            try
+            {
+                xStatus = "OK";
+                string sqlQuery = $"SELECT AcquireMode, AsignedUser, Brand, CanUseData, Cost, DeliveryDate, Description, MobileTechnology, Model, Operator, PhoneNumber, " +
+                    $"SerialNumber, SimCard, Status, DeviceCode, AcquiredDate, RTRIM(C.DSCRIPTN) Department " +
+                    $"FROM {Helpers.InterCompanyId}.dbo.EIIV00101 A " +
+                    $"LEFT JOIN {Helpers.InterCompanyId}.dbo.UPR00100  B ON SUBSTRING(A.AsignedUser, 1, 6) = RTRIM(B.EMPLOYID) " +
+                    $"LEFT JOIN {Helpers.InterCompanyId}.dbo.UPR40300  C ON RTRIM(B.DEPRTMNT) = RTRIM(C.DEPRTMNT) ";
+
+                var filters = new List<string>();
+
+                if (status != 0)
+                    filters.Add($"A.Status = '{status}' ");
+                if (!string.IsNullOrEmpty(dateRange))
+                    filters.Add($"A.DeliveryDate BETWEEN '{DateTime.ParseExact(dateRange.Split('-')[0].Trim(), "MM/dd/yyyy", null)}' AND '{DateTime.ParseExact(dateRange.Split('-')[1].Trim(), "MM/dd/yyyy", null)}' ");
+                if (!string.IsNullOrEmpty(department))
+                    filters.Add($"RTRIM(C.DSCRIPTN) = '{department.Trim()}' ");
+                if (filters.Count > 0)
+                    sqlQuery += "WHERE " + filters.FirstOrDefault();
+                foreach (var item in filters)
+                    sqlQuery += " AND " + item;
+                equipments = _repository.ExecuteQuery<Equipment>(sqlQuery).ToList();
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = xStatus, registros = equipments } };
+        }
+
+        public ActionResult SimCardInquiry()
+        {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Computing", "SimCard"))
+                return RedirectToAction("NotPermission", "Home");
+            return View();
+        }
+
+        [OutputCache(Duration = 0)]
+        [HttpPost]
+        public ActionResult SimCardInquiry(int status, string dateRange, string department)
+        {
+            string xStatus;
+            var equipments = new List<SimCard>();
+            try
+            {
+                xStatus = "OK";
+                string sqlQuery = $"SELECT DISTINCT A.SimCardCode, A.SerialNumber, A.Operator, A.PhoneNumber, A.AcquiredDate, A.HasData, A.DataQuantity, A.MinuteOpen, A.QuantityMinutes, A.AsignedEquipment, " +
+                    $"A.DeliveryDate, A.ChangePoints, A.Status, B.AsignedUser AssignedUser, RTRIM(D.DSCRIPTN) Department " +
+                    $"FROM {Helpers.InterCompanyId}.dbo.EIIV00201 A " +
+                    $"LEFT JOIN {Helpers.InterCompanyId}.dbo.EIIV00101 B ON A.SimCardCode = B.SimCard " +
+                    $"LEFT JOIN {Helpers.InterCompanyId}.dbo.UPR00100  C ON SUBSTRING(B.AsignedUser, 1, 6) = RTRIM(C.EMPLOYID) " +
+                    $"LEFT JOIN {Helpers.InterCompanyId}.dbo.UPR40300  D ON RTRIM(C.DEPRTMNT) = RTRIM(D.DEPRTMNT) ";
+
+                 var filters = new List<string>();
+
+                if (status != 0)
+                    filters.Add($"A.Status = '{status}' ");
+                if (!string.IsNullOrEmpty(dateRange))
+                    filters.Add($"A.DeliveryDate BETWEEN '{DateTime.ParseExact(dateRange.Split('-')[0].Trim(), "MM/dd/yyyy", null)}' AND '{DateTime.ParseExact(dateRange.Split('-')[1].Trim(), "MM/dd/yyyy", null)}' ");
+                if (!string.IsNullOrEmpty(department))
+                    filters.Add($"RTRIM(D.DSCRIPTN) = '{department.Trim()}' ");
+                if (filters.Count > 0)
+                    sqlQuery += "WHERE " + filters.FirstOrDefault();
+                foreach (var item in filters)
+                    sqlQuery += " AND " + item;
+                equipments = _repository.ExecuteQuery<SimCard>(sqlQuery).ToList();
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = xStatus, registros = equipments } };
+        }
+
+        public ActionResult EquipmentRequestInquiry()
+        {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Computing", "EquipmentRequest"))
+                return RedirectToAction("NotPermission", "Home");
+            return View();
+        }
+
+        [OutputCache(Duration = 0)]
+        [HttpPost]
+        public ActionResult EquipmentRequestInquiry(string requestType, int status, string department, string employee, string dateRange)
+        {
+            string xStatus;
+            var list = new List<EquipmentRequest>();
+            try
+            {
+                xStatus = "OK";
+                string sqlQuery = $"SELECT RequestId, RequestType, DocumentDate, DepartmentId, Requester, RequestBy, HasData, OpenMinutes, Note, Status " +
+                    $"FROM {Helpers.InterCompanyId}.dbo.EIPM10000 ";
+
+                var filters = new List<string>();
+
+                if (requestType != "0")
+                    filters.Add($"RequestType = '{requestType}' ");
+                if (status != 0)
+                    filters.Add($"Status = '{status}' ");
+                if (!string.IsNullOrEmpty(department))
+                    filters.Add($"DepartmentId = '{department}' ");
+                if (!string.IsNullOrEmpty(dateRange))
+                    filters.Add($"DocumentDate BETWEEN '{DateTime.ParseExact(dateRange.Split('-')[0].Trim(), "MM/dd/yyyy", null)}' AND '{DateTime.ParseExact(dateRange.Split('-')[1].Trim(), "MM/dd/yyyy", null)}' ");
+                if (!string.IsNullOrEmpty(employee))
+                    filters.Add($"Requester = '{employee}' ");
+
+                if (filters.Count > 0)
+                    sqlQuery += "WHERE " + filters.FirstOrDefault();
+                foreach (var item in filters)
+                    sqlQuery += " AND " + item;
+                list = _repository.ExecuteQuery<EquipmentRequest>(sqlQuery).ToList();
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = xStatus, registros = list } };
+        }
+
+        public ActionResult EquipmentDeliveryInquiry()
+        {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Computing", "EquipmentDelivery"))
+                return RedirectToAction("NotPermission", "Home");
+            return View();
+        }
+
+        [OutputCache(Duration = 0)]
+        [HttpPost]
+        public ActionResult EquipmentDeliveryInquiry(string deliveryType, int status, string department, string employee, string dateRange)
+        {
+            string xStatus;
+            var list = new List<EquipmentDelivery>();
+            try
+            {
+                xStatus = "OK";
+                string sqlQuery = $"SELECT A.RequestId, A.Device, A.DocumentDate, A.AssignedUser, A.DeliveryType, A.SimCard, A.PropertyBy, A.CostAmount, A.InvoiceOwner, " +
+                    $"A.AmountPayable, A.Accesories, A.AmountCoverable, A.Note, A.BaseDocumentNumber, A.Status " +
+                    $"FROM {Helpers.InterCompanyId}.dbo.EIPM10200 A " +
+                    $"INNER JOIN {Helpers.InterCompanyId}.dbo.EIPM10000 B ON A.BaseDocumentNumber = B.RequestId ";
+
+                var filters = new List<string>();
+
+                if (deliveryType != "0")
+                    filters.Add($"A.DeliveryType = '{deliveryType}' ");
+                if (status != 0)
+                    filters.Add($"Status = '{status}' ");
+                if (!string.IsNullOrEmpty(department))
+                    filters.Add($"B.DepartmentId = '{department}' ");
+                if (!string.IsNullOrEmpty(dateRange))
+                    filters.Add($"A.DocumentDate BETWEEN '{DateTime.ParseExact(dateRange.Split('-')[0].Trim(), "MM/dd/yyyy", null)}' AND '{DateTime.ParseExact(dateRange.Split('-')[1].Trim(), "MM/dd/yyyy", null)}' ");
+                if (!string.IsNullOrEmpty(employee))
+                    filters.Add($"A.AssignedUser = '{employee}' ");
+
+                if (filters.Count > 0)
+                    sqlQuery += "WHERE " + filters.FirstOrDefault();
+                foreach (var item in filters)
+                    sqlQuery += " AND " + item;
+                list = _repository.ExecuteQuery<EquipmentDelivery>(sqlQuery).ToList();
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = xStatus, registros = list } };
         }
 
         #endregion
@@ -802,6 +1473,19 @@ namespace Seaboard.Intranet.Web
                         $"WHERE (DeviceCode LIKE '%{consulta}%' OR Model LIKE '%{consulta}%' OR SerialNumber LIKE '%{consulta}%') AND Status NOT IN (3, 4) AND LEN(AsignedUser) = 0 ORDER BY DeviceCode";
                     var equipments = _repository.ExecuteQuery<Lookup>(sqlQuery);
                     return Json(equipments, JsonRequestBehavior.AllowGet);
+                case 4:
+                    sqlQuery = $"SELECT DeviceCode [Id], Model [Descripción], SerialNumber DataExtended, CONVERT(NVARCHAR(20), Cost) DataPlus " +
+                        $"FROM {Helpers.InterCompanyId}.dbo.EIIV00101 WITH (NOLOCK, READUNCOMMITTED) " +
+                        $"WHERE (DeviceCode LIKE '%{consulta}%' OR Model LIKE '%{consulta}%' OR SerialNumber LIKE '%{consulta}%') AND Status NOT IN (3, 4) AND AsignedUser = '{consultaExtra}' ORDER BY DeviceCode";
+                    var equipmentsAssigned = _repository.ExecuteQuery<Lookup>(sqlQuery);
+                    return Json(equipmentsAssigned, JsonRequestBehavior.AllowGet);
+                case 5:
+                    sqlQuery = $"SELECT A.SimCardCode [Id], A.PhoneNumber [Descripción], UPPER(A.Operator) DataExtended " +
+                        $"FROM {Helpers.InterCompanyId}.dbo.EIIV00201 A WITH (NOLOCK, READUNCOMMITTED) " +
+                        $"INNER JOIN {Helpers.InterCompanyId}.dbo.EIIV00101 B WITH (NOLOCK, READUNCOMMITTED) ON A.SimCardCode = B.SimCard " +
+                        $"WHERE (A.SimCardCode LIKE '%{consulta}%' OR A.PhoneNumber LIKE '%{consulta}%') AND A.Status NOT IN (3, 4) AND B.AsignedUser = '{consultaExtra}' ORDER BY A.SimCardCode";
+                    var simCardsAssigned = _repository.ExecuteQuery<Lookup>(sqlQuery);
+                    return Json(simCardsAssigned, JsonRequestBehavior.AllowGet);
             }
             return Json("");
         }

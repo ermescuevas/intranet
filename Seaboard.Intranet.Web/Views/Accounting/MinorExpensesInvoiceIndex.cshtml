@@ -35,7 +35,7 @@
                     </div>
                 </div>
                 <div class="ibox-content">
-                    @Html.ActionLink("NUEVA FACTURA", "MinorExpensesInvoice", "Accounting", null, new { @class = "btn btn-primary" })
+                    <button class="btn btn-primary" onclick="openNewInvoice();">NUEVA FACTURA</button>
                     <div class="hr-line-dashed"></div>
                     <table class="table table-striped table-bordered table-hover informationTable">
                         <thead>
@@ -52,52 +52,61 @@
                         <tbody>
                             @foreach (var item in Model)
                             {
-                            <tr>
-                                <td>@Html.ActionLink(item.DocumentNumber, "MinorExpensesInvoice", new { @id = item.DocumentNumber }) </td>
-                                <td>@item.Ncf</td>
-                                <td>@item.SupplierNumber</td>
-                                <td>
-                                    @switch (item.ExpenseType)
-                                    {
-                                        case 1:<span>01 - GASTOS DE PERSONAL</span>
-                                            break;
-                                        case 2:<span>02 - GASTOS POR TRABAJOS, SUMINISTROS Y SERVICIOS</span>
-                                            break;
-                                        case 3:<span>03 - ARRENDAMIENTOS</span>
-                                            break;
-                                        case 4:<span>04 - GASTOS DE ACTIVOS FIJO</span>
-                                            break;
-                                        case 5:<span>05 - GASTOS DE REPRESENTACIÓN</span>
-                                            break;
-                                        case 6:<span>06 - OTRAS DEDUCCIONES ADMITIDAS</span>
-                                            break;
-                                        case 7:<span>07 - GASTOS FINANCIEROS</span>
-                                            break;
-                                        case 8:<span>08 - GASTOS EXTRAORDINARIOS</span>
-                                            break;
-                                        case 9:<span>09 - COMPRAS Y GASTOS QUE FORMARON PARTE DEL COSTO DE VENTA</span>
-                                            break;
-                                        case 10:<span>10 - ADQUISICIONES DE ACTIVOS</span>
-                                            break;
-                                        case 11:<span>11 - GASTOS DE SEGURO</span>
-                                            break;
-                                    }
-
-
-                                </td>
-                                <td>@item.DocumentDate.ToString("dd/MM/yyyy")</td>
-                                <td>@item.TotalAmount.ToString("C2")</td>
-                                <td>
-                                    @if (!item.Posted)
-                                    {
-                                        <i class="badge badge-success">Abierto</i>
+                                <tr>
+                                    <td>@Html.ActionLink(item.DocumentNumber, "MinorExpensesInvoice", new { @id = item.DocumentNumber }) </td>
+                                    <td>@item.Ncf</td>
+                                    <td>@item.SupplierNumber</td>
+                                    <td>
+                                        @switch (item.ExpenseType)
+                                        {
+                                            case 1:<span>01 - GASTOS DE PERSONAL</span>
+                                                break;
+                                            case 2:<span>02 - GASTOS POR TRABAJOS, SUMINISTROS Y SERVICIOS</span>
+                                                break;
+                                            case 3:<span>03 - ARRENDAMIENTOS</span>
+                                                break;
+                                            case 4:<span>04 - GASTOS DE ACTIVOS FIJO</span>
+                                                break;
+                                            case 5:<span>05 - GASTOS DE REPRESENTACIÓN</span>
+                                                break;
+                                            case 6:<span>06 - OTRAS DEDUCCIONES ADMITIDAS</span>
+                                                break;
+                                            case 7:<span>07 - GASTOS FINANCIEROS</span>
+                                                break;
+                                            case 8:<span>08 - GASTOS EXTRAORDINARIOS</span>
+                                                break;
+                                            case 9:<span>09 - COMPRAS Y GASTOS QUE FORMARON PARTE DEL COSTO DE VENTA</span>
+                                                break;
+                                            case 10:<span>10 - ADQUISICIONES DE ACTIVOS</span>
+                                                break;
+                                            case 11:<span>11 - GASTOS DE SEGURO</span>
+                                                break;
                                         }
-                                    else
-                                    {
-                                        <i class="badge badge-danger">Contabilizado</i>
-                                    }
-                                </td>
-                            </tr>
+
+
+                                    </td>
+                                    <td>@item.DocumentDate.ToString("dd/MM/yyyy")</td>
+                                    <td>@item.TotalAmount.ToString("C2")</td>
+                                    <td>
+                                        @switch (item.Status)
+                                        {
+                                            case 0:
+                                                <i class="badge badge-primary">Nuevo</i>
+                                                break;
+                                            case 1:
+                                                <i class="badge badge-danger">Borrador</i>
+                                                break;
+                                            case 2:
+                                                <i class="badge badge-success">Registrada</i>
+                                                break;
+                                            case 3:
+                                                <i class="badge badge-info">Anulada</i>
+                                                break;
+                                            default:
+                                                break;
+                                        }
+                                    </td>
+                                </tr>
                             }
                         </tbody>
                     </table>
@@ -107,13 +116,15 @@
     </div>
 </div>
 @section Styles {
-                                        @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
     @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/sweetAlertStyles")
 }
 
-                                    @section Scripts {
-                                        @Scripts.Render("~/plugins/dataTables")
+@section Scripts {
+    @Scripts.Render("~/plugins/dataTables")
     @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/sweetAlert")
 
     <script>
         $(document).ready(function () {
@@ -170,5 +181,26 @@
 
             });
         });
+
+        function openNewInvoice() {
+            $.ajax({
+                url: '@Url.Action("CheckSequenceNcf", "Accounting")?type=13',
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                cache: false,
+                contentType: "application/json",
+                success: function (result) {
+                    if (result.status === "OK")
+                        window.location.href = '@Url.Action("MinorExpensesInvoice","Accounting")';
+                    else
+                        swal({
+                            title: "ERROR",
+                            text: result.status,
+                            type: "error"
+                        });
+                }
+            });
+        }
     </script>
 }

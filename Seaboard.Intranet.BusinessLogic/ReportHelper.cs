@@ -147,6 +147,36 @@ namespace Seaboard.Intranet.BusinessLogic
                     case 43:
                         reporte = "AccountReceivablesReport.rpt";
                         break;
+                    case 44:
+                        reporte = "EquipmentRequestReport.rpt";
+                        break;
+                    case 45:
+                        reporte = "EquipmentDeliveryReport.rpt";
+                        break;
+                    case 46:
+                        reporte = "EquipmentRepairReport.rpt";
+                        break;
+                    case 47:
+                        reporte = "EquipmentUnassignReport.rpt";
+                        break;
+                    case 48:
+                        reporte = "InformalSupplierInvoiceReport.rpt";
+                        break;
+                    case 49:
+                        reporte = "MinorExpensesInvoiceReport.rpt";
+                        break;
+                    case 50:
+                        reporte = "InformalSupplierTransDetailReport.rpt";
+                        break;
+                    case 51:
+                        reporte = "MinorExpensesTransDetailReport.rpt";
+                        break;
+                    case 52:
+                        reporte = "InformalSupplierTransSummaryReport.rpt";
+                        break;
+                    case 53:
+                        reporte = "MinorExpensesTransSummaryReport.rpt";
+                        break;
                 }
 
                 const string reportHeader = "SELECT '' CompName, '' Titulo, '' Parametro1, '' Parametro2, '' Parametro3, '' Parametro4, '' Parametro5, '' Parametro6, '' Usuario, 1 Marca";
