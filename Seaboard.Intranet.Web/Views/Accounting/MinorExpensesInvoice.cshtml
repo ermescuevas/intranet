@@ -58,13 +58,12 @@
                                                     <button class="btn btn-info btn-xs" onclick="postInvoice();">Registrar</button>
                                                     <button class="btn btn-success btn-xs" onclick="saveInvoice();">Guardar en borrador</button>
                                                 }
-                                                @if (Model.Status != 3)
+                                                @if (Model.Status != 3 && Model.Status != 0)
                                                 {
                                                     <button class="btn btn-danger btn-xs" onclick="eliminar();">@(Model.Status == 1 ? "Eliminar" : "Anular")</button>
                                                 }
                                                 @if (Model.Status != 0)
                                                 {
-
                                                     <button class="btn btn-primary btn-xs" onclick="imprimir();">Imprimir</button>
                                                 }
                                             </div>
@@ -263,6 +262,8 @@
                     <label>Motivo</label>
                     <textarea class="form-control" rows="4" id="VoidReason"></textarea>
                 </div>
+                <br />
+                <h3 id="VoidUser">Anulado por: </h3>
             </div>
 
             <div class="modal-footer">
@@ -401,6 +402,7 @@
                     if (result.status === "OK") {
                         $('#modal-VoidInvoice').modal('show');
                         $('#VoidReason').val(result.lookup.Descripción);
+                        $('#VoidUser').html('Anulado por: ' + result.lookup.DataExtended);
                         $('select[name=VoidType]').val(result.lookup.Id);
                         $('.selectpicker').selectpicker('refresh');
                     } else {

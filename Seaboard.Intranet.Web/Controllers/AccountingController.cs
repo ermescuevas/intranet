@@ -25,8 +25,8 @@ namespace Seaboard.Intranet.Web.Controllers
 
         public ActionResult Index()
         {
-            //if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "Supplier"))
-            //    return RedirectToAction("NotPermission", "Home");
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "Index"))
+                return RedirectToAction("NotPermission", "Home");
             var sqlQuery = $"SELECT A.DocumentNumber Id, A.DocumentDescription Descripción, CONVERT(nvarchar(20), B.ToNumber - B.NextNumber) DataExtended " +
                 $"FROM {Helpers.InterCompanyId}.dbo.ECNCF40101 A " +
                 $"INNER JOIN {Helpers.InterCompanyId}.dbo.ECNCF40102 B ON A.DocumentNumber = B.HeaderDocumentNumber " +
@@ -52,11 +52,9 @@ namespace Seaboard.Intranet.Web.Controllers
                 $"INNER JOIN {Helpers.InterCompanyId}.dbo.ECPM20200 B ON A.SopNumber = B.SopNumber " +
                 $"WHERE A.Status = 2 " +
                 $"ORDER BY A.SopNumber DESC ");
-
             ViewBag.LastInvoices = _repository.ExecuteQuery<AccountingInvoiceHeader>($"SELECT TOP 10 A.SopNumber DocumentNumber, A.Ncf, A.DocumentDate, A.SupplierNumber, A.SupplierName, A.Subtotal, " +
                 $"A.TaxAmount, A.Note, A.Status, CASE A.DocumentType WHEN 11 THEN 'Proveedor Informal' ELSE 'Gastos menores' END PhoneNumber, A.Total TotalAmount, A.CurrencyId, A.ExchangeRate " +
                 $"FROM {Helpers.InterCompanyId}.dbo.ECPM20100 A " +
-                $"INNER JOIN {Helpers.InterCompanyId}.dbo.ECPM20200 B ON A.SopNumber = B.SopNumber " +
                 $"WHERE A.Status = 2 " +
                 $"ORDER BY A.SopNumber DESC ");
             ViewBag.TotalAmount = _repository.ExecuteScalarQuery<double?>($"SELECT CONVERT(FLOAT, SUM(ISNULL(Total, 0))) FROM {Helpers.InterCompanyId}.dbo.ECPM20100 WHERE Status = 2") ?? 0;
@@ -64,26 +62,29 @@ namespace Seaboard.Intranet.Web.Controllers
                 $"WHERE CONVERT(DATE, DocumentDate) = CONVERT(DATE, DATEADD(MONTH, -1, GETDATE())) AND Status = 2");
             ViewBag.MonthlyInvoices = _repository.ExecuteScalarQuery<int>($"SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.ECPM20100 " +
                 $"WHERE MONTH(CONVERT(DATE, DocumentDate)) = MONTH(CONVERT(DATE, DATEADD(MONTH, -1, GETDATE()))) AND YEAR(CONVERT(DATE, DocumentDate)) = YEAR(CONVERT(DATE, DATEADD(MONTH, -1, GETDATE()))) AND Status = 2");
-            ViewBag.Series = _repository.ExecuteQuery<string>($"SELECT A.InvMonth + ' ' + CONVERT(NVARCHAR(20), A.InvYear) FROM (SELECT TOP 12 SUM(Total) AS Spent, " +
+            
+            ViewBag.Series = _repository.ExecuteQuery<string>($"SELECT A.InvMonth + ' ' + CONVERT(NVARCHAR(20), A.InvYear) FROM (SELECT TOP 12 SUM(ISNULL(Total, 0)) AS Spent, " +
                 $"CASE MONTH(DocumentDate) WHEN 1 THEN 'Enero' WHEN 2 THEN 'Febrero' WHEN 3 THEN 'Marzo' WHEN 4 THEN 'Abril' WHEN 5 THEN 'Mayo' WHEN 6 THEN 'Junio' WHEN 7 THEN 'Julio' " +
                 $"WHEN 8 THEN 'Agosto' WHEN 9 THEN 'Septiembre' " +
                 $"WHEN 10 THEN 'Octubre' WHEN 11 THEN 'Noviembre' WHEN 12 THEN 'Diciembre' ELSE 'Enero' END AS InvMonth, YEAR(DocumentDate) InvYear " +
                 $"FROM {Helpers.InterCompanyId}.dbo.ECPM20100 WHERE DocumentDate BETWEEN DATEADD(MONTH, -24, GETDATE()) AND CONVERT(DATE, GETDATE()) AND Status = 2 " +
                 $"GROUP BY YEAR(DocumentDate), MONTH(DocumentDate) " +
                 $"ORDER BY YEAR(DocumentDate) DESC, MONTH(DocumentDate) DESC) A");
-            ViewBag.ValuesSupplier = _repository.ExecuteQuery<double?>($"SELECT CONVERT(FLOAT, ISNULL(A.Spent, 0)) FROM (SELECT TOP 12 SUM(Total) AS Spent, " +
+            
+            ViewBag.ValuesSupplier = _repository.ExecuteQuery<double?>($"SELECT CONVERT(FLOAT, (CASE A.DocumentType WHEN 11 THEN A.Spent ELSE 0 END)) FROM (SELECT TOP 12 SUM(ISNULL(Total, 0)) AS Spent, " +
                 $"CASE MONTH(DocumentDate) WHEN 1 THEN 'Enero' WHEN 2 THEN 'Febrero' WHEN 3 THEN 'Marzo' WHEN 4 THEN 'Abril' WHEN 5 THEN 'Mayo' WHEN 6 THEN 'Junio' WHEN 7 THEN 'Julio' " +
                 $"WHEN 8 THEN 'Agosto' WHEN 9 THEN 'Septiembre' " +
-                $"WHEN 10 THEN 'Octubre' WHEN 11 THEN 'Noviembre' WHEN 12 THEN 'Diciembre' ELSE 'Enero' END AS InvMonth " +
-                $"FROM {Helpers.InterCompanyId}.dbo.ECPM20100 WHERE DocumentDate BETWEEN DATEADD(MONTH, -24, GETDATE()) AND CONVERT(DATE, GETDATE()) AND Status = 2 AND DocumentType = 11 " +
-                $"GROUP BY YEAR(DocumentDate), MONTH(DocumentDate) " +
+                $"WHEN 10 THEN 'Octubre' WHEN 11 THEN 'Noviembre' WHEN 12 THEN 'Diciembre' ELSE 'Enero' END AS InvMonth, DocumentType " +
+                $"FROM {Helpers.InterCompanyId}.dbo.ECPM20100 WHERE DocumentDate BETWEEN DATEADD(MONTH, -24, GETDATE()) AND CONVERT(DATE, GETDATE()) AND Status = 2 " +
+                $"GROUP BY YEAR(DocumentDate), MONTH(DocumentDate), DocumentType " +
                 $"ORDER BY YEAR(DocumentDate) DESC, MONTH(DocumentDate) DESC) A");
-            ViewBag.ValuesMinor = _repository.ExecuteQuery<double?>($"SELECT CONVERT(FLOAT, ISNULL(A.Spent, 0)) FROM (SELECT TOP 12 SUM(Total) AS Spent, " +
+            
+            ViewBag.ValuesMinor = _repository.ExecuteQuery<double?>($"SELECT CONVERT(FLOAT, (CASE A.DocumentType WHEN 13 THEN A.Spent ELSE 0 END)) FROM (SELECT TOP 12 SUM(ISNULL(Total, 0)) AS Spent, " +
                 $"CASE MONTH(DocumentDate) WHEN 1 THEN 'Enero' WHEN 2 THEN 'Febrero' WHEN 3 THEN 'Marzo' WHEN 4 THEN 'Abril' WHEN 5 THEN 'Mayo' WHEN 6 THEN 'Junio' WHEN 7 THEN 'Julio' " +
                 $"WHEN 8 THEN 'Agosto' WHEN 9 THEN 'Septiembre' " +
-                $"WHEN 10 THEN 'Octubre' WHEN 11 THEN 'Noviembre' WHEN 12 THEN 'Diciembre' ELSE 'Enero' END AS InvMonth " +
-                $"FROM {Helpers.InterCompanyId}.dbo.ECPM20100 WHERE DocumentDate BETWEEN DATEADD(MONTH, -24, GETDATE()) AND CONVERT(DATE, GETDATE()) AND Status = 2 AND DocumentType = 13 " +
-                $"GROUP BY YEAR(DocumentDate), MONTH(DocumentDate) " +
+                $"WHEN 10 THEN 'Octubre' WHEN 11 THEN 'Noviembre' WHEN 12 THEN 'Diciembre' ELSE 'Enero' END AS InvMonth, DocumentType " +
+                $"FROM {Helpers.InterCompanyId}.dbo.ECPM20100 WHERE DocumentDate BETWEEN DATEADD(MONTH, -24, GETDATE()) AND CONVERT(DATE, GETDATE()) AND Status = 2 " +
+                $"GROUP BY YEAR(DocumentDate), MONTH(DocumentDate), DocumentType " +
                 $"ORDER BY YEAR(DocumentDate) DESC, MONTH(DocumentDate) DESC) A");
             return View();
         }
@@ -92,8 +93,8 @@ namespace Seaboard.Intranet.Web.Controllers
 
         public ActionResult InformalSupplierInvoiceIndex()
         {
-            //if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "Supplier"))
-            //    return RedirectToAction("NotPermission", "Home");
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "InformalSupplierInvoice"))
+                return RedirectToAction("NotPermission", "Home");
             var invoices = _repository.ExecuteQuery<AccountingInvoiceHeader>($"SELECT TOP 500 SopNumber DocumentNumber, Ncf, NcfDueDate, NcfType, DocumentDate, SupplierNumber, SupplierName, TaxRegistrationNumber, " +
                 $"Address, City, State, Country, PhoneNumber, Subtotal, TaxAmount, Total TotalAmount, Note, CurrencyId, ExchangeRate, Status " +
                 $"FROM {Helpers.InterCompanyId}.dbo.ECPM20100 WHERE DocumentType = 11 ORDER BY SopNumber DESC");
@@ -102,8 +103,8 @@ namespace Seaboard.Intranet.Web.Controllers
 
         public ActionResult InformalSupplierInvoice(string id = "")
         {
-            //if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "Supplier"))
-            //    return RedirectToAction("NotPermission", "Home");
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "InformalSupplierInvoice"))
+                return RedirectToAction("NotPermission", "Home");
             AccountingInvoiceHeader invoice;
             invoice = _repository.ExecuteScalarQuery<AccountingInvoiceHeader>($"SELECT SopNumber DocumentNumber, Ncf, NcfDueDate, NcfType, DocumentDate, SupplierNumber, SupplierName, TaxRegistrationNumber, " +
                 $"Address, City, State, Country, PhoneNumber, Subtotal, TaxAmount, Total, Note, CurrencyId, ExchangeRate, Status " +
@@ -134,7 +135,7 @@ namespace Seaboard.Intranet.Web.Controllers
             else
                 invoice.Details = _repository.ExecuteQuery<AccountingInvoiceDetail>($"SELECT SopNumber DocumentNumber, LineNumber, ItemNumber, ItemDescription, Quantity, Price, TaxAmount, Total " +
                     $"FROM {Helpers.InterCompanyId}.dbo.ECPM20200 WHERE SopNumber = '{id}'").ToList();
-            ViewBag.Taxes = _repository.ExecuteQuery<Lookup>($"SELECT TaxPlanId Id, TaxPlanDescription Descripción, '' DataExtended, '' DataPlus FROM {Helpers.InterCompanyId}.dbo.ECPM40301").ToList();
+            ViewBag.Taxes = _repository.ExecuteQuery<Lookup>($"SELECT TaxPlanId Id, TaxPlanDescription Descripción, CONVERT(NVARCHAR(20), CONVERT(INT, TaxPercent)) DataExtended, '' DataPlus FROM {Helpers.InterCompanyId}.dbo.ECPM40301").ToList();
             ViewBag.VoidTypes = _repository.ExecuteQuery<Lookup>($"SELECT RTRIM(VoidType) Id, RTRIM(VoidTypeDescription) Descripción, '' DataExtended, '' DataPlus FROM {Helpers.InterCompanyId}.dbo.ECPM40201 ORDER BY VoidType").ToList();
             if (invoice.Status == 1)
             {
@@ -204,8 +205,8 @@ namespace Seaboard.Intranet.Web.Controllers
 
         public ActionResult MinorExpensesInvoiceIndex()
         {
-            //if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "Supplier"))
-            //    return RedirectToAction("NotPermission", "Home");
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "MinorExpenseInvoice"))
+                return RedirectToAction("NotPermission", "Home");
             var invoices = _repository.ExecuteQuery<AccountingInvoiceHeader>($"SELECT TOP 500 SopNumber DocumentNumber, Ncf, NcfDueDate, NcfType, DocumentDate, SupplierNumber, SupplierName, TaxRegistrationNumber, " +
                 $"Address, City, State, Country, PhoneNumber, Subtotal, TaxAmount, Total TotalAmount, Note, CurrencyId, ExchangeRate, Status, ExpenseType " +
                 $"FROM {Helpers.InterCompanyId}.dbo.ECPM20100 WHERE DocumentType = 13 ORDER BY SopNumber DESC");
@@ -214,8 +215,8 @@ namespace Seaboard.Intranet.Web.Controllers
 
         public ActionResult MinorExpensesInvoice(string id = "")
         {
-            //if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "Supplier"))
-            //    return RedirectToAction("NotPermission", "Home");
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "MinorExpenseInvoice"))
+                return RedirectToAction("NotPermission", "Home");
             AccountingInvoiceHeader invoice;
             invoice = _repository.ExecuteScalarQuery<AccountingInvoiceHeader>($"SELECT SopNumber DocumentNumber, Ncf, NcfDueDate, NcfType, DocumentDate, SupplierNumber, SupplierName, TaxRegistrationNumber, " +
                 $"Address, City, State, Country, PhoneNumber, Subtotal, TaxAmount, Total, Note, CurrencyId, ExchangeRate, Status, ExpenseType " +
@@ -354,7 +355,7 @@ namespace Seaboard.Intranet.Web.Controllers
             Lookup lookup = null;
             try
             {
-                var sqlQuery = $"SELECT ReasonType Id, Reason Descripción " +
+                var sqlQuery = $"SELECT ReasonType Id, Reason Descripción, LastUserId DataExtended " +
                 $"FROM {Helpers.InterCompanyId}.dbo.ECPM20110 WITH (NOLOCK, READUNCOMMITTED) " +
                 $"WHERE SopNumber = '{id}' ";
                 lookup = _repository.ExecuteScalarQuery<Lookup>(sqlQuery);
@@ -430,8 +431,8 @@ namespace Seaboard.Intranet.Web.Controllers
 
         public ActionResult SupplierIndex()
         {
-            //if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "Supplier"))
-            //    return RedirectToAction("NotPermission", "Home");
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "Supplier"))
+                return RedirectToAction("NotPermission", "Home");
             string sqlQuery = $"SELECT SupplierNumber, SupplierName, Email, Contact, Address, City, State, Country, ExpenseType, TaxRegistrationNumber RNC, PhoneNumber, FaxNumber " +
                 $"FROM {Helpers.InterCompanyId}.dbo.ECPM00200";
 
@@ -441,16 +442,15 @@ namespace Seaboard.Intranet.Web.Controllers
 
         public ActionResult SupplierCreate()
         {
-            //if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "Supplier"))
-            //    return RedirectToAction("NotPermission", "Home");
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "Supplier"))
+                return RedirectToAction("NotPermission", "Home");
             return View(new Supplier { Country = "Republica Dominicana" });
         }
 
         public ActionResult SupplierEdit(string id)
         {
-            //if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "Supplier"))
-            //    return RedirectToAction("NotPermission", "Home");
-
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "Supplier"))
+                return RedirectToAction("NotPermission", "Home");
             var supplier = _repository.ExecuteScalarQuery<Supplier>($"SELECT SupplierNumber, SupplierName, Email, Contact, Address, City, State, Country, ExpenseType, TaxRegistrationNumber RNC, PhoneNumber, FaxNumber " +
                 $"FROM {Helpers.InterCompanyId}.dbo.ECPM00200 WHERE SupplierNumber = '{id}'");
             return View(supplier);
@@ -508,8 +508,8 @@ namespace Seaboard.Intranet.Web.Controllers
 
         public ActionResult NCFConfigurationIndex()
         {
-            //if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "NCFConfiguration"))
-            //    return RedirectToAction("NotPermission", "Home");
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "NCFConfiguration"))
+                return RedirectToAction("NotPermission", "Home");
             return View();
         }
 
@@ -631,8 +631,8 @@ namespace Seaboard.Intranet.Web.Controllers
 
         public ActionResult ConfigurationIndex()
         {
-            //if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "Configuration"))
-            //    return RedirectToAction("NotPermission", "Home");
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "Configuration"))
+                return RedirectToAction("NotPermission", "Home");
             var sqlQuery = $"SELECT TaxRegistrationNumber, CompanyName, CompanyAddress, CompanyPhoneNumber, CompanyFaxNumber, SqlEmailProfile FROM {Helpers.InterCompanyId}.dbo.ECPM40101";
 
             var configuration = _repository.ExecuteScalarQuery<AccountingConfiguration>(sqlQuery) ?? new AccountingConfiguration();
@@ -692,8 +692,8 @@ namespace Seaboard.Intranet.Web.Controllers
 
         public ActionResult BillingConfigurationIndex()
         {
-            //if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Billing", "AccountConfiguration"))
-            //    return RedirectToAction("NotPermission", "Home");
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "BillingConfiguration"))
+                return RedirectToAction("NotPermission", "Home");
             ViewBag.Customers = _repository.ExecuteQuery<Lookup>($"SELECT RTRIM(CUSTNMBR) Id, RTRIM(CUSTNAME) Descripción, '' DataExtended FROM {Helpers.InterCompanyId}.dbo.RM00101 WHERE INACTIVE = 0").ToList();
             ViewBag.Accounts = _repository.ExecuteQuery<Lookup>($"SELECT B.ACTNUMST Id, RTRIM(A.ACTDESCR) Descripción, CONVERT(NVARCHAR(20), A.ACTINDX) DataExtended " +
                 $"FROM {Helpers.InterCompanyId}.dbo.GL00100 A INNER JOIN {Helpers.InterCompanyId}.dbo.GL00105 B ON A.ACTINDX = B.ACTINDX ORDER BY A.ACTINDX").ToList();
@@ -706,8 +706,8 @@ namespace Seaboard.Intranet.Web.Controllers
 
         public ActionResult VoidType()
         {
-            //if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "VoidType"))
-            //    return RedirectToAction("NotPermission", "Home");
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "VoidType"))
+                return RedirectToAction("NotPermission", "Home");
             var list = _repository.ExecuteQuery<Lookup>($"SELECT VoidType Id, VoidTypeDescription Descripción, '' DataExtended, '' DataPlus " +
                 $"FROM {Helpers.InterCompanyId}.dbo.ECPM40201 ORDER BY VoidType").ToList();
             return View(list);
@@ -757,8 +757,8 @@ namespace Seaboard.Intranet.Web.Controllers
 
         public ActionResult Tax()
         {
-            //if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "VoidType"))
-            //    return RedirectToAction("NotPermission", "Home");
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "Tax"))
+                return RedirectToAction("NotPermission", "Home");
             var list = _repository.ExecuteQuery<Lookup>($"SELECT TaxPlanId Id, TaxPlanDescription Descripción, LTRIM(STR(TaxPercent, 25, 2)) DataExtended, '' DataPlus " +
                 $"FROM {Helpers.InterCompanyId}.dbo.ECPM40301 ORDER BY TaxPlanId").ToList();
             return View(list);
@@ -808,8 +808,8 @@ namespace Seaboard.Intranet.Web.Controllers
 
         public ActionResult EmailAlert()
         {
-            //if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "VoidType"))
-            //    return RedirectToAction("NotPermission", "Home");
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "EmailAlert"))
+                return RedirectToAction("NotPermission", "Home");
             var list = _repository.ExecuteQuery<Lookup>($"SELECT Email Id, Name Descripción, '' DataExtended, '' DataPlus " +
                 $"FROM {Helpers.InterCompanyId}.dbo.ECPM40401 ORDER BY Email").ToList();
             return View(list);
@@ -858,8 +858,8 @@ namespace Seaboard.Intranet.Web.Controllers
 
         public ActionResult FinancialAccount()
         {
-            //if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "VoidType"))
-            //    return RedirectToAction("NotPermission", "Home");
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "Account"))
+                return RedirectToAction("NotPermission", "Home");
             var list = _repository.ExecuteQuery<Lookup>($"SELECT AccountNumber Id, AccountDescription Descripción, '' DataExtended, '' DataPlus " +
                 $"FROM {Helpers.InterCompanyId}.dbo.ECGL00100 ORDER BY AccountNumber").ToList();
             return View(list);
@@ -910,8 +910,8 @@ namespace Seaboard.Intranet.Web.Controllers
 
         public ActionResult TransGeneralLedgerReport()
         {
-            //if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "SalesTransGeneralLedger"))
-            //    return RedirectToAction("NotPermission", "Home");
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "SalesTransGeneralLedger"))
+                return RedirectToAction("NotPermission", "Home");
             return View();
         }
 
@@ -953,8 +953,8 @@ namespace Seaboard.Intranet.Web.Controllers
 
         public ActionResult FiscalSalesReport()
         {
-            //if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "FiscalSales"))
-            //    return RedirectToAction("NotPermission", "Home");
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "FiscalSales"))
+                return RedirectToAction("NotPermission", "Home");
             return View();
         }
 
@@ -1005,8 +1005,8 @@ namespace Seaboard.Intranet.Web.Controllers
 
         public ActionResult AccountingTransDetailReport()
         {
-            //if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "SalesTransGeneralLedger"))
-            //    return RedirectToAction("NotPermission", "Home");
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "AccountingTransDetailReport"))
+                return RedirectToAction("NotPermission", "Home");
             return View();
         }
 
@@ -1040,8 +1040,8 @@ namespace Seaboard.Intranet.Web.Controllers
 
         public ActionResult AccountingTransSummaryReport()
         {
-            //if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "SalesTransGeneralLedger"))
-            //    return RedirectToAction("NotPermission", "Home");
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "AccountingTransSummaryReport"))
+                return RedirectToAction("NotPermission", "Home");
             return View();
         }
 
@@ -1079,8 +1079,8 @@ namespace Seaboard.Intranet.Web.Controllers
 
         public ActionResult AccountingTransactionInquiry()
         {
-            //if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "Supplier"))
-            //    return RedirectToAction("NotPermission", "Home");
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "AccountTransactionInquiry"))
+                return RedirectToAction("NotPermission", "Home");
             return View();
         }
 
