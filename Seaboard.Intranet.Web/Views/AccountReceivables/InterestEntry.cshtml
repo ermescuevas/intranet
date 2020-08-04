@@ -21,7 +21,7 @@
     }
     else
     {
-         typeDescription += " definitivo";
+        typeDescription += " definitivo";
     }
 
     ViewBag.Title = typeDescription;
@@ -68,14 +68,14 @@
                             {
                                 <button class="btn btn-white" type="button" onclick="contabilizar();"><i class="fa fa-money"></i> Someter</button>
                                 <button class="btn btn-info" type="button" onclick="guardar();"><i class="fa fa-save"></i> Guardar</button>
-                                <button class="btn btn-success" type="button" onclick="actualizar();"><i class="fa fa-refresh"></i> Actualizar</button>
-                                <button class="btn btn-success" type="button" onclick="calcular();"><i class="fa fa-calculator"></i> Calcular</button>
+                                <button class="ladda-button btn btn-success" data-style="expand-right" type="button" id="updateData" onclick="actualizar();"><i class="fa fa-refresh"></i> Actualizar</button>
+                                <button class="ladda-button btn btn-success" data-style="expand-right" type="button" id="calculateData" onclick="calcular();"><i class="fa fa-calculator"></i> Calcular</button>
                                 <button class="btn btn-warning" type="button" onclick="eliminar();"><i class="fa fa-remove"></i> Eliminar</button>
                             }
                             else
-	                        {
+                            {
                                 <button class="btn btn-warning" type="button" onclick="anular();"><i class="fa fa-remove"></i> Anular</button>
-	                        }
+                            }
                             <button class="btn btn-primary" type="button" data-toggle="modal" data-target="#modal-Print" id="btn-print"><i class="fa fa-print"></i> Imprimir</button>
                         </div>
                     </div>
@@ -373,6 +373,7 @@
     @Styles.Render("~/plugins/touchSpinStyles")
     @Styles.Render("~/plugins/sweetAlertStyles")
     @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/plugins/laddaStyles")
     <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
 }
 
@@ -385,11 +386,13 @@
     @Scripts.Render("~/plugins/touchSpin")
     @Scripts.Render("~/plugins/dataTables")
     @Scripts.Render("~/plugins/sweetAlert")
+    @Scripts.Render("~/plugins/ladda")
     @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
 
     <script type="text/javascript">
         var value = "";
         $(document).ready(function () {
+            $('.ladda-button').ladda();
             $('.informationTable').DataTable({
                 pageLength: 6,
                 order: [[0, "desc"]],
@@ -540,6 +543,7 @@
                     cancelButtonText: "No, cancelar!",
                     closeOnConfirm: true
                 }, function () {
+                    $('#updateData').ladda('start');
                     var data = {
                         BatchNumber: $('#BatchNumber').val().trim(),
                         Description: $('#Description').val().trim(),
@@ -560,15 +564,16 @@
                         cache: false,
                         contentType: "application/json",
                         success: function (result) {
-                            if (result.status === "OK") {
+                            if (result.status === "OK") 
                                 generateHeader($('#BatchNumber').val().trim());
-                            } else {
+                             else 
                                 swal({
                                     title: "ERROR",
                                     text: result.status,
                                     type: "error"
                                 });
-                            }
+
+                            $('#updateData').ladda('stop');
                         }
                     });
                 });
@@ -628,17 +633,18 @@
                     cancelButtonText: "No, cancelar!",
                     closeOnConfirm: true
                 }, function () {
-                        var data = {
-                            BatchNumber: $('#BatchNumber').val().trim(),
-                            Description: $('#Description').val().trim(),
-                            CutDate: $('#CutDate').val().trim(),
-                            SearchDate: $('#SearchDate').val().trim(),
-                            BillingMonth: '01/' + $('#BillingMonth').datepicker({ dateFormat: 'ddMMyyyy' }).val(),
-                            DocumentDate: $('#DocumentDate').val().trim(),
-                            InterestRate: $('#InterestRate').val().trim(),
-                            Charge: $('#Charge').val().trim(),
-                            Preliminar: @preliminar,
-                            Type: @type
+                    $('#calculateData').ladda('start');
+                    var data = {
+                        BatchNumber: $('#BatchNumber').val().trim(),
+                        Description: $('#Description').val().trim(),
+                        CutDate: $('#CutDate').val().trim(),
+                        SearchDate: $('#SearchDate').val().trim(),
+                        BillingMonth: '01/' + $('#BillingMonth').datepicker({ dateFormat: 'ddMMyyyy' }).val(),
+                        DocumentDate: $('#DocumentDate').val().trim(),
+                        InterestRate: $('#InterestRate').val().trim(),
+                        Charge: $('#Charge').val().trim(),
+                        Preliminar: @preliminar,
+                        Type: @type
                     };
                     $.ajax({
                         url: '@Url.Action("CalculateInterest", "AccountReceivables")',
@@ -648,15 +654,15 @@
                         cache: false,
                         contentType: "application/json",
                         success: function (result) {
-                            if (result.status === "OK") {
+                            if (result.status === "OK") 
                                 generateHeader($('#BatchNumber').val().trim());
-                            } else {
+                             else 
                                 swal({
                                     title: "ERROR",
                                     text: result.status,
                                     type: "error"
                                 });
-                            }
+                            $('#calculateData').ladda('stop');
                         }
                     });
                 });
@@ -1093,7 +1099,7 @@
         function imprimir() {
             if ($('#BatchNumber').val().trim() !== '') {
                 var reportName = 'InterestReport';
-                if ($('#printOption').val() === '10') 
+                if ($('#printOption').val() === '10')
                     reportName += '.pdf';
                 else
                     reportName += '.xls';

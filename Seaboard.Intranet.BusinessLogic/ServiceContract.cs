@@ -18,7 +18,7 @@ namespace Seaboard.Intranet.BusinessLogic
     {
         #region Contract Methods
 
-        public bool CreatePayablesInvoice(GpPayablesDocument invoice, string username, string password)
+        public bool CreatePayablesInvoice(GpPayablesDocument invoice)
         {
             try
             {
@@ -71,19 +71,18 @@ namespace Seaboard.Intranet.BusinessLogic
                 }
 
                 payablesInvoice.Date = new DateTime(invoice.DocumentDate.Year, invoice.DocumentDate.Month, invoice.DocumentDate.Day, 0, 0, 0, 0);
-                payablesInvoice.PONumber = invoice.PurchaseOrder;
                 var payablesInvoiceCreatePolicy = wsDynamicsGp.GetPolicyByOperation("CreatePayablesInvoice", context);
                 wsDynamicsGp.CreatePayablesInvoice(payablesInvoice, context, payablesInvoiceCreatePolicy);
 
                 return true;
             }
-            catch
+            catch(Exception ex)
             {
                 return false;
             }
         }
 
-        public bool CreatePayablesCreditNote(GpPayablesDocument creditNote, string username, string password)
+        public bool CreatePayablesCreditNote(GpPayablesDocument creditNote)
         {
             try
             {
@@ -103,30 +102,33 @@ namespace Seaboard.Intranet.BusinessLogic
                     BatchKey = new BatchKey { Id = creditNote.DocumentNumber },
                     VendorDocumentNumber = creditNote.DocumentNumber
                 };
-                var payablesTax = new PayablesTax
+
+                if (creditNote.TaxAmount > 0)
                 {
-                    Key = new PayablesTaxKey
+                    var payablesTax = new PayablesTax
                     {
-                        PayablesDocumentKey = new PayablesDocumentKey { Id = creditNote.VoucherNumber },
-                        TaxDetailKey = new TaxDetailKey { Id = creditNote.TaxDetail }
-                    },
-                    TaxAmount = new MoneyAmount { Value = creditNote.TaxAmount }
-                };
-                payableTax.Add(payablesTax);
-                payablesCreditNote.Taxes = payableTax.ToArray();
+                        Key = new PayablesTaxKey
+                        {
+                            PayablesDocumentKey = new PayablesDocumentKey { Id = creditNote.VoucherNumber },
+                            TaxDetailKey = new TaxDetailKey { Id = creditNote.TaxDetail }
+                        },
+                        TaxAmount = new MoneyAmount { Value = creditNote.TaxAmount }
+                    };
+                    payableTax.Add(payablesTax);
+                    payablesCreditNote.Taxes = payableTax.ToArray();
+                }
 
                 if (creditNote.Currency != null)
                 {
                     if (creditNote.Currency != "")
                     {
                         if (creditNote.Currency.Trim() == "RDPESO")
-                        {
                             creditNoteCurrency.ISOCode = "DOP";
-                        }
                         else
                         {
                             creditNoteCurrency.ISOCode = "USD";
                             payablesCreditNote.ExchangeRate = 1;
+                            payablesCreditNote.ExchangeDate = new DateTime(creditNote.DocumentDate.Year, creditNote.DocumentDate.Month, creditNote.DocumentDate.Day, 0, 0, 0, 0);
                         }
 
                         payablesCreditNote.CurrencyKey = creditNoteCurrency;
@@ -134,13 +136,11 @@ namespace Seaboard.Intranet.BusinessLogic
                 }
 
                 payablesCreditNote.Date = new DateTime(creditNote.DocumentDate.Year, creditNote.DocumentDate.Month, creditNote.DocumentDate.Day, 0, 0, 0, 0);
-                payablesCreditNote.PONumber = creditNote.PurchaseOrder;
-
                 var payablesCreditNoteCreatePolicy = wsDynamicsGp.GetPolicyByOperation("CreatePayablesCreditMemo", context);
                 wsDynamicsGp.CreatePayablesCreditMemo(payablesCreditNote, context, payablesCreditNoteCreatePolicy);
                 return true;
             }
-            catch
+            catch(Exception ex)
             {
                 return false;
             }
@@ -151,7 +151,6 @@ namespace Seaboard.Intranet.BusinessLogic
             if (invoices != null && invoices.Count() > 0)
             {
                 var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
-                //var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("ermes", "ERNESTO.cuevas24") } } };
                 var context = new Context() { OrganizationKey = new CompanyKey { Id = Helpers.CompanyIdWebServices } };
                 var salesInvoiceCreatePolicy = wsDynamicsGp.GetPolicyByOperation("CreateSalesInvoice", context);
                 var salesTax = new List<SalesDocumentTax>();
@@ -250,7 +249,6 @@ namespace Seaboard.Intranet.BusinessLogic
             if (invoices != null && invoices.Count() > 0)
             {
                 var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
-                //var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("ermes", "ERNESTO.cuevas24") } } };
                 var context = new Context() { OrganizationKey = new CompanyKey { Id = Helpers.CompanyIdWebServices } };
                 var salesReturnCreatePolicy = wsDynamicsGp.GetPolicyByOperation("CreateSalesReturn", context);
                 foreach (var invoice in invoices)
@@ -310,7 +308,205 @@ namespace Seaboard.Intranet.BusinessLogic
             }
         }
 
-        public bool CreateVendor(GpVendor gpVendor, string username, string password)
+        public void CreateReceivablesCreditNote(GpCreditNote creditNote)
+        {
+            var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
+            var context = new Context() { OrganizationKey = new CompanyKey { Id = creditNote.CompanyId } };
+            var creditNoteCurrency = new CurrencyKey();
+
+            var receivablesCreditMemo = new ReceivablesCreditMemo
+            {
+                Key = new ReceivablesDocumentKey { Id = creditNote.Codigo },
+                CustomerKey = new CustomerKey { Id = creditNote.Cliente },
+                SalesAmount = new MoneyAmount { Value = creditNote.Monto },
+                TradeDiscountAmount = new MoneyAmount { Value = creditNote.Descuento },
+                BatchKey = new BatchKey { Id = creditNote.Lote },
+                CustomerPONumber = creditNote.Ncf
+            };
+
+            if (creditNote.Moneda != null)
+            {
+                if (creditNote.Moneda != "")
+                {
+                    if (creditNote.Moneda.Trim() == "RD$" || creditNote.Moneda.Trim() == "RDPESO")
+                        creditNoteCurrency.ISOCode = "DOP";
+                    else
+                    {
+                        creditNoteCurrency.ISOCode = "USD";
+                        receivablesCreditMemo.ExchangeRate = 1;
+                        receivablesCreditMemo.ExchangeDate = new DateTime(creditNote.Fecha.Year, creditNote.Fecha.Month, creditNote.Fecha.Day, 0, 0, 0, 0);
+                    }
+
+                    receivablesCreditMemo.CurrencyKey = creditNoteCurrency;
+                }
+            }
+            receivablesCreditMemo.Date = new DateTime(creditNote.Fecha.Year, creditNote.Fecha.Month, creditNote.Fecha.Day, 0, 0, 0, 0);
+
+            var receivablesCreditMemoCreatePolicy = wsDynamicsGp.GetPolicyByOperation("CreateReceivablesCreditMemo", context);
+            wsDynamicsGp.CreateReceivablesCreditMemo(receivablesCreditMemo, context, receivablesCreditMemoCreatePolicy);
+        }
+
+        public void CreateReceivablesDebitNote(GpCreditNote debitNote)
+        {
+            var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
+            var context = new Context() { OrganizationKey = new CompanyKey { Id = debitNote.CompanyId } };
+            var creditNoteCurrency = new CurrencyKey();
+
+            var receivablesDebitMemo = new ReceivablesDebitMemo
+            {
+                Key = new ReceivablesDocumentKey { Id = debitNote.Codigo },
+                CustomerKey = new CustomerKey { Id = debitNote.Cliente },
+                SalesAmount = new MoneyAmount { Value = debitNote.Monto },
+                TradeDiscountAmount = new MoneyAmount { Value = debitNote.Descuento },
+                BatchKey = new BatchKey { Id = debitNote.Lote }
+            };
+
+            if (debitNote.Moneda != null)
+            {
+                if (debitNote.Moneda != "")
+                {
+                    if (debitNote.Moneda.Trim() == "RD$" || debitNote.Moneda.Trim() == "RDPESO")
+                        creditNoteCurrency.ISOCode = "DOP";
+                    else
+                    {
+                        creditNoteCurrency.ISOCode = "USD";
+                        receivablesDebitMemo.ExchangeRate = 1;
+                        receivablesDebitMemo.ExchangeDate = new DateTime(debitNote.Fecha.Year, debitNote.Fecha.Month, debitNote.Fecha.Day, 0, 0, 0, 0);
+                    }
+
+                    receivablesDebitMemo.CurrencyKey = creditNoteCurrency;
+                }
+            }
+            receivablesDebitMemo.Date = new DateTime(debitNote.Fecha.Year, debitNote.Fecha.Month, debitNote.Fecha.Day, 0, 0, 0, 0);
+
+            var receivablesDebitMemoCreatePolicy = wsDynamicsGp.GetPolicyByOperation("CreateReceivablesDebitMemo", context);
+            wsDynamicsGp.CreateReceivablesDebitMemo(receivablesDebitMemo, context, receivablesDebitMemoCreatePolicy);
+        }
+
+        public void CreatePayablesCreditNote(GpCreditNote creditNote)
+        {
+            var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
+            var context = new Context() { OrganizationKey = new CompanyKey { Id = creditNote.CompanyId } };
+            var creditNoteCurrency = new CurrencyKey();
+            var payablesCreditMemo = new PayablesCreditMemo
+            {
+                Key = new PayablesDocumentKey { Id = creditNote.Codigo },
+                VendorKey = new VendorKey { Id = creditNote.Cliente },
+                PurchasesAmount = new MoneyAmount { Value = creditNote.Monto },
+                TradeDiscountAmount = new MoneyAmount { Value = creditNote.Descuento },
+                BatchKey = new BatchKey { Id = creditNote.Lote },
+                VendorDocumentNumber = creditNote.Ncf
+            };
+            if (creditNote.Moneda != null)
+            {
+                if (creditNote.Moneda != "")
+                {
+                    if (creditNote.Moneda.Trim() == "RD$" || creditNote.Moneda.Trim() == "RDPESO")
+                    {
+                        creditNoteCurrency.ISOCode = "DOP";
+                    }
+                    else
+                    {
+                        creditNoteCurrency.ISOCode = "USD";
+                        payablesCreditMemo.ExchangeRate = 1;
+                        payablesCreditMemo.ExchangeDate = new DateTime(creditNote.Fecha.Year, creditNote.Fecha.Month, creditNote.Fecha.Day, 0, 0, 0, 0);
+                    }
+
+                    payablesCreditMemo.CurrencyKey = creditNoteCurrency;
+                }
+            }
+
+            payablesCreditMemo.Date = new DateTime(creditNote.Fecha.Year, creditNote.Fecha.Month, creditNote.Fecha.Day, 0, 0, 0, 0);
+            var receivablesCreditMemoCreatePolicy = wsDynamicsGp.GetPolicyByOperation("CreatePayablesCreditMemo", context);
+            wsDynamicsGp.CreatePayablesCreditMemo(payablesCreditMemo, context, receivablesCreditMemoCreatePolicy);
+        }
+
+        public void CreatePurchaseReceipt(List<GpPurchaseReceipt> receipts)
+        {
+            var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
+            var context = new Context() { OrganizationKey = new CompanyKey { Id = Helpers.CompanyIdWebServices } };
+            var purchaseReceiptCreatePolicy = wsDynamicsGp.GetPolicyByOperation("CreatePurchaseReceipt", context);
+            var createProductVendorPolicy = wsDynamicsGp.GetPolicyByOperation("CreateItemVendor", context);
+            var createProductCurrencyPolicy = wsDynamicsGp.GetPolicyByOperation("CreateItemCurrency", context);
+
+            foreach (var receipt in receipts)
+            {
+                var purchaseReceipt = new PurchaseReceipt
+                {
+                    Date = new DateTime(receipt.DocumentDate.Year, receipt.DocumentDate.Month, receipt.DocumentDate.Day, 0, 0, 0),
+                    Key = new PurchaseTransactionKey { Id = receipt.DocumentNumber },
+                    BatchKey = new BatchKey { Id = receipt.BatchNumber },
+                    TransactionState = PurchaseTransactionState.Work,
+                    VendorDocumentNumber = receipt.InvoiceId,
+                    VendorKey = new VendorKey { Id = receipt.VendorId },
+                    Lines = ProcessLinesReceipt(receipt, wsDynamicsGp, context, createProductVendorPolicy, createProductCurrencyPolicy).ToArray()
+                };
+                wsDynamicsGp.CreatePurchaseReceipt(purchaseReceipt, context, purchaseReceiptCreatePolicy);
+            }
+        }
+
+        public bool CreateCashReceipt(GpCashReceipt receipt)
+        {
+            try
+            {
+                var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
+                var context = new Context() { OrganizationKey = new CompanyKey { Id = Helpers.CompanyIdWebServices } };
+
+                var cashReceipt = new GPServiceClient.CashReceipt
+                {
+                    Date = new DateTime(receipt.DocumentDate.Year, receipt.DocumentDate.Month, receipt.DocumentDate.Day, 0, 0, 0),
+                    Key = new ReceivablesDocumentKey { Id = receipt.DocumentNumber },
+                    BatchKey = new BatchKey { Id = receipt.BatchNumber },
+                    Amount = new MoneyAmount { Value = receipt.Amount },
+                    CurrencyKey = new CurrencyKey(),
+                    CustomerKey = new CustomerKey { Id = receipt.CustomerId },
+                    Description = receipt.Description,
+                    PostedDate = new DateTime(receipt.DocumentDate.Year, receipt.DocumentDate.Month, receipt.DocumentDate.Day, 0, 0, 0),
+                    GeneralLedgerPostingDate = new DateTime(receipt.DocumentDate.Year, receipt.DocumentDate.Month, receipt.DocumentDate.Day, 0, 0, 0)
+                };
+                if (receipt.CurrencyId != null)
+                {
+                    if (receipt.CurrencyId != "")
+                    {
+                        if (receipt.CurrencyId.Trim() == "RDPESO")
+                            cashReceipt.CurrencyKey.ISOCode = "DOP";
+                        else
+                        {
+                            cashReceipt.CurrencyKey.ISOCode = "USD";
+                            cashReceipt.ExchangeRate = 1;
+                            cashReceipt.ExchangeDate = new DateTime(receipt.DocumentDate.Year, receipt.DocumentDate.Month, receipt.DocumentDate.Day, 0, 0, 0);
+                        }
+                    }
+                }
+
+                switch (receipt.Type)
+                {
+                    case Domain.Models.CashReceiptType.Transferencia:
+                        cashReceipt.Type = CashReceiptType.Cash;
+                        break;
+                    case Domain.Models.CashReceiptType.Cheque:
+                        cashReceipt.Type = CashReceiptType.Check;
+                        break;
+                    case Domain.Models.CashReceiptType.Tarjeta:
+                        cashReceipt.Type = CashReceiptType.PaymentCard;
+                        break;
+                    default:
+                        cashReceipt.Type = CashReceiptType.PaymentCard;
+                        break;
+                }
+
+                var cashReceiptCreatePolicy = wsDynamicsGp.GetPolicyByOperation("CreateCashReceipt", context);
+                wsDynamicsGp.CreateCashReceipt(cashReceipt, context, cashReceiptCreatePolicy);
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public bool CreateVendor(GpVendor gpVendor)
         {
             try
             {
@@ -566,167 +762,6 @@ namespace Seaboard.Intranet.BusinessLogic
             catch (Exception ex)
             {
                 message = ex.Message;
-                return false;
-            }
-        }
-
-        public void ProcessReceivablesCreditNote(GpCreditNote creditNote, string username, string password)
-        {
-            var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
-            var context = new Context() { OrganizationKey = new CompanyKey { Id = creditNote.CompanyId } };
-            var creditNoteCurrency = new CurrencyKey();
-
-            var receivablesCreditMemo = new ReceivablesCreditMemo
-            {
-                Key = new ReceivablesDocumentKey { Id = creditNote.Codigo },
-                CustomerKey = new CustomerKey { Id = creditNote.Cliente },
-                SalesAmount = new MoneyAmount { Value = creditNote.Monto },
-                TradeDiscountAmount = new MoneyAmount { Value = creditNote.Descuento },
-                BatchKey = new BatchKey { Id = creditNote.Lote },
-                CustomerPONumber = creditNote.Ncf
-            };
-
-            if (creditNote.Moneda != null)
-            {
-                if (creditNote.Moneda != "")
-                {
-                    if (creditNote.Moneda.Trim() == "RD$" || creditNote.Moneda.Trim() == "RDPESO")
-                        creditNoteCurrency.ISOCode = "DOP";
-                    else
-                    {
-                        creditNoteCurrency.ISOCode = "USD";
-                        receivablesCreditMemo.ExchangeRate = 1;
-                        receivablesCreditMemo.ExchangeDate = new DateTime(creditNote.Fecha.Year, creditNote.Fecha.Month, creditNote.Fecha.Day, 0, 0, 0, 0);
-                    }
-
-                    receivablesCreditMemo.CurrencyKey = creditNoteCurrency;
-                }
-            }
-            receivablesCreditMemo.Date = new DateTime(creditNote.Fecha.Year, creditNote.Fecha.Month, creditNote.Fecha.Day, 0, 0, 0, 0);
-
-            var receivablesCreditMemoCreatePolicy = wsDynamicsGp.GetPolicyByOperation("CreateReceivablesCreditMemo", context);
-            wsDynamicsGp.CreateReceivablesCreditMemo(receivablesCreditMemo, context, receivablesCreditMemoCreatePolicy);
-        }
-
-        public void ProcessPayablesCreditNote(GpCreditNote creditNote, string username, string password)
-        {
-            var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
-            var context = new Context() { OrganizationKey = new CompanyKey { Id = creditNote.CompanyId } };
-            var creditNoteCurrency = new CurrencyKey();
-            var payablesCreditMemo = new PayablesCreditMemo
-            {
-                Key = new PayablesDocumentKey { Id = creditNote.Codigo },
-                VendorKey = new VendorKey { Id = creditNote.Cliente },
-                PurchasesAmount = new MoneyAmount { Value = creditNote.Monto },
-                TradeDiscountAmount = new MoneyAmount { Value = creditNote.Descuento },
-                BatchKey = new BatchKey { Id = creditNote.Lote },
-                VendorDocumentNumber = creditNote.Ncf
-            };
-            if (creditNote.Moneda != null)
-            {
-                if (creditNote.Moneda != "")
-                {
-                    if (creditNote.Moneda.Trim() == "RD$" || creditNote.Moneda.Trim() == "RDPESO")
-                    {
-                        creditNoteCurrency.ISOCode = "DOP";
-                    }
-                    else
-                    {
-                        creditNoteCurrency.ISOCode = "USD";
-                        payablesCreditMemo.ExchangeRate = 1;
-                        payablesCreditMemo.ExchangeDate = new DateTime(creditNote.Fecha.Year, creditNote.Fecha.Month, creditNote.Fecha.Day, 0, 0, 0, 0);
-                    }
-
-                    payablesCreditMemo.CurrencyKey = creditNoteCurrency;
-                }
-            }
-
-            payablesCreditMemo.Date = new DateTime(creditNote.Fecha.Year, creditNote.Fecha.Month, creditNote.Fecha.Day, 0, 0, 0, 0);
-            var receivablesCreditMemoCreatePolicy = wsDynamicsGp.GetPolicyByOperation("CreatePayablesCreditMemo", context);
-            wsDynamicsGp.CreatePayablesCreditMemo(payablesCreditMemo, context, receivablesCreditMemoCreatePolicy);
-        }
-
-        public void ProcessPurchaseReceipt(List<GpPurchaseReceipt> receipts, string username, string password)
-        {
-            var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
-            var context = new Context() { OrganizationKey = new CompanyKey { Id = Helpers.CompanyIdWebServices } };
-            var purchaseReceiptCreatePolicy = wsDynamicsGp.GetPolicyByOperation("CreatePurchaseReceipt", context);
-            var createProductVendorPolicy = wsDynamicsGp.GetPolicyByOperation("CreateItemVendor", context);
-            var createProductCurrencyPolicy = wsDynamicsGp.GetPolicyByOperation("CreateItemCurrency", context);
-
-            foreach (var receipt in receipts)
-            {
-                var purchaseReceipt = new PurchaseReceipt
-                {
-                    Date = new DateTime(receipt.DocumentDate.Year, receipt.DocumentDate.Month, receipt.DocumentDate.Day, 0, 0, 0),
-                    Key = new PurchaseTransactionKey { Id = receipt.DocumentNumber },
-                    BatchKey = new BatchKey { Id = receipt.BatchNumber },
-                    TransactionState = PurchaseTransactionState.Work,
-                    VendorDocumentNumber = receipt.InvoiceId,
-                    VendorKey = new VendorKey { Id = receipt.VendorId },
-                    Lines = ProcessLinesReceipt(receipt, wsDynamicsGp, context, createProductVendorPolicy, createProductCurrencyPolicy).ToArray()
-                };
-                wsDynamicsGp.CreatePurchaseReceipt(purchaseReceipt, context, purchaseReceiptCreatePolicy);
-            }
-        }
-
-        public bool CreateCashReceipt(GpCashReceipt receipt, string username, string password)
-        {
-            try
-            {
-                var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
-                var context = new Context() { OrganizationKey = new CompanyKey { Id = Helpers.CompanyIdWebServices } };
-
-                var cashReceipt = new GPServiceClient.CashReceipt
-                {
-                    Date = new DateTime(receipt.DocumentDate.Year, receipt.DocumentDate.Month, receipt.DocumentDate.Day, 0, 0, 0),
-                    Key = new ReceivablesDocumentKey { Id = receipt.DocumentNumber },
-                    BatchKey = new BatchKey { Id = receipt.BatchNumber },
-                    Amount = new MoneyAmount { Value = receipt.Amount },
-                    CurrencyKey = new CurrencyKey(),
-                    CustomerKey = new CustomerKey { Id = receipt.CustomerId },
-                    Description = receipt.Description,
-                    PostedDate = new DateTime(receipt.DocumentDate.Year, receipt.DocumentDate.Month, receipt.DocumentDate.Day, 0, 0, 0),
-                    GeneralLedgerPostingDate = new DateTime(receipt.DocumentDate.Year, receipt.DocumentDate.Month, receipt.DocumentDate.Day, 0, 0, 0)
-                };
-                if (receipt.CurrencyId != null)
-                {
-                    if (receipt.CurrencyId != "")
-                    {
-                        if (receipt.CurrencyId.Trim() == "RDPESO")
-                            cashReceipt.CurrencyKey.ISOCode = "DOP";
-                        else
-                        {
-                            cashReceipt.CurrencyKey.ISOCode = "USD";
-                            cashReceipt.ExchangeRate = 1;
-                            cashReceipt.ExchangeDate = new DateTime(receipt.DocumentDate.Year, receipt.DocumentDate.Month, receipt.DocumentDate.Day, 0, 0, 0);
-                        }
-                    }
-                }
-
-                switch (receipt.Type)
-                {
-                    case Domain.Models.CashReceiptType.Transferencia:
-                        cashReceipt.Type = CashReceiptType.Cash;
-                        break;
-                    case Domain.Models.CashReceiptType.Cheque:
-                        cashReceipt.Type = CashReceiptType.Check;
-                        break;
-                    case Domain.Models.CashReceiptType.Tarjeta:
-                        cashReceipt.Type = CashReceiptType.PaymentCard;
-                        break;
-                    default:
-                        cashReceipt.Type = CashReceiptType.PaymentCard;
-                        break;
-                }
-
-                var cashReceiptCreatePolicy = wsDynamicsGp.GetPolicyByOperation("CreateCashReceipt", context);
-                wsDynamicsGp.CreateCashReceipt(cashReceipt, context, cashReceiptCreatePolicy);
-
-                return true;
-            }
-            catch
-            {
                 return false;
             }
         }

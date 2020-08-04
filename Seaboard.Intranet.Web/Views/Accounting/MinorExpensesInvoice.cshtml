@@ -53,9 +53,13 @@
                                     <div class="col-md-12">
                                         <div class="m-b-md">
                                             <div class="btn-group-xs pull-right">
+                                                @if (Model.Status != 3)
+                                                {
+                                                    <button class="btn btn-info btn-xs" onclick="postInvoice();">Registro definitivo</button>
+                                                }
+
                                                 @if (Model.Status < 2)
                                                 {
-                                                    <button class="btn btn-info btn-xs" onclick="postInvoice();">Registrar</button>
                                                     <button class="btn btn-success btn-xs" onclick="saveInvoice();">Guardar en borrador</button>
                                                 }
                                                 @if (Model.Status != 3 && Model.Status != 0)
@@ -67,6 +71,14 @@
                                                     <button class="btn btn-primary btn-xs" onclick="imprimir();">Imprimir</button>
                                                 }
                                             </div>
+                                            @if (Model.Status == 1)
+                                            {
+                                                <div class=" btn-group-xs pull-left"><h1>EN BORRADOR</h1></div>
+                                            }
+                                            @if (Model.Status == 2)
+                                            {
+                                                <div class=" btn-group-xs pull-left"><h1>REGISTRADA</h1></div>
+                                            }
                                             @if (Model.Status == 3)
                                             {
                                                 <div class=" btn-group-xs pull-left">
@@ -164,7 +176,7 @@
                                                     </tbody>
                                                 </table>
                                             </div>
-                                            @if (Model.Status < 2)
+                                            @if (Model.Status != 3)
                                             {
                                                 <button class="btn btn-success btn-rounded" data-toggle="modal" data-target="#modal-AddItem">Agregar servicio</button>
                                             }
@@ -481,7 +493,7 @@
                     $($itemUnitPrice).focusout(function () { sumLines(); });
                     $tbody.append($row);
                     $remove.click(function () {
-                        if (@Model.Status < 2) {
+                        if (@Model.Status !== 3) {
                             deleteRow(item.ItemDescription, item.Price);
                             getItems();
                         }

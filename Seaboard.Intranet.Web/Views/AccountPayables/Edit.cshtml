@@ -32,7 +32,8 @@
                 <div class="ibox-content">
                     <div class="form-group">
                         <div class="col-sm-12 col-sm-offset-1">
-                            <button type="button" class="btn btn-primary" onclick="procesarSolicitud();"><i class="fa fa-add"></i>  Guardar</button>
+                            <button class="btn btn-white" type="button" onclick="contabilizar();"><i class="fa fa-money"></i> Contabilizar</button>
+                            <button type="button" class="btn btn-primary" onclick="guardar();"><i class=" fa fa-add"></i>  Guardar</button>
                             <button type="button" class="btn btn-default" onclick="limpiarCampos();"><i class="fa fa-refresh"></i>  Borrar</button>
                         </div>
                     </div>
@@ -53,6 +54,8 @@
                     @using (Html.BeginForm("Edit", "AccountPayables", FormMethod.Post, new { @id = "AccountPayablesEdit" }))
                     {
                         @Html.AntiForgeryToken()
+
+                        @Html.Hidden("PostType")
 
                         <div class="panel-body">
                             <div class="col-md-6 col-sm-6 col-xs-12">
@@ -111,30 +114,6 @@
                                         @Html.TextBoxFor(m => m.DocumentDate, new { @class = "form-control" })
                                     </div>
                                 </div>
-
-                                <div class="form-group">
-                                    <label class="col-sm-5 control-label">@Html.LabelFor(m => m.PurchaseOrder, "Departmento"):</label>
-                                    <div class='col-sm-7 input-group'>
-                                        @Html.TextBoxFor(m => m.PurchaseOrder, new { @class = "form-control" })
-                                        <span class="input-group-btn">
-                                            <button type="button" id="lookupDepartmento" class="btn btn-primary">
-                                                <i class="fa fa-search"></i>
-                                            </button>
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="col-sm-5 control-label">@Html.LabelFor(m => m.Ncf, "NCF"):</label>
-                                    <div class='col-sm-7 input-group'>
-                                        @Html.TextBoxFor(m => m.Ncf, new { @class = "form-control" })
-                                    </div>
-                                </div>
-
-                            </div>
-
-                            <div class="col-md-6 col-sm-6 col-xs-12">
-
                                 <div class="form-group">
                                     <label class="col-sm-4 control-label">@Html.LabelFor(m => m.Currency, "Moneda"):</label>
                                     <div class="col-sm-8 input-group">
@@ -146,7 +125,9 @@
                                         </span>
                                     </div>
                                 </div>
+                            </div>
 
+                            <div class="col-md-6 col-sm-6 col-xs-12">
                                 <div class="form-group">
                                     <label class="col-sm-4 control-label">@Html.LabelFor(m => m.TaxDetailId, "Id. de impuesto"):</label>
                                     <div class="col-sm-8 input-group">
@@ -440,6 +421,16 @@
             }
         }
 
+        function guardar() {
+            $('#PostType').val(0);
+            procesarSolicitud();
+        }
+
+         function contabilizar() {
+            $('#PostType').val(1);
+            procesarSolicitud();
+        }
+
         function procesarSolicitud() {
             var isAllValid = true;
 
@@ -455,11 +446,6 @@
 
             if ($('#VendorId').val().trim() == '') {
                 toastr.error('Debe de especificar un proveedor', 'Campos requeridos')
-                isAllValid = false;
-            }
-
-            if ($('#PurchaseOrder').val().trim() == '') {
-                toastr.error('Debe de especificar un departamento', 'Campos requeridos')
                 isAllValid = false;
             }
 
@@ -497,8 +483,6 @@
             $('#VendorId').val('');
             $('#VendName').val('');
             $('#DocumentDate').val('@DateTime.Now.ToShortDateString()');
-            $('#PurchaseOrder').val('');
-            $('#NCF').val('');
             $('#Currency').val('');
             $('#TaxDetailId').val('');
             $('#PurchaseAmount').val('');

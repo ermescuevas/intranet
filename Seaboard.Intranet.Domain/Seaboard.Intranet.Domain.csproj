@@ -82,6 +82,7 @@
     <Compile Include="Entity Models\Billing\NcfEntity.cs" />
     <Compile Include="Entity Models\MobileDevice.cs" />
     <Compile Include="Enums\AbsenceType.cs" />
+    <Compile Include="Enums\AccountPayablesModule.cs" />
     <Compile Include="Enums\AccountPayablesType.cs" />
     <Compile Include="Enums\EmployeeClass.cs" />
     <Compile Include="Enums\FoodSchedule.cs" />

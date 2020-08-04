@@ -27,10 +27,10 @@ namespace Seaboard.Intranet.Web.Controllers
         {
             if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "Index"))
                 return RedirectToAction("NotPermission", "Home");
-            var sqlQuery = $"SELECT A.DocumentNumber Id, A.DocumentDescription Descripción, CONVERT(nvarchar(20), B.ToNumber - B.NextNumber) DataExtended " +
+            var sqlQuery = $"SELECT A.DocumentNumber Id, A.DocumentDescription Descripción, CONVERT(nvarchar(20), (B.ToNumber - B.NextNumber) + 1) DataExtended " +
                 $"FROM {Helpers.InterCompanyId}.dbo.ECNCF40101 A " +
                 $"INNER JOIN {Helpers.InterCompanyId}.dbo.ECNCF40102 B ON A.DocumentNumber = B.HeaderDocumentNumber " +
-                $"WHERE(B.ToNumber - B.NextNumber) <= B.AlertNumber AND (B.ToNumber - B.NextNumber) > 0 ";
+                $"WHERE(B.ToNumber - B.NextNumber) <= B.AlertNumber AND (B.ToNumber - B.NextNumber) >= 0 ";
             var list = _repository.ExecuteQuery<Lookup>(sqlQuery).ToList();
             string ncfAlert = "";
             if (list.Count > 0)
@@ -62,7 +62,7 @@ namespace Seaboard.Intranet.Web.Controllers
                 $"WHERE CONVERT(DATE, DocumentDate) = CONVERT(DATE, DATEADD(MONTH, -1, GETDATE())) AND Status = 2");
             ViewBag.MonthlyInvoices = _repository.ExecuteScalarQuery<int>($"SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.ECPM20100 " +
                 $"WHERE MONTH(CONVERT(DATE, DocumentDate)) = MONTH(CONVERT(DATE, DATEADD(MONTH, -1, GETDATE()))) AND YEAR(CONVERT(DATE, DocumentDate)) = YEAR(CONVERT(DATE, DATEADD(MONTH, -1, GETDATE()))) AND Status = 2");
-            
+
             ViewBag.Series = _repository.ExecuteQuery<string>($"SELECT A.InvMonth + ' ' + CONVERT(NVARCHAR(20), A.InvYear) FROM (SELECT TOP 12 SUM(ISNULL(Total, 0)) AS Spent, " +
                 $"CASE MONTH(DocumentDate) WHEN 1 THEN 'Enero' WHEN 2 THEN 'Febrero' WHEN 3 THEN 'Marzo' WHEN 4 THEN 'Abril' WHEN 5 THEN 'Mayo' WHEN 6 THEN 'Junio' WHEN 7 THEN 'Julio' " +
                 $"WHEN 8 THEN 'Agosto' WHEN 9 THEN 'Septiembre' " +
@@ -70,7 +70,7 @@ namespace Seaboard.Intranet.Web.Controllers
                 $"FROM {Helpers.InterCompanyId}.dbo.ECPM20100 WHERE DocumentDate BETWEEN DATEADD(MONTH, -24, GETDATE()) AND CONVERT(DATE, GETDATE()) AND Status = 2 " +
                 $"GROUP BY YEAR(DocumentDate), MONTH(DocumentDate) " +
                 $"ORDER BY YEAR(DocumentDate) DESC, MONTH(DocumentDate) DESC) A");
-            
+
             ViewBag.ValuesSupplier = _repository.ExecuteQuery<double?>($"SELECT CONVERT(FLOAT, (CASE A.DocumentType WHEN 11 THEN A.Spent ELSE 0 END)) FROM (SELECT TOP 12 SUM(ISNULL(Total, 0)) AS Spent, " +
                 $"CASE MONTH(DocumentDate) WHEN 1 THEN 'Enero' WHEN 2 THEN 'Febrero' WHEN 3 THEN 'Marzo' WHEN 4 THEN 'Abril' WHEN 5 THEN 'Mayo' WHEN 6 THEN 'Junio' WHEN 7 THEN 'Julio' " +
                 $"WHEN 8 THEN 'Agosto' WHEN 9 THEN 'Septiembre' " +
@@ -78,7 +78,7 @@ namespace Seaboard.Intranet.Web.Controllers
                 $"FROM {Helpers.InterCompanyId}.dbo.ECPM20100 WHERE DocumentDate BETWEEN DATEADD(MONTH, -24, GETDATE()) AND CONVERT(DATE, GETDATE()) AND Status = 2 " +
                 $"GROUP BY YEAR(DocumentDate), MONTH(DocumentDate), DocumentType " +
                 $"ORDER BY YEAR(DocumentDate) DESC, MONTH(DocumentDate) DESC) A");
-            
+
             ViewBag.ValuesMinor = _repository.ExecuteQuery<double?>($"SELECT CONVERT(FLOAT, (CASE A.DocumentType WHEN 13 THEN A.Spent ELSE 0 END)) FROM (SELECT TOP 12 SUM(ISNULL(Total, 0)) AS Spent, " +
                 $"CASE MONTH(DocumentDate) WHEN 1 THEN 'Enero' WHEN 2 THEN 'Febrero' WHEN 3 THEN 'Marzo' WHEN 4 THEN 'Abril' WHEN 5 THEN 'Mayo' WHEN 6 THEN 'Junio' WHEN 7 THEN 'Julio' " +
                 $"WHEN 8 THEN 'Agosto' WHEN 9 THEN 'Septiembre' " +
@@ -271,9 +271,11 @@ namespace Seaboard.Intranet.Web.Controllers
             try
             {
                 var count = _repository.ExecuteScalarQuery<int>($"SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.ECPM20100 WHERE SopNumber = '{invoice.DocumentNumber}'");
+                var status = 0;
                 FiscalSalesTransaction fiscalTrans = null;
                 if (count > 0)
                 {
+                    status = _repository.ExecuteScalarQuery<int>($"SELECT Status FROM {Helpers.InterCompanyId}.dbo.ECPM20100 WHERE SopNumber = '{invoice.DocumentNumber}'");
                     _repository.ExecuteCommand($"DELETE {Helpers.InterCompanyId}.dbo.ECPM20100 WHERE SopNumber = '{invoice.DocumentNumber}'");
                     _repository.ExecuteCommand($"DELETE {Helpers.InterCompanyId}.dbo.ECPM20200 WHERE SopNumber = '{invoice.DocumentNumber}'");
                 }
@@ -295,7 +297,7 @@ namespace Seaboard.Intranet.Web.Controllers
                         $"VALUES ('{invoice.DocumentNumber}', {lineNumber}, '{item.ItemNumber}', '{item.ItemDescription}', '{item.Quantity}', '{item.Price}', '{item.TaxAmount}', '{item.Total}')");
                     lineNumber++;
                 }
-                if (invoice.Status == 2)
+                if (invoice.Status == 2 && status != 2)
                 {
                     string sqlQuery = $"SELECT A.HeaderDocumentNumber Rnc, CONVERT(NVARCHAR(20), A.DocumentNumber) ApplyNcf, HeaderDocumentNumber + REPLICATE('0', 8 - LEN(A.NextNumber)) + CONVERT(NVARCHAR(20), A.NextNumber) Ncf, " +
                     $"A.DueDate DocumentDate, B.DocumentDescription IncomeType " +
@@ -664,7 +666,7 @@ namespace Seaboard.Intranet.Web.Controllers
                     _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.ECPM40101 SET TaxRegistrationNumber = '{configuration.TaxRegistrationNumber}', CompanyName = '{configuration.CompanyName}'," +
                         $"CompanyAddress = '{configuration.CompanyAddress}', CompanyPhoneNumber = '{configuration.CompanyPhoneNumber}', CompanyFaxNumber = '{configuration.CompanyFaxNumber}', " +
                         $"SqlEmailProfile = '{configuration.SqlEmailProfile}', ModifiedDate = GETDATE(), LastUserId = '{Account.GetAccount(User.Identity.GetUserName()).UserId}'");
-                
+
                 count = _repository.ExecuteScalarQuery<int>("SELECT COUNT(*) FROM " + Helpers.InterCompanyId + ".dbo.LPSY40000 WHERE WINRPTID = 'Accounting'");
                 if (count == 0)
                 {
@@ -1157,18 +1159,22 @@ namespace Seaboard.Intranet.Web.Controllers
 
         private void SendMailNcfNotification()
         {
-            var sqlQuery = $"SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.ECNCF40101 A " +
-                $"INNER JOIN {Helpers.InterCompanyId}.dbo.ECNCF40102 B ON A.DocumentNumber = B.HeaderDocumentNumber " +
-                $"WHERE (B.ToNumber - B.NextNumber) <= B.AlertNumber AND (B.ToNumber - B.NextNumber) > 0";
-            var count = _repository.ExecuteScalarQuery<int?>(sqlQuery) ?? 0;
-
-            if (count > 0)
+            try
             {
-                string emails = "";
-                _repository.ExecuteQuery<string>($"SELECT Email FROM {Helpers.InterCompanyId}.dbo.ECPM40401").ToList().ForEach(p => { emails += p + ";"; });
-                if (!string.IsNullOrEmpty(emails))
-                    _repository.ExecuteCommand($"INTRANET.dbo.AcccountingSendMailNcfNotification '{Helpers.InterCompanyId}', '{emails}'");
+                var sqlQuery = $"SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.ECNCF40101 A " +
+                $"INNER JOIN {Helpers.InterCompanyId}.dbo.ECNCF40102 B ON A.DocumentNumber = B.HeaderDocumentNumber " +
+                $"WHERE (B.ToNumber - B.NextNumber) <= B.AlertNumber AND (B.ToNumber - B.NextNumber) >= 0";
+                var count = _repository.ExecuteScalarQuery<int?>(sqlQuery) ?? 0;
+
+                if (count > 0)
+                {
+                    string emails = "";
+                    _repository.ExecuteQuery<string>($"SELECT Email FROM {Helpers.InterCompanyId}.dbo.ECPM40401").ToList().ForEach(p => { emails += p + ";"; });
+                    if (!string.IsNullOrEmpty(emails))
+                        _repository.ExecuteCommand($"INTRANET.dbo.AccountingSendMailNcfNotification '{Helpers.InterCompanyId}', '{emails}'");
+                }
             }
+            catch { }
         }
     }
 }

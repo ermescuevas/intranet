@@ -527,8 +527,7 @@ namespace Seaboard.Intranet.Web.Controllers
                 receiptArray.Add(receipt);
             }
 
-            billing.ProcessPurchaseReceipt(receiptArray, Request.Cookies["UserAccount"]?["username"],
-                Request.Cookies["UserAccount"]?["password"]);
+            billing.CreatePurchaseReceipt(receiptArray);
 
             var bachComment = _repository.ExecuteScalarQuery<string>(
                 string.Format("SELECT BACHCMNT FROM " + Helpers.InterCompanyId +".dbo.SESOP30302 WHERE BACHNMBR = '{0}'", records.FirstOrDefault()?.Id));
@@ -856,7 +855,7 @@ namespace Seaboard.Intranet.Web.Controllers
                 };
 
                 var service = new ServiceContract();
-                service.ProcessReceivablesCreditNote(credit, Request.Cookies["UserAccount"]?["username"], Request.Cookies["UserAccount"]?["password"]);
+                service.CreateReceivablesCreditNote(credit);
                 _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.SY00500 SET BCHCOMNT = '" +
                                            descripción + "' WHERE BACHNUMB = '" + batchId + "' AND SERIES = 3 AND BCHSOURC = 'RM_Sales'");
 
@@ -909,7 +908,7 @@ namespace Seaboard.Intranet.Web.Controllers
                 };
 
                 service = new ServiceContract();
-                service.ProcessPayablesCreditNote(credit, Request.Cookies["UserAccount"]?["username"], Request.Cookies["UserAccount"]?["password"]);
+                service.CreatePayablesCreditNote(credit);
                 _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.SY00500 SET BCHCOMNT = '" + descripción + "' WHERE BACHNUMB = '" + batchId +
                                            "' AND SERIES = 4 AND BCHSOURC = 'PM_Trxent'");
 
@@ -998,8 +997,7 @@ namespace Seaboard.Intranet.Web.Controllers
                     DocumentNumber = secuencia,
                     Description = descripción
                 };
-                service.CreateCashReceipt(receipt, Request.Cookies["UserAccount"]?["username"],
-                    Request.Cookies["UserAccount"]?["password"]);
+                service.CreateCashReceipt(receipt);
                 _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.SY00500 SET BCHCOMNT = '" +
                                            descripción + "' WHERE BACHNUMB = '" + batchId +
                                            "' AND SERIES = 3 AND BCHSOURC = 'RM_Cash'");
@@ -1207,7 +1205,7 @@ namespace Seaboard.Intranet.Web.Controllers
                 }
                 else
                 {
-                    service.CreateCashReceipt(receipt, Request.Cookies["UserAccount"]?["username"], Request.Cookies["UserAccount"]?["password"]);
+                    service.CreateCashReceipt(receipt);
                     _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.SY00500 SET BCHCOMNT = '" + cashReceipt.Description + "' WHERE BACHNUMB = '" + cashReceipt.BatchNumber + "' AND SERIES = 3 AND BCHSOURC = 'RM_Cash'");
                 }
 
@@ -1307,6 +1305,56 @@ namespace Seaboard.Intranet.Web.Controllers
                             typeFilter == 1 ? filterTo : "", printCurrency,
                             exchangeRate.ToString(new CultureInfo("en-US")), methodCalc, excludeNoActivity,
                             excludeZeroBalance, excludeFullyPaidTrx, excludeCreditBalance, excludeUnpostedAppldCrDocs), 14, ref xStatus);
+                }
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = xStatus } };
+        }
+
+        public ActionResult AgingCPPReport()
+        {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "AccountReceivables",
+                "AgingReport"))
+            {
+                return RedirectToAction("NotPermission", "Home");
+            }
+            return View();
+        }
+
+        [OutputCache(Duration = 0)]
+        [HttpPost]
+        public ActionResult AgingCPPReport(bool detailReport, string filterFrom, string filterTo, int typeFilter,
+            int methodCalc, decimal exchangeRate, int printCurrency, string date, int excludeNoActivity, int excludeZeroBalance,
+            int excludeFullyPaidTrx, int excludeCreditBalance, int excludeUnpostedAppldCrDocs)
+        {
+            string xStatus;
+            try
+            {
+                xStatus = "OK";
+                if (detailReport)
+                {
+                    ReportHelper.Export(Helpers.ReportPath + "Reportes", Server.MapPath("~/PDF/Reportes/") + "AgingAccountPayablesDetail.pdf",
+                        string.Format("INTRANET.dbo.AccountPayablesAgingReportDetail '{0}','{1}','{2}','{3}','{4}','{5}',{6},{7},'{8}','{9}','{10}','{11}','{12}','{13}'",
+                            Helpers.InterCompanyId, date, typeFilter == 0 ? filterFrom : "",
+                            typeFilter == 0 ? filterTo : "", typeFilter == 1 ? filterFrom : "",
+                            typeFilter == 1 ? filterTo : "", printCurrency,
+                            exchangeRate.ToString(new CultureInfo("en-US")), methodCalc, excludeNoActivity,
+                            excludeZeroBalance, excludeFullyPaidTrx, excludeCreditBalance, excludeUnpostedAppldCrDocs), 55, ref xStatus);
+                }
+                else
+                {
+                    ReportHelper.Export(Helpers.ReportPath + "Reportes",
+                        Server.MapPath("~/PDF/Reportes/") + "AgingAccountPayablesSummary.pdf",
+                        string.Format("INTRANET.dbo.AccountPayablesAgingReportSummary '{0}','{1}','{2}','{3}','{4}','{5}',{6},{7},{8},'{9}','{10}','{11}','{12}','{13}'",
+                            Helpers.InterCompanyId, date, typeFilter == 0 ? filterFrom : "",
+                            typeFilter == 0 ? filterTo : "", typeFilter == 1 ? filterFrom : "",
+                            typeFilter == 1 ? filterTo : "", printCurrency,
+                            exchangeRate.ToString(new CultureInfo("en-US")), methodCalc, excludeNoActivity,
+                            excludeZeroBalance, excludeFullyPaidTrx, excludeCreditBalance, excludeUnpostedAppldCrDocs), 54, ref xStatus);
                 }
             }
             catch (Exception ex)

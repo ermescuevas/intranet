@@ -177,6 +177,12 @@ namespace Seaboard.Intranet.BusinessLogic
                     case 53:
                         reporte = "MinorExpensesTransSummaryReport.rpt";
                         break;
+                    case 54:
+                        reporte = "AgingAccountPayablesSummary.rpt";
+                        break;
+                    case 55:
+                        reporte = "AgingAccountPayablesDetail.rpt";
+                        break;
                 }
 
                 const string reportHeader = "SELECT '' CompName, '' Titulo, '' Parametro1, '' Parametro2, '' Parametro3, '' Parametro4, '' Parametro5, '' Parametro6, '' Usuario, 1 Marca";

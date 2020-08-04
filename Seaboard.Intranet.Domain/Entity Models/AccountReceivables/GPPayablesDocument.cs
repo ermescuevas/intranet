@@ -12,7 +12,6 @@ namespace Seaboard.Intranet.Domain.Models
         public string DocumentNumber { get; set; }
         public string VoucherNumber { get; set; }
         public string Description { get; set; }
-        public string PurchaseOrder { get; set; }
         public decimal PurchaseAmount { get; set; }
         public decimal FreightAmount { get; set; }
         public decimal TaxAmount { get; set; }
@@ -21,7 +20,6 @@ namespace Seaboard.Intranet.Domain.Models
         public string Currency { get; set; }
         public DateTime DocumentDate { get; set; }
         public string TaxDetail { get; set; }
-        public string Ncf { get; set; }
         public string Note { get; set; }
 
     }

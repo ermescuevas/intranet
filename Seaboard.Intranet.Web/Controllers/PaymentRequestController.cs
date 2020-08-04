@@ -732,8 +732,7 @@ namespace Seaboard.Intranet.Web.Controllers
             try
             {
                 ServiceContract service = new ServiceContract();
-                service.CreateVendor(new GpVendor { Name = vendName, Rnc = rnc, CheckName = checkName },
-                    Request.Cookies["UserAccount"]["username"], Request.Cookies["UserAccount"]["password"]);
+                service.CreateVendor(new GpVendor { Name = vendName, Rnc = rnc, CheckName = checkName });
                 status = "OK";
             }
             catch (Exception ex)

@@ -428,6 +428,7 @@
     <Content Include="Content\plugins\summernote\font\summernote.eot" />
     <Content Include="Content\plugins\summernote\font\summernote.ttf" />
     <Content Include="Content\plugins\summernote\font\summernote.woff" />
+    <Content Include="PDF\Excel\Planilla.xls" />
     <None Include="Properties\PublishProfiles\TCC.pubxml" />
     <None Include="Resources\blank.jpg" />
     <Content Include="Scripts\app\inspinia.js" />
@@ -1042,6 +1043,7 @@
     <Content Include="Views\Accounting\BillingConfigurationIndex.cshtml" />
     <Content Include="Views\Accounting\EmailAlert.cshtml" />
     <Content Include="Views\Accounting\FinancialAccount.cshtml" />
+    <Content Include="Views\AccountReceivables\AgingCPPReport.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -1050,6 +1052,7 @@
     <Folder Include="PDF\Despacho\" />
     <Folder Include="PDF\Nomina\" />
     <Folder Include="PDF\Pago\" />
+    <Folder Include="PDF\Reportes\" />
     <Folder Include="PDF\Requisicion\" />
     <Folder Include="PDF\Transferencia\" />
     <Folder Include="PDF\Volante\" />

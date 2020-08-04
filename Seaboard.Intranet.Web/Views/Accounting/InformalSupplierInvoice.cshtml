@@ -54,9 +54,9 @@
                                     <div class="col-md-12">
                                         <div class="m-b-md">
                                             <div class="btn-group-xs pull-right">
+                                                <button class="btn btn-info btn-xs" onclick="postInvoice();">Registro definitivo</button>
                                                 @if (Model.Status < 2)
                                                 {
-                                                    <button class="btn btn-info btn-xs" onclick="postInvoice();">Registrar</button>
                                                     <button class="btn btn-success btn-xs" onclick="saveInvoice();">Guardar en borrador</button>
                                                 }
                                                 @if (Model.Status != 3 && Model.Status != 0)
@@ -65,15 +65,16 @@
                                                 }
                                                 @if (Model.Status != 0)
                                                 {
-
                                                     <button class="btn btn-primary btn-xs" onclick="imprimir();">Imprimir</button>
                                                 }
                                             </div>
+                                            @if (Model.Status == 1)
+                                            {
+                                                <div class=" btn-group-xs pull-left"><h1>EN BORRADOR</h1></div>
+                                            }
                                             @if (Model.Status == 2)
                                             {
-                                                <div class=" btn-group-xs pull-left">
-                                                    <h1>REGISTRADA</h1>
-                                                </div>
+                                                <div class=" btn-group-xs pull-left"><h1>REGISTRADA</h1></div>
                                             }
                                             @if (Model.Status == 3)
                                             {
@@ -92,21 +93,17 @@
                                             <h1>Factura Proveedor informal</h1>
                                             <div class="form-group col-md-4">
                                                 <label>Proveedor:</label>
-                                                @if (string.IsNullOrEmpty(Model.SupplierNumber))
-                                                {
-                                                    <div class="input-group">
-                                                        @Html.TextBoxFor(m => m.SupplierNumber, new { @class = "form-control", @readonly = "readonly" })
+                                                <div class="input-group">
+                                                    @Html.TextBoxFor(m => m.SupplierNumber, new { @class = "form-control", @readonly = "readonly" })
+                                                    @if (Model.Status != 3)
+                                                    {
                                                         <span class="input-group-btn">
                                                             <button id="lookupSuplidor" type="button" class="btn btn-primary">
                                                                 <i class="fa fa-search"></i>
                                                             </button>
                                                         </span>
-                                                    </div>
-                                                }
-                                                else
-                                                {
-                                                    @Html.TextBoxFor(m => m.SupplierNumber, new { @class = "form-control", @readonly = "readonly" })
-                                                }
+                                                    }
+                                                </div>
                                             </div>
                                             <div class="form-group col-md-3">
                                                 <label>Fecha documento:</label>
@@ -187,10 +184,11 @@
                                                     </tbody>
                                                 </table>
                                             </div>
-                                            @if (Model.Status < 2)
+                                            @if (Model.Status != 3)
                                             {
                                                 <button class="btn btn-success btn-rounded" data-toggle="modal" data-target="#modal-AddItem">Agregar servicio</button>
                                             }
+
                                         </div>
                                     </div>
                                     <div class="row">
@@ -577,8 +575,8 @@
                     });
                     $tbody.append($row);
                     $remove.click(function () {
-                        if (@Model.Status < 2) {
-                            deleteRow(item.ItemDescription, item.Quantity, item.Price);
+                        if (@Model.Status !== 3) {
+                            deleteRow(item.ItemDescription, item.Price);
                             getItems();
                         }
                     });

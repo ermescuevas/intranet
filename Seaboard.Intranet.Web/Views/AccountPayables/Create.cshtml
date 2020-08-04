@@ -2,20 +2,18 @@
 @model Seaboard.Intranet.Domain.Models.AccountPayables
 
 @{
-    ViewBag.Title = "Transacciones de cuentas por pagar";
+    ViewBag.Title = "Transacciones de CXP & CXC";
+    Layout = "~/Views/Shared/_BillingLayout.cshtml";
 }
 <div class="row wrapper border-bottom white-bg page-heading">
     <div class="col-lg-10">
-        <h2>Transacciones de cuentas por pagar</h2>
+        <h2>Transacciones de CXP & CXC</h2>
         <ol class="breadcrumb">
             <li>
                 <a href="@Url.Action("Index", "Home")">Inicio</a>
             </li>
-            <li>
-                <a href="@Url.Action("Index", "AccountPayables")">Listado de transacciones</a>
-            </li>
             <li class="active">
-                <strong>Transacciones de cuentas por pagar</strong>
+                <strong>Transacciones de CXP & CXC</strong>
             </li>
         </ol>
     </div>
@@ -27,13 +25,14 @@
         <div class="col-lg-12">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
-                    <h3>Transacciones de cuentas por pagar</h3>
+                    <h3>Transacciones de CXP & CXC</h3>
                 </div>
 
                 <div class="ibox-content">
                     <div class="form-group">
                         <div class="col-sm-12 col-sm-offset-1">
-                            <button type="button" class="btn btn-primary" onclick="procesarSolicitud();"><i class=" fa fa-add"></i>  Guardar</button>
+                            <button class="btn btn-white" type="button" onclick="contabilizar();"><i class="fa fa-money"></i> Contabilizar</button>
+                            @*<button type="button" class="btn btn-primary" onclick="guardar();"><i class=" fa fa-add"></i>  Guardar</button>*@
                             <button type="button" class="btn btn-default" onclick="limpiarCampos();"><i class=" fa fa-refresh"></i>  Borrar</button>
                         </div>
                     </div>
@@ -57,18 +56,17 @@
 
                         <div class="panel-body">
                             <div class="col-md-6 col-sm-6 col-xs-12">
+                                <div class="form-group">
+                                    <label class="col-sm-5 control-label">@Html.LabelFor(m => m.Type, "Modulo"):</label>
+                                    <div class="col-sm-7 input-group">
+                                        @Html.EnumDropDownListFor(m => m.Module, "Seleccione un modulo", new { @class = "form-control" })
+                                    </div>
+                                </div>
 
                                 <div class="form-group">
                                     <label class="col-sm-5 control-label">@Html.LabelFor(m => m.Type, "Tipo de documento"):</label>
                                     <div class="col-sm-7 input-group">
                                         @Html.EnumDropDownListFor(m => m.Type, "Seleccione un tipo", new { @class = "form-control" })
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="col-sm-5 control-label">@Html.LabelFor(m => m.VoucherNumber, "Num. de comprobante"):</label>
-                                    <div class="col-sm-7 input-group">
-                                        @Html.TextBoxFor(m => m.VoucherNumber, new { @class = "form-control", @Value = ViewBag.RequestSecuence, @readonly = "" })
                                     </div>
                                 </div>
 
@@ -87,11 +85,11 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label class="col-sm-5 control-label">@Html.LabelFor(m => m.VendorId, "Proveedor"):</label>
+                                    <label class="col-sm-5 control-label">@Html.LabelFor(m => m.VendorId, "Proveedor / Cliente"):</label>
                                     <div class="col-sm-7 input-group">
                                         @Html.TextBoxFor(model => model.VendorId, new { @class = "form-control", @readonly = "" })
                                         <span class="input-group-btn">
-                                            <button type="button" id="lookupProveedor" class="btn btn-primary">
+                                            <button type="button" id="lookupVendor" class="btn btn-primary">
                                                 <i class="fa fa-search"></i>
                                             </button>
                                         </span>
@@ -114,31 +112,8 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label class="col-sm-5 control-label">@Html.LabelFor(m => m.PurchaseOrder, "Departmento"):</label>
-                                    <div class='col-sm-7 input-group'>
-                                        @Html.TextBoxFor(m => m.PurchaseOrder, new { @class = "form-control", Value = ViewBag.DepartmentId })
-                                        <span class="input-group-btn">
-                                            <button type="button" id="lookupDepartmento" class="btn btn-primary">
-                                                <i class="fa fa-search"></i>
-                                            </button>
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label class="col-sm-5 control-label">@Html.LabelFor(m => m.Ncf, "NCF"):</label>
-                                    <div class='col-sm-7 input-group'>
-                                        @Html.TextBoxFor(m => m.Ncf, new { @class = "form-control" })
-                                    </div>
-                                </div>
-
-                            </div>
-
-                            <div class="col-md-6 col-sm-6 col-xs-12">
-
-                                <div class="form-group">
-                                    <label class="col-sm-4 control-label">@Html.LabelFor(m => m.Currency, "Moneda"):</label>
-                                    <div class="col-sm-8 input-group">
+                                    <label class="col-sm-5 control-label">@Html.LabelFor(m => m.Currency, "Moneda"):</label>
+                                    <div class="col-sm-7 input-group">
                                         @Html.TextBoxFor(model => model.Currency, new { @class = "form-control", @readonly = "" })
                                         <span class="input-group-btn">
                                             <button type="button" id="lookupMoneda" class="btn btn-primary">
@@ -147,7 +122,9 @@
                                         </span>
                                     </div>
                                 </div>
+                            </div>
 
+                            <div class="col-md-6 col-sm-6 col-xs-12">
                                 <div class="form-group">
                                     <label class="col-sm-4 control-label">@Html.LabelFor(m => m.TaxDetailId, "Id. de impuesto"):</label>
                                     <div class="col-sm-8 input-group">
@@ -267,19 +244,24 @@
     @Scripts.Render("~/plugins/jasnyBootstrap")
     @Scripts.Render("~/plugins/toastr")
 
-    <script type="text/javascript">
-
+<script type="text/javascript">
         var totalAmount = 0;
-
-        window.onbeforeunload = function () {
-            $.ajax({
-                url: '@Url.Action("UnblockSecuence", "AccountPayables", new { Secuencia = ViewBag.RequestSecuence, Formulario = "PM10000", Usuario = Seaboard.Intranet.BusinessLogic.Account.GetAccount(User.Identity.GetUserName()).UserId })'
-            }).done(function () {
-            });
-        }
-
         $(document).ready(function () {
              @Html.Partial("_Scripts")
+
+            $("#lookupVendor").lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookup", "Home")?tipo=7&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function(data) {
+                    $('input[name=VendorId]').val(data.Id);
+                    $('input[name=VendName]').val(data.Descripción);
+                },
+                tableHeader: ['Id. de proveedor', 'Nombre'],
+                hiddenFields: ['DataExtended', 'DataPlus']
+            });
 
             if (($('#PurchaseAmount').val().trim().replace(/,/g, "") != '' && !isNaN($('#PurchaseAmount').val().trim().replace(/,/g, "")))) {
                 totalAmount = parseFloat(totalAmount) + parseFloat($('#PurchaseAmount').val().replace(/,/g, ""));
@@ -433,6 +415,16 @@
             }
         }
 
+        function guardar() {
+            $('#PostType').val(0);
+            procesarSolicitud();
+        }
+
+        function contabilizar() {
+            $('#PostType').val(1);
+            procesarSolicitud();
+        }
+
         function procesarSolicitud() {
             var isAllValid = true;
 
@@ -448,11 +440,6 @@
 
             if ($('#VendorId').val().trim() == '') {
                 toastr.error('Debe de especificar un proveedor', 'Campos requeridos')
-                isAllValid = false;
-            }
-
-            if ($('#PurchaseOrder').val().trim() == '') {
-                toastr.error('Debe de especificar un departamento', 'Campos requeridos')
                 isAllValid = false;
             }
 
@@ -490,8 +477,6 @@
             $('#VendorId').val('');
             $('#VendName').val('');
             $('#DocumentDate').val('@DateTime.Now.ToShortDateString()');
-            $('#PurchaseOrder').val('');
-            $('#NCF').val('');
             $('#Currency').val('');
             $('#TaxDetailId').val('');
             $('#PurchaseAmount').val('');
@@ -502,5 +487,5 @@
             $('#total').val('$ 0.00');
             $('#Note').val('');
         }
-    </script>
+</script>
 }

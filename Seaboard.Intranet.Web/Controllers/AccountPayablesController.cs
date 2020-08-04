@@ -31,28 +31,20 @@ namespace Seaboard.Intranet.Web.Controllers
         public ActionResult Index()
         {
             if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "AccountPayables", "Index"))
-            {
                 return RedirectToAction("NotPermission", "Home");
-            }
 
             var sqlQuery = "SELECT DISTINCT A.DEPRTMDS FROM " + Helpers.InterCompanyId + ".dbo.LPPOP40100 A "
                         + "INNER JOIN " + Helpers.InterCompanyId + ".dbo.LPPOP40101 B ON A.DEPRTMID = B.DEPRTMID "
                         + "WHERE RTRIM(B.USERID) = '" + Account.GetAccount(User.Identity.GetUserName()).UserId + "'";
 
             var filter = "";
-
             var departments = _repository.ExecuteQuery<string>(sqlQuery).ToArray();
-
             foreach (var item in departments)
             {
                 if (filter.Length == 0)
-                {
                     filter = "'" + item + "'";
-                }
                 else
-                {
                     filter += ",'" + item + "'";
-                }
             }
 
             sqlQuery = "SELECT RTRIM(VCHRNMBR) VoucherNumber, VENDORID VendorId, VENDNAME VendName, A.DOCNUMBR DocumentNumber, "
@@ -77,14 +69,9 @@ namespace Seaboard.Intranet.Web.Controllers
         public ActionResult Create()
         {
             if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "AccountPayables", "Index"))
-            {
                 return RedirectToAction("NotPermission", "Home");
-            }
             if (ViewBag.RequestSecuence == null)
-            {
                 ViewBag.RequestSecuence = HelperLogic.AsignaciónSecuencia("PM10000", Account.GetAccount(User.Identity.GetUserName()).UserId);
-            }
-
             ViewBag.DepartmentId = Account.GetAccount(User.Identity.GetUserName()).Department;
             ViewBag.Discount = 0.00;
             ViewBag.Freight = 0.00;
@@ -95,93 +82,114 @@ namespace Seaboard.Intranet.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Type,VoucherNumber,Description,VendorId,VendName,DocumentNumber,PurchaseOrder,TaxDetailId,PurchaseAmount,DiscountAmount,FreightAmount,MiscellaneousAmount,TaxAmount,Currency,Note,DocumentDate, NCF")] AccountPayables accountPayables)
+        public ActionResult Create([Bind(Include = "Module,Type,Description,VendorId,VendName,DocumentNumber,TaxDetailId,PurchaseAmount,DiscountAmount,FreightAmount,MiscellaneousAmount,TaxAmount,Currency,Note,DocumentDate,PostType")] AccountPayables accountPayables)
         {
             var isValid = false;
-
-            var service = new ServiceContract();
-            var payablesDocument = new GpPayablesDocument();
-            payablesDocument.Currency = accountPayables.Currency;
-            payablesDocument.DocumentDate = accountPayables.DocumentDate;
-            payablesDocument.DocumentNumber = accountPayables.DocumentNumber;
-            payablesDocument.FreightAmount = accountPayables.FreightAmount;
-            payablesDocument.MiscellaneousAmount = accountPayables.MiscellaneousAmount;
-            payablesDocument.PurchaseAmount = accountPayables.PurchaseAmount;
-            payablesDocument.PurchaseOrder = accountPayables.PurchaseOrder;
-            payablesDocument.TaxAmount = accountPayables.TaxAmount;
-            payablesDocument.TaxDetail = accountPayables.TaxDetailId;
-            payablesDocument.TradeDiscountAmount = accountPayables.DiscountAmount;
-            payablesDocument.VendorId = accountPayables.VendorId;
-            payablesDocument.VoucherNumber = accountPayables.VoucherNumber;
-            payablesDocument.Ncf = accountPayables.Ncf;
-            payablesDocument.Note = accountPayables.Note;
-            payablesDocument.Description = accountPayables.Description;
-
-            if (accountPayables.Type == AccountPayablesType.NotaDeCrédito)
+            string voucherNumber;
+            if (accountPayables.Module == AccountPayablesModule.Compras)
+                voucherNumber = HelperLogic.AsignaciónSecuencia("PM10000", Account.GetAccount(User.Identity.GetUserName()).UserId);
+            else
             {
-                if (service.CreatePayablesCreditNote(payablesDocument, Request.Cookies["UserAccount"]?["username"], Request.Cookies["UserAccount"]?["password"]))
-                    isValid = true;
+                if (accountPayables.Type == AccountPayablesType.NC)
+                    voucherNumber = _repository.ExecuteScalarQuery<string>($"INTRANET.dbo.GetNextNumberAccountReceivables '{Helpers.InterCompanyId}','{7}'");
+                else
+                    voucherNumber = _repository.ExecuteScalarQuery<string>($"INTRANET.dbo.GetNextNumberAccountReceivables '{Helpers.InterCompanyId}','{3}'");
+            }
+            var service = new ServiceContract();
+            if (accountPayables.Module == AccountPayablesModule.Compras)
+            {
+                var payablesDocument = new GpPayablesDocument
+                {
+                    Currency = accountPayables.Currency,
+                    DocumentDate = accountPayables.DocumentDate,
+                    DocumentNumber = accountPayables.DocumentNumber,
+                    FreightAmount = accountPayables.FreightAmount,
+                    MiscellaneousAmount = accountPayables.MiscellaneousAmount,
+                    PurchaseAmount = accountPayables.PurchaseAmount,
+                    TaxAmount = accountPayables.TaxAmount,
+                    TaxDetail = accountPayables.TaxDetailId,
+                    TradeDiscountAmount = accountPayables.DiscountAmount,
+                    VendorId = accountPayables.VendorId,
+                    VoucherNumber = voucherNumber,
+                    Note = accountPayables.Note,
+                    Description = accountPayables.Description
+                };
+                if (accountPayables.Type == AccountPayablesType.NC)
+                {
+                    if (service.CreatePayablesCreditNote(payablesDocument))
+                        isValid = true;
+                }
+                else
+                {
+                    if (service.CreatePayablesInvoice(payablesDocument))
+                        isValid = true;
+                }
+                if (isValid)
+                {
+                    if (!string.IsNullOrEmpty(payablesDocument.Note))
+                        _repository.ExecuteCommand(String.Format("INTRANET.dbo.AttachPayableNote '{0}','{1}','{2}'", Helpers.InterCompanyId, payablesDocument.VoucherNumber, payablesDocument.Note));
+                    if (accountPayables.Module == AccountPayablesModule.Compras)
+                        HelperLogic.DesbloqueoSecuencia(payablesDocument.VoucherNumber, "PM10000", Account.GetAccount(User.Identity.GetUserName()).UserId);
+                }
             }
             else
             {
-                if (service.CreatePayablesInvoice(payablesDocument, Request.Cookies["UserAccount"]?["username"], Request.Cookies["UserAccount"]?["password"]))
+                var receivablesDocument = new GpCreditNote
                 {
-                    var sqlQuery = "INSERT INTO " + Helpers.InterCompanyId + ".dbo.SY90000(ObjectType, ObjectID, PropertyName, PropertyValue) "
-                                   + "VALUES ('PayablesTransactionEntry','" + payablesDocument.VendorId.Trim() + "_5_" + payablesDocument.VoucherNumber.Trim() + "', "
-                                   + "'NCF', '" + payablesDocument.Ncf + "')";
-                    _repository.ExecuteCommand(sqlQuery);
-
-                    sqlQuery = "INSERT INTO " + Helpers.InterCompanyId + ".dbo.SY90000(ObjectType, ObjectID, PropertyName, PropertyValue) "
-                       + "VALUES ('PayablesTransactionEntry','" + payablesDocument.VendorId.Trim() + "_5_" + payablesDocument.VoucherNumber.Trim() + "', "
-                       + "'NCFTIPOGASTO', 9) ";
-                    _repository.ExecuteCommand(sqlQuery);
-
-                    _repository.ExecuteCommand(String.Format("INTRANET.dbo.AttachPayableNote '{0}','{1}','{2}'",
-                        Helpers.InterCompanyId, payablesDocument.VoucherNumber, payablesDocument.Note));
-
-                    isValid = true;
-                }
+                    Cliente = accountPayables.VendorId,
+                    Codigo = voucherNumber,
+                    Monto = accountPayables.PurchaseAmount,
+                    Moneda = accountPayables.Currency,
+                    CompanyId = Helpers.CompanyIdWebServices,
+                    Fecha = accountPayables.DocumentDate,
+                    Descuento = accountPayables.DiscountAmount,
+                    Lote = accountPayables.DocumentNumber
+                };
+                if (accountPayables.Type == AccountPayablesType.NC)
+                    service.CreateReceivablesCreditNote(receivablesDocument);
+                else
+                    service.CreateReceivablesDebitNote(receivablesDocument);
+                isValid = true;
             }
 
             if (isValid)
             {
-                HelperLogic.DesbloqueoSecuencia(payablesDocument.VoucherNumber, "PM10000", Account.GetAccount(User.Identity.GetUserName()).UserId);
-                return RedirectToAction("Index");
+                if (accountPayables.PostType == 1)
+                {
+                    string batchSource;
+                    if (accountPayables.Module == AccountPayablesModule.Compras)
+                        batchSource = "PM_Trxent";
+                    else
+                        batchSource = "RM_Sales";
+                    service.PostBatch(batchSource, accountPayables.DocumentNumber, ref voucherNumber);
+                }
+                return RedirectToAction("Create");
             }
-
-            ViewBag.RequestSecuence = accountPayables.VoucherNumber;
+            
             ViewBag.Discount = accountPayables.DiscountAmount;
             ViewBag.Freight = accountPayables.FreightAmount;
             ViewBag.Miscellaneous = accountPayables.MiscellaneousAmount;
             ViewBag.Tax = accountPayables.TaxAmount;
-            ViewBag.DepartmentId = accountPayables.PurchaseOrder;
-
             return View(accountPayables);
         }
 
         public ActionResult Edit(string id)
         {
             if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "AccountPayables", "Index"))
-            {
                 return RedirectToAction("NotPermission", "Home");
-            }
             if (id == null)
-            {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
 
             var sqlQuery = "SELECT TOP 1 A.VCHRNMBR VoucherNumber, A.VENDORID VendorId, A.VENDNAME VendName, A.DOCNUMBR DocumentNumber, "
                     + "A.DOCDATE DocumentDate, A.CURNCYID Currency, A.TRXDSCRN Description, "
-                    + "A.PONUMBER PurchaseOrder, CONVERT(NUMERIC(32, 2), A.PRCHAMNT) PurchaseAmount, "
+                    + "CONVERT(NUMERIC(32, 2), A.PRCHAMNT) PurchaseAmount, "
                     + "CONVERT(NUMERIC(32, 2), A.TRDISAMT) DiscountAmount, CONVERT(NUMERIC(32, 2), A.TAXAMNT) TaxAmount, "
                     + "CONVERT(NUMERIC(32, 2), A.FRTAMNT) FreightAmount, CONVERT(NUMERIC(32, 2), A.MSCCHAMT) MiscellaneousAmount, "
-                    + "(CASE A.DOCTYPE WHEN 1 THEN 1 ELSE 2 END) Type, ISNULL(C.TXTFIELD, '') Note, ISNULL(B.PropertyValue,'') NCF, ISNULL(D.TAXDTLID, '') TaxDetailId "
+                    + "(CASE A.DOCTYPE WHEN 1 THEN 1 ELSE 2 END) Type, ISNULL(C.TXTFIELD, '') Note, ISNULL(D.TAXDTLID, '') TaxDetailId "
                     + "FROM (SELECT RTRIM(A.VCHNUMWK) VCHRNMBR, A.VENDORID, B.VENDNAME, A.DOCNUMBR, A.DOCAMNT, A.DOCDATE, "
-                    + "A.CURNCYID, A.TRXDSCRN, A.PORDNMBR PONUMBER, PRCHAMNT, TRDISAMT, TAXAMNT, FRTAMNT, MSCCHAMT, DOCTYPE, A.NOTEINDX "
+                    + "A.CURNCYID, A.TRXDSCRN, PRCHAMNT, TRDISAMT, TAXAMNT, FRTAMNT, MSCCHAMT, DOCTYPE, A.NOTEINDX "
                     + "FROM " + Helpers.InterCompanyId + ".dbo.PM10000 A "
                     + "INNER JOIN " + Helpers.InterCompanyId + ".dbo.PM00200 B ON A.VENDORID = B.VENDORID) A "
-                    + "LEFT JOIN " + Helpers.InterCompanyId + ".dbo.SY90000 B "
-                    + "ON RTRIM(A.VENDORID) + '_5_' + RTRIM(A.VCHRNMBR) = RTRIM(B.ObjectID) AND B.PropertyName = 'NCF' "
                     + "LEFT JOIN " + Helpers.InterCompanyId + ".dbo.SY03900 C "
                     + "ON A.NOTEINDX = C.NOTEINDX "
                     + "LEFT JOIN " + Helpers.InterCompanyId + ".dbo.PM10500 D "
@@ -189,7 +197,6 @@ namespace Seaboard.Intranet.Web.Controllers
                     + "WHERE A.VCHRNMBR = '" + id + "'";
 
             var accountPayable = _repository.ExecuteScalarQuery<AccountPayables>(sqlQuery);
-
             if (accountPayable == null)
             {
                 RedirectToAction("Inquiry", id);
@@ -200,31 +207,31 @@ namespace Seaboard.Intranet.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Type,VoucherNumber,Description,VendorId,VendName,DocumentNumber,PurchaseOrder,TaxDetailId,PurchaseAmount,DiscountAmount,FreightAmount,MiscellaneousAmount,TaxAmount,Currency,Note,DocumentDate, NCF")] AccountPayables accountPayables)
+        public ActionResult Edit([Bind(Include = "Module,Type,,Description,VendorId,VendName,DocumentNumber,TaxDetailId,PurchaseAmount,DiscountAmount,FreightAmount,MiscellaneousAmount,TaxAmount,Currency,Note,DocumentDate,PostType")] AccountPayables accountPayables)
         {
             var isValid = false;
 
             var service = new ServiceContract();
-            var payablesDocument = new GpPayablesDocument();
-            payablesDocument.Currency = accountPayables.Currency;
-            payablesDocument.DocumentDate = accountPayables.DocumentDate;
-            payablesDocument.DocumentNumber = accountPayables.DocumentNumber;
-            payablesDocument.FreightAmount = accountPayables.FreightAmount;
-            payablesDocument.MiscellaneousAmount = accountPayables.MiscellaneousAmount;
-            payablesDocument.PurchaseAmount = accountPayables.PurchaseAmount;
-            payablesDocument.PurchaseOrder = accountPayables.PurchaseOrder;
-            payablesDocument.TaxAmount = accountPayables.TaxAmount;
-            payablesDocument.TaxDetail = accountPayables.TaxDetailId;
-            payablesDocument.TradeDiscountAmount = accountPayables.DiscountAmount;
-            payablesDocument.VendorId = accountPayables.VendorId;
-            payablesDocument.VoucherNumber = accountPayables.VoucherNumber;
-            payablesDocument.Ncf = accountPayables.Ncf;
-            payablesDocument.Note = accountPayables.Note;
-            payablesDocument.Description = accountPayables.Description;
-
-            if (accountPayables.Type == AccountPayablesType.NotaDeCrédito)
+            var payablesDocument = new GpPayablesDocument
             {
-                if (service.CreatePayablesCreditNote(payablesDocument, Request.Cookies["UserAccount"]["username"], Request.Cookies["UserAccount"]["password"]))
+                Currency = accountPayables.Currency,
+                DocumentDate = accountPayables.DocumentDate,
+                DocumentNumber = accountPayables.DocumentNumber,
+                FreightAmount = accountPayables.FreightAmount,
+                MiscellaneousAmount = accountPayables.MiscellaneousAmount,
+                PurchaseAmount = accountPayables.PurchaseAmount,
+                TaxAmount = accountPayables.TaxAmount,
+                TaxDetail = accountPayables.TaxDetailId,
+                TradeDiscountAmount = accountPayables.DiscountAmount,
+                VendorId = accountPayables.VendorId,
+                VoucherNumber = accountPayables.VoucherNumber,
+                Note = accountPayables.Note,
+                Description = accountPayables.Description
+            };
+
+            if (accountPayables.Type == AccountPayablesType.NC)
+            {
+                if (service.CreatePayablesCreditNote(payablesDocument))
                     isValid = true;
             }
             else
@@ -236,37 +243,14 @@ namespace Seaboard.Intranet.Web.Controllers
                 _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.PM10100 WHERE VCHRNMBR = '" + payablesDocument.VoucherNumber + "' AND PSTGSTUS = 0");
                 _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.SY00500 SET BCHTOTAL -= '" + amountDebit + "', NUMOFTRX -= 1 WHERE BACHNUMB = '" + payablesDocument.DocumentNumber + "'");
 
-                if (service.CreatePayablesInvoice(payablesDocument, Request.Cookies["UserAccount"]["username"], Request.Cookies["UserAccount"]["password"]))
-                {
-                    var sqlQuery = "DELETE " + Helpers.InterCompanyId + ".dbo.SY90000 "
-                                   + "WHERE ObjectID = '" + payablesDocument.VendorId.Trim() + "_5_" + payablesDocument.VoucherNumber.Trim() + "'"
-                                   + "AND PropertyName = 'NCF'";
-                    _repository.ExecuteCommand(sqlQuery);
-
-                    sqlQuery = "DELETE " + Helpers.InterCompanyId + ".dbo.SY90000 "
-                        + "WHERE ObjectID = '" + payablesDocument.VendorId.Trim() + "_5_" + payablesDocument.VoucherNumber.Trim() + "' "
-                        + "AND PropertyName = 'NCFTIPOGASTO'";
-                    _repository.ExecuteCommand(sqlQuery);
-
-                    sqlQuery = "INSERT INTO " + Helpers.InterCompanyId + ".dbo.SY90000(ObjectType, ObjectID, PropertyName, PropertyValue) "
-                        + "VALUES ('PayablesTransactionEntry','" + payablesDocument.VendorId.Trim() + "_5_" + payablesDocument.VoucherNumber.Trim() + "', "
-                        + "'NCF', '" + payablesDocument.Ncf + "')";
-                    _repository.ExecuteCommand(sqlQuery);
-
-                    sqlQuery = "INSERT INTO " + Helpers.InterCompanyId + ".dbo.SY90000(ObjectType, ObjectID, PropertyName, PropertyValue) "
-                       + "VALUES ('PayablesTransactionEntry','" + payablesDocument.VendorId.Trim() + "_5_" + payablesDocument.VoucherNumber.Trim() + "', "
-                       + "'NCFTIPOGASTO', 9) ";
-                    _repository.ExecuteCommand(sqlQuery);
-
-                    _repository.ExecuteCommand(String.Format("INTRANET.dbo.AttachPayableNote '{0}','{1}','{2}'",
-                        Helpers.InterCompanyId, payablesDocument.VoucherNumber, payablesDocument.Note));
-
+                if (service.CreatePayablesInvoice(payablesDocument))
                     isValid = true;
-                }
             }
 
             if (isValid)
             {
+                if (!string.IsNullOrEmpty(payablesDocument.Note))
+                    _repository.ExecuteCommand(String.Format("INTRANET.dbo.AttachPayableNote '{0}','{1}','{2}'", Helpers.InterCompanyId, payablesDocument.VoucherNumber, payablesDocument.Note));
                 HelperLogic.DesbloqueoSecuencia(payablesDocument.VoucherNumber, "PM10000", Account.GetAccount(User.Identity.GetUserName()).UserId);
                 return RedirectToAction("Index");
             }
@@ -278,12 +262,12 @@ namespace Seaboard.Intranet.Web.Controllers
         {
             var sqlQuery = "SELECT A.VCHRNMBR VoucherNumber, A.VENDORID VendorId, A.VENDNAME VendName, A.DOCNUMBR DocumentNumber, "
                     + "A.DOCDATE DocumentDate, A.CURNCYID Currency, A.TRXDSCRN Description, "
-                    + "A.PONUMBER PurchaseOrder, CONVERT(NUMERIC(32, 2), A.PRCHAMNT) PurchaseAmount, "
+                    + "CONVERT(NUMERIC(32, 2), A.PRCHAMNT) PurchaseAmount, "
                     + "CONVERT(NUMERIC(32, 2), A.TRDISAMT) DiscountAmount, CONVERT(NUMERIC(32, 2), A.TAXAMNT) TaxAmount, "
                     + "CONVERT(NUMERIC(32, 2), A.FRTAMNT) FreightAmount, CONVERT(NUMERIC(32, 2), A.MSCCHAMT) MiscellaneousAmount, "
-                    + "(CASE A.DOCTYPE WHEN 1 THEN 1 ELSE 2 END) Type, ISNULL(C.TXTFIELD, '') Note, ISNULL(B.PropertyValue,'') NCF "
+                    + "(CASE A.DOCTYPE WHEN 1 THEN 1 ELSE 2 END) Type, ISNULL(C.TXTFIELD, '') Note "
                     + "FROM (SELECT RTRIM(A.VCHNUMWK) VCHRNMBR, A.VENDORID, B.VENDNAME, A.DOCNUMBR, A.DOCAMNT, A.DOCDATE, "
-                    + "A.CURNCYID, A.TRXDSCRN, A.PORDNMBR PONUMBER, PRCHAMNT, TRDISAMT, TAXAMNT, FRTAMNT, MSCCHAMT, DOCTYPE, A.NOTEINDX "
+                    + "A.CURNCYID, A.TRXDSCRN, PRCHAMNT, TRDISAMT, TAXAMNT, FRTAMNT, MSCCHAMT, DOCTYPE, A.NOTEINDX "
                     + "FROM " + Helpers.InterCompanyId + ".dbo.PM10000 A "
                     + "INNER JOIN " + Helpers.InterCompanyId + ".dbo.PM00200 B ON A.VENDORID = B.VENDORID "
                     + "UNION ALL "
@@ -292,8 +276,6 @@ namespace Seaboard.Intranet.Web.Controllers
                     + "FROM " + Helpers.InterCompanyId + ".dbo.PM20000 A "
                     + "INNER JOIN " + Helpers.InterCompanyId + ".dbo.PM00200 B "
                     + "ON A.VENDORID = B.VENDORID) A "
-                    + "LEFT JOIN " + Helpers.InterCompanyId + ".dbo.SY90000 B "
-                    + "ON RTRIM(A.VENDORID) + '_5_' + RTRIM(A.VCHRNMBR) = RTRIM(B.ObjectID) AND B.PropertyName = 'NCF' "
                     + "LEFT JOIN " + Helpers.InterCompanyId + ".dbo.SY03900 C "
                     + "ON A.NOTEINDX = C.NOTEINDX "
                     + "WHERE A.VCHRNMBR = '" + id + "'";
