@@ -458,18 +458,33 @@
                             else
                                 $checkInput = $('<input type="checkbox" name="check" checked="checked">');
                             $checkDiv.append($checkInput).append($labelCheck);
+                            var $btnGroup = $('<div class="btn-group"/>')
                             var $print = $('<button href="#" class="btn btn-success btn-xs">Imprimir</button>');
+                            var $release = $('<button href="#" class="btn btn-info btn-xs">Liberar</button>');
+                            var $close = $('<button href="#" class="btn btn-primary btn-xs">Cerrar</button>');
                             $row.append($('<td/>').html($checkDiv));
                             $row.append($('<td/>').html(val.BatchNumber));
                             $row.append($('<td/>').html(val.Description));
                             $row.append($('<td/>').html(val.Approver));
                             $row.append($('<td/>').html(val.User));
                             $row.append($('<td/>').html(val.Note));
-                            $row.append($('<td/>').html($print));
                             $print.click(function (e) {
                                 printApprovalOvertime(val.RowId);
                                 e.preventDefault();
                             });
+                            $release.click(function (e) {
+                                releaseOvertime(val.BatchNumber);
+                                e.preventDefault();
+                            });
+                            $close.click(function (e) {
+                                closeOvertime(val.BatchNumber);
+                                e.preventDefault();
+                            });
+                            $btnGroup.append($print);
+                            $btnGroup.append($release);
+                            $btnGroup.append($close);
+                            $row.append($('<td/>').html($btnGroup));
+
                             $tbody.append($row);
                         });
                         $table.append($tbody);
@@ -517,6 +532,46 @@
                     }
                 }
             });
+        }
+
+        function releaseOvertime(id) {
+            if (confirm("Esta seguro que desea liberar este lote ?")) {
+                $.ajax({
+                    url: '@Url.Action("ReleaseOvertime", "HumanResources")?batchNumber=' + id,
+                    type: "POST",
+                    data: "",
+                    dataType: "JSON",
+                    cache: false,
+                    contentType: "application/json",
+                    success: function (d) {
+                        if (d.status == "OK") {
+                            toastr.info('Se ha liberado este lote correctamente', 'Completado');
+                        } else {
+                            toastr.error(d.status);
+                        }
+                    }
+                });
+            }
+        }
+
+        function closeOvertime(id) {
+            if (confirm("Esta seguro que desea cerrar este lote ?")) {
+                $.ajax({
+                    url: '@Url.Action("CloseOvertime", "HumanResources")?batchNumber=' + id,
+                    type: "POST",
+                    data: "",
+                    dataType: "JSON",
+                    cache: false,
+                    contentType: "application/json",
+                    success: function (d) {
+                        if (d.status == "OK") {
+                            toastr.info('Se ha cerrado este lote correctamente', 'Completado');
+                        } else {
+                            toastr.error(d.status);
+                        }
+                    }
+                });
+            }
         }
     </script>
 }

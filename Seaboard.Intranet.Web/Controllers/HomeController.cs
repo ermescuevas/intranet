@@ -375,28 +375,9 @@ namespace Seaboard.Intranet.Web.Controllers
                                    + "ORDER BY USERID ASC ";
                         break;
                     case 4:
-                        sqlQuery = "SELECT DISTINCT A.DEPRTMDS FROM " + Helpers.InterCompanyId + ".dbo.LPPOP40100 A "
-                                   + "INNER JOIN " + Helpers.InterCompanyId +
-                                   ".dbo.LPPOP40101 B ON A.DEPRTMID = B.DEPRTMID "
-                                   + "WHERE RTRIM(B.USERID) = '" +
-                                   Account.GetAccount(User.Identity.GetUserName()).UserId + "'";
-
-                        filter = "";
-
-                        departments = _repository.ExecuteQuery<string>(sqlQuery).ToArray();
-
-                        foreach (var item in departments)
-                        {
-                            if (filter.Length == 0)
-                                filter = "'" + item + "'";
-                            else
-                                filter += ",'" + item + "'";
-                        }
-
                         sqlQuery = "SELECT 'NO' [Id], 'NO' [Descripción], CONVERT(nvarchar(20), 0.00) [DataExtended] UNION ALL SELECT LTRIM(RTRIM(ARNUMBER)) [Id], LTRIM(RTRIM(ARDESC)) [Descripción], " +
                             "CONVERT(nvarchar(20), CONVERT(NUMERIC(30,2), DOCAMNT)) [DataExtended] FROM " + Helpers.InterCompanyId + ".dbo.LPPOP40400 "
-                            + " WHERE DEPRTMID IN (" + filter + ") AND (ARNUMBER LIKE '%" + consulta +
-                            "%' OR ARDESC LIKE '%" + consulta + "%') ";
+                            + " WHERE ARNUMBER LIKE '%" + consulta + "%' OR ARDESC LIKE '%" + consulta + "%' ";
                         break;
                     case 5:
                         sqlQuery = "SELECT RTRIM(A.CURNCYID) [Id], RTRIM(A.CRNCYDSC) [Descripción] FROM DYNAMICS.dbo.MC40200 A INNER JOIN DYNAMICS.dbo.MC60100 B "

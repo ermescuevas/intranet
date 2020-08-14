@@ -340,7 +340,6 @@ namespace Seaboard.Intranet.Web.Controllers
                 _repository.ExecuteCommand(sqlQuery);
                 newRowId = _repository.ExecuteScalarQuery<int>($"SELECT RowId FROM {Helpers.InterCompanyId}.dbo.EFUPR30100 ORDER BY RowId DESC");
                 ProcessLogic.SendToSharepoint(newRowId.ToString(), 5, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
-                
             }
             catch (Exception ex)
             {
@@ -1320,6 +1319,46 @@ namespace Seaboard.Intranet.Web.Controllers
                     }
                 }
 
+                status = "OK";
+            }
+            catch (Exception ex)
+            {
+                status = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status } };
+        }
+
+        [HttpPost]
+        public JsonResult ReleaseOvertime(string batchNumber)
+        {
+            string status;
+            try
+            {
+                _repository.ExecuteCommand($"UPDATE A SET Status = 0 FROM {Helpers.InterCompanyId}.dbo.EFUPR30200 A " +
+                        $"INNER JOIN {Helpers.InterCompanyId}.dbo.EFUPR30310 B ON A.RowId = B.OvertimeRowId " +
+                        $"WHERE B.BatchNumber = '{batchNumber}'");
+                _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EFUPR30300 SET STATUS = 0 WHERE BatchNumber = '{batchNumber}'");
+                status = "OK";
+            }
+            catch (Exception ex)
+            {
+                status = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status } };
+        }
+
+        [HttpPost]
+        public JsonResult CloseOvertime(string batchNumber)
+        {
+            string status;
+            try
+            {
+                _repository.ExecuteCommand($"UPDATE A SET Status = 4 FROM {Helpers.InterCompanyId}.dbo.EFUPR30200 A " +
+                         $"INNER JOIN {Helpers.InterCompanyId}.dbo.EFUPR30310 B ON A.RowId = B.OvertimeRowId " +
+                         $"WHERE B.BatchNumber = '{batchNumber}'");
+                _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EFUPR30300 SET STATUS = 4 WHERE BatchNumber = '{batchNumber}'");
                 status = "OK";
             }
             catch (Exception ex)

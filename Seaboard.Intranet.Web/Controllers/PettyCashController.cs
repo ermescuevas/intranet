@@ -119,6 +119,7 @@ namespace Seaboard.Intranet.Web.Controllers
                     DateTime.Now.ToString("yyyyMMdd"),
                     DateTime.Now.ToString("yyyyMMdd"), DateTime.Now.ToString("yyyyMMdd"), 0, 1,
                     Account.GetAccount(User.Identity.GetUserName()).UserId));
+                status = "OK";
 
                 if (postType == 1)
                 {
@@ -189,7 +190,7 @@ namespace Seaboard.Intranet.Web.Controllers
                     pettyCashRequest.Amount, pettyCashRequest.Note,
                     pettyCashRequest.Requester, pettyCashRequest.DepartmentId, pettyCashRequest.Currency, DateTime.Now, DateTime.Now, DateTime.Now, 0, 1,
                     Account.GetAccount(User.Identity.GetUserName()).UserId));
-
+                status = "OK";
                 if (postType == 1)
                 {
                     _repository.ExecuteCommand(String.Format("LODYNDEV.dbo.LPPOP30603SI '{0}','{1}','{2:yyyy-MM-ddThh:mm:ss}','{3}','{4}','{5}','{6}'",

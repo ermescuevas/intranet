@@ -263,7 +263,6 @@
 
     <script>
         $(document).ready(function () {
-            $('.ladda-button').ladda();
             $("#form").steps({
                 bodyTag: "fieldset",
                 onStepChanging: function (event, currentIndex, newIndex) {
@@ -615,7 +614,8 @@
         }
 
         function saveRequest() {
-            $('.ladda-button').ladda('start');
+            $('#form').find('a[href="#finish"]').css("display", "none");
+            $('#form').find('a[href="#previous"]').css("display","none");
             var data = {
                 employeeId: $('#EmployeeId').val(),
                 startDate: $('#StartDate').datepicker({ dateFormat: 'ddMMyyyy' }).val(),
@@ -638,7 +638,8 @@
                         window.location.reload();
                     }
                     else {
-                        $('.ladda-button').ladda('stop');
+                        $('#form').find('a[href="#previous"]').css("display", "");
+                        $('#form').find('a[href="#finish"]').css("display", "");
                         swal({
                             title: "ERROR",
                             text: result.status,
