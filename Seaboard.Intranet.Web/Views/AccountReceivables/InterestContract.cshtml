@@ -34,7 +34,7 @@
                     </div>
                 </div>
                 <div class="ibox-content">
-                    <button class="btn btn-primary" onclick="createContract();">NUEVO CONTRATO</button>
+                    <button class="btn btn-primary" onclick="createContract('','','', false, false);">NUEVO CONTRATO</button>
                     <div class="hr-line-dashed"></div>
                     <table class="table table-striped table-bordered table-hover informationTable">
                         <thead>
@@ -69,7 +69,10 @@
                                     {<i class="badge-info">No &nbsp;</i>}
                                 </td>
                                 <td>
-                                    <button class="btn btn-danger btn-xs" onclick="deleteContract('@item.CustomerNumber');">Eliminar</button>
+                                    <div class="btn-group-xs">
+                                        <button class="btn btn-danger btn-xs" onclick="deleteContract('@item.CustomerNumber');">Eliminar</button>
+                                        <button class="btn btn-info btn-xs" onclick="createContract('@item.CustomerNumber','@item.ChargePercent','@item.DaysDelay','@item.IncludeWeekends','@item.IncludeHolidays');">Editar</button>
+                                    </div>
                                 </td>
                             </tr>
                             }
@@ -211,9 +214,14 @@
             });
         });
 
-        function createContract() {
+        function createContract(customerNumber, rate, days, weekends, holidays) {
+            $('select[name=CustomerId]').val(customerNumber);
+            $('select[name=CustomerId]').selectpicker('refresh');
+            $('#InterestRate').val(rate);
+            $('#DaysDelay').val(days);
+            if (weekends) $('#IncludeWeekends').prop('checked', true); else $('#IncludeWeekends').prop('checked', false);
+            if (holidays) $('#IncludeHolidays').prop('checked', true); else $('#IncludeHolidays').prop('checked', false);
             $('#modal-CreateContract').modal('show');
-            $('#CountryDesc').val('');
         }
 
         function saveContract() {

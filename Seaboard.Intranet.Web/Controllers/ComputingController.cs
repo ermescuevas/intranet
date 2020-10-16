@@ -1165,9 +1165,34 @@ namespace Seaboard.Intranet.Web
 
         public void SaveEarnedPointEntity(EarnedPoint point)
         {
-            var sqlQuery = $"INSERT INTO {Helpers.InterCompanyId}.dbo.EIIV00301 (Description, Points, DocumentDate, SummaryType, CreatedDate, ModifiedDate, LastUserId) " +
+            string sqlQuery;
+            var count = _repository.ExecuteScalarQuery<int>($"SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.EIIV00301 WHERE Description = '{point.Description}'");
+            if (count == 0)
+                sqlQuery = $"INSERT INTO {Helpers.InterCompanyId}.dbo.EIIV00301 (Description, Points, DocumentDate, SummaryType, CreatedDate, ModifiedDate, LastUserId) " +
                      $"VALUES ('{point.Description}','{(point.SummaryType == 0 ? point.Points : point.Points * -1)}','{DateTime.Now.ToString("yyyyMMdd")}','{point.SummaryType}', GETDATE(), GETDATE(), '{Account.GetAccount(User.Identity.GetUserName()).UserId}') ";
+            else
+                sqlQuery = $"UPDATE {Helpers.InterCompanyId}.dbo.EIIV00301 SET Points = '{(point.SummaryType == 0 ? point.Points : point.Points * -1)}', " +
+                    $"SummaryType = '{point.SummaryType}', ModifiedDate = GETDATE(), LastUserId = '{Account.GetAccount(User.Identity.GetUserName()).UserId}' " +
+                    $"WHERE Description = '{point.Description}'";
             _repository.ExecuteCommand(sqlQuery);
+        }
+        [HttpPost]
+        public JsonResult DeleteEarnedPoint(string id)
+        {
+            string xStatus;
+
+            try
+            {
+                var sqlQuery = $"DELETE {Helpers.InterCompanyId}.dbo.EIIV00301 WHERE Description = '{id}'";
+                _repository.ExecuteCommand(sqlQuery);
+                xStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = xStatus } };
         }
 
         #endregion

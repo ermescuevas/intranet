@@ -1044,6 +1044,9 @@
     <Content Include="Views\Accounting\EmailAlert.cshtml" />
     <Content Include="Views\Accounting\FinancialAccount.cshtml" />
     <Content Include="Views\AccountReceivables\AgingCPPReport.cshtml" />
+    <Content Include="Views\Accounting\PurchaseOrderInquiry.cshtml" />
+    <Content Include="Views\Accounting\SupplierInquiry.cshtml" />
+    <Content Include="Views\Accounting\FiscalSalesExchangeRate.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

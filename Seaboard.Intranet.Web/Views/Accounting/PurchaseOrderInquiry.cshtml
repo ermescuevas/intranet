@@ -1,0 +1,155 @@
+﻿@model IEnumerable<Seaboard.Intranet.Domain.ViewModels.OpenOrdersView>
+@{
+    Layout = "~/Views/Shared/_AccountingLayout.cshtml";
+    ViewBag.Title = "Ordenes de compras abiertas";
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Ordenes de compras abiertas</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Ordenes de compras abiertas</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>Ordenes de compras abiertas</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <div class="row m-t-sm">
+                        <div class="col-lg-12">
+                            <div class="hr-line-dashed"></div>
+                            <table class="table table-striped table-bordered table-hover informationTable">
+                                <thead>
+                                    <tr>
+                                        <th style="width:9%">Orden</th>
+                                        <th style="width:9%">Fecha</th>
+                                        <th style="width:9%">Subtotal</th>
+                                        <th style="width:9%">Itbis</th>
+                                        <th style="width:8%">Descuento</th>
+                                        <th style="width:10%">Total</th>
+                                        <th style="width:7%">Moneda</th>
+                                        <th style="width:9%">Id proveedor</th>
+                                        <th style="width:10%">Proveedor</th>
+                                        <th style="width:8%">Requisición</th>
+                                        <th style="width:8%">Análisis</th>
+                                        <th style="width:10%">Comentario</th>
+                                        <th style="width:8%">Departamento</th>
+                                        <th style="width:10%">Concepto</th>
+                                        <th style="width:8%">Tipo</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                    <tr>
+                                        <td>@item.OC_Numero</td>
+                                        <td>@item.FECHA.ToString("dd/MM/yyyy")</td>
+                                        <td>@item.Subtotal.ToString("N2")</td>
+                                        <td>@item.Itbis.ToString("N2")</td>
+                                        <td>@item.Descuento.ToString("N2")</td>
+                                        <td>@item.Total.ToString("N2")</td>
+                                        <td>@item.Moneda</td>
+                                        <td>@item.Id_Vendedor</td>
+                                        <td>@item.Vendedor</td>
+                                        <td>@item.Requisición</td>
+                                        <td>@item.Análisis</td>
+                                        <td>@item.Comentario</td>
+                                        <td>@item.DPTO</td>
+                                        <td>@item.CONCEPTO</td>
+                                        <td>@item.TIPO</td>
+                                    </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Styles {
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/dataPicker")
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.informationTable').DataTable({
+                pageLength: 10,
+                order: [[0, "desc"]],
+                dom: '<"html5buttons"B>lTfgitp',
+                language: {
+                    "sProcessing": "Procesando... ",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:  ",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                },
+                oAria: {
+                    "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                },
+                buttons: [
+                    { extend: 'copy' },
+                    { extend: 'csv' },
+                    { extend: 'excel', title: 'ExampleFile' },
+                    { extend: 'pdf', title: 'ExampleFile' },
+
+                    {
+                        extend: 'print',
+                        orientation: 'landscape',
+                        customize: function (win) {
+                            $(win.document.body).addClass('white-bg');
+                            $(win.document.body).css('font-size', '10px');
+
+                            $(win.document.body).find('table')
+                                .addClass('compact')
+                                .css('font-size', 'inherit');
+                        }
+                    }
+                ]
+
+            });
+        });
+    </script>
+}

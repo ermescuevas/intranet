@@ -1075,6 +1075,47 @@ namespace Seaboard.Intranet.Web.Controllers
             return new JsonResult { Data = new { status = xStatus } };
         }
 
+        public ActionResult FiscalSalesExchangeRate()
+        {
+            return View();
+        }
+
+        [OutputCache(Duration = 0)]
+        [HttpPost]
+        public ActionResult FiscalSalesExchangeRate(string fromDate, string toDate)
+        {
+            string xStatus;
+            var list = new List<FiscalSalesTransaction>();
+            try
+            {
+                xStatus = "OK";
+                list = _repository.ExecuteQuery<FiscalSalesTransaction>($"INTRANET.dbo.FiscalSalesExchangeRate '{Helpers.InterCompanyId}','{fromDate}','{toDate}'").ToList();
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = xStatus, registros = list } };
+        }
+
+        [HttpPost]
+        public JsonResult SaveExchangeRateFiscalReport(List<MemInvoiceDetail> lines)
+        {
+            string xStatus;
+            try
+            {
+                foreach (var item in lines)
+                    _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EFRM30100 SET ExchangeRate = '{item.Total}' WHERE DocumentNumber = '{item.SopNumber}'");
+                xStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+            return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
+        }
+
         #endregion
 
         #region Consultas
@@ -1129,6 +1170,26 @@ namespace Seaboard.Intranet.Web.Controllers
             }
 
             return new JsonResult { Data = new { status = xStatus, registros = list }, JsonRequestBehavior = JsonRequestBehavior.AllowGet, MaxJsonLength = int.MaxValue };
+        }
+
+        public ActionResult SupplierInquiry()
+        {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Accounting", "SupplierInquiry"))
+                return RedirectToAction("NotPermission", "Home");
+            string sqlQuery = $"SELECT RTRIM([Id. de proveedor]) SupplierNumber, RTRIM([Nombre proveedor]) SupplierName, RTRIM([Id. clase proveedor]) ClassId, RTRIM([Contacto de proveedor]) Contact, " +
+                $"RTRIM([Dirección 1]) Address, RTRIM([Ciudad]) AS City, RTRIM([País]) AS Country, RTRIM([Número de teléfono 1]) PhoneNumber, RTRIM([Número de fax]) FaxNumber, " +
+                $"RTRIM([Categoria]) Category, RTRIM([Comentario2]) Bank, RTRIM([Número de cuenta con proveedor]) BankAccount, RTRIM([Clasificación]) AS Clasification, RTRIM([Ocupación]) Ocupation " +
+                $"FROM {Helpers.InterCompanyId}.dbo.[SEABO_REPORTES_SUPLIDORES_COMPRAS] ";
+            var registros = _repository.ExecuteQuery<Supplier>(sqlQuery);
+            return View(registros);
+        }
+
+        public ActionResult PurchaseOrderInquiry()
+        {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Home", "OpenPurchaseOrders"))
+                return RedirectToAction("NotPermission", "Home");
+            var list = _repository.ExecuteQuery<OpenOrdersView>($"SELECT * FROM {Helpers.InterCompanyId}.dbo.Seabo_status_ordenes_abiertas").ToList();
+            return View(list);
         }
 
         #endregion

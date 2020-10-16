@@ -507,10 +507,7 @@ namespace Seaboard.Intranet.BusinessLogic
         {
             try
             {
-                var xlApp = new Application
-                {
-                    DisplayAlerts = false
-                };
+                var xlApp = new Application { DisplayAlerts = false };
                 Workbook xlWorkbook = null;
                 xlWorkbook = xlApp.Workbooks.Open(filePath);
                 Worksheet xlWorksheet;

@@ -14,5 +14,11 @@
         public string FaxNumber { get; set; }
         public int ExpenseType { get; set; }
         public string Email { get; set; }
+        public string ClassId { get; set; }
+        public string Category { get; set; }
+        public string Clasification { get; set; }
+        public string Ocupation { get; set; }
+        public string Bank { get; set; }
+        public string BankAccount { get; set; }
     }
 }

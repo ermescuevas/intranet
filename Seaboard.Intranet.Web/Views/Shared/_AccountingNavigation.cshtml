@@ -71,13 +71,17 @@
                     <li class="@Html.IsSelected(action: "FinancialAccount")"><a href="@Url.Action("FinancialAccount", "Accounting")">Cuentas contables</a></li>
                 </ul>
             </li>
-            <li class="@Html.IsSelected(controller: "Accounting", action: "SupplierTransactionInquiry")">
+            <li class="@Html.IsSelected(controller: "Accounting", action: "SupplierTransactionInquiry")
+                @Html.IsSelected(controller: "Accounting", action: "SupplierInquiry")
+                @Html.IsSelected(controller: "Accounting", action: "PurchaseOrderInquiry")">
                 <a href="#"><i class="fa fa-table"></i> <span class="nav-label" data-i18n="nav.dashboard">Consultas</span> <span class="fa arrow"></span></a>
                 <ul class="nav nav-second-level collapse
-                            @Html.IsSelected(controller: "Accounting", action: "AccountingTransactionInquiry", cssClass: "in")">
-                    <li class="@Html.IsSelected(action: "AccountingTransactionInquiry")">
-                        <a href="@Url.Action("AccountingTransactionInquiry", "Accounting")">Facturas</a>
-                    </li>
+                            @Html.IsSelected(controller: "Accounting", action: "AccountingTransactionInquiry", cssClass: "in")
+                            @Html.IsSelected(controller: "Accounting", action: "SupplierInquiry", cssClass: "in")
+                            @Html.IsSelected(controller: "Accounting", action: "PurchaseOrderInquiry", cssClass: "in")">
+                    <li class="@Html.IsSelected(action: "AccountingTransactionInquiry")"><a href="@Url.Action("AccountingTransactionInquiry", "Accounting")">Facturas</a></li>
+                    <li class="@Html.IsSelected(action: "SupplierInquiry")"><a href="@Url.Action("SupplierInquiry", "Accounting")">Proveedores compras</a></li>
+                    <li class="@Html.IsSelected(action: "PurchaseOrderInquiry")"><a href="@Url.Action("PurchaseOrderInquiry", "Accounting")">OC abiertas</a></li>
                 </ul>
             </li>
             <li class="
@@ -101,15 +105,18 @@
                     @Html.IsSelected(controller: "Accounting", action: "ConfigurationIndex")
                     @Html.IsSelected(controller: "Accounting", action: "NCFConfigurationIndex")
                     @Html.IsSelected(controller: "Accounting", action: "BillingConfigurationIndex")
-                    @Html.IsSelected(controller: "Accounting", action: "EmailAlert")">
+                    @Html.IsSelected(controller: "Accounting", action: "EmailAlert")
+                    @Html.IsSelected(controller: "Accounting", action: "FiscalSalesExchangeRate")">
                 <a href="#"><i class="fa fa-laptop"></i> <span class="nav-label" data-i18n="nav.dashboard">Configuración</span> <span class="fa arrow"></span></a>
                 <ul class="nav nav-second-level collapse
                         @Html.IsSelected(controller: "Accounting", action: "ConfigurationIndex", cssClass: "in")
                         @Html.IsSelected(controller: "Accounting", action: "NCFConfigurationIndex", cssClass: "in")
                         @Html.IsSelected(controller: "Accounting", action: "BillingConfigurationIndex", cssClass: "in")
-                        @Html.IsSelected(controller: "Accounting", action: "EmailAlert", cssClass: "in")">
+                        @Html.IsSelected(controller: "Accounting", action: "EmailAlert", cssClass: "in")
+                        @Html.IsSelected(controller: "Accounting", action: "FiscalSalesExchangeRate", cssClass: "in")">
                     <li class="@Html.IsSelected(action: "ConfigurationIndex")"><a href="@Url.Action("ConfigurationIndex", "Accounting")">General</a></li>
                     <li class="@Html.IsSelected(action: "NCFConfigurationIndex")"><a href="@Url.Action("NCFConfigurationIndex", "Accounting")">NCF</a></li>
+                    <li class="@Html.IsSelected(action: "FiscalSalesExchangeRate")"><a href="@Url.Action("FiscalSalesExchangeRate", "Accounting")">Tasa para 607</a></li>
                     <li class="@Html.IsSelected(action: "BillingConfigurationIndex")"><a href="@Url.Action("BillingConfigurationIndex", "Accounting")">Facturación</a></li>
                     <li class="@Html.IsSelected(action: "EmailAlert")"><a href="@Url.Action("EmailAlert", "Accounting")">Email de alerta</a></li>
                 </ul>

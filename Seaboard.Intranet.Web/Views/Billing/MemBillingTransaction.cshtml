@@ -1096,8 +1096,13 @@
                 cancelButtonText: "No, cancelar!",
                 closeOnConfirm: false
             }, function () {
+                var url = "";
+                if ('@aBillingType' === '30')
+                    url = '@Url.Action("VerifyReliquidationNcfAvailability", "Billing")?batchNumber=' + '@Model.BatchNumber' + '&preInvoice=0&batch=1&billingType=30';
+                else
+                    url = '@Url.Action("VerifyMemBillingNcfAvailability", "Billing")?batchNumber=' + '@Model.BatchNumber' + '&preInvoice=0&batch=0&billingType=' + '@aBillingType';
                 $.ajax({
-                    url: '@Url.Action("VerifyMemBillingNcfAvailability", "Billing")?batchNumber=' + '@Model.BatchNumber' + '&preInvoice=0&batch=0&billingType=' + '@aBillingType',
+                    url: url,
                     type: "POST",
                     data: "",
                     cache: false,
@@ -1198,7 +1203,7 @@
                                                             });
                                                         } else {
                                                             swal.close();
-                                                                    window.location.href = '@Url.Action("MemBillingTransactionIndex","Billing")';
+                                                            window.location.href = '@Url.Action("MemBillingTransactionIndex","Billing")';
                                                         }
                                                     });
                                                 } else {
@@ -1326,8 +1331,13 @@
                 cancelButtonText: "No, cancelar!",
                 closeOnConfirm: false
             }, function () {
+                var url = "";
+                if ('@aBillingType' === '30')
+                    url = '@Url.Action("VerifyReliquidationNcfAvailability", "Billing")?batchNumber=' + '@Model.BatchNumber' + '&preInvoice=0&batch=1&sopNumber=' + $('#SopNumber').html() + '&billingType=30';
+                else
+                    url = '@Url.Action("VerifyMemBillingNcfAvailability", "Billing")?batchNumber=' + '@Model.BatchNumber' + '&preInvoice=0&batch=1&sopNumber=' + $('#SopNumber').html();
                 $.ajax({
-                    url: '@Url.Action("VerifyMemBillingNcfAvailability", "Billing")?batchNumber=' + '@Model.BatchNumber' + '&preInvoice=0&batch=1&sopNumber=' + $('#SopNumber').html(),
+                    url: url,
                     type: "POST",
                     data: "",
                     cache: false,

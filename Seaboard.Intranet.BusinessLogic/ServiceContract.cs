@@ -23,7 +23,7 @@ namespace Seaboard.Intranet.BusinessLogic
             try
             {
                 var payableTax = new List<PayablesTax>();
-                var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
+                var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("ermes", "netico24") } } };
                 var context = new Context { OrganizationKey = new CompanyKey { Id = Helpers.CompanyIdWebServices } };
                 var invoiceCurrency = new CurrencyKey();
                 var payablesInvoice = new PayablesInvoice
@@ -76,7 +76,7 @@ namespace Seaboard.Intranet.BusinessLogic
 
                 return true;
             }
-            catch(Exception ex)
+            catch
             {
                 return false;
             }
@@ -87,7 +87,7 @@ namespace Seaboard.Intranet.BusinessLogic
             try
             {
                 var payableTax = new List<PayablesTax>();
-                var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
+                var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("ermes", "netico24") } } };
                 var context = new Context { OrganizationKey = new CompanyKey { Id = Helpers.CompanyIdWebServices } };
                 var creditNoteCurrency = new CurrencyKey();
                 var payablesCreditNote = new PayablesCreditMemo
@@ -140,7 +140,7 @@ namespace Seaboard.Intranet.BusinessLogic
                 wsDynamicsGp.CreatePayablesCreditMemo(payablesCreditNote, context, payablesCreditNoteCreatePolicy);
                 return true;
             }
-            catch(Exception ex)
+            catch
             {
                 return false;
             }
@@ -150,7 +150,7 @@ namespace Seaboard.Intranet.BusinessLogic
         {
             if (invoices != null && invoices.Count() > 0)
             {
-                var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
+                var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("ermes", "netico24") } } };
                 var context = new Context() { OrganizationKey = new CompanyKey { Id = Helpers.CompanyIdWebServices } };
                 var salesInvoiceCreatePolicy = wsDynamicsGp.GetPolicyByOperation("CreateSalesInvoice", context);
                 var salesTax = new List<SalesDocumentTax>();
@@ -248,7 +248,8 @@ namespace Seaboard.Intranet.BusinessLogic
         {
             if (invoices != null && invoices.Count() > 0)
             {
-                var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
+                //var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
+                var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("ermes", "netico24") } } };
                 var context = new Context() { OrganizationKey = new CompanyKey { Id = Helpers.CompanyIdWebServices } };
                 var salesReturnCreatePolicy = wsDynamicsGp.GetPolicyByOperation("CreateSalesReturn", context);
                 foreach (var invoice in invoices)
@@ -310,7 +311,7 @@ namespace Seaboard.Intranet.BusinessLogic
 
         public void CreateReceivablesCreditNote(GpCreditNote creditNote)
         {
-            var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
+            var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("ermes", "netico24") } } };
             var context = new Context() { OrganizationKey = new CompanyKey { Id = creditNote.CompanyId } };
             var creditNoteCurrency = new CurrencyKey();
 
@@ -348,7 +349,7 @@ namespace Seaboard.Intranet.BusinessLogic
 
         public void CreateReceivablesDebitNote(GpCreditNote debitNote)
         {
-            var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
+            var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("ermes", "netico24") } } };
             var context = new Context() { OrganizationKey = new CompanyKey { Id = debitNote.CompanyId } };
             var creditNoteCurrency = new CurrencyKey();
 
@@ -385,7 +386,7 @@ namespace Seaboard.Intranet.BusinessLogic
 
         public void CreatePayablesCreditNote(GpCreditNote creditNote)
         {
-            var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
+            var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("ermes", "netico24") } } };
             var context = new Context() { OrganizationKey = new CompanyKey { Id = creditNote.CompanyId } };
             var creditNoteCurrency = new CurrencyKey();
             var payablesCreditMemo = new PayablesCreditMemo
@@ -423,7 +424,7 @@ namespace Seaboard.Intranet.BusinessLogic
 
         public void CreatePurchaseReceipt(List<GpPurchaseReceipt> receipts)
         {
-            var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
+            var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("ermes", "netico24") } } };
             var context = new Context() { OrganizationKey = new CompanyKey { Id = Helpers.CompanyIdWebServices } };
             var purchaseReceiptCreatePolicy = wsDynamicsGp.GetPolicyByOperation("CreatePurchaseReceipt", context);
             var createProductVendorPolicy = wsDynamicsGp.GetPolicyByOperation("CreateItemVendor", context);
@@ -449,7 +450,7 @@ namespace Seaboard.Intranet.BusinessLogic
         {
             try
             {
-                var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
+                var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("ermes", "netico24") } } };
                 var context = new Context() { OrganizationKey = new CompanyKey { Id = Helpers.CompanyIdWebServices } };
 
                 var cashReceipt = new GPServiceClient.CashReceipt
@@ -482,6 +483,7 @@ namespace Seaboard.Intranet.BusinessLogic
                 switch (receipt.Type)
                 {
                     case Domain.Models.CashReceiptType.Transferencia:
+                    case Domain.Models.CashReceiptType.Efectivo:
                         cashReceipt.Type = CashReceiptType.Cash;
                         break;
                     case Domain.Models.CashReceiptType.Cheque:
@@ -510,7 +512,7 @@ namespace Seaboard.Intranet.BusinessLogic
         {
             try
             {
-                var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
+                var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("ermes", "netico24") } } };
                 var context = new Context() { OrganizationKey = new CompanyKey { Id = Helpers.CompanyIdWebServices } };
                 var vendor = new Vendor
                 {
@@ -543,7 +545,7 @@ namespace Seaboard.Intranet.BusinessLogic
         {
             try
             {
-                var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
+                var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("ermes", "netico24") } } };
                 var context = new Context() { OrganizationKey = new CompanyKey { Id = Helpers.CompanyIdWebServices } };
                 var vendor = new Vendor
                 {
@@ -594,7 +596,7 @@ namespace Seaboard.Intranet.BusinessLogic
         {
             try
             {
-                var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
+                var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("ermes", "netico24") } } };
                 var context = new Context() { OrganizationKey = new CompanyKey { Id = Helpers.CompanyIdWebServices } };
                 var customer = new GPServiceClient.Customer
                 {
@@ -647,7 +649,7 @@ namespace Seaboard.Intranet.BusinessLogic
         {
             try
             {
-                var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
+                var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("ermes", "netico24") } } };
                 var context = new Context() { OrganizationKey = new CompanyKey { Id = Helpers.CompanyIdWebServices } };
                 var vendor = new Vendor
                 {
@@ -698,7 +700,7 @@ namespace Seaboard.Intranet.BusinessLogic
         {
             try
             {
-                var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
+                var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("ermes", "netico24") } } };
                 var context = new Context() { OrganizationKey = new CompanyKey { Id = Helpers.CompanyIdWebServices } };
                 var customer = new GPServiceClient.Customer
                 {
@@ -751,7 +753,7 @@ namespace Seaboard.Intranet.BusinessLogic
         {
             try
             {
-                var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
+                var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("ermes", "netico24") } } };
                 var context = new Context() { OrganizationKey = new CompanyKey { Id = Helpers.CompanyIdWebServices } };
                 var customerKey = new CustomerKey { Id = customerId };
                 var policy = wsDynamicsGp.GetPolicyByOperation("DeleteCustomer", context);

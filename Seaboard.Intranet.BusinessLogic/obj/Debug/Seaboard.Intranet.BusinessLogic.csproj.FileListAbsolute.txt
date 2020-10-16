@@ -221,3 +221,4 @@ C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\in
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csproj.CopyComplete
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.dll
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.pdb
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csproj.CoreCompileInputs.cache

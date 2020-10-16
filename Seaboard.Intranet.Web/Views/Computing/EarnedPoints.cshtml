@@ -47,7 +47,7 @@
                 </div>
 
                 <div class="ibox-content">
-                    <button class="btn btn-danger" onclick="createRequest(0)">NUEVO FIDEPUNTOS</button>
+                    <button class="btn btn-danger" onclick="createRequest('', '', '');">NUEVO FIDEPUNTOS</button>
                     <h1 class="pull-right"><strong>TOTAL: @total.ToString("N0")</strong></h1>
                     <hr />
                     <div class="row table-responsive">
@@ -58,6 +58,7 @@
                                     <th>Puntos</th>
                                     <th>Tipo sumarizacion</th>
                                     <th>Fecha</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -77,6 +78,12 @@
                                         }
                                     </td>
                                     <td>@item.DocumentDate.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        <div class="btn-group-xs">
+                                            <button class="btn btn-danger btn-xs" onclick="deleteRequest('@item.Description');">Eliminar</button>
+                                            <button class="btn btn-info btn-xs" onclick="createRequest('@item.Description', '@item.Points', '@item.SummaryType');">Editar</button>
+                                        </div>
+                                    </td>
                                 </tr>
                                 }
                             </tbody>
@@ -235,8 +242,11 @@
             $('.ladda-button').ladda();
         });
 
-        function createRequest() {
-            limpiarCampos();
+        function createRequest(description, points, type) {
+            $('#Description').val(description);
+            $('#Points').val(points);
+            $('select[name=SummaryType]').val(type);
+            $('select[name=SummaryType]').selectpicker('refresh');
             $('#modal-CreateHeader').modal({ backdrop: 'static', keyboard: false });
         }
 
@@ -291,6 +301,26 @@
             $('#Points').val('');
             $('#SummaryType').val('');
             $('.selectpicker').selectpicker('refresh');
+        }
+
+        function deleteRequest(id) {
+            if (confirm("Esta seguro que desea eliminar este registro ?")) {
+                $.ajax({
+                    url: '@Url.Action("DeleteEarnedPoint", "Computing")?id=' + id,
+                    type: "POST",
+                    data: "",
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            window.location.reload();
+                        }
+                        else {
+                            alert(result.status);
+                        }
+                    }
+                });
+            }
         }
     </script>
 }

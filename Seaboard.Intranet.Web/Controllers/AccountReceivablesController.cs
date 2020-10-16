@@ -2206,8 +2206,16 @@ namespace Seaboard.Intranet.Web.Controllers
 
             try
             {
-                var sqlQuery = $"INSERT INTO {Helpers.InterCompanyId}.dbo.EFRM00101 (CustomerNumber, ChargePercent, DaysDelay, IncludeWeekends, IncludeHolidays, LastUserId) " +
-                    $"VALUES ('{contract.CustomerNumber}', '{contract.ChargePercent}', '{contract.DaysDelay}', '{contract.IncludeWeekends}', '{contract.IncludeHolidays}', '{Account.GetAccount(User.Identity.GetUserName()).UserId}') ";
+                string sqlQuery;
+                var count = _repository.ExecuteScalarQuery<int>($"SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.EFRM00101 WHERE CustomerNumber = '{contract.CustomerNumber}'");
+                if (count == 0)
+                    sqlQuery = $"INSERT INTO {Helpers.InterCompanyId}.dbo.EFRM00101 (CustomerNumber, ChargePercent, DaysDelay, IncludeWeekends, IncludeHolidays, LastUserId) " +
+                        $"VALUES ('{contract.CustomerNumber}', '{contract.ChargePercent}', '{contract.DaysDelay}', '{contract.IncludeWeekends}', '{contract.IncludeHolidays}', '{Account.GetAccount(User.Identity.GetUserName()).UserId}') ";
+                else
+                    sqlQuery = $"UPDATE {Helpers.InterCompanyId}.dbo.EFRM00101 SET ChargePercent = '{contract.ChargePercent}', DaysDelay = '{contract.DaysDelay}', " +
+                        $"IncludeWeekends = '{contract.IncludeWeekends}', IncludeHolidays = '{contract.IncludeHolidays}', LastUserId = '{Account.GetAccount(User.Identity.GetUserName()).UserId}' " +
+                        $"WHERE CustomerNumber = '{contract.CustomerNumber}'";
+
                 _repository.ExecuteCommand(sqlQuery);
                 xStatus = "OK";
             }
