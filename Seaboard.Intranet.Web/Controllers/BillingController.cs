@@ -70,7 +70,6 @@ namespace Seaboard.Intranet.Web.Controllers
             var registros = _repository.ExecuteQuery<Customer>(sqlQuery);
             return View(registros);
         }
-
         public ActionResult CustomerCreate()
         {
             if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Billing", "Customer"))
@@ -81,7 +80,6 @@ namespace Seaboard.Intranet.Web.Controllers
             };
             return View(customer);
         }
-
         public ActionResult CustomerEdit(string id)
         {
             if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "Billing", "Customer"))
@@ -139,7 +137,6 @@ namespace Seaboard.Intranet.Web.Controllers
 
             return new JsonResult { Data = new { status = xStatus } };
         }
-
         [HttpPost]
         public JsonResult DeleteCustomer(string customerId)
         {
@@ -164,7 +161,6 @@ namespace Seaboard.Intranet.Web.Controllers
             }
             return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
         }
-
         [HttpPost]
         public JsonResult GetFiscalData(string rnc)
         {
@@ -3065,7 +3061,6 @@ namespace Seaboard.Intranet.Web.Controllers
             }
             return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
         }
-
         private void SendMailNcfNotification()
         {
             var sqlQuery = $"SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.EFNCF40101 A " +
