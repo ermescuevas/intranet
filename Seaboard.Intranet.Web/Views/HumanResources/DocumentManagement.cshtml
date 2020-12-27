@@ -1,0 +1,560 @@
+﻿@model Seaboard.Intranet.Domain.DigitalDocument
+@{
+    Layout = "~/Views/Shared/_HRLayout.cshtml";
+    ViewBag.Title = "Documentos Digitales";
+    var languages = (List<SelectListItem>)ViewBag.Languages;
+}
+
+<style>
+    .selected {
+        background-color: #e0f3ff;
+    }
+
+    #canvas_container {
+        height: 500px;
+        overflow: auto;
+        background: #333;
+        border: solid 2px;
+    }
+</style>
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Documentos Digitales</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Documentos Digitales</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox">
+                <div class="ibox-title">
+                    <div class="ibox-tools">
+                        <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        <a class="close-link"><i class="fa fa-times"></i></a>
+                    </div>
+                </div>
+
+                <div class="ibox-content">
+                    @using (Html.BeginForm("DocumentManagement", "HumanResources", FormMethod.Post, new { @id = "form", @class = "wizard-big", @accept_charset = "utf-8", @enctype = "multipart/form-data" }))
+                    {
+                        @Html.AntiForgeryToken()
+
+                        <h1>Datos generales</h1>
+                        <fieldset>
+                            <div class="row">
+                                <div class="col-sm-6 col-lg-offset-2">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Id. de documento:</label>
+                                        <div class="col-sm-8 input-group">
+                                            @Html.TextBoxFor(m => m.DocumentId, new { @class = "form-control required" })
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Nombre:</label>
+                                        <div class="col-sm-8 input-group">
+                                            @Html.TextBoxFor(m => m.Name, new { @class = "form-control required" })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Descripcion:</label>
+                                        <div class="col-sm-8 input-group">
+                                            @Html.TextAreaFor(m => m.Description, new { @class = "form-control", @rows = "4" })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Idioma:</label>
+                                        <div class="col-sm-8 input-group">
+                                            @Html.DropDownListFor(m => m.Language, languages, "Seleccione una opción", new { @class = "form-control required" })
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <h1>Subir archivo</h1>
+                        <fieldset>
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <div class="col-md-10">
+                                        <div class="fileinput fileinput-new input-group" data-provides="fileinput">
+                                            <div class="form-control" data-trigger="fileinput"><i class="glyphicon glyphicon-file fileinput-exists"></i> <span class="fileinput-filename"></span></div>
+                                            <span class="input-group-addon btn btn-default btn-file">
+                                                <span class="fileinput-new">Seleccionar</span>
+                                                <span class="fileinput-exists">Cambiar</span><input type="file" name="FileData" id="FileData">
+                                            </span>
+                                            <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">Borrar</a>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <button type="button" class="btn btn-success" onclick="atacharArchivo();" data-dismiss="modal"><i class="fa fa-file"></i></button>
+                                    </div>
+                                </div>
+                                <div class="col-md-7 text-center">
+                                    <div id="canvas_container"><canvas id="pdf_renderer"></canvas></div>
+                                    <div id="navigation_controls" class="btn-group">
+                                        <button class="btn btn-default btn-xs" type="button" id="go_previous">Anterior</button>
+                                        <button class="btn btn-default btn-xs" type="button" id="go_next">Siguiente</button>
+                                        <button class="btn btn-default btn-xs" type="button" id="zoom_in">+</button>
+                                        <button class="btn btn-default btn-xs" type="button" id="zoom_out">-</button>
+                                        &nbsp; &nbsp;
+                                        <span>Pagina: <span id="current_page"></span> / <span id="number_pages"></span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <h1>Personalizar</h1>
+                        <fieldset>
+                            <div class="row">
+                                <div class="col-md-10">
+                                    <textarea id="mytextarea" name="mytextarea">@Model.PersonalizedContent</textarea>
+                                </div>
+                                <div class="col-md-2">
+                                    <button id="lookupCampo" type="button" class="btn btn-primary">Agregar valor personalizado</button>
+                                    <input type="hidden" id="copyClipboard" name="copyClipboard" />
+                                    <hr />
+                                    <button class="btn btn-primary" type="button" onclick="createNewField();">Agregar campo personalizado</button>
+                                    <br />
+                                    <hr />
+                                    <div class="table-responsive" id="itemRows"></div>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <h1>Publicar documento</h1>
+                        <fieldset>
+                            <div class="row">
+                                <h2>Finalizacion</h2>
+                            </div>
+                            <br />
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <h4>Notas</h4>
+                                    <br />
+                                    <p>Para publicar el documento debe de darle click a finalizar</p>
+                                    <p>Se muestra una previsualizacion de como quedara el documento</p>
+                                </div>
+                                <div class="col-md-8 text-center">
+                                    <div id="canvas_container"><canvas id="pdf_renderer_preview"></canvas></div>
+                                    <div id="navigation_controls" class="btn-group">
+                                        <button class="btn btn-default btn-xs" type="button" id="go_previous_preview">Anterior</button>
+                                        <button class="btn btn-default btn-xs" type="button" id="go_next_preview">Siguiente</button>
+                                        <button class="btn btn-default btn-xs" type="button" id="zoom_in_preview">+</button>
+                                        <button class="btn btn-default btn-xs" type="button" id="zoom_out_preview">-</button>
+                                        &nbsp; &nbsp;
+                                        <span>Pagina: <span id="current_page_preview"></span> / <span id="number_pages_preview"></span></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-CreateHeader" class="modal inmodal" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content animated fadeIn">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Agregar nuevo campo</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">Id. de campo:</label>
+                        <div class="col-sm-8 input-group">
+                            <span class="input-group-addon" id="code-container"></span>
+                            <input name="Code" id="Code" class="form-control" maxlength="20" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="form-actions no-color">
+                        <button type="button" class="btn btn-primary" onclick="addField();"> Guardar</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    @Styles.Render("~/plugins/wizardStepsStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/plugins/sweetAlertStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+}
+
+@section Scripts {
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/wizardSteps")
+    @Scripts.Render("~/plugins/validate")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+    @Scripts.Render("~/plugins/jqlipboard")
+    @Scripts.Render("~/plugins/sweetAlert")
+<script type="text/javascript">
+        var fields = [];
+        var myState = {
+            pdf: null,
+            currentPage: 1,
+            zoom: 1
+        }
+        var myStatePreview = {
+            pdf: null,
+            currentPage: 1,
+            zoom: 1
+        }
+        $(document).ready(function () {
+            $("#form").steps({
+                labels: {
+                    email: "Por favor digite un email valido",
+                    current: "paso activo:",
+                    pagination: "Paginacion",
+                    finish: "Finalizar",
+                    next: "Siguiente",
+                    previous: "Anterior",
+                    loading: "Cargando ...",
+                    transitionEffect: "slideLeft",
+                },
+                bodyTag: "fieldset",
+                onStepChanging: function (event, currentIndex, newIndex) {
+                    if (currentIndex > newIndex) return true;
+                    var form = $(this);
+                    if (currentIndex < newIndex) {
+                        $(".body:eq(" + newIndex + ") label.error", form).remove();
+                        $(".body:eq(" + newIndex + ") .error", form).removeClass("error");
+                    }
+                    if (newIndex === 3)
+                        previsualizar();
+                    form.validate().settings.ignore = ":disabled,:hidden";
+                    return form.valid();
+                },
+                onStepChanged: function (event, currentIndex, priorIndex) { },
+                onFinishing: function (event, currentIndex) {
+                    var form = $(this);
+                    form.validate().settings.ignore = ":disabled,:hidden";
+                    return form.valid();
+                },
+                onFinished: function (event, currentIndex) {
+                    var form = $(this);
+                    var formData = new FormData();
+                    formData.append("fileData", document.getElementById("FileData").files[0]);
+                    formData.append("documentId", $('#DocumentId').val());
+                    var data = {
+                        DocumentId: $('#DocumentId').val(),
+                        Name: $('#Name').val(),
+                        Description: $('#Description').val(),
+                        Language: $('#Language').val(),
+                        PersonalizedContent: tinymce.activeEditor.getContent(),
+                        fields: fields
+                    };
+                    $.ajax({
+                        url: '@Url.Action("SaveDigitalDocument", "HumanResources")',
+                        type: "POST",
+                        data: JSON.stringify(data),
+                        dataType: "JSON",
+                        contentType: "application/json;",
+                        processData: false,
+                        success: function (result) {
+                            if (result.status === "OK") {
+                                $.ajax({
+                                    url: '@Url.Action("SaveDigitalAttachment", "HumanResources")',
+                                    type: "POST",
+                                    data: formData,
+                                    dataType: "JSON",
+                                    contentType: false,
+                                    processData: false,
+                                    success: function (result) {
+                                        window.location.href = '@Url.Action("DocumentManagementIndex", "HumanResources")';
+                                    }
+                                });
+                            }
+                            else {
+                                swal({
+                                    title: "ERROR",
+                                    text: result.status,
+                                    type: "error"
+                                });
+                            }
+                        }
+                    });
+                }
+            }).validate({
+                errorPlacement: function (error, element) { element.before(error); }
+            });
+            $("#lookupCampo").lookupbox({
+                title: 'Busqueda: ',
+                url: '@Url.Action("ListLookup", "Home")?tipo=49&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 800,
+                onItemSelected: function (data) {
+                    copyToClipboard(data.Id);
+                },
+                tableHeader: ['Nombre', 'Descripcion'],
+                hiddenFields: ['DataExtended', 'DataPlus']
+            });
+            $('.required').each(function (index) {
+                $(this).rules("add", { messages: { required: "Este campo es requerido" } });
+            });
+            $('.input-group.date').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true
+            });
+            $('#Code').EnsureMaxLength({
+                limit: 20,
+                cssClass: '',
+                separator: '/',
+                placement: '#code-container'
+            });
+            tinymce.init({
+                selector: '#mytextarea',
+                plugins: 'print preview powerpaste casechange importcss tinydrive searchreplace autolink autosave save directionality advcode visualblocks visualchars fullscreen image link media mediaembed template codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists checklist wordcount tinymcespellchecker a11ychecker imagetools textpattern noneditable help formatpainter permanentpen pageembed charmap tinycomments mentions quickbars linkchecker emoticons advtable',
+                mobile: { plugins: 'print preview powerpaste casechange importcss tinydrive searchreplace autolink autosave save directionality advcode visualblocks visualchars fullscreen image link media mediaembed template codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists checklist wordcount tinymcespellchecker a11ychecker textpattern noneditable help formatpainter pageembed charmap mentions quickbars linkchecker emoticons advtable' },
+                menubar: 'file edit view insert format tools table tc help',
+                toolbar: 'undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist checklist | forecolor backcolor casechange permanentpen formatpainter removeformat | pagebreak | charmap emoticons | fullscreen  preview save print | insertfile image media pageembed template link anchor codesample | a11ycheck ltr rtl | showcomments addcomment',
+                tinycomments_mode: 'embedded',
+                tinycomments_author: 'Author name',
+                height: 500,
+                image_caption: true,
+                quickbars_selection_toolbar: 'bold italic | quicklink h2 h3 blockquote quickimage quicktable',
+                noneditable_noneditable_class: 'mceNonEditable',
+                toolbar_mode: 'sliding',
+                spellchecker_whitelist: ['Ephox', 'Moxiecode'],
+                tinycomments_mode: 'embedded',
+                content_style: '.mymention{ color: gray; }',
+                contextmenu: 'link image imagetools table configurepermanentpen',
+                a11y_advanced_options: true,
+                autosave_ask_before_unload: false,
+            });
+
+            $('#go_previous').click(function () {
+                if (myState.pdf == null || myState.currentPage == 1) return;
+                myState.currentPage -= 1;
+                $("#current_page").html(myState.currentPage);
+                render();
+            });
+            $('#go_next').click(function () {
+                if (myState.pdf == null || myState.currentPage > myState.pdf._pdfInfo.numPages) return;
+                myState.currentPage += 1;
+                $("#current_page").html(myState.currentPage);
+                render();
+            });
+            $('#zoom_in').click(function () {
+                if (myState.pdf == null) return;
+                myState.zoom += 0.5;
+                render();
+            });
+            $('#zoom_out').click(function () {
+                if (myState.pdf == null) return;
+                myState.zoom -= 0.5;
+                render();
+            });
+
+            $('#go_previous_preview').click(function () {
+                if (myStatePreview.pdf == null || myStatePreview.currentPage == 1) return;
+                myStatePreview.currentPage -= 1;
+                $("#current_page_preview").html(myStatePreview.currentPage);
+                renderPreview();
+            });
+            $('#go_next_preview').click(function () {
+                if (myStatePreview.pdf == null || myStatePreview.currentPage > myStatePreview.pdf._pdfInfo.numPages) return;
+                myStatePreview.currentPage += 1;
+                $("#current_page_preview").html(myStatePreview.currentPage);
+                renderPreview();
+            });
+            $('#zoom_in_preview').click(function () {
+                if (myStatePreview.pdf == null) return;
+                myStatePreview.zoom += 0.5;
+                renderPreview();
+            });
+            $('#zoom_out_preview').click(function () {
+                if (myStatePreview.pdf == null) return;
+                myStatePreview.zoom -= 0.5;
+                renderPreview();
+            });
+            if ('@Model.DocumentId' !== '') {
+                getPreviewFile();
+                fillFields();
+            }
+        });
+        function copyToClipboard(value) {
+            toastr.info("Texto copiado");
+            $.copy(value)
+        }
+        function createNewField(code) {
+            $('#modal-CreateHeader').modal('show');
+            $('#Code').val('');
+    }
+        function getPreviewFile() {
+            var data = new FormData();
+            data.append("fileData", document.getElementById("FileData").files[0]);
+            data.append("documentId", '@Model.DocumentId');
+            $.ajax({
+                url: '@Url.Action("ConvertToPdf", "HumanResources")',
+                type: "POST",
+                data: data,
+                dataType: "JSON",
+                contentType: false,
+                processData: false,
+                success: function (result) {
+                    if (result !== '') {
+                        var pdfData = atob(result);
+                        pdfjsLib.getDocument({ data: pdfData }).then((pdf) => {
+                            myState.pdf = pdf;
+                            $('#number_pages').html(pdf.numPages);
+                            $('#current_page').html(1);
+                            render();
+                        });
+                    }
+                }
+            });
+        }
+        function fillFields() {
+            $.ajax({
+                url: '@Url.Action("GetPersonalizedFields", "HumanResources")?documentId=' + '@Model.DocumentId',
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                cache: false,
+                contentType: "application/json",
+                success: function (result) {
+                    if (result.status === "OK") {
+                        fields = result.fields;
+                        fillFieldsTable();
+                    }
+                }
+            });
+        }
+        function atacharArchivo() {
+            var data = new FormData();
+            data.append("fileData", document.getElementById("FileData").files[0]);
+            $.ajax({
+                url: '@Url.Action("ConvertToPdf", "HumanResources")',
+                type: "POST",
+                data: data,
+                dataType: "JSON",
+                contentType: false,
+                processData: false,
+                success: function (result) {
+                    var pdfData = atob(result);
+                    pdfjsLib.getDocument({ data: pdfData }).then((pdf) => {
+                        myState.pdf = pdf;
+                        $('#number_pages').html(pdf.numPages);
+                        $('#current_page').html(1);
+                        render();
+                    });
+                }
+            });
+        }
+        function previsualizar() {
+            var data = new FormData();
+            data.append("fileData", document.getElementById("FileData").files[0]);
+            data.append("htmlContent", tinymce.activeEditor.getContent());
+            data.append("documentId", '@Model.DocumentId');
+            $.ajax({
+                url: '@Url.Action("PreviewTemplate", "HumanResources")',
+                type: "POST",
+                data: data,
+                dataType: "JSON",
+                contentType: false,
+                processData: false,
+                success: function (result) {
+                    var pdfData = atob(result);
+                    pdfjsLib.getDocument({ data: pdfData }).then((pdf) => {
+                        myStatePreview.pdf = pdf;
+                        $('#number_pages_preview').html(pdf.numPages);
+                        $('#current_page_preview').html(1);
+                        renderPreview();
+                    });
+                }
+            });
+        }
+        function render() {
+            myState.pdf.getPage(myState.currentPage).then((page) => {
+                var canvas = document.getElementById("pdf_renderer");
+                var ctx = canvas.getContext('2d');
+                var viewport = page.getViewport(myState.zoom);
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+                page.render({ canvasContext: ctx, viewport: viewport });
+            });
+        }
+        function renderPreview() {
+            myStatePreview.pdf.getPage(myStatePreview.currentPage).then((page) => {
+                var canvas = document.getElementById("pdf_renderer_preview");
+                var ctx = canvas.getContext('2d');
+                var viewport = page.getViewport(myStatePreview.zoom);
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+                page.render({ canvasContext: ctx, viewport: viewport });
+            });
+        }
+        function addField() {
+            if ($('#Code').val() === '')
+                toastr.info("Debe de digitar un codigo de campo para poder continuar");
+            else {
+                $('#modal-CreateHeader').modal('hide');
+                fields.push({ DocumentId: 0, FieldId: "$*" + $('#Code').val() + "$*", FieldDescription: $('#Code').val() });
+                fillFieldsTable();
+                copyToClipboard("$*" + $('#Code').val() + "$*");
+            }
+        }
+        function fillFieldsTable() {
+            var $table = $('<table class="table table-stripped" id="itemTable"/>');
+            var thead = '<thead>' +
+                '<tr>' +
+                '<th style="width:90%">Id. de campo</th>' +
+                '<th style="width:10%">#</th>' +
+                '</tr>' +
+                '</thead>';
+            $table.append(thead);
+            var $tbody = $('<tbody/>');
+            $.each(fields, function (x, item) {
+                var $row = $('<tr/>');
+                var $button = $('<button class="btn btn-xs btn-primary" type="button"><i class="fa fa-trash"></button>');
+                $row.append($('<td/>').html(item.FieldDescription));
+                $row.append($('<td>').html($button));
+                $button.click(function () {
+                    swal({
+                        title: "Eliminar",
+                        text: "Esta seguro que desea eliminar este registro ?",
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#DD6B55",
+                        confirmButtonText: "Si, eliminar!",
+                        cancelButtonText: "No, cancelar!",
+                        closeOnConfirm: true
+                    }, function () {
+                        fields.splice(x, 1);
+                        fillFieldsTable();
+                    });
+                });
+                $tbody.append($row);
+            });
+            $table.append($tbody);
+            $('#itemRows').html($table);
+        }
+</script>
+}

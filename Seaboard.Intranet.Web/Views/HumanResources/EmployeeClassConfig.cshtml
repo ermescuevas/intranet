@@ -1,0 +1,655 @@
+﻿@model Seaboard.Intranet.Domain.Models.MemBillingHead
+@{
+    Layout = "~/Views/Shared/_HRLayout.cshtml";
+    ViewBag.Title = "Grupos de empleados";
+}
+
+<style>
+    .selected {background-color: #e0f3ff;}
+</style>
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Grupos de empleados</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Grupos de empleados</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <p>Creación de los grupos de empleados para el envio de documentos.</p>
+        <div class="col-lg-5">
+            <div class="ibox">
+                <div class="ibox-title">
+                    <h5>Grupos</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        <a class="close-link"><i class="fa fa-times"></i></a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <button class="btn btn-danger" onclick="createGroup('','')">Crear nuevo grupo</button>
+                    <hr />
+                    <div class="row table-responsive" id="headerRows">
+                        <table class="table informationTable" id="headerTable">
+                            <thead>
+                                <tr>
+                                    <th style="width:20%">Codigo</th>
+                                    <th style="width:55%">Descripción</th>
+                                    <th style="width:25%">#</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="ibox">
+                <div class="ibox-title">
+                    <h5>Empleados</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        <a class="close-link"><i class="fa fa-times"></i></a>
+                    </div>
+                </div>
+
+                <div class="ibox-content">
+                    <button class="btn btn-success" onclick="createDetail($('#CodeHeader').val(),'','','','','','')">Asignar empleados</button>
+                    <hr />
+                    <div class="row table-responsive" id="detailRows">
+                        <table class="table informationTable">
+                            <thead>
+                                <tr>
+                                    <th style="width:15%">Id. de empleado</th>
+                                    <th style="width:45%">Nombre</th>
+                                    <th style="width:25%">Departamento</th>
+                                    <th style="width:15%">#</th>
+                                </tr>
+                            </thead>
+
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-CreateHeader" class="modal inmodal" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content animated fadeIn">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Nuevo grupo</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">Id. de grupo:</label>
+                        <div class="col-sm-8 input-group">
+                            <span class="input-group-addon" id="code-container"></span>
+                            <input name="Code" id="Code" class="form-control" maxlength="20" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label">Descripción:</label>
+                        <div class="col-sm-8 input-group">
+                            <span class="input-group-addon" id="description-container"></span>
+                            <input name="Description" id="Description" class="form-control" maxlength="200" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="form-actions no-color">
+                        <button type="button" class="btn btn-primary" onclick="saveGroup();"> Guardar</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="modal-CreateDetail" class="modal inmodal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content animated fadeIn">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Asignar empleados</h4>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" name="CodeHeader" id="CodeHeader" />
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="btn-group">
+                                <button class="btn btn-info" onclick="marcarTodo();"><i class="fa fa-check"></i> Marcar todo</button>
+                                <button class="btn btn-success" onclick="desmarcarTodo();"><i class="fa fa-remove"></i> Desmarcar todo</button>
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <div class="table-responsive" id="overtimeRows"></div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+                    <button type="button" class="btn btn-success ladda-button" id="sendButton" data-style="expand-left" onclick="saveDetail();">Asignar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/plugins/sweetAlertStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/css/bootstrap-select.min.css">
+}
+
+@section Scripts {
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/sweetAlert")
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/bootstrap-select.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/i18n/defaults-en_US.js"></script>
+
+    <script type="text/javascript">
+        var value = "";
+        $(document).ready(function () {
+            $('.informationTable').DataTable({
+                pageLength: 6,
+                order: [[0, "desc"]],
+                paging: false,
+                scrollCollapse: true,
+                scrollY: "50vh",
+                language: {
+                    "sProcessing": "Procesando... ",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:  ",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                },
+                oAria: {
+                    "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                }
+            });
+            $('#Code').EnsureMaxLength({
+                limit: 20,
+                cssClass: '',
+                separator: '/',
+                placement: '#code-container'
+            });
+            $('#Description').EnsureMaxLength({
+                limit: 200,
+                cssClass: '',
+                separator: '/',
+                placement: '#description-container'
+            });
+            getConfiguration();
+        });
+
+        function createGroup(code, description) {
+            $('#modal-CreateHeader').modal('show');
+            if (code !== '') $('#Code').prop('readonly', true);
+            else $('#Code').prop('readonly', false);
+
+            $('#Code').val(code);
+            $('#Description').val(description);
+        }
+        function createDetail(code) {
+            if (code !== '') {
+                $('#modal-CreateDetail').modal('show');
+                $('#CodeHeader').val(code);
+                generateEmployees();
+            } else toastr.info("Debe de insertar un grupo antes de usar esta opción")
+        }
+
+        function getConfiguration() {
+            generateHeaders();
+        }
+        function generateHeaders() {
+            $.ajax({
+                url: '@Url.Action("GetEmployeeGroups", "HumanResources")',
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    var $table = $('<table class="table informationTable"/>');
+                    $table.append('<thead>' +
+                        '<tr>' +
+                        '<th style="width:20%">Codigo</th>' +
+                        '<th style="width:55%">Descripción</th>' +
+                        '<th style="width:25%">#</th>' +
+                        '</tr>' +
+                        '</thead>');
+                    var $tbody = $('<tbody/>');
+                    if (result.length > 0) {
+                        $.each(result, function (i, val) {
+                            var $row = $('<tr/>');
+                            var $btnGroup = $('<div class="btn-group"/>')
+                            var $edit = $('<button href="#" class="btn btn-success btn-xs">Editar</button>');
+                            var $remove = $('<button href="#"class="btn btn-danger btn-xs">Eliminar</button>');
+                            $row.append($('<td/>').html(val.Id));
+                            $row.append($('<td/>').html(val.Descripción));
+                            $tbody.append($row);
+                            $($row).click(function () {
+                                $(this).addClass('selected').siblings().removeClass('selected');
+                                value = $(this).find('td:first').html();
+                                $('#CodeHeader').val(value);
+                                generateDetails(value);
+                            });
+                            $remove.click(function (e) {
+                                deleteGroup(val.Id);
+                                e.preventDefault();
+                            });
+                            $edit.click(function (e) {
+                                createGroup(val.Id, val.Descripción);
+                                e.preventDefault();
+                            });
+                            $btnGroup.append($edit);
+                            $btnGroup.append($remove);
+                            $row.append($('<td/>').html($btnGroup));
+                        });
+                    }
+                    $table.append($tbody);
+                    $('#headerRows').html($table);
+                    $($table).DataTable({
+                        pageLength: 8,
+                        dom: '<"html5buttons"B>lTfgitp',
+                        paging: false,
+                        scrollCollapse: true,
+                        scrollY: "50vh",
+                        language: {
+                            "sProcessing": "Procesando... ",
+                            "sLengthMenu": "Mostrar _MENU_ registros",
+                            "sZeroRecords": "No se encontraron resultados",
+                            "sEmptyTable": "Ningún dato disponible en esta tabla",
+                            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                            "sInfoPostFix": "",
+                            "sSearch": "Buscar:  ",
+                            "sUrl": "",
+                            "sInfoThousands": ",",
+                            "sLoadingRecords": "Cargando...",
+                            "oPaginate": {
+                                "sFirst": "Primero",
+                                "sLast": "Último",
+                                "sNext": "Siguiente",
+                                "sPrevious": "Anterior"
+                            }
+                        },
+                        oAria: {
+                            "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                            "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                        },
+                        buttons: [
+                            { extend: 'excel', title: 'Cabecera NCF' },
+                            { extend: 'pdf', title: 'Cabecera NCF' },
+                            {
+                                extend: 'print',
+                                customize: function (win) {
+                                    $(win.document.body).addClass('white-bg');
+                                    $(win.document.body).css('font-size', '10px');
+
+                                    $(win.document.body).find('table')
+                                        .addClass('compact')
+                                        .css('font-size', 'inherit');
+                                }
+                            }
+                        ]
+                    });
+                }
+            });
+        }
+        function generateDetails(code) {
+            $.ajax({
+                url: '@Url.Action("GetEmployeeGroupDetail", "HumanResources")?groupCode=' + code,
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    var $table = $('<table class="table informationTable"/>');
+                    $table.append(
+                        '<thead>' +
+                        '<tr>' +
+                        '<th style="width:15%">Id. de empleado</th>' +
+                        '<th style="width:45%">Nombre</th>' +
+                        '<th style="width:25%">Departamento</th>' +
+                        '<th style="width:15%">#</th>' +
+                        '</tr>' +
+                        '</thead>');
+                    var $tbody = $('<tbody/>');
+                    if (result.registros.length > 0) {
+                        $.each(result.registros, function (i, val) {
+                            var $row = $('<tr/>');
+                            $row.append($('<td/>').html(val.Id));
+                            $row.append($('<td/>').html(val.Descripción));
+                            $row.append($('<td/>').html(val.DataExtended));
+                            var $btnGroup = $('<div class="btn-group"/>')
+                            var $remove = $('<button href="#"class="btn btn-danger btn-xs">Eliminar</button>');
+                            $remove.click(function (e) {
+                                deleteDetail(code, val.Id);
+                                e.preventDefault();
+                            });
+                            $btnGroup.append($remove);
+                            $row.append($('<td/>').html($btnGroup));
+                            $tbody.append($row);
+                        });
+                    }
+                    $table.append($tbody);
+                    $('#detailRows').html($table);
+                    $($table).DataTable({
+                        pageLength: 8,
+                        dom: '<"html5buttons"B>lTfgitp',
+                        paging: false,
+                        scrollCollapse: true,
+                        scrollY: "50vh",
+                        language: {
+                            "sProcessing": "Procesando... ",
+                            "sLengthMenu": "Mostrar _MENU_ registros",
+                            "sZeroRecords": "No se encontraron resultados",
+                            "sEmptyTable": "Ningún dato disponible en esta tabla",
+                            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                            "sInfoPostFix": "",
+                            "sSearch": "Buscar:  ",
+                            "sUrl": "",
+                            "sInfoThousands": ",",
+                            "sLoadingRecords": "Cargando...",
+                            "oPaginate": {
+                                "sFirst": "Primero",
+                                "sLast": "Último",
+                                "sNext": "Siguiente",
+                                "sPrevious": "Anterior"
+                            }
+                        },
+                        oAria: {
+                            "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                            "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                        },
+                        buttons: [
+                            { extend: 'excel', title: 'Detalle de NCF' },
+                            { extend: 'pdf', title: 'Detalle de NCF' },
+                            {
+                                extend: 'print',
+                                customize: function (win) {
+                                    $(win.document.body).addClass('white-bg');
+                                    $(win.document.body).css('font-size', '10px');
+
+                                    $(win.document.body).find('table')
+                                        .addClass('compact')
+                                        .css('font-size', 'inherit');
+                                }
+                            }
+                        ]
+                    });
+                }
+            });
+        }
+        function generateEmployees() {
+            $.ajax({
+                url: '@Url.Action("GetEmployeeList", "HumanResources")?groupCode=' + $('#CodeHeader').val(),
+                type: "POST",
+                data: "",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    var $table = $('<table class="table table-stripped table-hover" id="itemTable"/>');
+                    $table.append(
+                        '<thead>' +
+                        '<tr>' +
+                        '<th style="width:8%">#</th>' +
+                        '<th style="width:25%">Id. de empleado</th>' +
+                        '<th style="width:42%">Nombre</th>' +
+                        '<th style="width:25%">Departamento</th>' +
+                        '</tr>' +
+                        '</thead>');
+                    if (result.registros.length > 0) {
+                        var $tbody = $('<tbody/>');
+                        $.each(result.registros, function (i, val) {
+                            var $row = $('<tr/>');
+                            var $labelCheck = $('<label>');
+                            var $checkInput;
+                            var $checkDiv = $('<div class="checkbox checkbox-success checkbox-circle text-center" style="margin-top: 1px; margin-bottom: 1px;">');
+                            if (val.DataPlus === '0') $checkInput = $('<input type="checkbox" name="check">');
+                            else $checkInput = $('<input type="checkbox" name="check" checked="checked">');
+                            $checkDiv.append($checkInput).append($labelCheck);
+                            $row.append($('<td/>').html($checkDiv));
+                            $row.append($('<td/>').html(val.Id));
+                            $row.append($('<td/>').html(val.Descripción));
+                            $row.append($('<td/>').html(val.DataExtended));
+                            $tbody.append($row);
+                        });
+                        $table.append($tbody);
+                    }
+                    $('#overtimeRows').html($table);
+                    $($table).DataTable({
+                        pageLength: 8,
+                        dom: '<"html5buttons"B>lTfgitp',
+                        paging: false,
+                        scrollCollapse: true,
+                        scrollY: "50vh",
+                        language: {
+                            "sProcessing": "Procesando... ",
+                            "sLengthMenu": "Mostrar _MENU_ registros",
+                            "sZeroRecords": "No se encontraron resultados",
+                            "sEmptyTable": "Ningún dato disponible en esta tabla",
+                            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                            "sInfoPostFix": "",
+                            "sSearch": "Buscar:  ",
+                            "sUrl": "",
+                            "sInfoThousands": ",",
+                            "sLoadingRecords": "Cargando...",
+                            "oPaginate": {
+                                "sFirst": "Primero",
+                                "sLast": "Último",
+                                "sNext": "Siguiente",
+                                "sPrevious": "Anterior"
+                            }
+                        },
+                        oAria: {
+                            "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                            "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                        },
+                        buttons: [
+                            { extend: 'excel', title: 'Detalle de NCF' },
+                            { extend: 'pdf', title: 'Detalle de NCF' },
+                            {
+                                extend: 'print',
+                                customize: function (win) {
+                                    $(win.document.body).addClass('white-bg');
+                                    $(win.document.body).css('font-size', '10px');
+
+                                    $(win.document.body).find('table')
+                                        .addClass('compact')
+                                        .css('font-size', 'inherit');
+                                }
+                            }
+                        ]
+                    });
+                }
+            });
+        }
+
+        function saveGroup() {
+            var isAllValid = true;
+            if ($('#Code').val() === '') {
+                toastr.error('Por favor debe de especificar un producto para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Description').val() === '') {
+                toastr.error('Por favor debe de un identificador de columna', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (isAllValid) {
+                var data = {
+                    Id: $('#Code').val().trim(),
+                    Descripción: $('#Description').val().trim()
+                }
+                $.ajax({
+                    url: '@Url.Action("SaveEmployeeGroup", "HumanResources")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            $('#modal-CreateHeader').modal('hide');
+                            generateHeaders();
+                        }
+                        else {
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+                    }
+                });
+            }
+        }
+        function saveDetail() {
+            var isAllValid = true;
+            var items = [];
+            if ($('#CodeHeader').val() === '') {
+                toastr.error('Por favor debe de especificar un grupo para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+            $('#itemTable > tbody > tr').each(function () {
+                if ($(this).find('td:eq(0) input').is(':checked')) {
+                    items.push($(this).find('td:eq(1)').html());
+                }
+            });
+
+            if (isAllValid) {
+                var data = {
+                    groupCode: $('#CodeHeader').val(),
+                    detailEmployees: items
+                }
+                $.ajax({
+                    url: '@Url.Action("SaveEmployeeGroupDetail", "HumanResources")',
+                    type: "POST",
+                    data: JSON.stringify(data),
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") 
+                            window.location.reload();
+                        else 
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                    }
+                });
+            }
+        }
+
+        function deleteGroup(groupCode) {
+            swal({
+                title: "Eliminar",
+                text: "Esta seguro que desea eliminar este registro ?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Si, eliminar!",
+                cancelButtonText: "No, cancelar!",
+                closeOnConfirm: true
+            }, function () {
+                $.ajax({
+                    url: '@Url.Action("DeleteEmployeeGroup", "HumanResources")?groupCode=' + groupCode,
+                    type: "POST",
+                    data: "",
+                    cache: false,
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            generateHeaders();
+                            generateDetails('');
+                        } else {
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+                    }
+                });
+            });
+        }
+        function deleteDetail(groupCode, employeeId) {
+            swal({
+                title: "Eliminar",
+                text: "Esta seguro que desea eliminar este registro ?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Si, eliminar!",
+                cancelButtonText: "No, cancelar!",
+                closeOnConfirm: true
+            }, function () {
+                $.ajax({
+                    url: '@Url.Action("DeleteEmployeeGroupDetail", "HumanResources")?groupCode=' + groupCode + "&employeeId=" + employeeId,
+                    type: "POST",
+                    data: "",
+                    cache: false,
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.status === "OK") {
+                            generateDetails(groupCode);
+                        } else {
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                        }
+                    }
+                });
+            });
+        }
+    </script>
+}

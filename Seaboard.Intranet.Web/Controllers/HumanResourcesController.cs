@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNet.Identity;
+﻿using Aspose.Pdf.Facades;
+using HiQPdf;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+using Microsoft.AspNet.Identity;
 using Seaboard.Intranet.BusinessLogic;
 using Seaboard.Intranet.Data;
 using Seaboard.Intranet.Data.Repository;
@@ -9,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Mvc;
 
@@ -18,11 +23,14 @@ namespace Seaboard.Intranet.Web.Controllers
     public class HumanResourcesController : Controller
     {
         private readonly GenericRepository _repository;
-
         public HumanResourcesController()
         {
             var db = new SeaboContext();
             _repository = new GenericRepository(db);
+        }
+        public ActionResult Index()
+        {
+            return View();
         }
 
         #region Configuracion de Ausencias
@@ -340,6 +348,12 @@ namespace Seaboard.Intranet.Web.Controllers
                 _repository.ExecuteCommand(sqlQuery);
                 newRowId = _repository.ExecuteScalarQuery<int>($"SELECT RowId FROM {Helpers.InterCompanyId}.dbo.EFUPR30100 ORDER BY RowId DESC");
                 ProcessLogic.SendToSharepoint(newRowId.ToString(), 5, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
+                if (status != "OK")
+                    if (newRowId != 0)
+                    {
+                        _repository.ExecuteCommand($"DELETE {Helpers.InterCompanyId}.dbo.EFUPR30100 WHERE RowId = '{newRowId}'");
+                        HelperLogic.DesbloqueoSecuencia(secuence, "EFUPR30100", Account.GetAccount(User.Identity.GetUserName()).UserId);
+                    }
             }
             catch (Exception ex)
             {
@@ -1463,6 +1477,830 @@ namespace Seaboard.Intranet.Web.Controllers
         public class AttachmentViewModel
         {
             public HttpPostedFileBase FileData { get; set; }
+        }
+
+        #endregion
+
+        #region Grupos de empleados
+
+        public ActionResult EmployeeClassConfig()
+        {
+            return View();
+        }
+        public ActionResult GetEmployeeGroups()
+        {
+            var sqlQuery = "SELECT GroupCode Id, GroupDescription Descripción FROM " + Helpers.InterCompanyId + ".dbo.EHUPR40100 ORDER BY GroupCode";
+            var list = _repository.ExecuteQuery<Lookup>(sqlQuery).ToList();
+            return Json(list, JsonRequestBehavior.AllowGet);
+        }
+        public JsonResult GetEmployeeList(string groupCode)
+        {
+            var xRegistros = new List<Lookup>();
+            string status;
+            try
+            {
+                string sqlQuery;
+                sqlQuery = "SELECT RTRIM(A.EMPLOYID) Id, RTRIM(A.FRSTNAME) + ' ' + RTRIM(A.LASTNAME) Descripción, RTRIM(B.DSCRIPTN) DataExtended, ISNULL(C.EmployeeId, '0') DataPlus " +
+                    $"FROM {Helpers.InterCompanyId}.dbo.UPR00100 A " +
+                    $"INNER JOIN {Helpers.InterCompanyId}.dbo.UPR40300 B ON A.DEPRTMNT = B.DEPRTMNT " +
+                    $"LEFT JOIN {Helpers.InterCompanyId}.dbo.EHUPR40110 C ON A.EMPLOYID = C.EmployeeId AND C.GroupCode = '{groupCode}' " +
+                    $"WHERE (A.INACTIVE = 0 OR UPPER(A.USERDEF2) = 'SI') AND A.EMPLOYID NOT IN (SELECT EmployeeId FROM {Helpers.InterCompanyId}.dbo.EHUPR40110 WHERE GroupCode <> '{groupCode}') " +
+                    $"ORDER BY A.EMPLOYID";
+
+                xRegistros = _repository.ExecuteQuery<Lookup>(sqlQuery).ToList();
+                status = "OK";
+            }
+            catch (Exception ex)
+            {
+                status = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status, registros = xRegistros } };
+        }
+        public JsonResult GetEmployeeGroupDetail(string groupCode)
+        {
+            var xRegistros = new List<Lookup>();
+            string status;
+            try
+            {
+                string sqlQuery;
+                sqlQuery = "SELECT RTRIM(A.EMPLOYID) Id, RTRIM(A.FRSTNAME) + ' ' + RTRIM(A.LASTNAME) Descripción, RTRIM(B.DSCRIPTN) DataExtended " +
+                    $"FROM {Helpers.InterCompanyId}.dbo.UPR00100 A " +
+                    $"INNER JOIN {Helpers.InterCompanyId}.dbo.UPR40300 B ON A.DEPRTMNT = B.DEPRTMNT " +
+                    $"INNER JOIN {Helpers.InterCompanyId}.dbo.EHUPR40110 C ON A.EMPLOYID = C.EmployeeId " +
+                    $"WHERE C.GroupCode = '{groupCode}' ";
+                xRegistros = _repository.ExecuteQuery<Lookup>(sqlQuery).ToList();
+                status = "OK";
+            }
+            catch (Exception ex)
+            {
+                status = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status, registros = xRegistros } };
+        }
+        [HttpPost]
+        public JsonResult SaveEmployeeGroup(Lookup header)
+        {
+            string xStatus;
+
+            try
+            {
+                var count = _repository.ExecuteScalarQuery<int>("SELECT COUNT(*) FROM " + Helpers.InterCompanyId + ".dbo.EHUPR40100 WHERE GroupCode = '" + header.Id + "'");
+                var sqlQuery = "";
+                if (count == 0)
+                    sqlQuery = "INSERT INTO " + Helpers.InterCompanyId + ".dbo.EHUPR40100 (GroupCode, GroupDescription, LastUserId)" +
+                        $"VALUES ('{header.Id}', '{header.Descripción}', '{Account.GetAccount(User.Identity.GetUserName()).UserId}')";
+                else
+                    sqlQuery = $"UPDATE {Helpers.InterCompanyId}.dbo.EHUPR40100 SET GroupDescription = '{header.Descripción}', LastUserId = '{Account.GetAccount(User.Identity.GetUserName()).UserId}' " +
+                        $"WHERE GroupCode = '{header.Id}'";
+                _repository.ExecuteCommand(sqlQuery);
+                xStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = xStatus } };
+        }
+        public JsonResult SaveEmployeeGroupDetail(string groupCode, List<string> detailEmployees)
+        {
+            string status;
+            try
+            {
+                _repository.ExecuteCommand($"DELETE {Helpers.InterCompanyId}.dbo.EHUPR40110 WHERE GroupCode = '{groupCode}'");
+                foreach (var item in detailEmployees)
+                    _repository.ExecuteCommand($"INSERT INTO {Helpers.InterCompanyId}.dbo.EHUPR40110 (GroupCode, EmployeeId, LastUserId) VALUES ('{groupCode}','{item}','{Account.GetAccount(User.Identity.GetUserName()).UserId}')");
+                status = "OK";
+            }
+            catch (Exception ex)
+            {
+                status = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status } };
+        }
+        [HttpPost]
+        public JsonResult DeleteEmployeeGroup(string groupCode)
+        {
+            string xStatus = "";
+            try
+            {
+                _repository.ExecuteCommand($"DELETE {Helpers.InterCompanyId}.dbo.EHUPR40100 WHERE GroupCode = '{groupCode}'");
+                _repository.ExecuteCommand($"DELETE {Helpers.InterCompanyId}.dbo.EHUPR40110 WHERE GroupCode = '{groupCode}'");
+                xStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+            return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
+        }
+        [HttpPost]
+        public JsonResult DeleteEmployeeGroupDetail(string groupCode, string employeeId)
+        {
+            string xStatus = "";
+            try
+            {
+                _repository.ExecuteCommand($"DELETE {Helpers.InterCompanyId}.dbo.EHUPR40110 WHERE GroupCode = '{groupCode}' AND EmployeeId = '{employeeId}'");
+                xStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+            return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
+        }
+
+        #endregion
+
+        #region Asignacion de grupos
+
+        public ActionResult EmployeeClassManagement()
+        {
+            return View();
+        }
+        public ActionResult GetDigitalDocuments()
+        {
+            var sqlQuery = "SELECT DocumentId Id, Name Descripción FROM " + Helpers.InterCompanyId + ".dbo.EHUPR10100 ORDER BY DocumentId";
+            var list = _repository.ExecuteQuery<Lookup>(sqlQuery).ToList();
+            return Json(list, JsonRequestBehavior.AllowGet);
+        }
+        public JsonResult GetGroupList(string documentId)
+        {
+            var xRegistros = new List<Lookup>();
+            string status;
+            try
+            {
+                string sqlQuery;
+                sqlQuery = "SELECT RTRIM(A.GroupCode) Id, RTRIM(A.GroupDescription) Descripción, ISNULL(B.GroupCode, '0') DataPlus " +
+                    $"FROM {Helpers.InterCompanyId}.dbo.EHUPR40100 A " +
+                    $"LEFT JOIN {Helpers.InterCompanyId}.dbo.EHUPR40200 B ON A.GroupCode = B.GroupCode AND B.DocumentId = '{documentId}' " +
+                    $"ORDER BY A.GroupCode";
+
+                xRegistros = _repository.ExecuteQuery<Lookup>(sqlQuery).ToList();
+                status = "OK";
+            }
+            catch (Exception ex)
+            {
+                status = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status, registros = xRegistros } };
+        }
+        public JsonResult GetDocumentGroups(string documentId)
+        {
+            var xRegistros = new List<Lookup>();
+            string status;
+            try
+            {
+                string sqlQuery;
+                sqlQuery = "SELECT RTRIM(A.GroupCode) Id, RTRIM(A.GroupDescription) Descripción " +
+                    $"FROM {Helpers.InterCompanyId}.dbo.EHUPR40100 A " +
+                    $"INNER JOIN {Helpers.InterCompanyId}.dbo.EHUPR40200 B ON A.GroupCode = B.GroupCode " +
+                    $"WHERE B.DocumentId = '{documentId}' ";
+                xRegistros = _repository.ExecuteQuery<Lookup>(sqlQuery).ToList();
+                status = "OK";
+            }
+            catch (Exception ex)
+            {
+                status = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status, registros = xRegistros } };
+        }
+        [HttpPost]
+        public JsonResult SaveGroupDocument(string documentId, List<string> detailGroups)
+        {
+            string status;
+            try
+            {
+                _repository.ExecuteCommand($"DELETE {Helpers.InterCompanyId}.dbo.EHUPR40200 WHERE DocumentId = '{documentId}'");
+                foreach (var item in detailGroups)
+                    _repository.ExecuteCommand($"INSERT INTO {Helpers.InterCompanyId}.dbo.EHUPR40200 (DocumentId, GroupCode, LastUserId) VALUES ('{documentId}','{item}','{Account.GetAccount(User.Identity.GetUserName()).UserId}')");
+                status = "OK";
+            }
+            catch (Exception ex)
+            {
+                status = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status } };
+        }
+        [HttpPost]
+        public JsonResult DeleteGroupDocument(string documentId, string groupCode)
+        {
+            string xStatus;
+            try
+            {
+                _repository.ExecuteCommand($"DELETE {Helpers.InterCompanyId}.dbo.EHUPR40200 WHERE DocumentId = '{documentId}' AND GroupCode = '{groupCode}'");
+                xStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+            return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
+        }
+
+        #endregion
+
+        #region Gestion Documental
+
+        public ActionResult DocumentManagementIndex()
+        {
+            var sqlQuery = $"SELECT DocumentId, DocumentDate, Name, Description, Language, Status FROM {Helpers.InterCompanyId}.dbo.EHUPR10100 ORDER BY DocumentId ";
+            var list = _repository.ExecuteQuery<DigitalDocument>(sqlQuery).ToList();
+
+            return View(list);
+        }
+        public ActionResult DocumentManagement(string id = "")
+        {
+            DigitalDocument digitalDocument;
+            if (string.IsNullOrEmpty(id))
+                digitalDocument = new DigitalDocument()
+                {
+                    DocumentId = "",
+                    Name = "",
+                    Description = "",
+                    PersonalizedContent = "",
+                    
+                };
+            else
+            {
+                string sqlQuery = $"SELECT DocumentId, Name, Description, PersonalizedContent, DocumentDate, Language, Status FROM {Helpers.InterCompanyId}.dbo.EHUPR10100 WHERE DocumentId = '{id}'";
+                digitalDocument = _repository.ExecuteScalarQuery<DigitalDocument>(sqlQuery);
+            }
+            var languages = new List<SelectListItem>()
+            {
+                new SelectListItem { Value = "Español", Text = "Español" },
+                new SelectListItem { Value = "Ingles", Text = "Ingles" },
+                new SelectListItem { Value = "Frances", Text = "Frances" },
+                new SelectListItem { Value = "Italiano", Text = "Italiano" },
+                new SelectListItem { Value = "Portugues", Text = "Portugues" },
+                new SelectListItem { Value = "Bulgaro", Text = "Bulgaro" }
+            };
+            ViewBag.Languages = languages;
+            return View(digitalDocument);
+        }
+        [HttpPost]
+        public JsonResult SaveDigitalDocument(DigitalDocument document, List<DigitalDocumentField> fields)
+        {
+            string xStatus;
+
+            try
+            {
+                byte[] fileStream = null;
+                var count = _repository.ExecuteScalarQuery<int>("SELECT COUNT(*) FROM " + Helpers.InterCompanyId + ".dbo.EHUPR10100 WHERE DocumentId = '" + document.DocumentId + "'");
+                if (count > 0)
+                {
+                    _repository.ExecuteCommand($"DELETE {Helpers.InterCompanyId}.dbo.EHUPR10100 WHERE DocumentId = '{document.DocumentId}'");
+                    _repository.ExecuteCommand($"DELETE {Helpers.InterCompanyId}.dbo.EHUPR10101 WHERE DocumentId = '{document.DocumentId}'");
+                    fileStream = _repository.ExecuteScalarQuery<byte[]>($"SELECT FileTemplate FROM {Helpers.InterCompanyId}.dbo.EHUPR10100 WHERE DocumentId = '{document.DocumentId}'");
+                }
+
+                _repository.ExecuteCommand($"INSERT INTO {Helpers.InterCompanyId}.dbo.EHUPR10100 (DocumentId, Name, Description, DocumentDate, Language, PersonalizedContent, Status, LastUserId) " +
+                    $"VALUES ('{document.DocumentId}', '{document.Name}','{document.Description}', GETDATE(), '{document.Language}','{document.PersonalizedContent.Replace("'", @"''")}', " +
+                    $"'0', '{Account.GetAccount(User.Identity.GetUserName()).UserId}')");
+                if (fields != null)
+                    foreach (var item in fields)
+                        _repository.ExecuteCommand($"INSERT INTO {Helpers.InterCompanyId}.dbo.EHUPR10101 (DocumentId, FieldId, FieldDescription, LastUserId) " +
+                            $"VALUES ('{document.DocumentId}', '{item.FieldId}', '{item.FieldDescription}', '{Account.GetAccount(User.Identity.GetUserName()).UserId}')");
+
+                if (fileStream != null)
+                    _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EHUPR10100 SET FileTemplate = {"0x" + BitConverter.ToString(fileStream).Replace("-", string.Empty)} WHERE DocumentId = '{document.DocumentId}' ");
+                xStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = xStatus } };
+        }
+        public JsonResult SaveDigitalAttachment(string documentId, HttpPostedFileBase fileData)
+        {
+            byte[] fileStream = null;
+            if (fileData != null)
+            {
+                using (var binaryReader = new BinaryReader(fileData.InputStream))
+                    fileStream = binaryReader.ReadBytes(fileData.ContentLength);
+                _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EHUPR10100 SET FileTemplate = {"0x" + BitConverter.ToString(fileStream).Replace("-", string.Empty)} WHERE DocumentId = '{documentId}' ");
+            }
+
+            return Json("", JsonRequestBehavior.AllowGet);
+        }
+        public JsonResult DeleteDigitalDocument(string documentId)
+        {
+            string xStatus;
+
+            try
+            {
+                xStatus = "OK";
+                var count = _repository.ExecuteScalarQuery<int>($"SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.EHUPR10100 WHERE DocumentId = '{documentId}'");
+                if (count > 0)
+                {
+                    count = _repository.ExecuteScalarQuery<int>($"SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.EHUPR20100 WHERE DocumentId = '{documentId}'");
+                    if (count > 0)
+                        xStatus = "No puede eliminarse el documento por que existen transacciones relacionadas a el";
+                    count = _repository.ExecuteScalarQuery<int>($"SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.EHUPR40200 WHERE DocumentId = '{documentId}'");
+                    if (count > 0)
+                        xStatus = "No puede eliminarse el documento por que existen transacciones relacionadas a el";
+                }
+
+                if (xStatus == "OK")
+                {
+                    _repository.ExecuteCommand($"DELETE {Helpers.InterCompanyId}.dbo.EHUPR10100 WHERE DocumentId = '{documentId}'");
+                    _repository.ExecuteCommand($"DELETE {Helpers.InterCompanyId}.dbo.EHUPR10101 WHERE DocumentId = '{documentId}'");
+                }
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = xStatus } };
+        }
+        public JsonResult VoidDigitalDocument(string documentId, int status)
+        {
+            string xStatus;
+
+            try
+            {
+                _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EHUPR10100 SET Status = {status} WHERE DocumentId = '{documentId}'");
+                xStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = xStatus } };
+        }
+        [HttpPost]
+        public JsonResult ConvertToPdf(HttpPostedFileBase fileData, string documentId)
+        {
+            byte[] fileStream = null;
+            var base64String = "";
+            try
+            {
+                if (!string.IsNullOrEmpty(documentId) && fileData == null)
+                    fileStream = _repository.ExecuteScalarQuery<byte[]>($"SELECT FileTemplate FROM {Helpers.InterCompanyId}.dbo.EHUPR10100 WHERE DocumentId = '{documentId}'");
+                else
+                    using (var binaryReader = new BinaryReader(fileData.InputStream))
+                    {
+                        fileStream = binaryReader.ReadBytes(fileData.ContentLength);
+                    }
+                if (fileStream != null)
+                    base64String = Convert.ToBase64String(fileStream);
+            }
+            catch { }
+
+            return Json(base64String, JsonRequestBehavior.AllowGet);
+        }
+        public JsonResult GetPersonalizedFields(string documentId)
+        {
+            var fields = new List<DigitalDocumentField>();
+            string status;
+            try
+            {
+                fields = _repository.ExecuteQuery<DigitalDocumentField>($"SELECT DocumentId, FieldId, FieldDescription " +
+                    $"FROM {Helpers.InterCompanyId}.dbo.EHUPR10101 WHERE DocumentId = '{documentId}'").ToList();
+                status = "OK";
+            }
+            catch(Exception ex) { status = ex.Message;  }
+
+            return Json(new { status, fields }, JsonRequestBehavior.AllowGet);
+        }
+        [ValidateInput(false)]
+        [HttpPost]
+        public ActionResult PreviewTemplate(string htmlContent, HttpPostedFileBase fileData, string documentId)
+        {
+            byte[] pdfBuffer = null;
+            int pages;
+            PdfImportedPage importedPage;
+            var sourceDocument = new Document();
+            string outputPdfPath = Server.MapPath("~/PDF/Reportes/") + "preview.pdf";
+            if (System.IO.File.Exists(outputPdfPath))
+                System.IO.File.Delete(outputPdfPath);
+
+            PdfCopy pdfCopyProvider = new PdfCopy(sourceDocument, new FileStream(outputPdfPath, FileMode.Create));
+            sourceDocument.Open();
+            var htmlToPdfConverter = new HtmlToPdf
+            {
+                WaitBeforeConvert = 2,
+                HtmlLoadedTimeout = 120
+            };
+            htmlToPdfConverter.Document.PageSize = PdfPageSize.Letter;
+            htmlToPdfConverter.Document.PageOrientation = PdfPageOrientation.Portrait;
+            htmlToPdfConverter.Document.Margins = new PdfMargins((float)63.49606);
+            
+            string htmlCode = htmlContent;
+            PdfReader reader;
+            if (!string.IsNullOrEmpty(documentId) && fileData == null)
+            {
+                var fileBinaryBlob = _repository.ExecuteScalarQuery<byte[]>($"SELECT FileTemplate FROM {Helpers.InterCompanyId}.dbo.EHUPR10100 WHERE DocumentId = '{documentId}'");
+                if (fileBinaryBlob != null)
+                    pdfBuffer = fileBinaryBlob;
+            }
+            else
+            {
+                if (fileData != null)
+                {
+                    using (var binaryReader = new BinaryReader(fileData.InputStream))
+                    {
+                        pdfBuffer = binaryReader.ReadBytes(fileData.ContentLength);
+                    }
+                }
+            }
+
+            if (pdfBuffer != null)
+            {
+                pages = TotalPageCount(pdfBuffer);
+                reader = new PdfReader(pdfBuffer);
+                for (int i = 1; i <= pages; i++)
+                {
+                    importedPage = pdfCopyProvider.GetImportedPage(reader, i);
+                    pdfCopyProvider.AddPage(importedPage);
+                }
+
+                reader.Close();
+            }
+            if (!string.IsNullOrEmpty(htmlCode))
+            {
+                pdfBuffer = htmlToPdfConverter.ConvertHtmlToMemory(htmlCode, "");
+                if (pdfBuffer != null)
+                {
+                    pages = TotalPageCount(pdfBuffer);
+                    reader = new PdfReader(pdfBuffer);
+                    for (int i = 1; i <= pages; i++)
+                    {
+                        importedPage = pdfCopyProvider.GetImportedPage(reader, i);
+                        pdfCopyProvider.AddPage(importedPage);
+                    }
+                }
+            }
+            sourceDocument.Close();
+            FileStream fileStream = new FileStream(outputPdfPath, FileMode.Open, FileAccess.Read);
+            byte[] data = new byte[(int)fileStream.Length];
+            fileStream.Read(data, 0, data.Length);
+            fileStream.Close();
+            return Json(Convert.ToBase64String(data), JsonRequestBehavior.AllowGet);
+        }
+        private static int TotalPageCount(byte[] fileData)
+        {
+            Stream stream = new MemoryStream(fileData);
+            using (var sr = new StreamReader(stream))
+            {
+                string text = sr.ReadToEnd();
+                Regex regex = new Regex(@"/Type\s*/Page[^s]");
+                MatchCollection matches = regex.Matches(text);
+                return matches.Count;
+            }
+        }
+
+        public ActionResult EmployeeDocumentHandlingIndex()
+        {
+            var sqlQuery = $"SELECT A.DocumentId, A.EmployeeId, A.SendDate, B.Description, B.Name, A.Status " +
+                $"FROM {Helpers.InterCompanyId}.dbo.EHUPR20100 A " +
+                $"INNER JOIN {Helpers.InterCompanyId}.dbo.EHUPR10100 B ON A.DocumentId = B.DocumentId " +
+                $"WHERE A.EmployeeId = '{Account.GetAccount(User.Identity.GetUserName()).EmployeeId}' AND B.Status = 0 " +
+                $"ORDER BY A.SendDate ";
+            var list = _repository.ExecuteQuery<EmployeeDigitalDocument>(sqlQuery).ToList();
+
+            return View(list);
+        }
+        public ActionResult EmployeeDocumentHandling(string id, string employeeId)
+        {
+            ViewBag.DocumentId = id;
+            ViewBag.EmployeeId = employeeId;
+
+            var name = _repository.ExecuteScalarQuery<string>($"SELECT B.Name FROM {Helpers.InterCompanyId}.dbo.EHUPR20100 A " +
+                $"INNER JOIN {Helpers.InterCompanyId}.dbo.EHUPR10100 B ON A.DocumentId = B.DocumentId WHERE A.DocumentId = '{id}' AND A.EmployeeId = '{employeeId}'");
+
+            var sqlQuery = $"SELECT DocumentId, FieldId, FieldDescription, FieldValue " +
+                $"FROM {Helpers.InterCompanyId}.dbo.EHUPR20101 " +
+                $"WHERE DocumentId = '{id}' AND EmployeeId = '{Account.GetAccount(User.Identity.GetUserName()).EmployeeId}'";
+            ViewBag.Fields = _repository.ExecuteQuery<DigitalDocumentField>(sqlQuery).ToList();
+            return View(new EmployeeDigitalDocument { Name = name });
+        }
+        public JsonResult GetPreviewFileSign(string documentId, string employeeId)
+        {
+            int pages;
+            PdfImportedPage importedPage;
+            var sourceDocument = new Document();
+            string outputPdfPath = Server.MapPath("~/PDF/Reportes/") + "preview.pdf";
+            if (System.IO.File.Exists(outputPdfPath))
+                System.IO.File.Delete(outputPdfPath);
+
+            PdfCopy pdfCopyProvider = new PdfCopy(sourceDocument, new FileStream(outputPdfPath, FileMode.Create));
+            sourceDocument.Open();
+            var htmlToPdfConverter = new HtmlToPdf
+            {
+                WaitBeforeConvert = 2,
+                HtmlLoadedTimeout = 120
+            };
+            htmlToPdfConverter.Document.PageSize = PdfPageSize.Letter;
+            htmlToPdfConverter.Document.PageOrientation = PdfPageOrientation.Portrait;
+            htmlToPdfConverter.Document.Margins = new PdfMargins((float)63.49606);
+
+            string htmlCode = _repository.ExecuteScalarQuery<string>($"SELECT PersonalizedContent FROM {Helpers.InterCompanyId}.dbo.EHUPR10100 A INNER JOIN {Helpers.InterCompanyId}.dbo.EHUPR20100 B ON A.DocumentId = B.DocumentId WHERE A.DocumentId = '{documentId}' AND B.EmployeeId = '{employeeId}'");
+            _repository.ExecuteQuery<string>($"SELECT FieldId FROM {Helpers.InterCompanyId}.dbo.EHUPR50100").ToList().ForEach(p => { if (htmlCode.Contains(p)) htmlCode = htmlCode.Replace(p, GetFieldData(p)); });
+            _repository.ExecuteQuery<string>($"SELECT FieldId FROM {Helpers.InterCompanyId}.dbo.EHUPR20101 WHERE DocumentId = '{documentId}' AND EmployeeId = '{employeeId}'").ToList().ForEach(p =>
+            {
+                if (htmlCode.Contains(p)) htmlCode = htmlCode.Replace(p, GetPersonalizedFieldData(p, documentId, employeeId));
+            });
+            
+            var fileData = _repository.ExecuteScalarQuery<byte[]>($"SELECT FileTemplate FROM {Helpers.InterCompanyId}.dbo.EHUPR10100 A INNER JOIN {Helpers.InterCompanyId}.dbo.EHUPR20100 B ON A.DocumentId = B.DocumentId WHERE A.DocumentId = '{documentId}' AND B.EmployeeId = '{employeeId}'");
+            byte[] pdfBuffer;
+            PdfReader reader;
+            if (fileData != null)
+            {
+                pdfBuffer = fileData;
+                pages = TotalPageCount(pdfBuffer);
+                reader = new PdfReader(pdfBuffer);
+                for (int i = 1; i <= pages; i++)
+                {
+                    importedPage = pdfCopyProvider.GetImportedPage(reader, i);
+                    pdfCopyProvider.AddPage(importedPage);
+                }
+
+                reader.Close();
+            }
+            if (!string.IsNullOrEmpty(htmlCode))
+            {
+                pdfBuffer = htmlToPdfConverter.ConvertHtmlToMemory(htmlCode, "");
+                if (pdfBuffer != null)
+                {
+                    pages = TotalPageCount(pdfBuffer);
+                    reader = new PdfReader(pdfBuffer);
+                    for (int i = 1; i <= pages; i++)
+                    {
+                        importedPage = pdfCopyProvider.GetImportedPage(reader, i);
+                        pdfCopyProvider.AddPage(importedPage);
+                    }
+                }
+            }
+            sourceDocument.Close();
+            FileStream fileStream = new FileStream(outputPdfPath, FileMode.Open, FileAccess.Read);
+            byte[] data = new byte[(int)fileStream.Length];
+            fileStream.Read(data, 0, data.Length);
+            fileStream.Close();
+            return Json(Convert.ToBase64String(data), JsonRequestBehavior.AllowGet);
+        }
+        public JsonResult SubmitEmployeeDocument(List<DigitalDocumentField> values, string documentId, string employeeId)
+        {
+            string xStatus;
+            try
+            {
+                if (values != null)
+                    foreach (var item in values)
+                        _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EHUPR20101 SET FieldValue = '{item.FieldValue}' " +
+                            $"WHERE FieldId = '{item.FieldId}' AND DocumentId = '{documentId}' AND EmployeeId = '{employeeId}'");
+                _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EHUPR20100 SET Status = 1 WHERE DocumentId = '{documentId}' AND EmployeeId = '{employeeId}'");
+                xStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = xStatus } };
+        }
+
+        public ActionResult PreviewEmployeeDocument(string documentId, string employeeId)
+        {
+            int pages;
+            PdfImportedPage importedPage;
+            var sourceDocument = new Document();
+            string outputPdfPath = Server.MapPath("~/PDF/Reportes/") + "preview.pdf";
+            if (System.IO.File.Exists(outputPdfPath))
+                System.IO.File.Delete(outputPdfPath);
+
+            PdfCopy pdfCopyProvider = new PdfCopy(sourceDocument, new FileStream(outputPdfPath, FileMode.Create));
+            sourceDocument.Open();
+            var htmlToPdfConverter = new HtmlToPdf
+            {
+                WaitBeforeConvert = 2,
+                HtmlLoadedTimeout = 120
+            };
+            htmlToPdfConverter.Document.PageSize = PdfPageSize.Letter;
+            htmlToPdfConverter.Document.PageOrientation = PdfPageOrientation.Portrait;
+            htmlToPdfConverter.Document.Margins = new PdfMargins((float)63.49606);
+
+            string htmlCode = _repository.ExecuteScalarQuery<string>($"SELECT PersonalizedContent FROM {Helpers.InterCompanyId}.dbo.EHUPR10100 A INNER JOIN {Helpers.InterCompanyId}.dbo.EHUPR20100 B ON A.DocumentId = B.DocumentId WHERE A.DocumentId = '{documentId}' AND B.EmployeeId = '{employeeId}'");
+            _repository.ExecuteQuery<string>($"SELECT FieldId FROM {Helpers.InterCompanyId}.dbo.EHUPR50100").ToList().ForEach(p => { if (htmlCode.Contains(p)) htmlCode = htmlCode.Replace(p, GetFieldData(p)); });
+            _repository.ExecuteQuery<string>($"SELECT FieldId FROM {Helpers.InterCompanyId}.dbo.EHUPR20101 WHERE DocumentId = '{documentId}' AND EmployeeId = '{employeeId}'").ToList().ForEach(p =>
+            {
+                if (htmlCode.Contains(p)) htmlCode = htmlCode.Replace(p, GetPersonalizedFieldData(p, documentId, employeeId));
+            });
+
+            var fileData = _repository.ExecuteScalarQuery<byte[]>($"SELECT FileTemplate FROM {Helpers.InterCompanyId}.dbo.EHUPR10100 A INNER JOIN {Helpers.InterCompanyId}.dbo.EHUPR20100 B ON A.DocumentId = B.DocumentId WHERE A.DocumentId = '{documentId}' AND B.EmployeeId = '{employeeId}'");
+            byte[] pdfBuffer;
+            PdfReader reader;
+            if (fileData != null)
+            {
+                pdfBuffer = fileData;
+                pages = TotalPageCount(pdfBuffer);
+                reader = new PdfReader(pdfBuffer);
+                for (int i = 1; i <= pages; i++)
+                {
+                    importedPage = pdfCopyProvider.GetImportedPage(reader, i);
+                    pdfCopyProvider.AddPage(importedPage);
+                }
+
+                reader.Close();
+            }
+            if (!string.IsNullOrEmpty(htmlCode))
+            {
+                pdfBuffer = htmlToPdfConverter.ConvertHtmlToMemory(htmlCode, "");
+                if (pdfBuffer != null)
+                {
+                    pages = TotalPageCount(pdfBuffer);
+                    reader = new PdfReader(pdfBuffer);
+                    for (int i = 1; i <= pages; i++)
+                    {
+                        importedPage = pdfCopyProvider.GetImportedPage(reader, i);
+                        pdfCopyProvider.AddPage(importedPage);
+                    }
+                }
+            }
+            sourceDocument.Close();
+            FileStream fileStream = new FileStream(outputPdfPath, FileMode.Open, FileAccess.Read);
+            byte[] data = new byte[(int)fileStream.Length];
+            fileStream.Read(data, 0, data.Length);
+            fileStream.Close();
+            return File(data, "application/pdf");
+        }
+        private string GetFieldData(string fieldId)
+        {
+            var query = _repository.ExecuteScalarQuery<string>($"SELECT FieldSearch FROM {Helpers.InterCompanyId}.dbo.EHUPR50100 WHERE FieldId = '{fieldId}'");
+            return _repository.ExecuteScalarQuery<string>(query.Replace("^^Parametros^^", Account.GetAccount(User.Identity.GetUserName()).EmployeeId));
+        }
+        private string GetPersonalizedFieldData(string fieldId, string documentId, string employeeId)
+        {
+            var fieldValue = _repository.ExecuteScalarQuery<string>($"SELECT FieldValue FROM {Helpers.InterCompanyId}.dbo.EHUPR20101 " +
+                $"WHERE FieldId = '{fieldId}' AND DocumentId = '{documentId}' AND EmployeeId = '{employeeId}'");
+            return string.IsNullOrEmpty(fieldValue) ? fieldId : fieldValue;
+        }
+
+        public ActionResult SendEmployeeDocumentIndex()
+        {
+            var sqlQuery = $"SELECT [BatchNumber] Id, [Description] Descripción, CONVERT(NVARCHAR(20), [NumberOfEmployee]) DataExtended, CONVERT(NVARCHAR(10), [SendDate], 103) DataPlus FROM {Helpers.InterCompanyId}.dbo.EHUPR10200 ORDER BY BatchNumber ";
+            var list = _repository.ExecuteQuery<Lookup>(sqlQuery).ToList();
+
+            return View(list);
+        }
+        public ActionResult SendEmployeeDocument()
+        {
+            var list = _repository.ExecuteQuery<DigitalDocument>($"SELECT DocumentId, DocumentDate, Name, Description, Language, Status FROM {Helpers.InterCompanyId}.dbo.EHUPR10100 WHERE Status = 0 ORDER BY DocumentId").ToList();
+            ViewBag.Documents = list;
+            return View();
+        }
+        [HttpPost]
+        public JsonResult SendEmployeeDocument(string employeeFrom, string employeeTo, string groupFrom, string groupTo, string departmentFrom, string departmentTo)
+        {
+            string status;
+            var registros = new List<UserEmployeeViewModel>();
+            try
+            {
+                var sqlQuery = "SELECT A.EMPLOYID EmployeeId, RTRIM(A.FRSTNAME) + ' ' + RTRIM(A.LASTNAME) Name, RTRIM(A.FRSTNAME) FirstName, "
+                            + "RTRIM(A.LASTNAME) LastName, RTRIM(A.USERDEF1) Identification, RTRIM(B.DSCRIPTN) Department, RTRIM(C.DSCRIPTN) JobTitle, RTRIM(ISNULL(D.INET1, '')) Email "
+                            + "FROM " + Helpers.InterCompanyId + ".dbo.UPR00100 A "
+                            + "INNER JOIN " + Helpers.InterCompanyId + ".dbo.UPR40300 B ON A.DEPRTMNT = B.DEPRTMNT "
+                            + "INNER JOIN " + Helpers.InterCompanyId + ".dbo.UPR40301 C ON A.JOBTITLE = C.JOBTITLE "
+                            + "LEFT JOIN " + Helpers.InterCompanyId + ".dbo.SY01200 D ON A.EMPLOYID = D.Master_ID AND D.Master_Type = 'EMP' ";
+                if (!string.IsNullOrEmpty(groupFrom) && !string.IsNullOrEmpty(groupTo))
+                    sqlQuery += "INNER JOIN " + Helpers.InterCompanyId + ".dbo.EHUPR40110 E ON A.EMPLOYID = E.EmployeeId ";
+                sqlQuery += "WHERE (INACTIVE = 0 OR UPPER(USERDEF2) = 'SI') ";
+                if (!string.IsNullOrEmpty(employeeFrom) && !string.IsNullOrEmpty(employeeTo))
+                    sqlQuery += $"AND A.EMPLOYID BETWEEN '{employeeFrom}' AND '{employeeTo}' ";
+                if (!string.IsNullOrEmpty(groupFrom) && !string.IsNullOrEmpty(groupTo))
+                    sqlQuery += $"AND E.GroupCode BETWEEN '{groupFrom}' AND '{groupTo}' ";
+                if (!string.IsNullOrEmpty(departmentFrom) && !string.IsNullOrEmpty(departmentTo))
+                    sqlQuery += $"AND A.DEPRTMNT BETWEEN '{departmentFrom}' AND '{departmentTo}' ";
+                sqlQuery += "ORDER BY A.EMPLOYID ";
+                registros = _repository.ExecuteQuery<UserEmployeeViewModel>(sqlQuery).ToList();
+                status = "OK";
+            }
+            catch (Exception ex)
+            {
+                status = ex.Message;
+            }
+
+            return Json(new { status, registros }, JsonRequestBehavior.AllowGet);
+        }
+        [HttpPost]
+        public JsonResult SendEmployeeDocumentProcess(string employeeFrom, string employeeTo, string groupFrom, string groupTo, string departmentFrom, string departmentTo, string[] includeDocuments)
+        {
+            string status;
+            var registros = new List<UserEmployeeViewModel>();
+            try
+            {
+                var sqlQuery = "SELECT A.EMPLOYID EmployeeId, RTRIM(A.FRSTNAME) + ' ' + RTRIM(A.LASTNAME) Name, RTRIM(A.FRSTNAME) FirstName, "
+                            + "RTRIM(A.LASTNAME) LastName, RTRIM(A.USERDEF1) Identification, RTRIM(B.DSCRIPTN) Department, RTRIM(C.DSCRIPTN) JobTitle, RTRIM(ISNULL(D.INET1, '')) Email "
+                            + "FROM " + Helpers.InterCompanyId + ".dbo.UPR00100 A "
+                            + "INNER JOIN " + Helpers.InterCompanyId + ".dbo.UPR40300 B ON A.DEPRTMNT = B.DEPRTMNT "
+                            + "INNER JOIN " + Helpers.InterCompanyId + ".dbo.UPR40301 C ON A.JOBTITLE = C.JOBTITLE "
+                            + "LEFT JOIN " + Helpers.InterCompanyId + ".dbo.SY01200 D ON A.EMPLOYID = D.Master_ID AND D.Master_Type = 'EMP' ";
+                if (!string.IsNullOrEmpty(groupFrom) && !string.IsNullOrEmpty(groupTo))
+                    sqlQuery += "INNER JOIN " + Helpers.InterCompanyId + ".dbo.EHUPR40110 E ON A.EMPLOYID = E.EmployeeId ";
+                sqlQuery += "WHERE (INACTIVE = 0 OR UPPER(USERDEF2) = 'SI') ";
+                if (!string.IsNullOrEmpty(employeeFrom) && !string.IsNullOrEmpty(employeeTo))
+                    sqlQuery += $"AND A.EMPLOYID BETWEEN '{employeeFrom}' AND '{employeeTo}' ";
+                if (!string.IsNullOrEmpty(groupFrom) && !string.IsNullOrEmpty(groupTo))
+                    sqlQuery += $"AND E.GroupCode BETWEEN '{groupFrom}' AND '{groupTo}' ";
+                if (!string.IsNullOrEmpty(departmentFrom) && !string.IsNullOrEmpty(departmentTo))
+                    sqlQuery += $"AND A.DEPRTMNT BETWEEN '{departmentFrom}' AND '{departmentTo}' ";
+                sqlQuery += "ORDER BY A.EMPLOYID ";
+                registros = _repository.ExecuteQuery<UserEmployeeViewModel>(sqlQuery).ToList();
+
+                string batchNumber = $"SEND{DateTime.Now:yyyyMMddHHmmss}";
+                int count = 0;
+                foreach (var item in registros)
+                {
+                    List<DigitalDocument> list = null;
+                    if (includeDocuments != null && includeDocuments.Length > 0)
+                    {
+                        list = _repository.ExecuteQuery<DigitalDocument>($"SELECT DocumentId, DocumentDate, Name, Description, Language, Status FROM {Helpers.InterCompanyId}.dbo.EHUPR10100 WHERE Status = 0 ORDER BY DocumentId ").ToList();
+                        list = list.Where(x => includeDocuments.Contains(x.DocumentId)).ToList();
+                    }
+                    else
+                    {
+                        list = _repository.ExecuteQuery<DigitalDocument>($"SELECT DISTINCT A.DocumentId, A.DocumentDate, A.Name, A.Description, A.Language, A.Status " +
+                            $"FROM {Helpers.InterCompanyId}.dbo.EHUPR10100 A " +
+                            $"INNER JOIN {Helpers.InterCompanyId}.dbo.EHUPR40200 B ON A.DocumentId = B.DocumentId " +
+                            $"INNER JOIN {Helpers.InterCompanyId}.dbo.EHUPR40110 C ON B.GroupCode = C.GroupCode " +
+                            $"WHERE C.EmployeeId = '{item.EmployeeId}' AND A.Status = 0").ToList();
+                    }
+                    _repository.ExecuteCommand($"INSERT INTO {Helpers.InterCompanyId}.dbo.EHUPR10210 ([BatchNumber], [EmployeeId], [Status]) VALUES ('{batchNumber}', '{item.EmployeeId}', 0)");
+                    count++;
+                    foreach (var document in list)
+                    {
+                        _repository.ExecuteCommand($"INSERT INTO {Helpers.InterCompanyId}.dbo.EHUPR20100 ([BatchNumber], [DocumentId], [EmployeeId], [SendDate], [SignDate], [Status], [LastUserId]) " +
+                            $"VALUES ('{batchNumber}', '{document.DocumentId}', '{item.EmployeeId}', GETDATE(), '19000101', 0, '{Account.GetAccount(User.Identity.GetUserName()).UserId}')");
+                        var fields = _repository.ExecuteQuery<DigitalDocumentField>($"SELECT DocumentId, FieldId, FieldDescription FROM {Helpers.InterCompanyId}.dbo.EHUPR10101 WHERE DocumentId = '{document.DocumentId}'").ToList();
+                        foreach (var field in fields)
+                            _repository.ExecuteCommand($"INSERT INTO {Helpers.InterCompanyId}.dbo.EHUPR20101 ([BatchNumber], [DocumentId], [EmployeeId], [FieldId], [FieldDescription], [FieldValue], [LastUserId]) " +
+                                $"VALUES ('{batchNumber}', '{document.DocumentId}', '{item.EmployeeId}', '{field.FieldId}', '{field.FieldDescription}', '', '{Account.GetAccount(User.Identity.GetUserName()).UserId}')");
+                    }
+                }
+                _repository.ExecuteCommand($"INSERT INTO {Helpers.InterCompanyId}.dbo.EHUPR10200 ([BatchNumber], [Description], [NumberOfEmployee], [SendDate], [LastUserId]) " +
+                    $"VALUES ('{batchNumber}', 'Envio de documentos a empleados', '{count}', GETDATE(), '{Account.GetAccount(User.Identity.GetUserName()).UserId}')");
+                status = "OK";
+                //ProcessLogic.SendToSharepoint(batchNumber, 17, "", ref status);
+            }
+            catch (Exception ex)
+            {
+                status = ex.Message;
+            }
+
+            return Json(new { status, registros }, JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult GetSendEmployeeDocumentDetail(string id)
+        {
+            var xRegistros = new List<Lookup>();
+            string status;
+            try
+            {
+                string sqlQuery;
+                sqlQuery = "SELECT RTRIM(B.EMPLOYID) Id, RTRIM(B.FRSTNAME) + ' ' + RTRIM(B.LASTNAME) Descripción, RTRIM(C.DSCRIPTN) DataExtended, CASE A.Status WHEN 0 THEN 'No enviado' ELSE 'Recibido' END DataPlus " +
+                    $"FROM {Helpers.InterCompanyId}.dbo.EHUPR10210 A " +
+                    $"INNER JOIN {Helpers.InterCompanyId}.dbo.UPR00100 B ON A.EmployeeId = B.EMPLOYID " +
+                    $"INNER JOIN {Helpers.InterCompanyId}.dbo.UPR40300 C ON B.DEPRTMNT = C.DEPRTMNT " +
+                    $"WHERE A.BatchNumber = '{id}' ";
+                xRegistros = _repository.ExecuteQuery<Lookup>(sqlQuery).ToList();
+                status = "OK";
+            }
+            catch (Exception ex)
+            {
+                status = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status, registros = xRegistros } };
+        }
+        public JsonResult GetSendEmployeeDocumentDocument(string id, string employee)
+        {
+            var xRegistros = new List<Lookup>();
+            string status;
+            try
+            {
+                string sqlQuery;
+                sqlQuery = "SELECT A.Name Id, CASE A.Status WHEN 0 THEN 'No sometido' ELSE 'Sometido' END  Descripción " +
+                    $"FROM {Helpers.InterCompanyId}.dbo.EHUPR10100 A " +
+                    $"INNER JOIN {Helpers.InterCompanyId}.dbo.EHUPR20100 B ON A.DocumentId = B.DocumentId " +
+                    $"WHERE B.BatchNumber = '{id}' AND B.EmployeeId = '{employee}' ";
+                xRegistros = _repository.ExecuteQuery<Lookup>(sqlQuery).ToList();
+                status = "OK";
+            }
+            catch (Exception ex)
+            {
+                status = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status, registros = xRegistros } };
         }
 
         #endregion

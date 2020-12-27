@@ -3,6 +3,7 @@ using Seaboard.Intranet.Domain.Models;
 using System.Collections.Generic;
 using System.Linq;
 using Seaboard.Intranet.Data.Repository;
+using Seaboard.Intranet.Domain;
 
 namespace Seaboard.Intranet.BusinessLogic
 {
@@ -16,6 +17,16 @@ namespace Seaboard.Intranet.BusinessLogic
             User user = repository.GetAll<User>(u => u.UserName == userId).FirstOrDefault();
 
             return user;
+        }
+
+        public static List<EmployeeDigitalDocument> GetDocumentForSign(string userId)
+        {
+            var db = new SeaboContext();
+            GenericRepository repository = new GenericRepository(db);
+            User user = repository.GetAll<User>(u => u.UserName == userId).FirstOrDefault();
+            var list = repository.ExecuteQuery<EmployeeDigitalDocument>($"SELECT A.DocumentId, B.[Name], A.EmployeeId FROM {Helpers.InterCompanyId}.dbo.EHUPR20100 A " +
+                $"INNER JOIN {Helpers.InterCompanyId}.dbo.EHUPR10100 B ON A.DocumentId = B.DocumentId WHERE A.Status = 0 AND A.EmployeeId = '{user.EmployeeId}'").ToList();
+            return list;
         }
 
         public static List<Permission> GetAccountPermission(string userId)

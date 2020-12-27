@@ -62,6 +62,9 @@
     <Compile Include="Entity Models\Accounting\AccountingInvoiceHeader.cs" />
     <Compile Include="Entity Models\AccountReceivables\InterestConfiguration.cs" />
     <Compile Include="Entity Models\AccountReceivables\InterestContract.cs" />
+    <Compile Include="Entity Models\Human Resources\EmployeeDigitalDocument.cs" />
+    <Compile Include="Entity Models\Human Resources\DigitalDocument.cs" />
+    <Compile Include="Entity Models\Human Resources\DigitalDocumentField.cs" />
     <Compile Include="Entity Models\Human Resources\HumanResourcesOvertime.cs" />
     <Compile Include="Entity Models\AccountReceivables\InterestHeader.cs" />
     <Compile Include="Entity Models\AccountReceivables\InterestCustomer.cs" />

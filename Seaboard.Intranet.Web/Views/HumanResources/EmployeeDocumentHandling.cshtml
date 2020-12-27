@@ -1,0 +1,212 @@
+﻿@using Seaboard.Intranet.Domain
+@model Seaboard.Intranet.Domain.EmployeeDigitalDocument
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Documentos digitales";
+    var fields = (List<DigitalDocumentField>)ViewBag.Fields;
+}
+
+<style>
+    .selected {
+        background-color: #e0f3ff;
+    }
+
+    #canvas_container {
+        height: 650px;
+        overflow: auto;
+        background: #333;
+        border: solid 2px;
+    }
+</style>
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Documentos Digitales</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Documentos Digitales</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+@Html.Hidden("DocumentId", (string)ViewBag.DocumentId)
+@Html.Hidden("EmployeeId", (string)ViewBag.EmployeeId)
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="col-lg-12">
+        <div class="ibox">
+            <div class="ibox-title">
+                <h3>@Model.Name</h3>
+            </div>
+
+            <div class="ibox-content">
+                <div class="row">
+                    <div class="col-md-8 text-center">
+                        <div id="canvas_container"><canvas id="pdf_renderer"></canvas></div>
+                        <div id="navigation_controls" class="btn-group">
+                            <button class="btn btn-default btn-xs" type="button" id="go_previous">Anterior</button>
+                            <button class="btn btn-default btn-xs" type="button" id="go_next">Siguiente</button>
+                            <button class="btn btn-default btn-xs" type="button" id="zoom_in">+</button>
+                            <button class="btn btn-default btn-xs" type="button" id="zoom_out">-</button>
+                            &nbsp; &nbsp;
+                            <span>Pagina: <span id="current_page"></span> / <span id="number_pages"></span></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <form id="form">
+                            @foreach (var item in fields)
+                            {
+                                <label>@item.FieldDescription</label>
+                                <input type="text" class="form-control required" id="@item.FieldId" name="@item.FieldId" />
+                                <br />
+                            }
+                            <hr />
+                            <button class="btn btn-primary btn-rounded btn-block" type="button" onclick="someter();">Someter</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    @Styles.Render("~/plugins/wizardStepsStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/plugins/sweetAlertStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+}
+
+@section Scripts {
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/wizardSteps")
+    @Scripts.Render("~/plugins/validate")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+    @Scripts.Render("~/plugins/jqlipboard")
+    @Scripts.Render("~/plugins/sweetAlert")
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.0.943/pdf.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+    var fields = [];
+    var myState = {
+        pdf: null,
+        currentPage: 1,
+        zoom: 1.5
+    }
+    $(document).ready(function () {
+        $('#go_previous').click(function () {
+            if (myState.pdf == null || myState.currentPage == 1) return;
+            myState.currentPage -= 1;
+            $("#current_page").html(myState.currentPage);
+            render();
+        });
+        $('#go_next').click(function () {
+            if (myState.pdf == null || myState.currentPage > myState.pdf._pdfInfo.numPages) return;
+            myState.currentPage += 1;
+            $("#current_page").html(myState.currentPage);
+            render();
+        });
+        $('#zoom_in').click(function () {
+            if (myState.pdf == null) return;
+            myState.zoom += 0.5;
+            render();
+        });
+        $('#zoom_out').click(function () {
+            if (myState.pdf == null) return;
+            myState.zoom -= 0.5;
+            render();
+        });
+        getFile();
+    });
+    function someter() {
+        fields = [];
+        $("form#form :input").each(function () {
+            var input = $(this);
+            if (input.val() !== '')
+                fields.push({ FieldId: input.attr('id'), FieldValue: input.val() });
+        });
+        var form = $('#form');
+        if (form.valid()) {
+            if (parseInt($('#current_page').html()) >= parseInt($('#number_pages').html())) {
+                var data = {
+                    values: fields,
+                    documentId: $('#DocumentId').val(),
+                    employeeId: $('#EmployeeId').val()
+                };
+                swal({
+                    title: "Someter",
+                    text: "Esta seguro que desea someter este documento ?",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Si, someter!",
+                    cancelButtonText: "No, cancelar!",
+                    closeOnConfirm: true
+                }, function () {
+                    $.ajax({
+                        url: '@Url.Action("SubmitEmployeeDocument", "HumanResources")',
+                        type: "POST",
+                        data: JSON.stringify(data),
+                        cache: false,
+                        dataType: "JSON",
+                        contentType: "application/json",
+                        success: function (result) {
+                            if (result.status === "OK") {
+                                window.location.href = '@Url.Action("EmployeeDocumentHandlingIndex", "HumanResources")';
+                            } else {
+                                swal({
+                                    title: "ERROR",
+                                    text: result.status,
+                                    type: "error"
+                                });
+                            }
+                        }
+                    });
+                });
+            }
+            else
+                swal({
+                    title: "INFORMACION",
+                    text: "Debe de leer todas las paginas del documento para poder continuar",
+                    type: "warning"
+                });
+        }
+    }
+    function getFile() {
+        var data = {
+            documentId: $('#DocumentId').val(),
+            employeeId: $('#EmployeeId').val()
+        }
+        $.ajax({
+            url: '@Url.Action("GetPreviewFileSign", "HumanResources")',
+            type: "POST",
+            data: JSON.stringify(data),
+            dataType: "JSON",
+            contentType: "application/json",
+            success: function (result) {
+                var pdfData = atob(result);
+                pdfjsLib.getDocument({ data: pdfData }).then((pdf) => {
+                    myState.pdf = pdf;
+                    $('#number_pages').html(pdf.numPages);
+                    $('#current_page').html(1);
+                    render();
+                });
+            }
+        });
+    }
+    function render() {
+        myState.pdf.getPage(myState.currentPage).then((page) => {
+            var canvas = document.getElementById("pdf_renderer");
+            var ctx = canvas.getContext('2d');
+            var viewport = page.getViewport(myState.zoom);
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            page.render({ canvasContext: ctx, viewport: viewport });
+        });
+    }
+</script>
+}

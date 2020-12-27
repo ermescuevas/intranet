@@ -466,7 +466,7 @@ namespace Seaboard.Intranet.Web.Controllers
                         break;
                     case 18:
                         sqlQuery ="SELECT A.EMPLOYID EmployeeId, RTRIM(A.FRSTNAME) + ' ' + RTRIM(A.LASTNAME) Name, RTRIM(A.FRSTNAME) FirstName, "
-                            + "A.LASTNAME LastName, A.USERDEF1 Identification, RTRIM(B.DSCRIPTN) Department, RTRIM(C.DSCRIPTN) JobTitle, ISNULL(D.INET1, '') Email "
+                            + "RTRIM(A.LASTNAME) LastName, RTRIM(A.USERDEF1) Identification, RTRIM(B.DSCRIPTN) Department, RTRIM(C.DSCRIPTN) JobTitle, RTRIM(ISNULL(D.INET1, '')) Email "
                             + "FROM " + Helpers.InterCompanyId + ".dbo.UPR00100 A "
                             + "INNER JOIN " + Helpers.InterCompanyId + ".dbo.UPR40300 B "
                             + "ON A.DEPRTMNT = B.DEPRTMNT "
@@ -742,6 +742,18 @@ namespace Seaboard.Intranet.Web.Controllers
                             "FROM " + Helpers.InterCompanyId + ".dbo.UPR40300 " +
                             "WHERE DEPRTMNT LIKE '%" + consulta + "%' OR DSCRIPTN LIKE '%" + consulta + "%' " +
                             "ORDER BY DSCRIPTN";
+                        break;
+                    case 49:
+                        sqlQuery = "SELECT RTRIM(FieldId) Id, RTRIM(FieldDescription) Descripción, '' DataExtended, '' DataPlus " +
+                            "FROM " + Helpers.InterCompanyId + ".dbo.EHUPR50100 " +
+                            "WHERE FieldId LIKE '%" + consulta + "%' OR FieldDescription LIKE '%" + consulta + "%' " +
+                            "ORDER BY RowId";
+                        break;
+                    case 50:
+                        sqlQuery = "SELECT RTRIM(GroupCode) Id, RTRIM(GroupDescription) Descripción, '' DataExtended, '' DataPlus " +
+                            "FROM " + Helpers.InterCompanyId + ".dbo.EHUPR40100 " +
+                            "WHERE GroupCode LIKE '%" + consulta + "%' OR GroupDescription LIKE '%" + consulta + "%' " +
+                            "ORDER BY GroupCode";
                         break;
                 }
 

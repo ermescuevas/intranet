@@ -1923,10 +1923,65 @@ namespace Seaboard.Intranet.BusinessLogic
                     } while (retryCount < 3);
                     break;
 
+                #endregion
+                case 17:
+                    #region Envio de documentos
+                    do
+                    {
+                        try
+                        {
+                            clientContext = new ClientContext("https://seaboardpowercomdo.sharepoint.com");
+                            foreach (char c in "Servicios2.4")
+                                securePassword.AppendChar(c);
+                            clientContext.Credentials = new SharePointOnlineCredentials("no-reply@seaboardpower.com.do", securePassword);
+                            listCollection = clientContext.Web.Lists.GetByTitle("Documento");
+                            listInformation = new ListItemCreationInformation();
+
+                            using (clientContext)
+                            {
+                                clientContext.Load(clientContext.Web);
+                                clientContext.Load(listCollection);
+                                var builder = new StringBuilder();
+                                builder.Append("<View><Query>");
+                                builder.Append("<Where><Eq><FieldRef Name='Lote'/>");
+                                builder.Append("<Value Type='Text'>" + idSolicitud + "</Value></Eq></Where>");
+                                builder.Append("</Query><RowLimit>1</RowLimit></View>");
+
+                                var query = new CamlQuery { ViewXml = builder.ToString().Trim() };
+                                var collection = listCollection.GetItems(query);
+                                clientContext.Load(collection);
+                                clientContext.ExecuteQuery();
+
+                                if (collection.Count > 0)
+                                {
+                                    foreach (var item in collection)
+                                    {
+                                        listItem = listCollection.GetItemById(item["ID"].ToString().Trim());
+                                        listItem.DeleteObject();
+                                        clientContext.ExecuteQuery();
+                                    }
+                                }
+                            }
+
+                            listItem = listCollection.AddItem(listInformation);
+                            listItem["Lote"] = idSolicitud;
+                            listItem["DB"] = Helpers.InterCompanyId;
+                            listItem.Update();
+
+                            clientContext.ExecuteQuery();
+                            break;
+                        }
+                        catch (Exception ex)
+                        {
+                            status = ex.Message;
+                            retryCount++;
+                        }
+                    } while (retryCount < 3);
+                    break;
+
                     #endregion
             }
         }
-
         public static List<ApprovalHistory> GetListSharepoint(int modulo, string id, ref string status, ref string pendingApprover, ref string documentDate)
         {
             var clientContext = new ClientContext("https://seaboardpowercomdo.sharepoint.com");

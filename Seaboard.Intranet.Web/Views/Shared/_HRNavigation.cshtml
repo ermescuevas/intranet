@@ -1,0 +1,106 @@
+﻿@using Microsoft.AspNet.Identity;
+@using Seaboard.Intranet.BusinessLogic
+@{
+    var account = Account.GetAccount(User.Identity.GetUserName());
+}
+<nav class="navbar-default navbar-static-side" role="navigation">
+    <div class="sidebar-collapse">
+        <ul class="nav metismenu" id="side-menu">
+            <li class="nav-header">
+                <div class="dropdown profile-element">
+                    <span>
+                        <i class="fa fa-user-circle fa-4x"></i>
+                    </span>
+                    <a data-toggle="dropdown" class="dropdown-toggle" href="#">
+                        <span class="clear">
+                            <span class="block m-t-xs">
+                                <strong class="font-bold"> @(account?.FirstName + " " + account?.LastName)</strong>
+                            </span>
+                        </span>
+                    </a>
+                    <ul class="dropdown-menu animated fadeInRight m-t-xs">
+                        <li><a href="@Url.Action("ChangePassword", "Account")">Cambiar contraseña</a></li>
+                        <li class="divider"></li>
+                        <li><a href="@Url.Action("Logout", "Account")">Salir</a></li>
+                    </ul>
+                </div>
+                <div class="logo-element">
+                    TCC
+                </div>
+            </li>
+            <li class="landing_link">
+                <a href="@Url.Action("Index","HumanResources")"><i class="fa fa-star"></i> <span class="nav-label">Inicio</span></a>
+            </li>
+            <li class="@Html.IsSelected(controller: "HumanResources", action: "DocumentManagementIndex")
+                @Html.IsSelected(controller: "HumanResources", action: "DocumentManagement")
+                @Html.IsSelected(controller: "HumanResources", action: "EmployeeClassManagement")
+                @Html.IsSelected(controller: "HumanResources", action: "SendEmployeeDocumentIndex")
+                @Html.IsSelected(controller: "HumanResources", action: "SendEmployeeDocument")
+                @Html.IsSelected(controller: "HumanResources", action: "SendEmployeeDocument")
+                @Html.IsSelected(controller: "PaymentVoucher", action: "PayrollView")
+                @Html.IsSelected(controller: "HumanResources", action: "OvertimeRequest")
+                @Html.IsSelected(controller: "HumanResources", action: "ExtraOvertimeRequest")
+                @Html.IsSelected(controller: "HumanResources", action: "HumanResourcesOvertime")">
+                <a href="#"><i class="fa fa-edit"></i> <span class="nav-label" data-i18n="nav.dashboard">Procesos</span> <span class="fa arrow"></span></a>
+                <ul class="nav nav-second-level collapse
+                    @Html.IsSelected(controller: "HumanResources", action: "DocumentManagementIndex", cssClass: "in")
+                    @Html.IsSelected(controller: "HumanResources", action: "DocumentManagement", cssClass: "in")
+                    @Html.IsSelected(controller: "HumanResources", action: "EmployeeClassManagement", cssClass: "in")
+                    @Html.IsSelected(controller: "HumanResources", action: "SendEmployeeDocumentIndex", cssClass: "in")
+                    @Html.IsSelected(controller: "HumanResources", action: "SendEmployeeDocument", cssClass: "in")
+                    @Html.IsSelected(controller: "PaymentVoucher", action: "PayrollView", cssClass: "in")
+                    @Html.IsSelected(controller: "HumanResources", action: "OvertimeRequest", cssClass: "in")
+                    @Html.IsSelected(controller: "HumanResources", action: "ExtraOvertimeRequest", cssClass: "in")
+                    @Html.IsSelected(controller: "HumanResources", action: "HumanResourcesOvertime", cssClass: "in")">
+                    <li class="@Html.IsSelected(action: "DocumentManagementIndex") @Html.IsSelected(action: "DocumentManagement")">
+                        <a href="@Url.Action("DocumentManagementIndex", "HumanResources")">Documentos digitales</a>
+                    </li>
+                    <li class="@Html.IsSelected(action: "SendEmployeeDocumentIndex") @Html.IsSelected(action: "SendEmployeeDocument")">
+                        <a href="@Url.Action("SendEmployeeDocumentIndex", "HumanResources")">Envio de documentos</a>
+                    </li>
+                    <li class="@Html.IsSelected(action: "EmployeeClassManagement")"><a href="@Url.Action("EmployeeClassManagement", "HumanResources")">Clasificacion empleados</a></li>
+                    <li class="@Html.IsSelected(action: "PayrollView")"><a href="@Url.Action("PayrollView", "PaymentVoucher")">Acceso a nominas</a></li>
+                    <li class="@Html.IsSelected(action: "OvertimeRequest")"><a href="@Url.Action("OvertimeRequest", "HumanResources")">Horas Extras</a></li>
+                    <li class="@Html.IsSelected(action: "ExtraOvertimeRequest")"><a href="@Url.Action("ExtraOvertimeRequest", "HumanResources")">Horas Extras extraordinarias</a></li>
+                    <li class="@Html.IsSelected(action: "HumanResourcesOvertime")"><a href="@Url.Action("HumanResourcesOvertime", "HumanResources")">Nomina - Horas Extras</a></li>
+                </ul>
+            </li>
+            <li class="@Html.IsSelected(controller: "HumanResources", action: "AbsenceReport")
+                @Html.IsSelected(controller: "HumanResources", action: "VacationPendingReport")
+                @Html.IsSelected(controller: "HumanResources", action: "DigitalDocumentInquiry")">
+                <a href="#"><i class="fa fa-table"></i> <span class="nav-label" data-i18n="nav.dashboard">Consultas</span> <span class="fa arrow"></span></a>
+                <ul class="nav nav-second-level collapse
+                    @Html.IsSelected(controller: "HumanResources", action: "AbsenceReport", cssClass: "in")
+                    @Html.IsSelected(controller: "HumanResources", action: "VacationPendingReport", cssClass: "in")
+                    @Html.IsSelected(controller: "HumanResources", action: "DigitalDocumentInquiry", cssClass: "in")">
+                    <li class="@Html.IsSelected(action: "AbsenceConfiguration")"><a href="@Url.Action("DigitalDocumentInquiry", "HumanResources")">Documentos digitales</a></li>
+                    <li class="@Html.IsSelected(action: "AbsenceReport")"><a href="@Url.Action("AbsenceReport", "HumanResources")">Ausencias procesadas</a></li>
+                    <li class="@Html.IsSelected(action: "VacationPendingReport")"><a href="@Url.Action("VacationPendingReport", "HumanResources")">Vacaciones pendientes</a></li>
+                </ul>
+            </li>
+            <li class="@Html.IsSelected(controller: "HumanResources", action: "DigitalDocumentReport")
+                @Html.IsSelected(controller: "HumanResources", action: "DigitalDocumentAuditReport")">
+                <a href="#"><i class="fa fa-files-o"></i> <span class="nav-label" data-i18n="nav.dashboard">Reportes</span> <span class="fa arrow"></span></a>
+                <ul class="nav nav-second-level collapse
+                    @Html.IsSelected(controller: "HumanResources", action: "DigitalDocumentReport", cssClass: "in")
+                    @Html.IsSelected(controller: "HumanResources", action: "DigitalDocumentAuditReport", cssClass: "in")">
+                    <li class="@Html.IsSelected(action: "DigitalDocumentReport")"><a href="@Url.Action("DigitalDocumentReport", "HumanResources")">Documentos digitales</a></li>
+                    <li class="@Html.IsSelected(action: "DigitalDocumentAuditReport")"><a href="@Url.Action("DigitalDocumentAuditReport", "HumanResources")">Auditoria documentos digitales</a></li>
+                </ul>
+            </li>
+            <li class="@Html.IsSelected(controller: "HumanResources", action: "EmployeeClassConfig") 
+                @Html.IsSelected(controller: "HumanResources", action: "AbsenceConfiguration")
+                @Html.IsSelected(controller: "HumanResources", action: "HolidayConfiguration")">
+                <a href="#"><i class="fa fa-laptop"></i> <span class="nav-label" data-i18n="nav.dashboard">Configuración</span> <span class="fa arrow"></span></a>
+                <ul class="nav nav-second-level collapse
+                        @Html.IsSelected(controller: "HumanResources", action: "EmployeeClassConfig", cssClass: "in")
+                    @Html.IsSelected(controller: "HumanResources", action: "AbsenceConfiguration", cssClass: "in")
+                    @Html.IsSelected(controller: "HumanResources", action: "HolidayConfiguration", cssClass: "in")">
+                    <li class="@Html.IsSelected(action: "EmployeeClassConfig")"><a href="@Url.Action("EmployeeClassConfig", "HumanResources")">Grupos empleados</a></li>
+                    <li class="@Html.IsSelected(action: "AbsenceConfiguration")"><a href="@Url.Action("AbsenceConfiguration", "HumanResources")">Reglas de ausencias</a></li>
+                    <li class="@Html.IsSelected(action: "HolidayConfiguration")"><a href="@Url.Action("HolidayConfiguration", "HumanResources")">Dias feriados</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</nav>

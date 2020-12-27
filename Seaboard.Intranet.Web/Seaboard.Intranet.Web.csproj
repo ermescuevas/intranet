@@ -47,8 +47,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Aspose.PDF, Version=20.12.0.0, Culture=neutral, PublicKeyToken=f0262d67fe233d63, processorArchitecture=MSIL">
+      <HintPath>..\packages\Aspose.PDF.20.12.0\lib\net4.0\Aspose.PDF.dll</HintPath>
+    </Reference>
     <Reference Include="BeginCollectionItem">
       <HintPath>..\..\Seaboard Intranet - Copy\Seaboard.Intranet.Web\bin\BeginCollectionItem.dll</HintPath>
+    </Reference>
+    <Reference Include="BouncyCastle.Crypto, Version=1.8.6.0, Culture=neutral, PublicKeyToken=0e99375e54769942">
+      <HintPath>..\packages\BouncyCastle.1.8.6.1\lib\BouncyCastle.Crypto.dll</HintPath>
     </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
@@ -57,6 +63,12 @@
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
       <Private>True</Private>
+    </Reference>
+    <Reference Include="HiQPdf.Free, Version=12.0.0.0, Culture=neutral, PublicKeyToken=acd8b62594985b24, processorArchitecture=MSIL">
+      <HintPath>..\packages\hiqpdf.free.12.0.0\lib\net40\HiQPdf.Free.dll</HintPath>
+    </Reference>
+    <Reference Include="itextsharp, Version=5.5.13.2, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <HintPath>..\packages\iTextSharp.5.5.13.2\lib\itextsharp.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.AspNet.Identity.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.Identity.Core.2.2.1\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
@@ -428,7 +440,6 @@
     <Content Include="Content\plugins\summernote\font\summernote.eot" />
     <Content Include="Content\plugins\summernote\font\summernote.ttf" />
     <Content Include="Content\plugins\summernote\font\summernote.woff" />
-    <Content Include="PDF\Excel\Planilla.xls" />
     <None Include="Properties\PublishProfiles\TCC.pubxml" />
     <None Include="Resources\blank.jpg" />
     <Content Include="Scripts\app\inspinia.js" />
@@ -738,6 +749,7 @@
     <Content Include="Scripts\plugins\jqGrid\i18n\grid.locale-ua.js" />
     <Content Include="Scripts\plugins\jqGrid\i18n\grid.locale-vi.js" />
     <Content Include="Scripts\plugins\jqGrid\jquery.jqGrid.min.js" />
+    <Content Include="Scripts\plugins\jqlipboard\JQlipboard.min.js" />
     <Content Include="Scripts\plugins\jquery-ui\images\ui-icons_444444_256x240.png" />
     <Content Include="Scripts\plugins\jquery-ui\images\ui-icons_555555_256x240.png" />
     <Content Include="Scripts\plugins\jquery-ui\images\ui-icons_777620_256x240.png" />
@@ -1047,12 +1059,24 @@
     <Content Include="Views\Accounting\PurchaseOrderInquiry.cshtml" />
     <Content Include="Views\Accounting\SupplierInquiry.cshtml" />
     <Content Include="Views\Accounting\FiscalSalesExchangeRate.cshtml" />
+    <Content Include="Views\HumanResources\EmployeeClassConfig.cshtml" />
+    <Content Include="Views\Shared\_HRNavigation.cshtml" />
+    <Content Include="Views\Shared\_HRLayout.cshtml" />
+    <Content Include="Views\HumanResources\Index.cshtml" />
+    <Content Include="Views\HumanResources\DocumentManagementIndex.cshtml" />
+    <Content Include="Views\HumanResources\DocumentManagement.cshtml" />
+    <Content Include="Views\HumanResources\EmployeeDocumentHandling.cshtml" />
+    <Content Include="Views\HumanResources\EmployeeDocumentHandlingIndex.cshtml" />
+    <Content Include="Views\HumanResources\SendEmployeeDocument.cshtml" />
+    <Content Include="Views\HumanResources\SendEmployeeDocumentIndex.cshtml" />
+    <Content Include="Views\HumanResources\EmployeeClassManagement.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="PDF\AR\" />
     <Folder Include="PDF\Caja\" />
     <Folder Include="PDF\Despacho\" />
+    <Folder Include="PDF\Excel\" />
     <Folder Include="PDF\Nomina\" />
     <Folder Include="PDF\Pago\" />
     <Folder Include="PDF\Reportes\" />

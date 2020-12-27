@@ -94,6 +94,9 @@ namespace Seaboard.Intranet.Web
             bundles.Add(new ScriptBundle("~/plugins/chartJs").Include(
                       "~/Scripts/plugins/chartjs/Chart.min.js"));
 
+            // jQlipboard
+            bundles.Add(new ScriptBundle("~/plugins/jqlipboard").Include("~/Scripts/plugins/jqlipboard/JQlipboard.min.js"));
+
             // iCheck css styles
             bundles.Add(new StyleBundle("~/Content/plugins/iCheck/iCheckStyles").Include(
                       "~/Content/plugins/iCheck/custom.css"));

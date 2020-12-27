@@ -1,6 +1,7 @@
 ﻿@using Seaboard.Intranet.Domain;
 @model IEnumerable<Seaboard.Intranet.Domain.Models.HumanResourcesOvertime>
 @{
+    Layout = "~/Views/Shared/_HRLayout.cshtml";
     ViewBag.Title = "Recursos humanos - Horas extras";
 }
 
@@ -68,7 +69,7 @@
                                                     <tr>
                                                         <th style="width:10%">Id. de lote</th>
                                                         <th style="width:20%">Descripcion</th>
-                                                        <th style="width:10%">Cant. transacciones</th>
+                                                        <th style="width:10%">Transacciones</th>
                                                         <th style="width:10%">Fecha creacion</th>
                                                         <th style="width:30%">Nota</th>
                                                         <th style="width:10%">Estado</th>
@@ -82,7 +83,7 @@
                                                         <td>@item.BatchNumber</td>
                                                         <td>@item.Description</td>
                                                         <td>@item.NumberOfTransactions</td>
-                                                        <td>@item.CreatedDate</td>
+                                                        <td>@item.CreatedDate.ToString("dd/MM/yyyy")</td>
                                                         <td>@item.Note</td>
                                                         <td>
                                                             @if (item.Status == 0)

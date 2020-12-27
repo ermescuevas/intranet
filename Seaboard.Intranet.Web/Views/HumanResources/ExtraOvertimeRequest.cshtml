@@ -1,6 +1,7 @@
 ﻿@using Seaboard.Intranet.Domain;
 @model IEnumerable<Seaboard.Intranet.Domain.Models.Overtime>
 @{
+    Layout = "~/Views/Shared/_HRLayout.cshtml";
     ViewBag.Title = "Horas extras extraordinarias";
     var employees = (List<Seaboard.Intranet.Domain.ViewModels.Lookup>)ViewBag.Employees;
     var batches = (List<Seaboard.Intranet.Domain.Models.OvertimeApproval>)ViewBag.BatchApprovals;
