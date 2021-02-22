@@ -755,6 +755,19 @@ namespace Seaboard.Intranet.Web.Controllers
                             "WHERE GroupCode LIKE '%" + consulta + "%' OR GroupDescription LIKE '%" + consulta + "%' " +
                             "ORDER BY GroupCode";
                         break;
+                    case 51:
+                        sqlQuery = "SELECT RTRIM(JOBTITLE) Id, RTRIM(DSCRIPTN) Descripción, '' DataExtended, '' DataPlus " +
+                            "FROM " + Helpers.InterCompanyId + ".dbo.UPR40301 " +
+                            "WHERE JOBTITLE LIKE '%" + consulta + "%' OR DSCRIPTN LIKE '%" + consulta + "%' " +
+                            "ORDER BY JOBTITLE";
+                        break;
+                    case 52:
+                        sqlQuery = "SELECT RTRIM(A.SUPERVISORCODE_I) Id, RTRIM(A.SUPERVISOR) Descripción, RTRIM(B.FRSTNAME) + ' ' + RTRIM(B.LASTNAME) DataExtended, '' DataPlus " +
+                            "FROM " + Helpers.InterCompanyId + ".dbo.UPR41700 A " +
+                            "INNER JOIN " + Helpers.InterCompanyId + ".dbo.UPR00100 B ON A.EMPLOYID = B.EMPLOYID " +
+                            "WHERE A.SUPERVISORCODE_I LIKE '%" + consulta + "%' OR A.SUPERVISOR LIKE '%" + consulta + "%' OR B.FRSTNAME LIKE '%" + consulta + "%' OR B.LASTNAME LIKE '%" + consulta + "%' " +
+                            "ORDER BY A.SUPERVISORCODE_I";
+                        break;
                 }
 
                 switch (tipo)

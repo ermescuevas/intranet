@@ -320,13 +320,20 @@
 
             if (isValid) {
                 toastr.info('Estamos procesando su solicitud', 'Por favor espere');
+                details = [];
+                $('#itemTable > tbody > tr').each(function () {
+                    if ($(this).find('td:eq(0) input').is(':checked')) {
+                        details.push($(this).find('td:eq(1)').html());
+                    }
+                });
                 var data = {
                     employeeFrom: $('#EmployeeIdFrom').val(),
                     employeeTo: $('#EmployeeIdTo').val(),
                     groupFrom: $('#GroupIdFrom').val(),
                     groupTo: $('#GroupIdTo').val(),
                     departmentFrom: $('#DepartmentIdFrom').val(),
-                    departmentTo: $('#DepartmentIdTo').val()
+                    departmentTo: $('#DepartmentIdTo').val(),
+                    includeDocuments: details
                 }
                 $.ajax({
                     url: '@Url.Action("SendEmployeeDocument", "HumanResources")',
@@ -431,6 +438,13 @@
                 cancelButtonText: "No, cancelar!",
                 closeOnConfirm: false
             }, function () {
+                swal({
+                    title: "ESPERE..",
+                    text: "Por favor espere...",
+                    type: "warning",
+                    showConfirmButton: false
+                });
+                details = [];
                 $('#itemTable > tbody > tr').each(function () {
                     if ($(this).find('td:eq(0) input').is(':checked')) {
                         details.push($(this).find('td:eq(1)').html());
@@ -450,7 +464,6 @@
                     type: "POST",
                     data: JSON.stringify(data),
                     dataType: "JSON",
-                    async: false,
                     cache: false,
                     contentType: "application/json",
                     success: function (result) {

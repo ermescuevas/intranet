@@ -1,0 +1,368 @@
+﻿@using Seaboard.Intranet.Domain;
+@model IEnumerable<Seaboard.Intranet.Domain.ViewModels.Lookup>
+@{
+    Layout = "~/Views/Shared/_HRLayout.cshtml";
+    ViewBag.Title = "Foto empleados";
+    var employees = (List<Seaboard.Intranet.Domain.ViewModels.Lookup>)ViewBag.Employees;
+}
+
+<style>
+    .bootstrap-select:not([class*=col-]):not([class*=form-control]):not(.input-group-btn) {
+        width: 100%;
+    }
+
+    .clockpicker-popover {
+        z-index: 999999;
+    }
+
+    .modal-lg {
+        width: 1200px;
+    }
+</style>
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-lg-10">
+        <h2>Foto empleados</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Foto empleados</strong>
+            </li>
+        </ol>
+    </div>
+    <div class="col-lg-2">
+
+    </div>
+</div>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>Foto empleados</h5>
+                    <div class="ibox-tools">
+                        <a class="collapse-link">
+                            <i class="fa fa-chevron-up"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="ibox-content">
+                    <div class="row m-t-sm">
+                        <div class="col-lg-12">
+                            <div class="panel blank-panel">
+                                <div class="panel-heading">
+                                    <div class="panel-options">
+                                        <ul class="nav nav-tabs">
+                                            <li id="tabButton1" class="active"><a href="#tab-1" data-toggle="tab">General</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div class="panel-body">
+                                    <div class="tab-content" id="tabContainer">
+                                        <div class="tab-pane active" id="tab-1">
+                                            <button class="btn btn-danger" onclick="createPicture('')">NUEVA FOTO</button>
+                                            <div class="hr-line-dashed"></div>
+                                            <table class="table table-striped table-bordered table-hover informationTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width:20%">Id. de empleado</th>
+                                                        <th style="width:40%">Nombre</th>
+                                                        <th style="width:20%">Departamento</th>
+                                                        <th style="width:20%">#</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var item in Model)
+                                                    {
+                                                        <tr>
+                                                            <td>@item.Id</td>
+                                                            <td>@item.Descripción</td>
+                                                            <td>@item.DataExtended</td>
+                                                            <td>
+                                                                <div class="btn-group-xs">
+                                                                    <button class="btn btn-xs btn-success" onclick="getPicture('@item.Id')">Ver</button>
+                                                                    <button class="btn btn-xs btn-info" onclick="createPicture('@item.Id');">Editar</button>
+                                                                    <button class="btn btn-danger btn-xs" onclick="deletePicture('@item.Id');">Eliminar</button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-CreateHeader" class="modal inmodal" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content animated fadeIn">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Nueva foto empleado</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="RowId" id="RowId" />
+                    <div class="row">
+                        <div class="form-group">
+                            <label>Empleado:</label>
+                            <select class="selectpicker form-control required" data-live-search="true" id="EmployeeId" name="EmployeeId">
+                                <option value=""></option>
+                                @foreach (var item in employees)
+                                {
+                                    <option value="@item.Id.Trim()">@(item.Id + " - " + item.Descripción)</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <form action="javascript:;" method="post" enctype="multipart/form-data" id="attachmentForm" accept-charset="utf-8">
+                            <div class="col-md-12">
+                                <div class="fileinput fileinput-new input-group" data-provides="fileinput">
+                                    <div class="form-control" data-trigger="fileinput"><i class="glyphicon glyphicon-file fileinput-exists"></i> <span class="fileinput-filename"></span></div>
+                                    <span class="input-group-addon btn btn-default btn-file"><span class="fileinput-new">Seleccionar foto</span><span class="fileinput-exists">Cambiar</span><input type="file" name="FileData" id="FileData"></span>
+                                    <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">Borrar</a>
+                                </div>
+                            </div>
+                        </form>
+                        <div class="img-preview img-preview-sm" style="width: 100%; height: 100%;">
+                            <img id="imgInp" style="width: 100%; height: 100%;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+                    <button type="button" class="btn btn-success" onclick="savePicture();">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-View" class="modal inmodal" tabindex="-1" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content animated fadeIn">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="img-preview img-preview-sm" style="width: 100%; height: 100%;">
+                            <img id="preview" style="width: 100%; height: 100%;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal" aria-hidden="true">Cancelar</button>
+                    <button type="button" class="btn btn-success" onclick="savePicture();">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Styles {
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/wizardStepsStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/plugins/sweetAlertStyles")
+    @Styles.Render("~/plugins/clockpickerStyles")
+    @Styles.Render("~/plugins/awesomeCheckboxStyles")
+    @Styles.Render("~/Content/plugins/iCheck/iCheckStyles")
+    @Styles.Render("~/plugins/laddaStyles")
+    @Styles.Render("~/plugins/sweetAlertStyles")
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/css/bootstrap-select.min.css">
+}
+
+@section Scripts {
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/wizardSteps")
+    @Scripts.Render("~/plugins/validate")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/sweetAlert")
+    @Scripts.Render("~/plugins/clockpicker")
+    @Scripts.Render("~/plugins/ladda")
+    @Scripts.Render("~/plugins/sweetAlert")
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/bootstrap-select.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/i18n/defaults-en_US.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('.informationTable').DataTable({
+                pageLength: 10,
+                order: [[0, "desc"]],
+                dom: '<"html5buttons"B>lTfgitp',
+                language: {
+                    "sProcessing": "Procesando... ",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:  ",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                },
+                oAria: {
+                    "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                },
+                buttons: [
+                    { extend: 'copy' },
+                    { extend: 'csv' },
+                    { extend: 'excel', title: 'ExampleFile' },
+                    { extend: 'pdf', title: 'ExampleFile' },
+
+                    {
+                        extend: 'print',
+                        customize: function (win) {
+                            $(win.document.body).addClass('white-bg');
+                            $(win.document.body).css('font-size', '10px');
+
+                            $(win.document.body).find('table')
+                                .addClass('compact')
+                                .css('font-size', 'inherit');
+                        }
+                    }
+                ]
+
+            });
+            $("#FileData").change(function () {
+                readURL(this);
+            });
+        });
+        function readURL(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#imgInp').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(input.files[0]); // convert to base64 string
+            }
+        }
+        function limpiarCampos() {
+            $('#EmployeeId').val('');
+            $('#attachmentForm').each(function () {
+                this.reset();
+            });
+            $('#imgInp').html('');
+            $('.selectpicker').selectpicker('refresh');
+        }
+        function createPicture(employeeId) {
+            $('#modal-CreateHeader').modal({ backdrop: 'static', keyboard: false });
+            $('select[name=EmployeeId]').val(employeeId);
+            $('.selectpicker').selectpicker('refresh');
+        }
+        function getPicture(employeeId) {
+            $.ajax({
+                url: '@Url.Action("GetEmployeePicture", "HumanResources")?employeeId=' + employeeId,
+                type: "POST",
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    if (result.status === "OK") {
+                        $('#modal-View').modal({ backdrop: 'static', keyboard: false });
+                        $('#preview').attr('src', result.picture);
+                    }
+                    else {
+                        swal({
+                            title: "ERROR",
+                            text: result.status,
+                            type: "error"
+                        });
+                    }
+                }
+            });
+        }
+        function savePicture() {
+            var isAllValid = true;
+            if ($('#EmployeeId').val() === '') {
+                toastr.error('Por favor debe de especificar un empleado para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+            if (document.getElementById("FileData").files.length === 0) {
+                toastr.error('Por favor debe de especificar una foto para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if (isAllValid) {
+                var data = new FormData();
+                data.append("FileData", document.getElementById("FileData").files[0]);
+                data.append("EmployeeId", $('#EmployeeId').val());
+                $.ajax({
+                    url: '@Url.Action("SaveEmployeePicture", "HumanResources")',
+                    type: "POST",
+                    data: data,
+                    dataType: "JSON",
+                    contentType: false,
+                    processData: false,
+                    success: function (d) {
+                        if (d.status === "OK")
+                            window.location.href = '@Url.Action("EmployeePhoto", "HumanResources")';
+                        else
+                            swal({
+                                title: "ERROR",
+                                text: d.status,
+                                type: "warning"
+                            });
+                    }
+                });
+            }
+        }
+        function deletePicture(employeeId) {
+            swal({
+                title: "Eliminar",
+                text: "Esta seguro que desea eliminar esta foto ?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Si, hazlo!",
+                cancelButtonText: "No, cancelar!",
+                closeOnConfirm: false
+            }, function () {
+                $.ajax({
+                    url: '@Url.Action("DeleteEmployeePicture", "HumanResources")?employeeId=' + employeeId,
+                    type: "POST",
+                    dataType: "JSON",
+                    contentType: false,
+                    processData: false,
+                    success: function (result) {
+                        if (result.status === "OK")
+                            window.location.href = '@Url.Action("EmployeePhoto", "HumanResources")';
+                        else
+                            swal({
+                                title: "ERROR",
+                                text: result.status,
+                                type: "error"
+                            });
+                    }
+                });
+            });
+        }
+    </script>
+}

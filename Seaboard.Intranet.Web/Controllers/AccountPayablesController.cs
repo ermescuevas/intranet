@@ -87,7 +87,7 @@ namespace Seaboard.Intranet.Web.Controllers
             var isValid = false;
             string voucherNumber;
             if (accountPayables.Module == AccountPayablesModule.Compras)
-                voucherNumber = HelperLogic.AsignaciónSecuencia("PM10000", Account.GetAccount(User.Identity.GetUserName()).UserId);
+                voucherNumber = _repository.ExecuteScalarQuery<string>($"INTRANET.dbo.GetNextNumberAccountPayables '{Helpers.InterCompanyId}'");
             else
             {
                 if (accountPayables.Type == AccountPayablesType.NC)
@@ -128,8 +128,6 @@ namespace Seaboard.Intranet.Web.Controllers
                 {
                     if (!string.IsNullOrEmpty(payablesDocument.Note))
                         _repository.ExecuteCommand(String.Format("INTRANET.dbo.AttachPayableNote '{0}','{1}','{2}'", Helpers.InterCompanyId, payablesDocument.VoucherNumber, payablesDocument.Note));
-                    if (accountPayables.Module == AccountPayablesModule.Compras)
-                        HelperLogic.DesbloqueoSecuencia(payablesDocument.VoucherNumber, "PM10000", Account.GetAccount(User.Identity.GetUserName()).UserId);
                 }
             }
             else

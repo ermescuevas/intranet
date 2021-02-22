@@ -74,6 +74,7 @@
                                                 <div class="btn-group-xs">
                                                     <button class="btn btn-danger btn-xs" onclick="deleteDocument('@item.DocumentId')">Eliminar</button>
                                                     <button class="btn btn-primary" onclick="voidDocument('@item.DocumentId', '@(item.Status ? 0 : 1)')">@(item.Status ? "Activar" : "Desactivar")</button>
+                                                    <a class="btn btn-success btn-xs" href="@Url.Action("PreviewTemplateDocument", "HumanResources", new { documentId = item.DocumentId })" target="_blank">Previsualizar</a>
                                                 </div>
                                             </td>
                                         </tr>

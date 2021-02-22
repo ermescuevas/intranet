@@ -1070,7 +1070,7 @@ namespace Seaboard.Intranet.Web.Controllers
             var sqlQuery = "SELECT A.DOCNUMBR CashReceiptId, A.BACHNUMB BatchNumber, A.TRXDSCRN Description, A.CUSTNMBR CustomerId, B.CUSTNAME CustomerName, " +
                 "A.CURNCYID Currency, A.DOCDATE DocumentDate, CONVERT(INT, A.CSHRCTYP) CashReceiptType, A.ORTRXAMT Amount, CONVERT(BIT, A.POSTED) Posted, " +
                 "CONVERT(BIT, A.VOIDSTTS) Voided FROM (" +
-                "SELECT DOCNUMBR, BACHNUMB, TRXDSCRN, CUSTNMBR, CURNCYID, DOCDATE, CSHRCTYP, ORTRXAMT, 0 POSTED, 0 VOIDSTTS " +
+                "SELECT DOCNUMBR, BACHNUMB, TRXDSCRN, CUSTNMBR, CURNCYID, DOCDATE, CSHRCTYP, ORTRXAMT, ONHOLD POSTED, ONHOLD VOIDSTTS " +
                 "FROM " + Helpers.InterCompanyId + ".dbo.RM10201 " +
                 "UNION ALL " +
                 "SELECT DOCNUMBR, BACHNUMB, TRXDSCRN, CUSTNMBR, CURNCYID, DOCDATE, CSHRCTYP, ORTRXAMT, 1 POSTED, VOIDSTTS " +
@@ -1088,7 +1088,7 @@ namespace Seaboard.Intranet.Web.Controllers
             if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "AccountReceivables", "CashReceipt"))
                 return RedirectToAction("NotPermission", "Home");
             if (ViewBag.DocumentNumber == null)
-                ViewBag.DocumentNumber = HelperLogic.AsignaciónSecuencia("RM10201", Account.GetAccount(User.Identity.GetUserName()).UserId);
+                ViewBag.DocumentNumber = ""; // HelperLogic.AsignaciónSecuencia("RM10201", Account.GetAccount(User.Identity.GetUserName()).UserId);
             return View();
         }
 
@@ -1098,7 +1098,7 @@ namespace Seaboard.Intranet.Web.Controllers
                 return RedirectToAction("NotPermission", "Home");
             var sqlQuery = "SELECT A.DOCNUMBR CashReceiptId, A.BACHNUMB BatchNumber, A.TRXDSCRN Description, A.CUSTNMBR CustomerId, B.CUSTNAME CustomerName, " +
                 "A.CURNCYID Currency, A.DOCDATE DocumentDate, CONVERT(INT, A.CSHRCTYP) CashReceiptType, A.ORTRXAMT Amount, CONVERT(BIT, A.POSTED) Posted, ISNULL(C.TXTFIELD, '') Note FROM (" +
-                "SELECT DOCNUMBR, BACHNUMB, TRXDSCRN, CUSTNMBR, CURNCYID, DOCDATE, CSHRCTYP, ORTRXAMT, 0 POSTED, NOTEINDX " +
+                "SELECT DOCNUMBR, BACHNUMB, TRXDSCRN, CUSTNMBR, CURNCYID, DOCDATE, CSHRCTYP, ORTRXAMT, ONHOLD POSTED, NOTEINDX " +
                 "FROM " + Helpers.InterCompanyId + ".dbo.RM10201 " +
                 "UNION ALL " +
                 "SELECT DOCNUMBR, BACHNUMB, TRXDSCRN, CUSTNMBR, CURNCYID, DOCDATE, CSHRCTYP, ORTRXAMT, 1 POSTED, NOTEINDX " +
@@ -1205,12 +1205,13 @@ namespace Seaboard.Intranet.Web.Controllers
                 }
                 else
                 {
+                    receipt.DocumentNumber = _repository.ExecuteScalarQuery<string>($"INTRANET.dbo.GetNextNumberAccountReceivables '{Helpers.InterCompanyId}', '9'");
+                    cashReceipt.CashReceiptId = receipt.DocumentNumber;
                     service.CreateCashReceipt(receipt);
                     _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.SY00500 SET BCHCOMNT = '" + cashReceipt.Description + "' WHERE BACHNUMB = '" + cashReceipt.BatchNumber + "' AND SERIES = 3 AND BCHSOURC = 'RM_Cash'");
                 }
 
                 _repository.ExecuteCommand($"INTRANET.dbo.AttachCashReceiptNote '{Helpers.InterCompanyId}','{cashReceipt.CashReceiptId}','{cashReceipt.Note}'");
-
                 if (cashReceipt.InvoiceLines != null)
                 {
                     foreach (var item in cashReceipt.InvoiceLines)
@@ -1242,16 +1243,31 @@ namespace Seaboard.Intranet.Web.Controllers
 
             return new JsonResult { Data = new { status = xStatus } };
         }
+        [HttpPost]
+        public JsonResult VoidCashReceipt(string id)
+        {
+            string xStatus;
+            try
+            {
+                _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.RM10201 SET ONHOLD = 1 WHERE DOCNUMBR = '{id}'");
+                xStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+            return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
+        }
 
         [OutputCache(Duration = 0)]
         [HttpPost]
-        public ActionResult PrintCashReceipt(string cashReceiptId)
+        public ActionResult PrintCashReceipt(string cashReceiptId, decimal amount = 0)
         {
             string xStatus;
             try
             {
                 xStatus = "OK";
-                ReportHelper.Export(Helpers.ReportPath + "Reportes", Server.MapPath("~/PDF/Reportes/") + "CashReceiptReport.pdf", $"INTRANET.dbo.CashReceiptReport '{Helpers.InterCompanyId}','{cashReceiptId}'", 22, ref xStatus);
+                ReportHelper.Export(Helpers.ReportPath + "Reportes", Server.MapPath("~/PDF/Reportes/") + "CashReceiptReport.pdf", $"INTRANET.dbo.CashReceiptReport '{Helpers.InterCompanyId}','{cashReceiptId}', '{amount}'", 22, ref xStatus);
             }
             catch (Exception ex)
             {
@@ -1259,6 +1275,28 @@ namespace Seaboard.Intranet.Web.Controllers
             }
 
             return new JsonResult { Data = new { status = xStatus } };
+        }
+
+        public JsonResult GetDocumentApply(string customerId, string documentNumber)
+        {
+            string xStatus;
+            var xRegistros = new List<MemNetTransDetail>();
+            try
+            {
+                string sqlQuery = $"SELECT RTRIM(APFRDCNM) DocumentNumber, CONVERT(nvarchar(20), CONVERT(DATE, DATE1, 112)) DocumentDate, " +
+                $"CONVERT(NUMERIC(32,2), ISNULL(APFRMAPLYAMT, 0))  AppliedAmount, " +
+                $"CASE APFRDCTY WHEN 9 THEN 'Recibo de ingresos' WHEN 7 THEN 'Neteo' WHEN 8 THEN 'Nota de Credito' ELSE 'Otros' END Module " +
+                $"FROM {Helpers.InterCompanyId}.dbo.RM20201 " +
+                $"WHERE CUSTNMBR = '{customerId}' AND APTODCNM = '{documentNumber}'";
+                xRegistros = _repository.ExecuteQuery<MemNetTransDetail>(sqlQuery).ToList();
+                xStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return Json(new { status = xStatus, registros = xRegistros }, JsonRequestBehavior.AllowGet);
         }
 
         #endregion
@@ -1514,6 +1552,40 @@ namespace Seaboard.Intranet.Web.Controllers
                     string.Format("INTRANET.dbo.AccountReceivablesReport '{0}','{1}','{2}','{3}'", Helpers.InterCompanyId, date, 1, exchangeRate.ToString(new CultureInfo("en-US"))),
                     43, ref xStatus, printOption == 10 ? 0 : 1,
                     string.Format("INTRANET.dbo.AccountReceivablesReport '{0}','{1}','{2}','{3}'", Helpers.InterCompanyId, date, 2, exchangeRate.ToString(new CultureInfo("en-US"))));
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = xStatus } };
+        }
+
+        public ActionResult AccountPayablesReport()
+        {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "AccountReceivables", "AccountReceivablesReport"))
+                return RedirectToAction("NotPermission", "Home");
+            return View();
+        }
+
+        [OutputCache(Duration = 0)]
+        [HttpPost]
+        public ActionResult AccountPayablesReport(string date, decimal exchangeRate, int printOption)
+        {
+            string xStatus;
+            try
+            {
+                xStatus = "OK";
+                var reportName = "AccountPayablesReport";
+                if (printOption == 10)
+                    reportName += ".pdf";
+                else
+                    reportName += ".xls";
+
+                ReportHelper.Export(Helpers.ReportPath + "Reportes", Server.MapPath("~/PDF/Reportes/") + reportName,
+                    string.Format("INTRANET.dbo.AccountPayablesReport '{0}','{1}','{2}','{3}'", Helpers.InterCompanyId, date, 1, exchangeRate.ToString(new CultureInfo("en-US"))),
+                    59, ref xStatus, printOption == 10 ? 0 : 1,
+                    string.Format("INTRANET.dbo.AccountPayablesReport '{0}','{1}','{2}','{3}'", Helpers.InterCompanyId, date, 2, exchangeRate.ToString(new CultureInfo("en-US"))));
             }
             catch (Exception ex)
             {

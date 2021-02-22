@@ -1,0 +1,377 @@
+﻿@using Seaboard.Intranet.Domain
+@{
+    Layout = "~/Views/Shared/_HRLayout.cshtml";
+    ViewBag.Title = "Reporte de firma de documentos";
+    var list = (List<DigitalDocument>)ViewBag.Documents;
+}
+
+<style>
+    .glyphicon.fa {
+        font-family: 'Glyphicons Halflings';
+    }
+</style>
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-sm-4">
+        <h2>Reporte de firma de documentos</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "HumanResources")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Reporte de firma de documentos</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="wrapper wrapper-content animated fadeInUp">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="ibox float-e-margins">
+                        <div class="ibox-title">
+                            <h3>Reporte de firma de documentos</h3>
+                        </div>
+                        <div class="ibox-content">
+                            <div class="col-sm-12 col-sm-offset-1">
+                                <button class="btn btn-primary" type="button" onclick="imprimir();"><i class="fa fa-search"></i> Imprimir</button>
+                                <button class="btn btn-info" type="button" onclick="borrar();"><i class="fa fa-eraser"></i> Borrar</button>
+                                <br />
+                            </div>
+                            <br />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ibox">
+                <div class="ibox-content">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Tipo de reporte :</label>
+                                <div class="col-sm-12 input-group">
+                                    <select class="form-control" id="ReportType" name="ReportType">
+                                        <option value="56">Normal</option>
+                                        <option value="57">Agrupado por departamentos</option>
+                                        <option value="58">Agrupado por documentos</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Estado :</label>
+                                <div class="col-sm-12 input-group">
+                                    <select class="form-control" id="DocumentStatus" name="DocumentStatus">
+                                        <option value="0">Todos</option>
+                                        <option value="1">Sometidos</option>
+                                        <option value="2">Sin someter</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Empleado:</label>
+                                <div class="col-sm-12 input-group">
+                                    <input type="text" name="EmployeeIdFrom" id="EmployeeIdFrom" class="form-control" placeholder="Desde" />
+                                    <span class="input-group-btn">
+                                        <button id="lookupEmpleadoDesde" type="button" class="btn btn-primary">
+                                            <i class="fa fa-search"></i>
+                                        </button>
+                                    </span>
+                                    <input type="text" name="EmployeeIdTo" id="EmployeeIdTo" class="form-control" placeholder="Hasta" />
+                                    <span class="input-group-btn">
+                                        <button id="lookupEmpleadoHasta" type="button" class="btn btn-primary">
+                                            <i class="fa fa-search"></i>
+                                        </button>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Grupo:</label>
+                                <div class="col-sm-12 input-group">
+                                    <input type="text" name="GroupIdFrom" id="GroupIdFrom" class="form-control" placeholder="Desde" />
+                                    <span class="input-group-btn">
+                                        <button id="lookupGrupoDesde" type="button" class="btn btn-primary">
+                                            <i class="fa fa-search"></i>
+                                        </button>
+                                    </span>
+                                    <input type="text" name="GroupIdTo" id="GroupIdTo" class="form-control" placeholder="Hasta" />
+                                    <span class="input-group-btn">
+                                        <button id="lookupGrupoHasta" type="button" class="btn btn-primary">
+                                            <i class="fa fa-search"></i>
+                                        </button>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Departamento:</label>
+                                <div class="col-sm-12 input-group">
+                                    <input type="text" name="DepartmentIdFrom" id="DepartmentIdFrom" class="form-control" placeholder="Desde" />
+                                    <span class="input-group-btn">
+                                        <button id="lookupDepartamentoDesde" type="button" class="btn btn-primary">
+                                            <i class="fa fa-search"></i>
+                                        </button>
+                                    </span>
+                                    <input type="text" name="DepartmentIdTo" id="DepartmentIdTo" class="form-control" placeholder="Hasta" />
+                                    <span class="input-group-btn">
+                                        <button id="lookupDepartamentoHasta" type="button" class="btn btn-primary">
+                                            <i class="fa fa-search"></i>
+                                        </button>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Rango de fecha:</label>
+                                <div class="col-sm-12 input-group">
+                                    <div class="col-md-7">
+                                        <input type="text" name="daterange" id="daterange" class="form-control" autocomplete="off" />
+                                    </div>
+                                    <div class="col-md-5">
+                                        <select class="form-control col-md-4" id="ConditionType" name="ConditionType">
+                                            <option value="0">Fecha de envio</option>
+                                            <option value="1">Fecha de firma</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Documentos:</label>
+                            <div class="table-responsive">
+                                <table class="table" id="itemTable">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 10%">#</th>
+                                            <th style="width: 30%">Id. de documento</th>
+                                            <th style="width: 60%">Nombre</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in list)
+                                        {
+                                            <tr>
+                                                <td><input type="checkbox" name="check" /></td>
+                                                <td>@item.DocumentId</td>
+                                                <td>@item.Name</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles{
+    @Styles.Render("~/plugins/dateRangeStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/plugins/sweetAlertStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/dateRange")
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+    @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/sweetAlert")
+
+<script>
+        var date;
+        var details = [];
+        $(document).ready(function () {
+            $.formattedDate = function (dateToFormat) {
+                var dateObject = new Date(dateToFormat);
+                var day = dateObject.getDate();
+                var month = dateObject.getMonth() + 1;
+                var year = dateObject.getFullYear();
+                day = day < 10 ? "0" + day : day;
+                month = month < 10 ? "0" + month : month;
+                var formattedDate = month + "/" + day + "/" + year;
+                return formattedDate;
+            };
+            $('.informationTable').DataTable({
+                pageLength: 10,
+                dom: '<"html5buttons"B>lTfgitp',
+                language: {
+                    "sProcessing": "Procesando... ",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sZeroRecords": "No se encontraron resultados",
+                    "sEmptyTable": "Ningún dato disponible en esta tabla",
+                    "sInfo":
+                        "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros ",
+                    "sInfoEmpty":
+                        "Mostrando registros del 0 al 0 de un total de 0 registros",
+                    "sInfoFiltered":
+                        "(filtrado de un total de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sSearch": "Buscar:  ",
+                    "sUrl": "",
+                    "sInfoThousands": ",",
+                    "sLoadingRecords": "Cargando...",
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                },
+                oAria: {
+                    "sSortAscending":
+                        ": Activar para ordenar la columna de manera ascendente",
+                    "sSortDescending":
+                        ": Activar para ordenar la columna de manera descendente"
+                },
+                buttons: [
+                    { extend: 'excel', title: 'ExampleFile' },
+                    {
+                        extend: 'print',
+                        customize: function (win) {
+                            $(win.document.body).addClass('white-bg');
+                            $(win.document.body).css('font-size', '10px');
+
+                            $(win.document.body).find('table')
+                                .addClass('compact')
+                                .css('font-size', 'inherit');
+                        }
+                    }
+                ]
+            });
+            $("#lookupEmpleadoDesde").lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookup", "Home")?tipo=18&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function (data) {
+                    $('input[name=EmployeeIdFrom]').val(data.EmployeeId);
+                    $('input[name=EmployeeIdTo]').val(data.EmployeeId);
+                },
+                tableHeader: ['Id. de empleado', 'Nombre', 'Departamento'],
+                hiddenFields: ['FirstName', 'LastName', 'Identification', 'JobTitle', 'Email', 'LastName']
+            });
+            $("#lookupEmpleadoHasta").lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookup", "Home")?tipo=18&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function (data) {
+                    $('input[name=EmployeeIdTo]').val(data.EmployeeId);
+                },
+                tableHeader: ['Id. de empleado', 'Nombre', 'Departamento'],
+                hiddenFields: ['FirstName', 'LastName', 'Identification', 'JobTitle', 'Email', 'LastName']
+            });
+            $("#lookupGrupoDesde").lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookup", "Home")?tipo=50&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function (data) {
+                    $('input[name=GroupIdFrom]').val(data.Id);
+                    $('input[name=GroupIdTo]').val(data.Id);
+                },
+                tableHeader: ['Id. de grupo', 'Descripción'],
+                hiddenFields: ['DataExtended', 'DataPlus']
+            });
+            $("#lookupGrupoHasta").lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookup", "Home")?tipo=50&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function (data) {
+                    $('input[name=GroupIdTo]').val(data.Id);
+                },
+                tableHeader: ['Id. de grupo', 'Descripción'],
+                hiddenFields: ['DataExtended', 'DataPlus']
+            });
+            $("#lookupDepartamentoDesde").lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookup", "Home")?tipo=48&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function (data) {
+                    $('input[name=DepartmentIdFrom]').val(data.Id);
+                    $('input[name=DepartmentIdTo]').val(data.Id);
+                },
+                tableHeader: ['Id. de departamento', 'Descripción'],
+                hiddenFields: ['DataExtended', 'DataPlus']
+            });
+            $("#lookupDepartamentoHasta").lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookup", "Home")?tipo=48&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function (data) {
+                    $('input[name=DepartmentIdTo]').val(data.Id);
+                },
+                tableHeader: ['Id. de departamento', 'Descripción'],
+                hiddenFields: ['DataExtended', 'DataPlus']
+            });
+            $('#daterange').daterangepicker({ format: 'DD/MM/YYYY', });
+            $('#daterange').on('apply.daterangepicker', function (ev, picker) {
+                date = picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY');
+            });
+            $('#daterange').on('cancel.daterangepicker', function (ev, picker) {
+                $('#daterange').val('');
+                date = '';
+            });
+        });
+        function borrar() {
+            $('#EmployeeIdFrom,#EmployeeIdTo,#GroupIdFrom,#GroupIdTo,#DepartmentIdFrom,#DepartmentIdTo').val('');
+        }
+        function imprimir() {
+            var url = '@Url.Content("~/PDF/Reportes/")' + 'DigitalDocumentReport.pdf';
+            toastr.info('Estamos procesando su solicitud', 'Por favor espere');
+            details = [];
+            $('#itemTable > tbody > tr').each(function () {
+                if ($(this).find('td:eq(0) input').is(':checked')) {
+                    details.push($(this).find('td:eq(1)').html());
+                }
+            });
+            var data = {
+                reportType: parseInt($('#ReportType').val()),
+                documentStatus: parseInt($('#DocumentStatus').val()),
+                employeeFrom: $('#EmployeeIdFrom').val(),
+                employeeTo: $('#EmployeeIdTo').val(),
+                groupFrom: $('#GroupIdFrom').val(),
+                groupTo: $('#GroupIdTo').val(),
+                departmentFrom: $('#DepartmentIdFrom').val(),
+                departmentTo: $('#DepartmentIdTo').val(),
+                conditionType: $('#ConditionType').val(),
+                dateRange: date,
+                includeDocuments: details
+            }
+            $.ajax({
+                url: '@Url.Action("DigitalDocumentReport", "HumanResources")',
+                type: "POST",
+                data: JSON.stringify(data),
+                dataType: "JSON",
+                async: false,
+                cache: false,
+                contentType: "application/json",
+                success: function (d) {
+                    if (d.status === "OK") 
+                        window.open(url);
+                    else
+                        swal({
+                            title: "ERROR",
+                            text: d.status,
+                            type: "error"
+                        });
+                }
+            });
+        }
+</script>
+}

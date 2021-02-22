@@ -24,7 +24,7 @@ namespace Seaboard.Intranet.BusinessLogic
             var db = new SeaboContext();
             GenericRepository repository = new GenericRepository(db);
             User user = repository.GetAll<User>(u => u.UserName == userId).FirstOrDefault();
-            var list = repository.ExecuteQuery<EmployeeDigitalDocument>($"SELECT A.DocumentId, B.[Name], A.EmployeeId FROM {Helpers.InterCompanyId}.dbo.EHUPR20100 A " +
+            var list = repository.ExecuteQuery<EmployeeDigitalDocument>($"SELECT A.BatchNumber, A.DocumentId, B.[Name], A.EmployeeId FROM {Helpers.InterCompanyId}.dbo.EHUPR20100 A " +
                 $"INNER JOIN {Helpers.InterCompanyId}.dbo.EHUPR10100 B ON A.DocumentId = B.DocumentId WHERE A.Status = 0 AND A.EmployeeId = '{user.EmployeeId}'").ToList();
             return list;
         }

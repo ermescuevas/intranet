@@ -82,7 +82,7 @@ namespace Seaboard.Intranet.BusinessLogic
                                 clientContext = new ClientContext("https://seaboardpowercomdo.sharepoint.com");
                                 foreach (char c in "Servicios2.4")
                                     securePassword.AppendChar(c);
-                                clientContext.Credentials = new SharePointOnlineCredentials("no-reply@seaboardpower.com.do", securePassword);
+                                clientContext.Credentials = new SharePointOnlineCredentials("flow@seaboardpower.com.do", securePassword);
                                 listCollection = clientContext.Web.Lists.GetByTitle("Servicio");
                                 listInformation = new ListItemCreationInformation();
 
@@ -180,8 +180,7 @@ namespace Seaboard.Intranet.BusinessLogic
                                         var reader = new StreamReader(Helpers.ReportPath + @"Requisicion\" + solicitud.Trim() + ".pdf");
                                         attachInfo = new AttachmentCreationInformation
                                         {
-                                            FileName = Helpers.ReportPath
-                                                       + solicitud.Trim() + ".pdf",
+                                            FileName = Helpers.ReportPath + solicitud.Trim() + ".pdf",
                                             ContentStream = reader.BaseStream
                                         };
 
@@ -218,7 +217,7 @@ namespace Seaboard.Intranet.BusinessLogic
                             status = "En estos momentos no es posible conectar con el servidor, por favor intente de nuevo";
                             retryCount++;
                         }
-                    } while (retryCount < 3);
+                    } while (retryCount < 5);
                     break;
 
                 #endregion
@@ -251,7 +250,7 @@ namespace Seaboard.Intranet.BusinessLogic
                                 clientContext = new ClientContext("https://seaboardpowercomdo.sharepoint.com");
                                 foreach (char c in "Servicios2.4")
                                     securePassword.AppendChar(c);
-                                clientContext.Credentials = new SharePointOnlineCredentials("no-reply@seaboardpower.com.do", securePassword);
+                                clientContext.Credentials = new SharePointOnlineCredentials("flow@seaboardpower.com.do", securePassword);
                                 listCollection = clientContext.Web.Lists.GetByTitle("Caja Chica");
                                 listInformation = new ListItemCreationInformation();
                                 using (clientContext)
@@ -335,7 +334,7 @@ namespace Seaboard.Intranet.BusinessLogic
                             status = "En estos momentos no es posible conectar con el servidor, por favor intente de nuevo";
                             retryCount++;
                         }
-                    } while (retryCount < 3);
+                    } while (retryCount < 5);
                     break;
 
                 #endregion
@@ -368,7 +367,7 @@ namespace Seaboard.Intranet.BusinessLogic
                                 clientContext = new ClientContext("https://seaboardpowercomdo.sharepoint.com");
                                 foreach (char c in "Servicios2.4")
                                     securePassword.AppendChar(c);
-                                clientContext.Credentials = new SharePointOnlineCredentials("no-reply@seaboardpower.com.do", securePassword);
+                                clientContext.Credentials = new SharePointOnlineCredentials("flow@seaboardpower.com.do", securePassword);
                                 listCollection = clientContext.Web.Lists.GetByTitle("Articulo");
                                 listInformation = new ListItemCreationInformation();
 
@@ -434,7 +433,7 @@ namespace Seaboard.Intranet.BusinessLogic
                             status = "En estos momentos no es posible conectar con el servidor, por favor intente de nuevo";
                             retryCount++;
                         }
-                    } while (retryCount < 3);
+                    } while (retryCount < 5);
                     break;
 
                 #endregion
@@ -478,7 +477,7 @@ namespace Seaboard.Intranet.BusinessLogic
                                 clientContext = new ClientContext("https://seaboardpowercomdo.sharepoint.com");
                                 foreach (char c in "Servicios2.4")
                                     securePassword.AppendChar(c);
-                                clientContext.Credentials = new SharePointOnlineCredentials("no-reply@seaboardpower.com.do", securePassword);
+                                clientContext.Credentials = new SharePointOnlineCredentials("flow@seaboardpower.com.do", securePassword);
                                 listCollection = clientContext.Web.Lists.GetByTitle("Almacen");
                                 listInformation = new ListItemCreationInformation();
 
@@ -548,7 +547,7 @@ namespace Seaboard.Intranet.BusinessLogic
                             status = "En estos momentos no es posible conectar con el servidor, por favor intente de nuevo";
                             retryCount++;
                         }
-                    } while (retryCount < 3);
+                    } while (retryCount < 5);
                     break;
 
                 #endregion
@@ -577,7 +576,7 @@ namespace Seaboard.Intranet.BusinessLogic
                                 clientContext = new ClientContext("https://seaboardpowercomdo.sharepoint.com");
                                 foreach (char c in "Servicios2.4")
                                     securePassword.AppendChar(c);
-                                clientContext.Credentials = new SharePointOnlineCredentials("no-reply@seaboardpower.com.do", securePassword);
+                                clientContext.Credentials = new SharePointOnlineCredentials("flow@seaboardpower.com.do", securePassword);
                                 listCollection = clientContext.Web.Lists.GetByTitle("Ausencia");
                                 listInformation = new ListItemCreationInformation();
 
@@ -649,7 +648,7 @@ namespace Seaboard.Intranet.BusinessLogic
                             status = "En estos momentos no es posible conectar con el servidor, por favor intente de nuevo";
                             retryCount++;
                         }
-                    } while (retryCount < 3);
+                    } while (retryCount < 5);
                     break;
 
                 #endregion
@@ -691,7 +690,7 @@ namespace Seaboard.Intranet.BusinessLogic
                                 clientContext = new ClientContext("https://seaboardpowercomdo.sharepoint.com");
                                 foreach (char c in "Servicios2.4")
                                     securePassword.AppendChar(c);
-                                clientContext.Credentials = new SharePointOnlineCredentials("no-reply@seaboardpower.com.do", securePassword);
+                                clientContext.Credentials = new SharePointOnlineCredentials("flow@seaboardpower.com.do", securePassword);
                                 listCollection = clientContext.Web.Lists.GetByTitle("Entrenamiento");
                                 listInformation = new ListItemCreationInformation();
 
@@ -766,7 +765,7 @@ namespace Seaboard.Intranet.BusinessLogic
                             status = "En estos momentos no es posible conectar con el servidor, por favor intente de nuevo";
                             retryCount++;
                         }
-                    } while (retryCount < 3);
+                    } while (retryCount < 5);
                     break;
 
                 #endregion
@@ -884,7 +883,7 @@ namespace Seaboard.Intranet.BusinessLogic
                                 clientContext = new ClientContext("https://seaboardpowercomdo.sharepoint.com");
                                 foreach (char c in "Servicios2.4")
                                     securePassword.AppendChar(c);
-                                clientContext.Credentials = new SharePointOnlineCredentials("no-reply@seaboardpower.com.do", securePassword);
+                                clientContext.Credentials = new SharePointOnlineCredentials("flow@seaboardpower.com.do", securePassword);
                                 listCollection = clientContext.Web.Lists.GetByTitle("Usuario");
                                 listInformation = new ListItemCreationInformation();
 
@@ -957,7 +956,7 @@ namespace Seaboard.Intranet.BusinessLogic
                             status = "En estos momentos no es posible conectar con el servidor, por favor intente de nuevo";
                             retryCount++;
                         }
-                    } while (retryCount < 3);
+                    } while (retryCount < 5);
                     break;
 
                 #endregion
@@ -988,7 +987,7 @@ namespace Seaboard.Intranet.BusinessLogic
                                 clientContext = new ClientContext("https://seaboardpowercomdo.sharepoint.com");
                                 foreach (char c in "Servicios2.4")
                                     securePassword.AppendChar(c);
-                                clientContext.Credentials = new SharePointOnlineCredentials("no-reply@seaboardpower.com.do", securePassword);
+                                clientContext.Credentials = new SharePointOnlineCredentials("flow@seaboardpower.com.do", securePassword);
                                 listCollection = clientContext.Web.Lists.GetByTitle("Overtime");
                                 listInformation = new ListItemCreationInformation();
 
@@ -1075,7 +1074,7 @@ namespace Seaboard.Intranet.BusinessLogic
                             status = ex.Message;
                             retryCount++;
                         }
-                    } while (retryCount < 3);
+                    } while (retryCount < 5);
                     break;
 
                 #endregion
@@ -1546,7 +1545,7 @@ namespace Seaboard.Intranet.BusinessLogic
                                     clientContext = new ClientContext("https://seaboardpowercomdo.sharepoint.com");
                                     foreach (char c in "Servicios2.4")
                                         securePassword.AppendChar(c);
-                                    clientContext.Credentials = new SharePointOnlineCredentials("no-reply@seaboardpower.com.do", securePassword);
+                                    clientContext.Credentials = new SharePointOnlineCredentials("flow@seaboardpower.com.do", securePassword);
                                     listCollection = clientContext.Web.Lists.GetByTitle("Equipo");
                                     listInformation = new ListItemCreationInformation();
 
@@ -1623,7 +1622,7 @@ namespace Seaboard.Intranet.BusinessLogic
                             status = ex.Message;
                             retryCount++;
                         }
-                    } while (retryCount < 3);
+                    } while (retryCount < 5);
                     break;
 
                 #endregion
@@ -1645,7 +1644,7 @@ namespace Seaboard.Intranet.BusinessLogic
                                     clientContext = new ClientContext("https://seaboardpowercomdo.sharepoint.com");
                                     foreach (char c in "Servicios2.4")
                                         securePassword.AppendChar(c);
-                                    clientContext.Credentials = new SharePointOnlineCredentials("no-reply@seaboardpower.com.do", securePassword);
+                                    clientContext.Credentials = new SharePointOnlineCredentials("flow@seaboardpower.com.do", securePassword);
                                     listCollection = clientContext.Web.Lists.GetByTitle("Entrega");
                                     listInformation = new ListItemCreationInformation();
 
@@ -1723,7 +1722,7 @@ namespace Seaboard.Intranet.BusinessLogic
                             status = ex.Message;
                             retryCount++;
                         }
-                    } while (retryCount < 3);
+                    } while (retryCount < 5);
                     break;
 
                 #endregion
@@ -1744,7 +1743,7 @@ namespace Seaboard.Intranet.BusinessLogic
                                     clientContext = new ClientContext("https://seaboardpowercomdo.sharepoint.com");
                                     foreach (char c in "Servicios2.4")
                                         securePassword.AppendChar(c);
-                                    clientContext.Credentials = new SharePointOnlineCredentials("no-reply@seaboardpower.com.do", securePassword);
+                                    clientContext.Credentials = new SharePointOnlineCredentials("flow@seaboardpower.com.do", securePassword);
                                     listCollection = clientContext.Web.Lists.GetByTitle("Reparacion");
                                     listInformation = new ListItemCreationInformation();
 
@@ -1819,7 +1818,7 @@ namespace Seaboard.Intranet.BusinessLogic
                             status = ex.Message;
                             retryCount++;
                         }
-                    } while (retryCount < 3);
+                    } while (retryCount < 5);
                     break;
 
                 #endregion
@@ -1844,7 +1843,7 @@ namespace Seaboard.Intranet.BusinessLogic
                                     clientContext = new ClientContext("https://seaboardpowercomdo.sharepoint.com");
                                     foreach (char c in "Servicios2.4")
                                         securePassword.AppendChar(c);
-                                    clientContext.Credentials = new SharePointOnlineCredentials("no-reply@seaboardpower.com.do", securePassword);
+                                    clientContext.Credentials = new SharePointOnlineCredentials("flow@seaboardpower.com.do", securePassword);
                                     listCollection = clientContext.Web.Lists.GetByTitle("Equipo");
                                     listInformation = new ListItemCreationInformation();
 
@@ -1920,7 +1919,7 @@ namespace Seaboard.Intranet.BusinessLogic
                             status = ex.Message;
                             retryCount++;
                         }
-                    } while (retryCount < 3);
+                    } while (retryCount < 5);
                     break;
 
                 #endregion
@@ -1933,7 +1932,7 @@ namespace Seaboard.Intranet.BusinessLogic
                             clientContext = new ClientContext("https://seaboardpowercomdo.sharepoint.com");
                             foreach (char c in "Servicios2.4")
                                 securePassword.AppendChar(c);
-                            clientContext.Credentials = new SharePointOnlineCredentials("no-reply@seaboardpower.com.do", securePassword);
+                            clientContext.Credentials = new SharePointOnlineCredentials("flow@seaboardpower.com.do", securePassword);
                             listCollection = clientContext.Web.Lists.GetByTitle("Documento");
                             listInformation = new ListItemCreationInformation();
 
@@ -1976,7 +1975,7 @@ namespace Seaboard.Intranet.BusinessLogic
                             status = ex.Message;
                             retryCount++;
                         }
-                    } while (retryCount < 3);
+                    } while (retryCount < 5);
                     break;
 
                     #endregion
@@ -1984,129 +1983,143 @@ namespace Seaboard.Intranet.BusinessLogic
         }
         public static List<ApprovalHistory> GetListSharepoint(int modulo, string id, ref string status, ref string pendingApprover, ref string documentDate)
         {
-            var clientContext = new ClientContext("https://seaboardpowercomdo.sharepoint.com");
-            var securePassword = new SecureString();
-            var builder = new StringBuilder();
-            foreach (char c in "Servicios2.4")
-                securePassword.AppendChar(c);
-            clientContext.Credentials = new SharePointOnlineCredentials("no-reply@seaboardpower.com.do", securePassword);
-            var listCollection = clientContext.Web.Lists.GetByTitle("Historial Aprobaciones");
-            var approvalHistory = new List<ApprovalHistory>();
-            using (clientContext)
+            var retryCount = 0;
+            do
             {
-                clientContext.Load(clientContext.Web);
-                clientContext.Load(listCollection);
-                builder.Append("<View><Query>");
-                builder.Append("<Where><Eq><FieldRef Name='Solicitud'/>");
-                builder.Append("<Value Type='Text'>" + id + "</Value></Eq></Where>");
-                builder.Append("</Query><RowLimit>100</RowLimit></View>");
-                var query = new CamlQuery { ViewXml = builder.ToString().Trim() };
-                var collection = listCollection.GetItems(query);
-                clientContext.Load(collection);
-                clientContext.ExecuteQuery();
-
-                if (collection.Count > 0)
+                try
                 {
-                    foreach (var item in collection)
+                    var clientContext = new ClientContext("https://seaboardpowercomdo.sharepoint.com");
+                    var securePassword = new SecureString();
+                    var builder = new StringBuilder();
+                    foreach (char c in "Servicios2.4")
+                        securePassword.AppendChar(c);
+                    clientContext.Credentials = new SharePointOnlineCredentials("flow@seaboardpower.com.do", securePassword);
+                    var listCollection = clientContext.Web.Lists.GetByTitle("Historial Aprobaciones");
+                    var approvalHistory = new List<ApprovalHistory>();
+                    using (clientContext)
                     {
-                        var approver = clientContext.Web.SiteUsers.GetById(((FieldUserValue)item["Aprobador"]).LookupId);
-                        var requester = clientContext.Web.SiteUsers.GetById(((FieldUserValue)item["Solicitante"]).LookupId);
-                        clientContext.Load(approver);
-                        clientContext.Load(approver, u => u.LoginName);
-                        clientContext.Load(requester);
-                        clientContext.Load(requester, u => u.LoginName);
+                        clientContext.Load(clientContext.Web);
+                        clientContext.Load(listCollection);
+                        builder.Append("<View><Query>");
+                        builder.Append("<Where><Eq><FieldRef Name='Solicitud'/>");
+                        builder.Append("<Value Type='Text'>" + id + "</Value></Eq></Where>");
+                        builder.Append("</Query><RowLimit>100</RowLimit></View>");
+                        var query = new CamlQuery { ViewXml = builder.ToString().Trim() };
+                        var collection = listCollection.GetItems(query);
+                        clientContext.Load(collection);
                         clientContext.ExecuteQuery();
-                        approvalHistory.Add(new ApprovalHistory
+
+                        if (collection.Count > 0)
                         {
-                            Module = item["Modulo"].ToString().Trim(),
-                            Request = item["Solicitud"].ToString().Trim(),
-                            DateApproved = item["Fecha"].ToString().Trim(),
-                            Status = item["Aprobacion"].ToString().Trim(),
-                            Approver = approver.Title,
-                            Requester = requester.Title
-                        });
+                            foreach (var item in collection)
+                            {
+                                var approver = clientContext.Web.SiteUsers.GetById(((FieldUserValue)item["Aprobador"]).LookupId);
+                                var requester = clientContext.Web.SiteUsers.GetById(((FieldUserValue)item["Solicitante"]).LookupId);
+                                clientContext.Load(approver);
+                                clientContext.Load(approver, u => u.LoginName);
+                                clientContext.Load(requester);
+                                clientContext.Load(requester, u => u.LoginName);
+                                clientContext.ExecuteQuery();
+                                approvalHistory.Add(new ApprovalHistory
+                                {
+                                    Module = item["Modulo"].ToString().Trim(),
+                                    Request = item["Solicitud"].ToString().Trim(),
+                                    DateApproved = item["Fecha"].ToString().Trim(),
+                                    Status = item["Aprobacion"].ToString().Trim(),
+                                    Approver = approver.Title,
+                                    Requester = requester.Title
+                                });
+                            }
+                        }
                     }
-                }
-            }
 
-            builder = new StringBuilder();
-            builder.Append("<View><Query>");
-            switch (modulo)
-            {
-                case 1:
-                    listCollection = clientContext.Web.Lists.GetByTitle("Almacen");
-                    builder.Append("<Where><Eq><FieldRef Name='Solicitud'/>");
-                    break;
-                case 2:
-                    listCollection = clientContext.Web.Lists.GetByTitle("Articulo");
-                    builder.Append("<Where><Eq><FieldRef Name='Solicitud'/>");
-                    break;
-                case 3:
-                    listCollection = clientContext.Web.Lists.GetByTitle("Servicio");
-                    builder.Append("<Where><Eq><FieldRef Name='Solicitud'/>");
-                    break;
-                case 4:
-                    listCollection = clientContext.Web.Lists.GetByTitle("Caja Chica");
-                    builder.Append("<Where><Eq><FieldRef Name='Solicitud'/>");
-                    break;
-                case 5:
-                    listCollection = clientContext.Web.Lists.GetByTitle("Compra");
-                    builder.Append("<Where><Eq><FieldRef Name='OrdenNum'/>");
-                    break;
-                case 6:
-                    listCollection = clientContext.Web.Lists.GetByTitle("Analisis");
-                    builder.Append("<Where><Eq><FieldRef Name='Analisis'/>");
-                    break;
-                case 7:
-                    listCollection = clientContext.Web.Lists.GetByTitle("Pago");
-                    builder.Append("<Where><Eq><FieldRef Name='Solicitud'/>");
-                    break;
-                case 8:
-                    listCollection = clientContext.Web.Lists.GetByTitle("Proveedor");
-                    builder.Append("<Where><Eq><FieldRef Name='Solicitud'/>");
-                    break;
-                case 9:
-                    listCollection = clientContext.Web.Lists.GetByTitle("Ausencia");
-                    builder.Append("<Where><Eq><FieldRef Name='Solicitud'/>");
-                    break;
-                case 10:
-                    listCollection = clientContext.Web.Lists.GetByTitle("Entrenamiento");
-                    builder.Append("<Where><Eq><FieldRef Name='Solicitud'/>");
-                    break;
-                case 11:
-                    listCollection = clientContext.Web.Lists.GetByTitle("Overtime");
-                    builder.Append("<Where><Eq><FieldRef Name='Lote'/>");
-                    break;
-                case 12:
-                    listCollection = clientContext.Web.Lists.GetByTitle("Usuario");
-                    builder.Append("<Where><Eq><FieldRef Name='Solicitud'/>");
-                    break;
-            }
-            
-            using (clientContext)
-            {
-                clientContext.Load(clientContext.Web);
-                clientContext.Load(listCollection);
-                builder.Append("<Value Type='Text'>" + id + "</Value></Eq></Where>");
-                builder.Append("</Query><RowLimit>1</RowLimit></View>");
-                var query = new CamlQuery { ViewXml = builder.ToString().Trim() };
-                var collection = listCollection.GetItems(query);
-                clientContext.Load(collection);
-                clientContext.ExecuteQuery();
-
-                if (collection.Count > 0)
-                {
-                    foreach (var item in collection)
+                    builder = new StringBuilder();
+                    builder.Append("<View><Query>");
+                    switch (modulo)
                     {
-                        status = item["Estado"].ToString().Trim();
-                        documentDate = item["Fecha"].ToString();
-                        if (status == "Pendiente")
-                            pendingApprover = item["AprobadorPendiente"].ToString();
+                        case 1:
+                            listCollection = clientContext.Web.Lists.GetByTitle("Almacen");
+                            builder.Append("<Where><Eq><FieldRef Name='Solicitud'/>");
+                            break;
+                        case 2:
+                            listCollection = clientContext.Web.Lists.GetByTitle("Articulo");
+                            builder.Append("<Where><Eq><FieldRef Name='Solicitud'/>");
+                            break;
+                        case 3:
+                            listCollection = clientContext.Web.Lists.GetByTitle("Servicio");
+                            builder.Append("<Where><Eq><FieldRef Name='Solicitud'/>");
+                            break;
+                        case 4:
+                            listCollection = clientContext.Web.Lists.GetByTitle("Caja Chica");
+                            builder.Append("<Where><Eq><FieldRef Name='Solicitud'/>");
+                            break;
+                        case 5:
+                            listCollection = clientContext.Web.Lists.GetByTitle("Compra");
+                            builder.Append("<Where><Eq><FieldRef Name='OrdenNum'/>");
+                            break;
+                        case 6:
+                            listCollection = clientContext.Web.Lists.GetByTitle("Analisis");
+                            builder.Append("<Where><Eq><FieldRef Name='Analisis'/>");
+                            break;
+                        case 7:
+                            listCollection = clientContext.Web.Lists.GetByTitle("Pago");
+                            builder.Append("<Where><Eq><FieldRef Name='Solicitud'/>");
+                            break;
+                        case 8:
+                            listCollection = clientContext.Web.Lists.GetByTitle("Proveedor");
+                            builder.Append("<Where><Eq><FieldRef Name='Solicitud'/>");
+                            break;
+                        case 9:
+                            listCollection = clientContext.Web.Lists.GetByTitle("Ausencia");
+                            builder.Append("<Where><Eq><FieldRef Name='Solicitud'/>");
+                            break;
+                        case 10:
+                            listCollection = clientContext.Web.Lists.GetByTitle("Entrenamiento");
+                            builder.Append("<Where><Eq><FieldRef Name='Solicitud'/>");
+                            break;
+                        case 11:
+                            listCollection = clientContext.Web.Lists.GetByTitle("Overtime");
+                            builder.Append("<Where><Eq><FieldRef Name='Lote'/>");
+                            break;
+                        case 12:
+                            listCollection = clientContext.Web.Lists.GetByTitle("Usuario");
+                            builder.Append("<Where><Eq><FieldRef Name='Solicitud'/>");
+                            break;
                     }
-                }
-            }
 
-            return approvalHistory;
+                    using (clientContext)
+                    {
+                        clientContext.Load(clientContext.Web);
+                        clientContext.Load(listCollection);
+                        builder.Append("<Value Type='Text'>" + id + "</Value></Eq></Where>");
+                        builder.Append("</Query><RowLimit>1</RowLimit></View>");
+                        var query = new CamlQuery { ViewXml = builder.ToString().Trim() };
+                        var collection = listCollection.GetItems(query);
+                        clientContext.Load(collection);
+                        clientContext.ExecuteQuery();
+
+                        if (collection.Count > 0)
+                        {
+                            foreach (var item in collection)
+                            {
+                                status = item["Estado"].ToString().Trim();
+                                documentDate = item["Fecha"].ToString();
+                                if (status == "Pendiente")
+                                    pendingApprover = item["AprobadorPendiente"].ToString();
+                            }
+                        }
+                    }
+
+                    return approvalHistory;
+                }
+                catch
+                {
+                    status = "En estos momentos no es posible conectar con el servidor, por favor intente de nuevo";
+                    retryCount++;
+                }
+            } while (retryCount < 5);
+
+            return null;
         }
     }
 }

@@ -173,6 +173,7 @@ C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\in
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Web\bin\roslyn\VBCSCompiler.exe
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Web\bin\roslyn\VBCSCompiler.exe.config
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Web\bin\Antlr3.Runtime.dll
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Web\bin\Aspose.PDF.dll
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Web\bin\BouncyCastle.Crypto.dll
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Web\bin\EntityFramework.dll
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Web\bin\EntityFramework.SqlServer.dll
@@ -217,6 +218,7 @@ C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\in
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Web\bin\Seaboard.Intranet.Data.pdb
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Web\bin\Seaboard.Intranet.Data.dll.config
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Web\bin\Seaboard.Intranet.Domain.pdb
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Web\bin\Aspose.PDF.xml
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Web\bin\EntityFramework.xml
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Web\bin\EntityFramework.SqlServer.xml
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Web\bin\HiQPdf.Free.xml
@@ -251,5 +253,3 @@ C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\in
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Web\obj\Debug\Seaboard.Intranet.Web.csproj.CopyComplete
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Web\obj\Debug\Seaboard.Intranet.Web.dll
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Web\obj\Debug\Seaboard.Intranet.Web.pdb
-C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Web\bin\Aspose.PDF.dll
-C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Web\bin\Aspose.PDF.xml

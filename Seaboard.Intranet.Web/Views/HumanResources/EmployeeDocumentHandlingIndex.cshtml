@@ -64,7 +64,7 @@
                                                     @foreach (var item in Model.Where(x => !x.Status))
                                                     {
                                                         <tr>
-                                                            <td>@Html.ActionLink(item.DocumentId, "EmployeeDocumentHandling", new { id = item.DocumentId, employeeId = item.EmployeeId })</td>
+                                                            <td>@Html.ActionLink(item.DocumentId, "EmployeeDocumentHandling", new {batchNumber = item.BatchNumber, id = item.DocumentId, employeeId = item.EmployeeId })</td>
                                                             <td>@item.Name</td>
                                                             <td>@item.Description</td>
                                                             <td>@item.SendDate.ToString("dd/MM/yyyy")</td>
@@ -99,7 +99,7 @@
                                                     @foreach (var item in Model.Where(x => x.Status))
                                                     {
                                                         <tr>
-                                                            <td>@Html.ActionLink(item.DocumentId, "PreviewEmployeeDocument", new { documentId = item.DocumentId, employeeId = item.EmployeeId }, new { @target = "_blank" })</td>
+                                                            <td>@Html.ActionLink(item.DocumentId, "PreviewEmployeeDocument", new { batchNumber = item.BatchNumber, documentId = item.DocumentId, employeeId = item.EmployeeId }, new { @target = "_blank" })</td>
                                                             <td>@item.Name</td>
                                                             <td>@item.Description</td>
                                                             <td>@item.SendDate.ToString("dd/MM/yyyy")</td>

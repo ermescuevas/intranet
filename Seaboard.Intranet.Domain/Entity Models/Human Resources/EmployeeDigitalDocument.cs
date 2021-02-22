@@ -4,6 +4,7 @@ namespace Seaboard.Intranet.Domain
 {
     public class EmployeeDigitalDocument
     {
+        public string BatchNumber { get; set; }
         public string DocumentId { get; set; }
         public string EmployeeId { get; set; }
         public string Name { get; set; }

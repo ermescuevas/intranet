@@ -422,7 +422,7 @@ namespace Seaboard.Intranet.Web.Controllers
             string sqlQuery = $"SELECT A.HeaderDocumentNumber Rnc, CONVERT(NVARCHAR(20), A.DocumentNumber) ApplyNcf, HeaderDocumentNumber + REPLICATE('0', 8 - LEN(A.NextNumber)) + CONVERT(NVARCHAR(20), A.NextNumber) Ncf, " +
                 $"A.DueDate DocumentDate, B.DocumentDescription IncomeType " +
                 $"FROM {Helpers.InterCompanyId}.dbo.ECNCF40102 A " +
-                $"INNER JOIN {Helpers.InterCompanyId}.dbo.ECNCF40101 B ON A.HeaderDocumentNumber = B.DocumentNumber WHERE B.DocumentType = {ncfType} AND A.NextNumber <= A.ToNumber";
+                $"INNER JOIN {Helpers.InterCompanyId}.dbo.ECNCF40101 B ON A.HeaderDocumentNumber = B.DocumentNumber WHERE B.DocumentType = {ncfType} AND A.NextNumber <= A.ToNumber AND A.Status = 10 AND CONVERT(DATE, A.DueDate) >= CONVERT(DATE, GETDATE())";
 
             return _repository.ExecuteScalarQuery<FiscalSalesTransaction>(sqlQuery);
         }

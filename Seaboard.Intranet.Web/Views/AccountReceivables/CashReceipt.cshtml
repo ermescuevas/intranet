@@ -39,7 +39,7 @@
                     </div>
                     <div class="form-group">
                         <div class="col-sm-12 col-sm-offset-1">
-                            <button class="btn btn-white" type="button" onclick="contabilizar();"><i class="fa fa-money"></i> Contabilizar</button>
+                            @*<button class="btn btn-white" type="button" onclick="contabilizar();"><i class="fa fa-money"></i> Contabilizar</button>*@
                             <button class="btn btn-primary" type="button" onclick="guardar();"><i class="fa fa-save"></i> Guardar</button>
                             <button class="btn btn-white" type="button" onclick="limpiarCampos();"><i class="fa fa-eraser"></i> Borrar</button>
                         </div>
@@ -67,10 +67,10 @@
                             <fieldset class="form-horizontal">
                                 <div class="row">
                                     <div class="col-sm-6">
-                                        <div class="form-group">
+                                        <div style="display:none" class="form-group">
                                             <label class="col-sm-4 control-label">Num. de recibo:</label>
                                             <div class="col-sm-8 input-group">
-                                                @Html.TextBoxFor(m => m.CashReceiptId, new { @class = "form-control", @Value = ViewBag.DocumentNumber, @readonly = "" })
+                                                @Html.HiddenFor(m => m.CashReceiptId, new { @class = "form-control", @Value = ViewBag.DocumentNumber })
                                             </div>
                                         </div>
 
@@ -234,6 +234,26 @@
             </div>
         </div>
     </div>
+
+    <div id="modal-InvoiceApply" class="modal inmodal fadeIn" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content animated fadeIn">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">Documentos aplicados</h4>
+                </div>
+
+                <div class="modal-body">
+                    <div class="table-responsive" style="height:400px;overflow:auto" id="applyRows"></div>
+                </div>
+                <div class="modal-footer">
+                    <div class="form-actions no-color">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 
@@ -260,7 +280,7 @@
     @Scripts.Render("~/plugins/footable")
     @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
 
-    <script type="text/javascript">
+<script type="text/javascript">
         var editor;
         var name = "";
         $(document).ready(function () {
@@ -326,14 +346,18 @@
                     invoiceItems = result;
                     if (invoiceItems.length > 0) {
                         var $table = $('<table  class="table table-stripped table-bordered" id="invoiceTable" />');
-                        $table.append('<thead><tr><th style="width:5%"></th><th>Aplicar al documento</th><th>Fecha documento</th><th>Monto pendiente</th><th>Aplicar monto</th></tr></thead>');
+                        $table.append('<thead><tr><th style="width:10%"></th><th>Aplicar al documento</th><th>Fecha documento</th><th>Monto pendiente</th><th>Aplicar monto</th></tr></thead>');
                         var $tbody = $('<tbody/>');
                         $.each(invoiceItems, function (i, val) {
                             var $row = $('<tr/>');
                             var $inputCurrentAmount = $('<input style="width:auto" type="text" readonly="readonly" name="CurrentAmount"/>');
                             var $inputDocumentAmount = $('<input style="width:auto" type="text" name="DocumentAmount"/>');
+                            var $btnGroup = $("<div class='btn-group-xs'>");
                             var $remove = $('<button class="btn btn-white btn-xs"><i class="fa fa-book fa"></button>');
-                            $row.append($('<td/>').html($remove));
+                            var $details = $('<button class="btn btn-white btn-xs"><i class="fa fa-bars fa"></button>');
+                            $btnGroup.append($remove);
+                            $btnGroup.append($details);
+                            $row.append($('<td/>').html($btnGroup));
                             $row.append($('<td name="DocumentNumber"/>').html(val.Id));
                             $row.append($('<td name="DocumentDate"/>').html(val.DataExtended));
                             $inputCurrentAmount.val(parseFloat(val.Descripción).toFixed(2).replace(/./g, function (c, x, a) {
@@ -347,20 +371,19 @@
                                     }));
                                 }
                             });
-                            $.each(invoiceApplied,
-                                function(j, amount) {
-                                    if (invoiceApplied[j].DocumentNumber == invoiceItems[i].Id) {
-                                        if (parseFloat(val.Descripción) > 0) {
-                                            $inputCurrentAmount.val(parseFloat(parseFloat(val.Descripción) -
-                                                parseFloat(invoiceApplied[j].DocumentAmount)).toFixed(2).replace(/./g,
-                                                    function(c, x, a) {
-                                                        return x && c !== "." && ((a.length - x) % 3 === 0)
-                                                            ? ',' + c
-                                                            : c;
-                                                    }));
-                                        }
+                            $.each(invoiceApplied, function (j, amount) {
+                                if (invoiceApplied[j].DocumentNumber == invoiceItems[i].Id) {
+                                    if (parseFloat(val.Descripción) > 0) {
+                                        $inputCurrentAmount.val(parseFloat(parseFloat(val.Descripción) -
+                                            parseFloat(invoiceApplied[j].DocumentAmount)).toFixed(2).replace(/./g,
+                                                function (c, x, a) {
+                                                    return x && c !== "." && ((a.length - x) % 3 === 0)
+                                                        ? ',' + c
+                                                        : c;
+                                                }));
                                     }
-                                });
+                                }
+                            });
                             $('<td/>').append($inputCurrentAmount).appendTo($row);
                             $('<td/>').append($inputDocumentAmount).appendTo($row);
                             $remove.click(function (e) {
@@ -398,6 +421,10 @@
                                     }));
                                 }
                             });
+                            $details.click(function () {
+                                getInvoiceApply(val.Id);
+                            });
+
                             $inputDocumentAmount.focusout(function (e) {
                                 e.preventDefault();
                                 var value = invoiceItems[i];
@@ -464,6 +491,46 @@
                     else {
                         $('#invoiceRows').html('');
                     }
+                }
+            });
+        }
+
+        function getInvoiceApply(code) {
+            $('#modal-InvoiceApply').modal({ backdrop: 'static', keyboard: false, action: 'show' });
+            $.ajax({
+                url: '@Url.Action("GetDocumentApply", "AccountReceivables")?customerId=' + $('#CustomerId').val() + "&documentNumber=" + code,
+                type: "POST",
+                data: "",
+                cache: false,
+                async: false,
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    var $table = $('<table class="table table-stripped" id="applyTable"/>');
+                    $table.append(
+                        '<thead>' +
+                        '<tr>' +
+                        '<th style="width:25%">Id. de documento</th>' +
+                        '<th style="width:25%">Tipo</th>' +
+                        '<th style="width:20%">Fecha de documento</th>' +
+                        '<th style="width:30%">Monto aplicado</th>' +
+                        '</tr>' +
+                        '</thead>');
+                    if (result.registros.length > 0) {
+                        var $tbody = $('<tbody/>');
+                        $.each(result.registros, function (i, val) {
+                            var $row = $('<tr/>');
+                            $row.append($('<td />').html(val.DocumentNumber));
+                            $row.append($('<td />').html(val.Module));
+                            $row.append($('<td />').html(val.DocumentDate));
+                            $row.append($('<td />').html(parseFloat(val.AppliedAmount).toFixed(2).replace(/./g, function (c, i, a) {
+                                return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                            })));
+                            $tbody.append($row);
+                        });
+                        $table.append($tbody);
+                    }
+                    $('#applyRows').html($table);
                 }
             });
         }
@@ -737,5 +804,5 @@
                 });
             }
         }
-    </script>
+</script>
 }

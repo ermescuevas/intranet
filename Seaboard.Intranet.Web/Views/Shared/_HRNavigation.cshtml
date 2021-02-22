@@ -79,26 +79,29 @@
                 </ul>
             </li>
             <li class="@Html.IsSelected(controller: "HumanResources", action: "DigitalDocumentReport")
-                @Html.IsSelected(controller: "HumanResources", action: "DigitalDocumentAuditReport")">
+                @Html.IsSelected(controller: "HumanResources", action: "EmployeeDataReport")">
                 <a href="#"><i class="fa fa-files-o"></i> <span class="nav-label" data-i18n="nav.dashboard">Reportes</span> <span class="fa arrow"></span></a>
                 <ul class="nav nav-second-level collapse
                     @Html.IsSelected(controller: "HumanResources", action: "DigitalDocumentReport", cssClass: "in")
-                    @Html.IsSelected(controller: "HumanResources", action: "DigitalDocumentAuditReport", cssClass: "in")">
+                    @Html.IsSelected(controller: "HumanResources", action: "EmployeeDataReport", cssClass: "in")">
                     <li class="@Html.IsSelected(action: "DigitalDocumentReport")"><a href="@Url.Action("DigitalDocumentReport", "HumanResources")">Documentos digitales</a></li>
-                    <li class="@Html.IsSelected(action: "DigitalDocumentAuditReport")"><a href="@Url.Action("DigitalDocumentAuditReport", "HumanResources")">Auditoria documentos digitales</a></li>
+                    <li class="@Html.IsSelected(action: "EmployeeDataReport")"><a href="@Url.Action("EmployeeDataReport", "HumanResources")">Datos empleado</a></li>
                 </ul>
             </li>
             <li class="@Html.IsSelected(controller: "HumanResources", action: "EmployeeClassConfig") 
                 @Html.IsSelected(controller: "HumanResources", action: "AbsenceConfiguration")
-                @Html.IsSelected(controller: "HumanResources", action: "HolidayConfiguration")">
+                @Html.IsSelected(controller: "HumanResources", action: "HolidayConfiguration")
+                @Html.IsSelected(controller: "HumanResources", action: "EmployeePhoto")">
                 <a href="#"><i class="fa fa-laptop"></i> <span class="nav-label" data-i18n="nav.dashboard">Configuración</span> <span class="fa arrow"></span></a>
                 <ul class="nav nav-second-level collapse
                         @Html.IsSelected(controller: "HumanResources", action: "EmployeeClassConfig", cssClass: "in")
                     @Html.IsSelected(controller: "HumanResources", action: "AbsenceConfiguration", cssClass: "in")
-                    @Html.IsSelected(controller: "HumanResources", action: "HolidayConfiguration", cssClass: "in")">
+                    @Html.IsSelected(controller: "HumanResources", action: "HolidayConfiguration", cssClass: "in")
+                    @Html.IsSelected(controller: "HumanResources", action: "EmployeePhoto", cssClass: "in")">
                     <li class="@Html.IsSelected(action: "EmployeeClassConfig")"><a href="@Url.Action("EmployeeClassConfig", "HumanResources")">Grupos empleados</a></li>
                     <li class="@Html.IsSelected(action: "AbsenceConfiguration")"><a href="@Url.Action("AbsenceConfiguration", "HumanResources")">Reglas de ausencias</a></li>
                     <li class="@Html.IsSelected(action: "HolidayConfiguration")"><a href="@Url.Action("HolidayConfiguration", "HumanResources")">Dias feriados</a></li>
+                    <li class="@Html.IsSelected(action: "EmployeePhoto")"><a href="@Url.Action("EmployeePhoto", "HumanResources")">Foto empleado</a></li>
                 </ul>
             </li>
         </ul>

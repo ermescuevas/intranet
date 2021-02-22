@@ -22,6 +22,9 @@
                         <li><a href="http://intranet/payment/Payment/payment_form.aspx">Pago</a></li>
                         <li><a href="@Url.Action("UserRequest", "HumanResources")">Creación usuario de red</a></li>
                         <li><a href="@Url.Action("Index", "PurchaseQuotation")">Cotizacion compras</a></li>
+                        <li><a href="@Url.Action("EquipmentRequestIndex", "Computing")">Equipo de comunicación</a></li>
+                        <li><a href="@Url.Action("AbsenceRequest", "HumanResources")">Ausencia</a></li>
+                        <li><a href="@Url.Action("TrainingRequest", "HumanResources")">Capacitacion</a></li>
                     </ul>
                 </li>
 
@@ -77,42 +80,7 @@
 
                 <li class="dropdown"><a href="@Url.Action("Index", "Accounting")" class="dropdown-toggle"> Contabilidad </a></li>
 
-                <li class="dropdown">
-                    <a aria-expanded="false" role="button" href="#" class="dropdown-toggle" data-toggle="dropdown"> Recursos Humanos <span class="caret"></span></a>
-                    <ul role="menu" class="dropdown-menu">
-                        <li class="dropdown-submenu">
-                            <a href="#">Solicitudes</a>
-                            <ul class="dropdown-menu">
-                                <li><a href="@Url.Action("AbsenceRequest","HumanResources")">Solicitud de ausencias</a></li>
-                                <li><a href="@Url.Action("Index", "PaymentVoucher")">Volante de pago</a></li>
-                                <li><a href="@Url.Action("TrainingRequest", "HumanResources")">Solicitud de capacitación</a></li>
-                                <li><a href="@Url.Action("PayrollView", "PaymentVoucher")">Acceso a nominas</a></li>
-                            </ul>
-                        </li>
-                        <li class="dropdown-submenu">
-                            <a href="#">Transacciones</a>
-                            <ul class="dropdown-menu">
-                                <li><a href="@Url.Action("OvertimeRequest","HumanResources")">Horas Extras</a></li>
-                                <li><a href="@Url.Action("ExtraOvertimeRequest", "HumanResources")">Horas Extras extraordinarias</a></li>
-                                <li><a href="@Url.Action("HumanResourcesOvertime", "HumanResources")">Nomina - Horas Extras</a></li>
-                            </ul>
-                        </li>
-                        <li class="dropdown-submenu">
-                            <a href="#">Consultas</a>
-                            <ul class="dropdown-menu">
-                                <li><a href="@Url.Action("AbsenceReport","HumanResources")">Ausencias procesadas</a></li>
-                                <li><a href="@Url.Action("VacationPendingReport", "HumanResources")">Vacaciones pendientes</a></li>
-                            </ul>
-                        </li>
-                        <li class="dropdown-submenu">
-                            <a href="#">Configuración</a>
-                            <ul class="dropdown-menu">
-                                <li><a href="@Url.Action("AbsenceConfiguration","HumanResources")">Reglas de ausencias</a></li>
-                                <li><a href="@Url.Action("HolidayConfiguration", "HumanResources")">Dias feriados</a></li>
-                            </ul>
-                        </li>
-                    </ul>
-                </li>
+                <li class="dropdown"><a href="@Url.Action("Index", "HumanResources")" class="dropdown-toggle"> Recursos Humanos </a></li>
 
                 <li class="dropdown">
                     <a role="button" href="#" class="dropdown-toggle" data-toggle="dropdown"> Otros <span class="caret"></span></a>
@@ -126,6 +94,7 @@
                                 <li><a href="@Url.Action("Index", "EmployeeExtension")">Directorio telefonico</a></li>
                                 <li><a href="@Url.Action("Index", "WtSupplier")">Perfil para el WT de Suplidor</a></li>
                                 <li><a href="@Url.Action("Index", "PayrollBatch")">Nómina</a></li>
+                                <li><a href="@Url.Action("PurchaseOrderStatus", "Home")">Aprobacion Manual OC</a></li>
                             </ul>
                         </li>
                         <li class="dropdown-submenu">

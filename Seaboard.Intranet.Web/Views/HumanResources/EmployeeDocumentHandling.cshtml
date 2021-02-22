@@ -2,7 +2,7 @@
 @model Seaboard.Intranet.Domain.EmployeeDigitalDocument
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
-    ViewBag.Title = "Documentos digitales";
+    ViewBag.Title = "Sometimiento documentos digitales";
     var fields = (List<DigitalDocumentField>)ViewBag.Fields;
 }
 
@@ -20,19 +20,17 @@
 </style>
 <div class="row wrapper border-bottom white-bg page-heading">
     <div class="col-lg-10">
-        <h2>Documentos Digitales</h2>
+        <h2>Sometimiento documentos digitales</h2>
         <ol class="breadcrumb">
-            <li>
-                <a href="@Url.Action("Index", "Home")">Inicio</a>
-            </li>
-            <li class="active">
-                <strong>Documentos Digitales</strong>
-            </li>
+            <li><a href="@Url.Action("Index", "Home")">Inicio</a></li>
+            <li><a href="@Url.Action("EmployeeDocumentHandlingIndex", "HumanResources")">Listado de documentos digitales</a></li>
+            <li class="active"><strong>Sometimiento documentos digitales</strong></li>
         </ol>
     </div>
 </div>
 @Html.Hidden("DocumentId", (string)ViewBag.DocumentId)
 @Html.Hidden("EmployeeId", (string)ViewBag.EmployeeId)
+@Html.Hidden("BatchNumber", (string)ViewBag.BatchNumber)
 <div class="wrapper wrapper-content animated fadeInRight">
     <div class="col-lg-12">
         <div class="ibox">
@@ -90,7 +88,7 @@
     @Scripts.Render("~/plugins/jqlipboard")
     @Scripts.Render("~/plugins/sweetAlert")
     <script src="http://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.0.943/pdf.min.js" type="text/javascript"></script>
-<script type="text/javascript">
+    <script type="text/javascript">
     var fields = [];
     var myState = {
         pdf: null,
@@ -135,7 +133,8 @@
                 var data = {
                     values: fields,
                     documentId: $('#DocumentId').val(),
-                    employeeId: $('#EmployeeId').val()
+                    employeeId: $('#EmployeeId').val(),
+                    batchNumber: $('#BatchNumber').val()
                 };
                 swal({
                     title: "Someter",
@@ -179,7 +178,8 @@
     function getFile() {
         var data = {
             documentId: $('#DocumentId').val(),
-            employeeId: $('#EmployeeId').val()
+            employeeId: $('#EmployeeId').val(),
+            batchNumber: $('#BatchNumber').val()
         }
         $.ajax({
             url: '@Url.Action("GetPreviewFileSign", "HumanResources")',
@@ -208,5 +208,5 @@
             page.render({ canvasContext: ctx, viewport: viewport });
         });
     }
-</script>
+    </script>
 }
