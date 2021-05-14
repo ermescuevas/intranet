@@ -1186,7 +1186,7 @@ namespace Seaboard.Intranet.Web.Controllers
                         $"LEFT JOIN {Helpers.InterCompanyId}.dbo.SOP10106 E ON A.DOCNUMBR = E.SOPNUMBE " +
                         $"INNER JOIN {Helpers.InterCompanyId}.dbo.Seabo_SOP_Line_Items F ON A.DOCNUMBR = F.SOP_Number " +
                         $"WHERE A.CUSTNMBR = '{customerId}' AND RTRIM(A.CURNCYID) = '{currencyId}' AND (A.ORORGTRX - ISNULL(C.DocumentApply, 0)) > 0 AND A.RMDTYPAL = 1 AND SUBSTRING(A.DOCNUMBR, 1, 3) = 'FAC' " +
-                        $"AND (A.ORORGTRX - ISNULL(C.DocumentApply, 0)) - ISNULL(D.ApplyAmount, 0) >= {amount} AND CONVERT(DATE, A.DOCDATE) >= CONVERT(DATE, '{startDateInvoice.ToString("yyyyMMdd")}') " +
+                        $"AND (A.ORORGTRX - ISNULL(C.DocumentApply, 0)) - ISNULL(D.ApplyAmount, 0) < {amount} AND CONVERT(DATE, A.DOCDATE) >= CONVERT(DATE, '{startDateInvoice.ToString("yyyyMMdd")}') " +
                         $"/*AND F.Item_Number NOT IN ('INTERESES') */ ";
                 }
                 else

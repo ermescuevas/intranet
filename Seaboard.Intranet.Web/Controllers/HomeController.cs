@@ -4,6 +4,7 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Net.Mail;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 using Microsoft.AspNet.Identity;
 using Seaboard.Intranet.BusinessLogic;
@@ -821,7 +822,8 @@ namespace Seaboard.Intranet.Web.Controllers
             try
             {
                 xStatus = "OK";
-                ProcessLogic.SendToSharepoint(id, Convert.ToInt32(type), Account.GetAccount(User.Identity.GetUserName()).Email, ref xStatus);
+                //ProcessLogic.SendToSharepoint(id, Convert.ToInt32(type), Account.GetAccount(User.Identity.GetUserName()).Email, ref xStatus);
+                Task.Run(() => ProcessLogic.SendToSharepointAsync(id, Convert.ToInt32(type), Account.GetAccount(User.Identity.GetUserName()).Email));
             }
             catch (Exception ex)
             {
@@ -869,7 +871,8 @@ namespace Seaboard.Intranet.Web.Controllers
                 _repository.ExecuteCommand(String.Format("LODYNDEV.dbo.LPIV00101P1 '{0}','{1}','{2:yyyy-MM-ddThh:mm:ss}','{3}','{4}'",
                     Helpers.InterCompanyId, secuence, DateTime.Now, 1,Account.GetAccount(User.Identity.GetUserName()).UserId));
 
-                ProcessLogic.SendToSharepoint(secuence, 3, Account.GetAccount(User.Identity.GetUserName()).Email, ref xStatus);
+                Task.Run(() => ProcessLogic.SendToSharepointAsync(secuence, 3, Account.GetAccount(User.Identity.GetUserName()).Email));
+                //ProcessLogic.SendToSharepoint(secuence, 3, Account.GetAccount(User.Identity.GetUserName()).Email, ref xStatus);
                 HelperLogic.DesbloqueoSecuencia(secuence, "LPIV00101", Account.GetAccount(User.Identity.GetUserName()).UserId);
                 
             }

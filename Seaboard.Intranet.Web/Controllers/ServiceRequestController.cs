@@ -13,6 +13,7 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using Seaboard.Intranet.Data.Repository;
+using System.Threading.Tasks;
 
 namespace Seaboard.Intranet.Web.Controllers
 {
@@ -296,7 +297,8 @@ namespace Seaboard.Intranet.Web.Controllers
                     var purchaseRequest = _repository.ExecuteScalarQuery<string>(sqlQuery);
                     _repository.ExecuteCommand($"LODYNDEV.dbo.LPWF00101SI '{Helpers.InterCompanyId}','{request.PurchaseRequestId}','{request.Description}','{1}','{1}'");
                     _repository.ExecuteCommand($"LODYNDEV.dbo.LPWF00201SI '{Helpers.InterCompanyId}','{request.PurchaseRequestId}','{Account.GetAccount(User.Identity.GetUserName()).UserId}','','{1}'");
-                    ProcessLogic.SendToSharepoint(request.PurchaseRequestId, 1, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
+                    Task.Run(() => ProcessLogic.SendToSharepointAsync(request.PurchaseRequestId, 1, Account.GetAccount(User.Identity.GetUserName()).Email));
+                    //ProcessLogic.SendToSharepoint(request.PurchaseRequestId, 1, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
                 }
             }
             catch (Exception ex)
@@ -370,7 +372,8 @@ namespace Seaboard.Intranet.Web.Controllers
                 _repository.ExecuteCommand(string.Format("LODYNDEV.dbo.LPWF00101SI '{0}','{1}','{2}','{3}','{4}'", Helpers.InterCompanyId, purchaseRequestId, "", 1, 1));
                 _repository.ExecuteCommand(string.Format("LODYNDEV.dbo.LPWF00201SI '{0}','{1}','{2}','{3}','{4}'", Helpers.InterCompanyId, purchaseRequestId, Account.GetAccount(User.Identity.GetUserName()).UserId, "", 4));
 
-                ProcessLogic.SendToSharepoint(purchaseRequestId, 1, Account.GetAccount(User.Identity.GetUserName()).Email, ref xStatus);
+                Task.Run(() => ProcessLogic.SendToSharepointAsync(purchaseRequestId, 1, Account.GetAccount(User.Identity.GetUserName()).Email));
+                //ProcessLogic.SendToSharepoint(purchaseRequestId, 1, Account.GetAccount(User.Identity.GetUserName()).Email, ref xStatus);
             }
             catch (Exception ex)
             {

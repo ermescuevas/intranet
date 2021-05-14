@@ -13,6 +13,7 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using Seaboard.Intranet.Data.Repository;
+using System.Threading.Tasks;
 
 namespace Seaboard.Intranet.Web.Controllers
 {
@@ -51,8 +52,7 @@ namespace Seaboard.Intranet.Web.Controllers
                 + "A.POSTEDDT RequiredDate, A.DOCDATE DocumentDate, RTRIM(ISNULL(A.TRNSTLOC, '')) AR, ISNULL(A.USERID, '') Requester, "
                 + "CASE A.DOCSTTS WHEN 1 THEN 'No enviado' WHEN 2 THEN 'Enviada' WHEN 3 THEN 'Aprobado' WHEN 4 THEN 'En Proceso' WHEN 5 THEN 'Anulado' WHEN 7 THEN 'Rechazado' ELSE 'Cerrada' END Status "
                 + "FROM " + Helpers.InterCompanyId + ".dbo.LLIF10100 A "
-                + "WHERE A.DOCTYPE = 1 AND LOWER(RTRIM(A.DEPTMTID)) IN (" + filter +
-                ") AND LEN(RTRIM(A.SRCDOCNUM)) > 0 "
+                + "WHERE A.DOCTYPE = 1 AND LOWER(RTRIM(A.DEPTMTID)) IN (" + filter + ") AND LEN(RTRIM(A.SRCDOCNUM)) > 0 "
                 + "ORDER BY A.DEX_ROW_ID DESC";
 
             var purchaseRequestList = _repository.ExecuteQuery<PurchaseRequestViewModel>(sqlQuery);
@@ -314,7 +314,8 @@ namespace Seaboard.Intranet.Web.Controllers
                                 Helpers.InterCompanyId, request.PurchaseRequestId,
                                 Account.GetAccount(User.Identity.GetUserName()).UserId, "", 4));
 
-                        ProcessLogic.SendToSharepoint(request.PurchaseRequestId, 1, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
+                        Task.Run(() => ProcessLogic.SendToSharepointAsync(request.PurchaseRequestId, 1, Account.GetAccount(User.Identity.GetUserName()).Email));
+                        //ProcessLogic.SendToSharepoint(request.PurchaseRequestId, 1, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
                     }
                 }
                 else
@@ -378,7 +379,8 @@ namespace Seaboard.Intranet.Web.Controllers
 
                         _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.LLIF10100 SET DOCSTTS = 2 WHERE DOCNUMBR = '" + request.PurchaseRequestId + "'");
                         _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.LLIF10110 SET ITEMSTTS = 2 WHERE DOCNUMBR = '" + request.PurchaseRequestId + "'");
-                        ProcessLogic.SendToSharepoint(request.PurchaseRequestId, 4, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
+                        Task.Run(() => ProcessLogic.SendToSharepointAsync(request.PurchaseRequestId, 4, Account.GetAccount(User.Identity.GetUserName()).Email));
+                        //ProcessLogic.SendToSharepoint(request.PurchaseRequestId, 4, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
                     }
                 }
             }
@@ -660,7 +662,8 @@ namespace Seaboard.Intranet.Web.Controllers
                 _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.LLIF10100 SET DOCSTTS = 2 WHERE DOCNUMBR = '" + purchaseRequestId + "'");
                 _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.LLIF10110 SET ITEMSTTS = 2 WHERE DOCNUMBR = '" + purchaseRequestId + "'");
 
-                ProcessLogic.SendToSharepoint(purchaseRequestId, 4, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
+                Task.Run(() => ProcessLogic.SendToSharepointAsync(purchaseRequestId, 4, Account.GetAccount(User.Identity.GetUserName()).Email));
+                //ProcessLogic.SendToSharepoint(purchaseRequestId, 4, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
             }
             catch (Exception ex)
             {

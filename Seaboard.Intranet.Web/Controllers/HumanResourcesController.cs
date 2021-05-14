@@ -14,6 +14,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 
@@ -340,7 +342,11 @@ namespace Seaboard.Intranet.Web.Controllers
                     $"'{unitDays}','{availableDays}','{note}', 0, '{Account.GetAccount(User.Identity.GetUserName()).UserId}') ";
                 _repository.ExecuteCommand(sqlQuery);
                 newRowId = _repository.ExecuteScalarQuery<int>($"SELECT RowId FROM {Helpers.InterCompanyId}.dbo.EFUPR30100 ORDER BY RowId DESC");
-                ProcessLogic.SendToSharepoint(newRowId.ToString(), 5, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
+                Thread.Sleep(2000);
+                string requestId = _repository.ExecuteScalarQuery<string>($"SELECT RequestId FROM {Helpers.InterCompanyId}.dbo.EFUPR30100 WHERE RowId = {newRowId}");
+                //ProcessLogic.SendToSharepoint(newRowId.ToString(), 5, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
+                Task.Run(() => ProcessLogic.SendToSharepointAsync(requestId, 5, Account.GetAccount(User.Identity.GetUserName()).Email));
+                
                 if (status != "OK")
                     if (newRowId != 0)
                     {
@@ -384,7 +390,9 @@ namespace Seaboard.Intranet.Web.Controllers
             try
             {
                 status = "OK";
-                ProcessLogic.SendToSharepoint(rowId.ToString(), 5, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
+                string requestId = _repository.ExecuteScalarQuery<string>($"SELECT RequestId FROM {Helpers.InterCompanyId}.dbo.EFUPR30100 WHERE RowId = {rowId}");
+                Task.Run(() => ProcessLogic.SendToSharepointAsync(requestId, 5, Account.GetAccount(User.Identity.GetUserName()).Email));
+                //ProcessLogic.SendToSharepoint(rowId.ToString(), 5, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
             }
             catch (Exception ex)
             {
@@ -567,28 +575,39 @@ namespace Seaboard.Intranet.Web.Controllers
                 else
                     startDate = request.StartDate;
                 string sqlQuery;
+                string nameParticipants = "";
+
+                if (!string.IsNullOrEmpty(request.Participants))
+                    foreach (var item in request.Participants.Split(','))
+                    {
+                        var employee = _repository.ExecuteScalarQuery<string>($"SELECT RTRIM(FRSTNAME) + ' ' + RTRIM(LASTNAME) FROM {Helpers.InterCompanyId}.dbo.UPR00100 WHERE EMPLOYID = '{item}'");
+                        if (!string.IsNullOrEmpty(employee))
+                            nameParticipants += employee + ",";
+                    }
 
                 if (request.RowId == 0)
                 {
                     secuence = HelperLogic.AsignaciónSecuencia("EFUPR30400", Account.GetAccount(User.Identity.GetUserName()).UserId);
                     sqlQuery = $"INSERT INTO {Helpers.InterCompanyId}.dbo.EFUPR30400 ([RequestId],[Description],[EmployeeId],[StartDate],[Duration],[Department],[Cost]," +
-                        $"[CurrencyId],[Location],[Supplier],[Objectives],[Requirements],[Participants],[IsCompleted],[Status],[LastUserId]) " +
+                        $"[CurrencyId],[Location],[Supplier],[Objectives],[Requirements],[Participants],[ParticipantsName],[IsCompleted],[Status],[LastUserId]) " +
                         $"VALUES ('{secuence}','{request.Description}','{request.EmployeeId}','{startDate.ToString("yyyyMMdd")}','{request.Duration}','{request.Department}','{request.Cost}', " +
                         $"'{request.CurrencyId}','{request.Location}','{request.Supplier}', '{request.Objectives}', '{request.Requirements}', " +
-                        $"'{request.Participants}', '{request.IsCompleted}', 1, '{Account.GetAccount(User.Identity.GetUserName()).UserId}') ";
+                        $"'{request.Participants}', '{nameParticipants}', '{request.IsCompleted}', 1, '{Account.GetAccount(User.Identity.GetUserName()).UserId}') ";
                 }
                 else
                     sqlQuery = $"UPDATE {Helpers.InterCompanyId}.dbo.EFUPR30400 SET [Description] = '{request.Description}', [EmployeeId] = '{request.EmployeeId}', [StartDate] = '{startDate.ToString("yyyyMMdd")}', " +
                         $"[Duration] = '{request.Duration}', [Department] = '{request.Department}', [Cost] = '{request.Cost}', [CurrencyId] = '{request.CurrencyId}', [Location] = '{request.Location}', " +
                         $"[Supplier] = '{request.Supplier}', [Objectives] = '{request.Objectives}', [Requirements] = '{request.Requirements}', [Participants] = '{request.Participants}', " +
-                        $"[IsCompleted] = '{request.IsCompleted}', [Status] = 1, [LastUserId] = '{Account.GetAccount(User.Identity.GetUserName()).UserId}' " +
+                        $"[ParticipantsName] = '{nameParticipants}', [IsCompleted] = '{request.IsCompleted}', [Status] = 1, [LastUserId] = '{Account.GetAccount(User.Identity.GetUserName()).UserId}' " +
                         $"WHERE RowId = {request.RowId}";
                 _repository.ExecuteCommand(sqlQuery);
 
                 newRowId = request.RowId == 0 ? _repository.ExecuteScalarQuery<int>($"SELECT RowId FROM {Helpers.InterCompanyId}.dbo.EFUPR30400 ORDER BY RowId DESC") : request.RowId;
                 status = "OK";
+                string requestId = _repository.ExecuteScalarQuery<string>($"SELECT RequestId FROM {Helpers.InterCompanyId}.dbo.EFUPR30400 WHERE RowId = {newRowId}");
                 if (send)
-                    ProcessLogic.SendToSharepoint(newRowId.ToString(), 6, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
+                    Task.Run(() => ProcessLogic.SendToSharepointAsync(requestId, 6, Account.GetAccount(User.Identity.GetUserName()).Email));
+                //ProcessLogic.SendToSharepoint(newRowId.ToString(), 6, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
             }
             catch (Exception ex)
             {
@@ -761,7 +780,9 @@ namespace Seaboard.Intranet.Web.Controllers
                 _repository.ExecuteCommand(sqlQuery);
                 newRowId = request.RowId == 0 ? _repository.ExecuteScalarQuery<int>($"SELECT RowId FROM {Helpers.InterCompanyId}.dbo.EFUPR30500 ORDER BY RowId DESC") : request.RowId;
                 status = "OK";
-                ProcessLogic.SendToSharepoint(newRowId.ToString(), 7, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
+                string requestId = _repository.ExecuteScalarQuery<string>($"SELECT RequestId FROM {Helpers.InterCompanyId}.dbo.EFUPR30500 WHERE RowId = {newRowId}");
+                Task.Run(() => ProcessLogic.SendToSharepointAsync(requestId, 7, Account.GetAccount(User.Identity.GetUserName()).Email));
+                //ProcessLogic.SendToSharepoint(newRowId.ToString(), 7, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
 
             }
             catch (Exception ex)
@@ -827,7 +848,7 @@ namespace Seaboard.Intranet.Web.Controllers
                 "CASE A.OvertimeType WHEN 1 THEN '100%' WHEN 2 THEN '35%' WHEN 3 THEN '15%' WHEN 4 THEN 'Feriado' ELSE '100%' END OvertimeTypeDesc, A.OvertimeType, A.Status, A.RowId " +
                 $"FROM {Helpers.InterCompanyId}.dbo.EFUPR30200 A " +
                 $"INNER JOIN {Helpers.InterCompanyId}.dbo.UPR00100 B ON A.EmployeeId = B.EMPLOYID " +
-                $"WHERE A.LastUserId = '{Account.GetAccount(User.Identity.GetUserName()).UserId}' AND A.Module = 1 AND A.Status <> 4";
+                $"WHERE (A.LastUserId = '{Account.GetAccount(User.Identity.GetUserName()).UserId}' OR '{Account.GetAccount(User.Identity.GetUserName()).UserId}' = 'jramos') AND A.Module = 1 AND A.Status <> 4";
             var list = _repository.ExecuteQuery<Overtime>(sqlQuery).ToList();
 
             return View(list);
@@ -860,7 +881,7 @@ namespace Seaboard.Intranet.Web.Controllers
                 "CASE A.OvertimeType WHEN 1 THEN '100%' WHEN 2 THEN '35%' WHEN 3 THEN '15%' WHEN 4 THEN 'Feriado' ELSE '100%' END OvertimeTypeDesc, A.OvertimeType, A.Status, A.RowId " +
                 $"FROM {Helpers.InterCompanyId}.dbo.EFUPR30200 A " +
                 $"INNER JOIN {Helpers.InterCompanyId}.dbo.UPR00100 B ON A.EmployeeId = B.EMPLOYID " +
-                $"WHERE A.LastUserId = '{Account.GetAccount(User.Identity.GetUserName()).UserId}' AND Module = 2 AND A.Status <> 4";
+                $"WHERE (A.LastUserId = '{Account.GetAccount(User.Identity.GetUserName()).UserId}' OR '{Account.GetAccount(User.Identity.GetUserName()).UserId}' = 'jramos') AND Module = 2 AND A.Status <> 4";
             var list = _repository.ExecuteQuery<Overtime>(sqlQuery).ToList();
 
             return View(list);
@@ -991,7 +1012,7 @@ namespace Seaboard.Intranet.Web.Controllers
                     sqlQuery = "SELECT B.EMPLOYID EmployeeId, RTRIM(B.FRSTNAME) + ' ' + RTRIM(B.LASTNAME) EmployeeName, A.StartDate, A.EndDate, A.Hours, A.Note, " +
                     "CASE A.OvertimeType WHEN 1 THEN '100%' WHEN 2 THEN '30%' WHEN 3 THEN '15%' WHEN 4 THEN 'Feriado' ELSE '100%' END OvertimeTypeDesc, A.OvertimeType, A.Status, A.RowId " +
                     $"FROM {Helpers.InterCompanyId}.dbo.EFUPR30200 A INNER JOIN {Helpers.InterCompanyId}.dbo.UPR00100 B ON A.EmployeeId = B.EMPLOYID " +
-                    $"WHERE A.Status = 0 AND LastUserId = '{Account.GetAccount(User.Identity.GetUserName()).UserId}' AND Module = {module}";
+                    $"WHERE A.Status = 0 AND (A.LastUserId = '{Account.GetAccount(User.Identity.GetUserName()).UserId}' OR '{Account.GetAccount(User.Identity.GetUserName()).UserId}' = 'jramos') AND Module = {module}";
                 else
                     sqlQuery = "SELECT B.EMPLOYID EmployeeId, RTRIM(B.FRSTNAME) + ' ' + RTRIM(B.LASTNAME) EmployeeName, A.StartDate, A.EndDate, A.Hours, A.Note, " +
                         "CASE A.OvertimeType WHEN 1 THEN '100%' WHEN 2 THEN '30%' WHEN 3 THEN '15%' WHEN 4 THEN 'Feriado' ELSE '100%' END OvertimeTypeDesc, A.OvertimeType, A.Status, A.RowId " +
@@ -1056,6 +1077,7 @@ namespace Seaboard.Intranet.Web.Controllers
 
                 newRowId = rowId == 0 ? _repository.ExecuteScalarQuery<int>($"SELECT RowId FROM {Helpers.InterCompanyId}.dbo.EFUPR30300 ORDER BY RowId DESC") : rowId;
                 status = "OK";
+                string requestId = _repository.ExecuteScalarQuery<string>($"SELECT BatchNumber FROM {Helpers.InterCompanyId}.dbo.EFUPR30300 WHERE RowId = {newRowId}");
                 if (fileData != null)
                 {
                     byte[] fileStream = null;
@@ -1069,6 +1091,7 @@ namespace Seaboard.Intranet.Web.Controllers
                         Helpers.InterCompanyId, "Overtime" + newRowId, fileName, "0x" + BitConverter.ToString(fileStream).Replace("-", String.Empty),
                         fileType, Account.GetAccount(User.Identity.GetUserName()).UserId, "REQ"));
                 }
+                Task.Run(() => ProcessLogic.SendToSharepointAsync(requestId, 8, Account.GetAccount(User.Identity.GetUserName()).Email));
                 //ProcessLogic.SendToSharepoint(newRowId.ToString(), 8, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
             }
             catch (Exception ex)
@@ -1086,7 +1109,9 @@ namespace Seaboard.Intranet.Web.Controllers
             try
             {
                 status = "OK";
-                ProcessLogic.SendToSharepoint(rowId.ToString(), 8, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
+                string requestId = _repository.ExecuteScalarQuery<string>($"SELECT BatchNumber FROM {Helpers.InterCompanyId}.dbo.EFUPR30300 WHERE RowId = {rowId}");
+                Task.Run(() => ProcessLogic.SendToSharepointAsync(requestId, 8, Account.GetAccount(User.Identity.GetUserName()).Email));
+                //ProcessLogic.SendToSharepoint(rowId.ToString(), 8, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
             }
             catch (Exception ex)
             {
@@ -2303,7 +2328,8 @@ namespace Seaboard.Intranet.Web.Controllers
                     _repository.ExecuteCommand($"INSERT INTO {Helpers.InterCompanyId}.dbo.EHUPR10200 ([BatchNumber], [Description], [NumberOfEmployee], [SendDate], [LastUserId]) " +
                     $"VALUES ('{batchNumber}', 'Envio de documentos a empleados', '{count}', GETDATE(), '{Account.GetAccount(User.Identity.GetUserName()).UserId}')");
                     status = "OK";
-                    ProcessLogic.SendToSharepoint(batchNumber, 17, "", ref status);
+                    Task.Run(() => ProcessLogic.SendToSharepointAsync(batchNumber, 17, Account.GetAccount(User.Identity.GetUserName()).Email));
+                    //ProcessLogic.SendToSharepoint(batchNumber, 17, "", ref status);
                     if (status != "OK")
                     {
                         _repository.ExecuteCommand($"DELETE {Helpers.InterCompanyId}.dbo.EHUPR20101 WHERE BatchNumber = '{batchNumber}'");

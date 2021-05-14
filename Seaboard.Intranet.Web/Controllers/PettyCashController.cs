@@ -13,6 +13,7 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using Seaboard.Intranet.Data.Repository;
+using System.Threading.Tasks;
 
 namespace Seaboard.Intranet.Web.Controllers
 {
@@ -52,7 +53,7 @@ namespace Seaboard.Intranet.Web.Controllers
                 + "DEPRTMID Department, LSTUSRID UserId, CREATDDT DocumentDate, "
                 + "(CASE REQUSTS WHEN 0 THEN 'No enviada' WHEN 1 THEN 'Enviado' WHEN 2 THEN 'Rechazado' WHEN 3 THEN 'Anulado' WHEN 4 THEN 'Aprobado' "
                 + "WHEN 5 THEN 'Cerrada' ELSE 'No enviada' END) Status "
-                + "FROM " + Helpers.InterCompanyId + ".dbo.LPPOP30600 WHERE DEPRTMID IN(" + filter + ") "
+                + "FROM " + Helpers.InterCompanyId + ".dbo.LPPOP30600 WHERE DEPRTMID IN(" + filter + ") OR REQUESTBY = '" + Account.GetAccount(User.Identity.GetUserName()).UserId + "' "
                 + "ORDER BY DEX_ROW_ID DESC";
 
             var pettyCashRequestList = _repository.ExecuteQuery<PettyCashRequestViewModel>(sqlQuery);
@@ -82,7 +83,7 @@ namespace Seaboard.Intranet.Web.Controllers
                 + "DEPRTMID Department, LSTUSRID UserId, CREATDDT DocumentDate, "
                 + "(CASE REQUSTS WHEN 0 THEN 'No enviada' WHEN 1 THEN 'Enviado' WHEN 2 THEN 'Rechazado' WHEN 3 THEN 'Anulado' WHEN 4 THEN 'Aprobado' "
                 + "WHEN 5 THEN 'Cerrada' ELSE 'No enviada' END) Status "
-                + "FROM " + Helpers.InterCompanyId + ".dbo.LPPOP30600 WHERE DEPRTMID IN(" + filter + ") AND "
+                + "FROM " + Helpers.InterCompanyId + ".dbo.LPPOP30600 WHERE (DEPRTMID IN(" + filter + ") OR REQUESTBY = '" + Account.GetAccount(User.Identity.GetUserName()).UserId + "') AND "
                 + $"CREATDDT BETWEEN '{DateTime.ParseExact(fromDate, "MM/dd/yyyy", null).ToString("yyyyMMdd")}' AND '{DateTime.ParseExact(toDate, "MM/dd/yyyy", null).ToString("yyyyMMdd")}' "
                 + "ORDER BY DEX_ROW_ID DESC";
 
@@ -133,8 +134,8 @@ namespace Seaboard.Intranet.Web.Controllers
                         Helpers.InterCompanyId, pettyCashRequest.RequestId,
                         DateTime.Now.ToString("yyyy-MM-ddThh:mm:ss"), 1,
                         Account.GetAccount(User.Identity.GetUserName()).UserId));
-
-                    ProcessLogic.SendToSharepoint(pettyCashRequest.RequestId, 2, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
+                    Task.Run(() => ProcessLogic.SendToSharepointAsync(pettyCashRequest.RequestId, 2, Account.GetAccount(User.Identity.GetUserName()).Email));
+                    //ProcessLogic.SendToSharepoint(pettyCashRequest.RequestId, 2, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
                 }
 
                 if (status == "OK")
@@ -201,7 +202,8 @@ namespace Seaboard.Intranet.Web.Controllers
                     _repository.ExecuteCommand(String.Format("LODYNDEV.dbo.LPPOP30600P1 '{0}','{1}','{2:yyyy-MM-ddThh:mm:ss}','{3}','{4}'",
                         Helpers.InterCompanyId, pettyCashRequest.RequestId, DateTime.Now, 1,
                         Account.GetAccount(User.Identity.GetUserName()).UserId));
-                    ProcessLogic.SendToSharepoint(pettyCashRequest.RequestId, 2, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
+                    Task.Run(() => ProcessLogic.SendToSharepointAsync(pettyCashRequest.RequestId, 2, Account.GetAccount(User.Identity.GetUserName()).Email));
+                    //ProcessLogic.SendToSharepoint(pettyCashRequest.RequestId, 2, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
                 }
 
 
@@ -300,7 +302,8 @@ namespace Seaboard.Intranet.Web.Controllers
                     Helpers.InterCompanyId, requestId, DateTime.Now.ToString("yyyy-MM-ddThh:mm:ss"), 1,
                     Account.GetAccount(User.Identity.GetUserName()).UserId));
                 status = "OK";
-                ProcessLogic.SendToSharepoint(requestId, 2, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
+                Task.Run(() => ProcessLogic.SendToSharepointAsync(requestId, 2, Account.GetAccount(User.Identity.GetUserName()).Email));
+                //ProcessLogic.SendToSharepoint(requestId, 2, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
             }
             catch(Exception ex)
             {

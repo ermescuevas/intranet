@@ -211,7 +211,7 @@ namespace Seaboard.Intranet.Web.Controllers
         [HttpPost]
         public async Task<JsonResult> SaveUser(User user)
         {
-            bool xStatus;
+            string xStatus;
             try
             {
                 var oldPassword = "";
@@ -271,12 +271,19 @@ namespace Seaboard.Intranet.Web.Controllers
                     _repository.ExecuteCommand(sqlQuery);
                 }
 
-                xStatus = true;
+                xStatus = "OK";
 
             }
-            catch
+            catch(Exception e)
             {
-                xStatus = false;
+                var err = e;
+                var msg = e.Message + "\n";
+                while (err.InnerException != null)
+                {
+                    msg = msg + "\n" + "InnerException: " + err.InnerException.Message;
+                    err = err.InnerException;
+                }
+                xStatus = msg;
             }
 
             return new JsonResult {Data = new {status = xStatus } };

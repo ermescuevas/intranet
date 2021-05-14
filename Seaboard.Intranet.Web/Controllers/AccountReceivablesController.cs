@@ -338,14 +338,13 @@ namespace Seaboard.Intranet.Web.Controllers
         public JsonResult PostBatchTransCreateDetail(Lookup[] records)
         {
             string xStatus;
-            var message = "";
             try
             {
                 ProcessReceipt(records);
                 foreach (var item in records)
                     UpdateDataTransaction(item.Id, item.Descripción);
-                ServiceContract service = new ServiceContract();
-                service.PostBatch("Rcvg Trx Entry", records.FirstOrDefault()?.Id, ref message);
+                //ServiceContract service = new ServiceContract();
+                //service.PostBatch("Rcvg Trx Entry", records.FirstOrDefault()?.Id, ref message);
                 xStatus = "OK";
             }
             catch (Exception ex)
@@ -889,8 +888,8 @@ namespace Seaboard.Intranet.Web.Controllers
                     }
                 }
 
-                service = new ServiceContract();
-                service.PostBatch("RM_Sales", batchId, ref message);
+                //service = new ServiceContract();
+                //service.PostBatch("RM_Sales", batchId, ref message);
 
                 codigo = _repository.ExecuteScalarQuery<string>($"INTRANET.dbo.GetNextNumberAccountPayables '{Helpers.InterCompanyId}'");
 
@@ -939,14 +938,11 @@ namespace Seaboard.Intranet.Web.Controllers
                     }
                 }
 
-                service = new ServiceContract();
-                service.PostBatch("PM_Trxent", batchId, ref message);
+                //service = new ServiceContract();
+                //service.PostBatch("PM_Trxent", batchId, ref message);
 
                 if (generateDocuments)
-                {
                     GenerateDocuments(customerId, customerAmount, vendorId, vendorAmount, netDifference, batchId, date, currency, note, descripción);
-                }
-
                 _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.SESOP30501 SET POSTED = 1 WHERE BACHNMBR = '" + batchId + "'");
                 xStatus = "OK";
             }
@@ -1123,28 +1119,39 @@ namespace Seaboard.Intranet.Web.Controllers
         }
 
         [HttpPost]
-        public ActionResult InvoiceApply(string customerId = "", string currency = "")
+        public ActionResult InvoiceApply(string customerId = "", string currency = "", string documentNumber = "")
         {
             try
             {
                 string sqlQuery = "";
                 if (currency != "RDPESO")
                 {
-                    sqlQuery = "SELECT RTRIM(DOCNUMBR) Id, CONVERT(NVARCHAR(20), CONVERT(NUMERIC(32,2), ORCTRXAM)) Descripción, "
-                    + "CONVERT(nvarchar(20), CONVERT(DATE, DOCDATE, 112)) DataExtended FROM " + Helpers.InterCompanyId +
+                    sqlQuery = "SELECT Id, Descripción, DataExtended, CONVERT(NVARCHAR(50), SUM(CONVERT(NUMERIC(32,2), DataPlus))) DataPlus FROM ( " +
+                        "SELECT RTRIM(DOCNUMBR) Id, CONVERT(NVARCHAR(20), CONVERT(NUMERIC(32,2), ORCTRXAM)) Descripción, "
+                    + "CONVERT(nvarchar(20), CONVERT(DATE, DOCDATE, 112)) DataExtended, '0.00' DataPlus FROM " + Helpers.InterCompanyId +
                     ".dbo.MC020102 " + "WHERE CUSTNMBR = '" + customerId + "' AND RTRIM(CURNCYID) = '" + currency +
-                    "' AND ORCTRXAM > 0 AND RMDTYPAL IN(1,3) ";
+                    "' AND ORCTRXAM > 0 AND RMDTYPAL IN(1,3) " +
+                    "UNION ALL " +
+                    "SELECT RTRIM(B.DOCNUMBR) Id, CONVERT(NVARCHAR(20), CONVERT(NUMERIC(32,2), B.ORCTRXAM)) Descripción, " +
+                    "CONVERT(nvarchar(20), CONVERT(DATE, B.DOCDATE, 112)) DataExtended, CONVERT(NVARCHAR(20), CONVERT(NUMERIC(32,2), A.APPTOAMT)) DataPlus " +
+                    "FROM " + Helpers.InterCompanyId + ".dbo.RM20201 A INNER JOIN " + Helpers.InterCompanyId + ".dbo.MC020102 B ON A.APTODCNM = B.DOCNUMBR WHERE A.APFRDCNM = '" + documentNumber + "') A " +
+                    "GROUP BY Id, Descripción, DataExtended";
                 }
                 else
                 {
-                    sqlQuery =
-                    "SELECT RTRIM(DOCNUMBR) Id, CONVERT(NVARCHAR(20), CONVERT(NUMERIC(32,2), CURTRXAM)) Descripción, "
-                    + "CONVERT(nvarchar(20), CONVERT(DATE, DOCDATE, 112)) DataExtended FROM " + Helpers.InterCompanyId +
+                    sqlQuery = "SELECT DISTINCT Id, Descripción, DataExtended, CONVERT(NVARCHAR(50), SUM(CONVERT(NUMERIC(32,2), DataPlus))) DataPlus FROM (" +
+                        "SELECT RTRIM(DOCNUMBR) Id, CONVERT(NVARCHAR(20), CONVERT(NUMERIC(32,2), CURTRXAM)) Descripción, "
+                    + "CONVERT(nvarchar(20), CONVERT(DATE, DOCDATE, 112)) DataExtended, '0.00' DataPlus FROM " + Helpers.InterCompanyId +
                     ".dbo.RM20101 " + "WHERE CUSTNMBR = '" + customerId + "' AND RTRIM(CURNCYID) = '" + currency +
-                    "' AND CURTRXAM > 0 AND RMDTYPAL IN(1,3) ";
+                    "' AND CURTRXAM > 0 AND RMDTYPAL IN(1,3) " +
+                    "UNION ALL " +
+                    "SELECT RTRIM(B.DOCNUMBR) Id, CONVERT(NVARCHAR(20), CONVERT(NUMERIC(32,2), B.CURTRXAM)) Descripción, " +
+                    "CONVERT(nvarchar(20), CONVERT(DATE, B.DOCDATE, 112)) DataExtended, CONVERT(NVARCHAR(20), CONVERT(NUMERIC(32,2), A.APPTOAMT)) DataPlus " +
+                    "FROM " + Helpers.InterCompanyId + ".dbo.RM20201 A INNER JOIN " + Helpers.InterCompanyId + ".dbo.RM20101 B ON A.APTODCNM = B.DOCNUMBR WHERE A.APFRDCNM = '" + documentNumber + "') A " +
+                    "GROUP BY Id, Descripción, DataExtended";
                 }
 
-                var lookup = _repository.ExecuteQuery<Lookup>(sqlQuery).ToList();
+                var lookup = _repository.ExecuteQuery<Lookup>(sqlQuery).Distinct().ToList();
                 return Json(lookup, JsonRequestBehavior.AllowGet);
             }
             catch
@@ -1172,22 +1179,29 @@ namespace Seaboard.Intranet.Web.Controllers
                     Type = cashReceipt.CashReceiptType,
                     Description = cashReceipt.Description
                 };
-
+                decimal currentAmount = 0;
                 var count = _repository.ExecuteScalarQuery<int>($"SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.RM10201 WHERE DOCNUMBR = '{cashReceipt.CashReceiptId}'");
 
                 if (count > 0)
                 {
+
+                    foreach (var item in cashReceipt.InvoiceLines)
+                    {
+                        currentAmount += Convert.ToDecimal(item.DocumentAmount);
+                    }
+
+                    currentAmount -= cashReceipt.Amount;
                     var sqlQuery = "SELECT DOCNUMBR CashReceiptId, BACHNUMB BatchNumber, TRXDSCRN Description, CUSTNMBR CustomerId, " +
-                        "CURNCYID CurrencyId, DOCDATE DocumentDate, CONVERT(INT, CSHRCTYP) CashReceiptType, ORTRXAMT Amount, CONVERT(BIT, POSTED) Posted " +
-                        "FROM " + Helpers.InterCompanyId + ".dbo.RM10201 " +
-                        "WHERE DOCNUMBR = '" + cashReceipt.CashReceiptId + "'";
+                    "CURNCYID CurrencyId, DOCDATE DocumentDate, CONVERT(INT, CSHRCTYP) CashReceiptType, ORTRXAMT Amount, CONVERT(BIT, POSTED) Posted " +
+                    "FROM " + Helpers.InterCompanyId + ".dbo.RM10201 " +
+                    "WHERE DOCNUMBR = '" + cashReceipt.CashReceiptId + "'";
 
                     var trans = _repository.ExecuteScalarQuery<CashReceipt>(sqlQuery);
 
                     _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.SY00500 SET BCHTOTAL -= '" + trans.Amount + "', NUMOFTRX -= 1 WHERE BACHNUMB = '" + trans.BatchNumber + "'");
                     _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.RM10201 " +
                         "SET TRXDSCRN = '" + cashReceipt.Description + "', CURNCYID = '" + cashReceipt.Currency + "', DOCDATE = '" + cashReceipt.DocumentDate.ToString("yyyyMMdd") + "'," +
-                        "CSHRCTYP = '" + Convert.ToInt16(cashReceipt.CashReceiptType) + "', ORTRXAMT = '" + cashReceipt.Amount + "' WHERE DOCNUMBR = '" + cashReceipt.CashReceiptId + "'");
+                        "CSHRCTYP = '" + Convert.ToInt16(cashReceipt.CashReceiptType) + "', CURTRXAM = '"+ cashReceipt.Amount + "',  ORTRXAMT = '" + cashReceipt.Amount + "' WHERE DOCNUMBR = '" + cashReceipt.CashReceiptId + "'");
 
                     _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.RM10201 " +
                         "SET TRXDSCRN = '" + cashReceipt.Description + "', CURNCYID = '" + cashReceipt.Currency + "', DOCDATE = '" + cashReceipt.DocumentDate.ToString("yyyyMMdd") + "'," +
@@ -1199,7 +1213,6 @@ namespace Seaboard.Intranet.Web.Controllers
                           "SET DOCDATE = '" + cashReceipt.DocumentDate.ToString("yyyyMMdd") + "', ORCTRXAM = '" + cashReceipt.Amount + "' " +
                           "WHERE DOCNUMBR = '" + cashReceipt.CashReceiptId + "' AND CUSTNMBR = '" + cashReceipt.CustomerId + "'");
                     }
-
                     _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.SY00500 SET BCHTOTAL += '" + cashReceipt.Amount + "', " +
                         "NUMOFTRX += 1 WHERE BACHNUMB = '" + cashReceipt.BatchNumber + "'");
                 }
@@ -1216,6 +1229,7 @@ namespace Seaboard.Intranet.Web.Controllers
                 {
                     foreach (var item in cashReceipt.InvoiceLines)
                     {
+                        
                         if (cashReceipt.Currency != "RDPESO")
                         {
                             _repository.ExecuteCommand(string.Format("INTRANET.dbo.ApplyMulticurrencyReceivablesDocument '{0}','{1}','{2}','{3}','{4}','{5:yyyyMMdd}'",
@@ -1224,6 +1238,15 @@ namespace Seaboard.Intranet.Web.Controllers
                         }
                         else
                         {
+                            count = _repository.ExecuteScalarQuery<int>($"SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.RM20201 " +
+                            $"WHERE APTODCNM = '{item.DocumentNumber}' AND CUSTNMBR = '{cashReceipt.CustomerId}' AND APFRDCNM = '{cashReceipt.CashReceiptId}'");
+                            if (count > 0)
+                            {
+                                var amount = _repository.ExecuteScalarQuery<decimal>($"SELECT APPTOAMT FROM {Helpers.InterCompanyId}.dbo.RM20201 " +
+                                $"WHERE APTODCNM = '{item.DocumentNumber}' AND CUSTNMBR = '{cashReceipt.CustomerId}' AND APFRDCNM = '{cashReceipt.CashReceiptId}'");
+                                _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.RM20101 SET CURTRXAM += '" + amount + "' WHERE DOCNUMBR = '" + item.DocumentNumber + "'");
+                                _repository.ExecuteCommand($"DELETE {Helpers.InterCompanyId}.dbo.RM20201 WHERE APTODCNM = '{item.DocumentNumber}' AND CUSTNMBR = '{cashReceipt.CustomerId}' AND APFRDCNM = '{cashReceipt.CashReceiptId}'");
+                            }
                             var docType = _repository.ExecuteScalarQuery<short>(
                             "SELECT RMDTYPAL FROM " + Helpers.InterCompanyId + ".dbo.RM20101 " +
                             "WHERE RTRIM(DOCNUMBR) = '" + item.DocumentNumber + "' " +
@@ -1232,6 +1255,8 @@ namespace Seaboard.Intranet.Web.Controllers
                                     Helpers.InterCompanyId, item.DocumentNumber, cashReceipt.CashReceiptId, Convert.ToDecimal(item.DocumentAmount).ToString(new CultureInfo("en-US")), 9, docType, cashReceipt.DocumentDate));
                         }
                     }
+
+                    _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.RM10201 SET CURTRXAM = '" + currentAmount + "' WHERE DOCNUMBR = '" + cashReceipt.CashReceiptId + "'");
                 }
 
                 xStatus = "OK";
@@ -1595,6 +1620,73 @@ namespace Seaboard.Intranet.Web.Controllers
             return new JsonResult { Data = new { status = xStatus } };
         }
 
+        public ActionResult AccountReceivablesNetMulticurrencyReport()
+        {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "AccountReceivables", "AccountReceivablesReport"))
+                return RedirectToAction("NotPermission", "Home");
+            return View();
+        }
+
+        [OutputCache(Duration = 0)]
+        [HttpPost]
+        public ActionResult AccountReceivablesNetMulticurrencyReport(string date, decimal exchangeRate, int printOption)
+        {
+            string xStatus;
+            try
+            {
+                xStatus = "OK";
+                var reportName = "AccountReceivablesNetMulticurrencyReport";
+                if (printOption == 10)
+                    reportName += ".pdf";
+                else
+                    reportName += ".xls";
+
+                ReportHelper.Export(Helpers.ReportPath + "Reportes", Server.MapPath("~/PDF/Reportes/") + reportName,
+                    string.Format("INTRANET.dbo.AccountReceivablesNetMulticurrencyReport '{0}','{1}','{2}'", Helpers.InterCompanyId, date, exchangeRate.ToString(new CultureInfo("en-US"))),
+                    61, ref xStatus, printOption == 10 ? 0 : 1);
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = xStatus } };
+        }
+
+        public ActionResult AccountReceivablesCustomReport()
+        {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "AccountReceivables", "AccountReceivablesReport"))
+                return RedirectToAction("NotPermission", "Home");
+            return View();
+        }
+
+        [OutputCache(Duration = 0)]
+        [HttpPost]
+        public ActionResult AccountReceivablesCustomReport(string date, decimal exchangeRate, int printOption)
+        {
+            string xStatus;
+            try
+            {
+                xStatus = "OK";
+                var reportName = "AccountReceivablesCustomSummary";
+                if (printOption == 10)
+                    reportName += ".pdf";
+                else
+                    reportName += ".xls";
+
+                ReportHelper.Export(Helpers.ReportPath + "Reportes", Server.MapPath("~/PDF/Reportes/") + reportName,
+                    string.Format("INTRANET.dbo.AccountReceivablesCustomReportSummary '{0}','{1}','{2}','{3}'", Helpers.InterCompanyId, date, exchangeRate.ToString(new CultureInfo("en-US")), 1),
+                    62, ref xStatus, printOption == 10 ? 0 : 1,
+                    string.Format("INTRANET.dbo.AccountReceivablesCustomReportSummary '{0}','{1}','{2}','{3}'", Helpers.InterCompanyId, date, exchangeRate.ToString(new CultureInfo("en-US")), 2));
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = xStatus } };
+        }
+
         #endregion
 
         #region Attachments
@@ -1893,7 +1985,6 @@ namespace Seaboard.Intranet.Web.Controllers
             ViewBag.Type = type;
             return View(list);
         }
-
         public ActionResult InterestEntry(string batchNumber = "", int type = 0, int preliminar = 0)
         {
             if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "AccountReceivables", "InterestEntry"))
@@ -1922,7 +2013,6 @@ namespace Seaboard.Intranet.Web.Controllers
             ViewBag.Preliminar = preliminar;
             return View(interestHeader);
         }
-
         public ActionResult InterestInquiry(int type = 0)
         {
             if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "AccountReceivables", "InterestEntry"))
@@ -1939,7 +2029,6 @@ namespace Seaboard.Intranet.Web.Controllers
             ViewBag.Type = type;
             return View("InterestIndex", list);
         }
-
         public JsonResult PostInterestData(string batchNumber, int preliminar)
         {
             string xStatus;
@@ -1958,7 +2047,6 @@ namespace Seaboard.Intranet.Web.Controllers
             }
             return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
         }
-
         public JsonResult InsertInterestData(string batchNumber, string description, string cutDate, string searchDate, string billingMonth, string documentDate, decimal interestRate, decimal charge, int preliminar, int type)
         {
             string xStatus;
@@ -1977,7 +2065,6 @@ namespace Seaboard.Intranet.Web.Controllers
             
             return Json(new { status = xStatus}, JsonRequestBehavior.AllowGet);
         }
-
         public JsonResult GetInterestDataCustomer(string batchNumber)
         {
             string xStatus;
@@ -1998,7 +2085,6 @@ namespace Seaboard.Intranet.Web.Controllers
 
             return Json(new { status = xStatus, registros = customers }, JsonRequestBehavior.AllowGet);
         }
-
         public JsonResult GetInterestDataDetails(string batchNumber, string customerId)
         {
             string xStatus;
@@ -2022,7 +2108,6 @@ namespace Seaboard.Intranet.Web.Controllers
 
             return Json(new { status = xStatus, registros = details }, JsonRequestBehavior.AllowGet);
         }
-
         public JsonResult GetDetailPaymentDetails(string batchNumber, string customerId, string documentNumber, int preliminar)
         {
             string xStatus;
@@ -2044,7 +2129,6 @@ namespace Seaboard.Intranet.Web.Controllers
 
             return Json(new { status = xStatus, registros = details }, JsonRequestBehavior.AllowGet);
         }
-
         public JsonResult SaveInterest(string batchNumber, string description, string cutDate, string searchDate, string billingMonth, string documentDate, decimal interestRate, decimal charge, int preliminar, int type)
         {
             string xStatus;
@@ -2063,7 +2147,6 @@ namespace Seaboard.Intranet.Web.Controllers
 
             return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
         }
-
         public JsonResult CalculateInterest(string batchNumber, string description, string cutDate, string searchDate, string billingMonth, string documentDate, decimal interestRate, decimal charge, int preliminar, int type)
         {
             string xStatus;
@@ -2083,7 +2166,6 @@ namespace Seaboard.Intranet.Web.Controllers
 
             return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
         }
-
         [HttpPost]
         public JsonResult GetInterestRate(string date)
         {
@@ -2102,7 +2184,6 @@ namespace Seaboard.Intranet.Web.Controllers
 
             return Json(new { status = xStatus, rate }, JsonRequestBehavior.AllowGet);
         }
-
         [HttpPost]
         public JsonResult DeleteInterestTransaction(string batchNumber)
         {
@@ -2127,7 +2208,6 @@ namespace Seaboard.Intranet.Web.Controllers
 
             return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
         }
-
         [HttpPost]
         public JsonResult VoidInterestTransaction(string batchNumber)
         {
@@ -2151,7 +2231,6 @@ namespace Seaboard.Intranet.Web.Controllers
 
             return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
         }
-
         [HttpPost]
         public JsonResult UpdateInterestTransactionInvoiceExclusion(string batchNumber, string customerId, string documentNumber, bool exclude)
         {
@@ -2171,7 +2250,6 @@ namespace Seaboard.Intranet.Web.Controllers
             }
             return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
         }
-
         [HttpPost]
         public JsonResult UpdateInterestTransactionCustomerExclusion(string batchNumber, string customerId, bool exclude)
         {
@@ -2196,7 +2274,6 @@ namespace Seaboard.Intranet.Web.Controllers
             }
             return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
         }
-
         [OutputCache(Duration = 0)]
         [HttpPost]
         public ActionResult InterestReport(string batchNumber, int printOption)
@@ -2221,7 +2298,6 @@ namespace Seaboard.Intranet.Web.Controllers
 
             return new JsonResult { Data = new { status = xStatus } };
         }
-
         public ActionResult InterestConfiguration()
         {
             if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "AccountReceivables", "InterestConfiguration"))
@@ -2230,7 +2306,6 @@ namespace Seaboard.Intranet.Web.Controllers
             var configuration = _repository.ExecuteScalarQuery<InterestConfiguration>(sqlQuery) ?? new InterestConfiguration { StartDateInvoice = DateTime.Now, ChargeRate = 0 };
             return View(configuration);
         }
-
         public JsonResult SaveInterestConfiguration(decimal ChargeRate, string StartDateInvoice, string InterestItemCode, string RechargeItemCode)
         {
             string xStatus;
@@ -2270,7 +2345,6 @@ namespace Seaboard.Intranet.Web.Controllers
                 "" + Helpers.InterCompanyId + ".dbo.RM00101 WHERE INACTIVE = 0 AND CUSTCLAS <> 'LOCALSPOT'").ToList();
             return View(list);
         }
-
         [HttpPost]
         public JsonResult SaveContract(InterestContract contract)
         {
@@ -2298,7 +2372,6 @@ namespace Seaboard.Intranet.Web.Controllers
 
             return new JsonResult { Data = new { status = xStatus } };
         }
-
         [HttpPost]
         public JsonResult DeleteContract(string id)
         {

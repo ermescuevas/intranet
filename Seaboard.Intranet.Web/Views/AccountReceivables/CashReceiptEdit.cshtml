@@ -362,7 +362,7 @@
 
         function GeneratedInvoicesTable() {
             $.ajax({
-                url: '@Url.Action("InvoiceApply", "AccountReceivables")?customerId=' + $('#CustomerId').val().trim() +'&currency=' +$('#Currency').val().trim(),
+                url: '@Url.Action("InvoiceApply", "AccountReceivables")?customerId=' + $('#CustomerId').val().trim() + '&currency=' + $('#Currency').val().trim() + '&documentNumber=' + $('#CashReceiptId').val().trim(),
                 type: "POST",
                 data: "",
                 dataType: "JSON",
@@ -372,8 +372,7 @@
                     invoiceItems = result;
                     if (invoiceItems.length > 0) {
                         var $table = $('<table  class="table table-stripped table-bordered" id="invoiceTable" />');
-                        $table.append(
-                            '<thead><tr><th style="width:10%"></th><th>Aplicar al documento</th><th>Fecha documento</th><th>Monto pendiente</th><th>Aplicar monto</th></tr></thead>');
+                        $table.append('<thead><tr><th style="width:10%"></th><th>Aplicar al documento</th><th>Fecha documento</th><th>Monto pendiente</th><th>Aplicar monto</th></tr></thead>');
                         var $tbody = $('<tbody/>');
                         $.each(invoiceItems,
                             function (i, val) {
@@ -393,71 +392,55 @@
                                 }));
                                 $inputDocumentAmount.val("0.00");
                                 $.each(invoiceApplied, function (j, amount) {
-                                    if (invoiceApplied[j].DocumentNumber == invoiceItems[i].Id) {
-                                        $inputDocumentAmount.val(parseFloat(invoiceApplied[j].DocumentAmount).toFixed(2).replace(/./g,function (c, i, a) {
-                                                    return i && c !== "." && ((a.length - i) % 3 === 0)
-                                                        ? ',' + c
-                                                        : c;
-                                                }));
-                                    }
+                                    if (invoiceApplied[j].DocumentNumber == invoiceItems[i].Id)
+                                        $inputDocumentAmount.val(parseFloat(invoiceApplied[j].DocumentAmount).toFixed(2).replace(/./g, function (c, i, a) {
+                                            return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                                        }));
                                 });
-                                $.each(invoiceApplied, function (j, amount) {
-                                    if (invoiceApplied[j].DocumentNumber == invoiceItems[i].Id) {
-                                        if (parseFloat(val.Descripción) > 0) {
-                                            $inputCurrentAmount.val(parseFloat(parseFloat(val.Descripción) -
-                                                parseFloat(invoiceApplied[j].DocumentAmount).toFixed(2).replace(/./g,function (c, i, a) {
-                                                        return i && c !== "." && ((a.length - i) % 3 === 0)
-                                                            ? ',' + c
-                                                            : c;
-                                                    })));
-                                        }
-                                    }
-                                });
+                                //$.each(invoiceApplied, function (j, amount) {
+                                //    if (invoiceApplied[j].DocumentNumber == invoiceItems[i].Id) {
+                                //        if (parseFloat(val.Descripción) > 0)
+                                //            $inputCurrentAmount.val(parseFloat(parseFloat(val.Descripción) - parseFloat(invoiceApplied[j].DocumentAmount).toFixed(2).replace(/./g, function (c, i, a) {
+                                //                return i && c !== "." && ((a.length - i) % 3 === 0)
+                                //                    ? ',' + c
+                                //                    : c;
+                                //            })));
+                                //    }
+                                //});
                                 $('<td/>').append($inputCurrentAmount).appendTo($row);
                                 $('<td/>').append($inputDocumentAmount).appendTo($row);
                                 $remove.click(function (e) {
                                     e.preventDefault();
                                     var value = invoiceItems[i];
-                                    var cellValueApplied =
-                                        parseFloat($(
-                                            '#invoiceTable tr:eq(' + (i + 1) + ') td:eq(' + (5 - 1) + ') input')
-                                            .val()
-                                            .replace(/,/g, ""));
-                                    var cellValueCurrent =
-                                        parseFloat($(
-                                            '#invoiceTable tr:eq(' + (i + 1) + ') td:eq(' + (4 - 1) + ') input')
-                                            .val()
-                                            .replace(/,/g, ""));
+                                    var cellValueApplied = parseFloat($('#invoiceTable tr:eq(' + (i + 1) + ') td:eq(' + (5 - 1) + ') input').val().replace(/,/g, ""));
+                                    var cellValueCurrent = parseFloat($('#invoiceTable tr:eq(' + (i + 1) + ') td:eq(' + (4 - 1) + ') input').val().replace(/,/g, ""));
                                     if (cellValueApplied == 0) {
-                                        console.log(value.Descripción);
                                         invoiceApplied.push({
                                             DocumentNumber: value.Id,
                                             DocumentAmount: value.Descripción
                                         });
 
-                                        setCellValue('invoiceTable', i, 5, parseFloat(value.Descripción).toFixed(2));
+                                        setCellValue('invoiceTable', i, 5, (parseFloat(cellValueCurrent)).toFixed(2));
                                         setCellValue('invoiceTable', i, 4, 0);
                                         var monto = parseFloat($('#montoAplicado').text().replace(/,/g, ""));
-                                        monto = monto + parseFloat(value.Descripción);
+                                        monto = monto + parseFloat(cellValueCurrent);
                                         $('#montoAplicado').text(monto.toFixed(2).replace(/./g,
                                             function (c, i, a) {
                                                 return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
                                             }));
                                     } else {
                                         for (var j = 0; j < invoiceApplied.length; j++) {
-                                            if (invoiceApplied[j].DocumentNumber == value.Id) {
+                                            if (invoiceApplied[j].DocumentNumber == value.Id)
                                                 invoiceApplied.splice(j, 1);
-                                            }
                                         }
 
                                         setCellValue('invoiceTable', i, 5, "0.00");
-                                        setCellValue('invoiceTable', i, 4, parseFloat(value.Descripción).toFixed(2));
+                                        setCellValue('invoiceTable', i, 4, (parseFloat(cellValueCurrent) + parseFloat(cellValueApplied)).toFixed(2))
                                         var monto = parseFloat($('#montoAplicado').text().replace(/,/g, ""));
                                         monto = monto - parseFloat(cellValueApplied);
-                                        $('#montoAplicado').text(monto.toFixed(2).replace(/./g,
-                                            function (c, i, a) {
-                                                return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
-                                            }));
+                                        $('#montoAplicado').text(monto.toFixed(2).replace(/./g, function (c, i, a) {
+                                            return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                                        }));
                                     }
                                 });
                                 $details.click(function () {
@@ -466,52 +449,24 @@
                                 $inputDocumentAmount.focusout(function (e) {
                                     e.preventDefault();
                                     var value = invoiceItems[i];
-                                    var cellValueApplied =
-                                        parseFloat($(
-                                            '#invoiceTable tr:eq(' + (i + 1) + ') td:eq(' + (5 - 1) + ') input')
-                                            .val()
-                                            .replace(/,/g, "")).toFixed(2);
-                                    var cellValueCurrent =
-                                        parseFloat($(
-                                            '#invoiceTable tr:eq(' + (i + 1) + ') td:eq(' + (4 - 1) + ') input')
-                                            .val()
-                                            .replace(/,/g, "")).toFixed(2);
+                                    var cellValueApplied = parseFloat($('#invoiceTable tr:eq(' + (i + 1) + ') td:eq(' + (5 - 1) + ') input').val().replace(/,/g, "")).toFixed(2);
+                                    var cellValueCurrent = parseFloat($('#invoiceTable tr:eq(' + (i + 1) + ') td:eq(' + (4 - 1) + ') input').val().replace(/,/g, "")).toFixed(2);
                                     for (var j = 0; j < invoiceApplied.length; j++) {
-                                        if (invoiceApplied[j].DocumentNumber == value.Id) {
+                                        if (invoiceApplied[j].DocumentNumber == value.Id)
                                             invoiceApplied.splice(j, 1);
-                                        }
                                     }
 
                                     if (cellValueApplied > 0) {
-                                        console.log(Math.abs(parseFloat(value.Descripción) -
-                                            Math.abs(cellValueApplied - cellValueCurrent)));
                                         invoiceApplied.push({
                                             DocumentNumber: value.Id,
-                                            DocumentAmount: Math.abs(parseFloat(value.Descripción) -
-                                                Math.abs(cellValueApplied - cellValueCurrent))
+                                            DocumentAmount: parseFloat(cellValueApplied)
                                         });
                                     }
 
-                                    setCellValue('invoiceTable',
-                                        i,
-                                        4,
-                                        Math.abs(parseFloat(value.Descripción) - Math.abs(cellValueApplied))
-                                            .toFixed(2));
-                                    cellValueCurrent =
-                                        parseFloat($(
-                                            '#invoiceTable tr:eq(' + (i + 1) + ') td:eq(' + (4 - 1) + ') input')
-                                            .val()
-                                            .replace(/,/g, ""));
-                                    setCellValue('invoiceTable',
-                                        i,
-                                        5,
-                                        Math.abs(parseFloat(value.Descripción) - Math.abs(cellValueCurrent))
-                                            .toFixed(2));
-
-                                    var monto = parseFloat($('#montoAplicado').text().replace(/,/g, ""));
-                                    monto = monto +
-                                        Math.abs(parseFloat(value.Descripción) -
-                                            Math.abs(cellValueApplied - cellValueCurrent));
+                                    setCellValue('invoiceTable', i, 4, ((parseFloat(value.Descripción) + parseFloat(value.DataPlus)) - parseFloat(cellValueApplied)).toFixed(2));
+                                    //setCellValue('invoiceTable',i, 4, Math.abs(parseFloat(value.Descripción) - Math.abs(cellValueApplied)).toFixed(2));
+                                    //cellValueCurrent = parseFloat($('#invoiceTable tr:eq(' + (i + 1) + ') td:eq(' + (4 - 1) + ') input').val().replace(/,/g, ""));
+                                    setCellValue('invoiceTable', i, 5, parseFloat(cellValueApplied).toFixed(2));
                                     AmountApply(i);
                                 });
                                 $tbody.append($row);

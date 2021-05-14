@@ -359,11 +359,11 @@
                     dataType: "JSON",
                     contentType: "application/json",
                     success: function (d) {
-                        if (d.status == true) {
+                        if (d.status == "OK") {
                             window.location.href = "@Url.Action("Index", "Account")";
                         }
                         else {
-                            alert('Ha ocurrido un error');
+                            alert(d.status);
                         }
                         $('#submit').val('Guardar');
                     },

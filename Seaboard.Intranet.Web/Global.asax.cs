@@ -1,4 +1,5 @@
-﻿using Seaboard.Intranet.Domain;
+﻿using Seaboard.Intranet.BusinessLogic;
+using Seaboard.Intranet.Domain;
 using System;
 using System.Globalization;
 using System.Threading;
@@ -33,6 +34,13 @@ namespace Seaboard.Intranet.Web
             Helpers.MailServer = WebConfigurationManager.AppSettings["MailServer"].ToString();
             Helpers.HelpdeskMail = WebConfigurationManager.AppSettings["HelpdeskMail"].ToString();
             Helpers.VendorClass = WebConfigurationManager.AppSettings["VendorClass"].ToString();
+
+            WebTaskScheduler.Lock();
+            try { WebTaskScheduler.Add("RunTasks", RunTasks, new TimeSpan(0, 0, 2, 0)); } finally { WebTaskScheduler.Unlock(); }
+        }
+        private static void RunTasks(WebTaskEventArgs e)
+        {
+            e.CanContinue = true;
         }
     }
 }

@@ -198,6 +198,12 @@ namespace Seaboard.Intranet.BusinessLogic
                     case 60:
                         reporte = "EmployeeDataReport.rpt";
                         break;
+                    case 61:
+                        reporte = "AccountReceivablesNetMulticurrency.rpt";
+                        break;
+                    case 62:
+                        reporte = "AgingAccountReceivablesCustomSummary.rpt";
+                        break;
                 }
 
                 const string reportHeader = "SELECT '' CompName, '' Titulo, '' Parametro1, '' Parametro2, '' Parametro3, '' Parametro4, '' Parametro5, '' Parametro6, '' Usuario, 1 Marca";
@@ -221,7 +227,7 @@ namespace Seaboard.Intranet.BusinessLogic
                     crystalReport.Database.Tables[1].SetDataSource(detalle);
                 }
 
-                if (tipo == 43 || tipo == 59)
+                if (tipo == 43 || tipo == 59 || tipo == 62)
                     crystalReport.Subreports[0].SetDataSource(ConnectionDb.GetDt(subQuery));
                 var type = CrystalDecisions.Shared.ExportFormatType.PortableDocFormat;
                 if (printOption != 0)
