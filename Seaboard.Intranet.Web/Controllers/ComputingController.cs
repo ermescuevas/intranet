@@ -511,7 +511,7 @@ namespace Seaboard.Intranet.Web
                 if (postType == 1)
                 {
                     //ProcessLogic.SendToSharepoint(equipmentRequest.RequestId, 13, Account.GetAccount(User.Identity.GetUserName()).Email, ref xStatus);
-                    Task.Run(() => ProcessLogic.SendToSharepointAsync(equipmentRequest.RequestId, 13, Account.GetAccount(User.Identity.GetUserName()).Email));
+                    ProcessLogic.SendToSharepointAsync(equipmentRequest.RequestId, 13, Account.GetAccount(User.Identity.GetUserName()).Email);
                     _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIPM10000 SET Status = 2 WHERE RequestId = '{equipmentRequest.RequestId}'");
                     LogRequest(equipmentRequest.RequestId, Account.GetAccount(User.Identity.GetUserName()).FirstName + " " + Account.GetAccount(User.Identity.GetUserName()).LastName, "Enviado a flujo de aprobacion");
                 }
@@ -663,7 +663,7 @@ namespace Seaboard.Intranet.Web
             {
                 _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIPM10000 SET Status = 7 WHERE RequestId = '{id}'");
                 LogRequest(id, Account.GetAccount(User.Identity.GetUserName()).FirstName + " " + Account.GetAccount(User.Identity.GetUserName()).LastName, "Solicitud marcada como completada");
-                Task.Run(() => ProcessLogic.SendToSharepointAsync(id, 16, Account.GetAccount(User.Identity.GetUserName()).Email));
+                ProcessLogic.SendToSharepointAsync(id, 16, Account.GetAccount(User.Identity.GetUserName()).Email);
                 //ProcessLogic.SendToSharepoint(id, 16, Account.GetAccount(User.Identity.GetUserName()).Email, ref xStatus);
                 xStatus = "OK";
             }
@@ -737,7 +737,7 @@ namespace Seaboard.Intranet.Web
                 _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIPM10000 SET Status = 6 WHERE RequestId = '{equipmentRequest.BaseDocumentNumber}'");
                 if (postType == 1)
                 {
-                    Task.Run(() => ProcessLogic.SendToSharepointAsync(equipmentRequest.RequestId, 14, Account.GetAccount(User.Identity.GetUserName()).Email));
+                    ProcessLogic.SendToSharepointAsync(equipmentRequest.RequestId, 14, Account.GetAccount(User.Identity.GetUserName()).Email);
                     //ProcessLogic.SendToSharepoint(equipmentRequest.RequestId, 14, Account.GetAccount(User.Identity.GetUserName()).Email, ref xStatus);
                     _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIPM10200 SET Status = 2 WHERE RequestId = '{equipmentRequest.RequestId}'");
                 }
@@ -795,7 +795,7 @@ namespace Seaboard.Intranet.Web
                 {
                     _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIPM10000 SET Status = 7 WHERE RequestId = '{equipmentDelivery.BaseDocumentNumber}'");
                     LogRequest(equipmentDelivery.BaseDocumentNumber, Account.GetAccount(User.Identity.GetUserName()).FirstName + " " + Account.GetAccount(User.Identity.GetUserName()).LastName, "Equipo entregado");
-                    Task.Run(() => ProcessLogic.SendToSharepointAsync(equipmentDelivery.BaseDocumentNumber, 16, Account.GetAccount(User.Identity.GetUserName()).Email));
+                    ProcessLogic.SendToSharepointAsync(equipmentDelivery.BaseDocumentNumber, 16, Account.GetAccount(User.Identity.GetUserName()).Email);
                     //ProcessLogic.SendToSharepoint(equipmentDelivery.BaseDocumentNumber, 16, Account.GetAccount(User.Identity.GetUserName()).Email, ref xStatus);
                 }
 
@@ -861,7 +861,7 @@ namespace Seaboard.Intranet.Web
                 if (type == "10")
                 {
                     _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIPM10000 SET Status = 7 WHERE RequestId = '{baseDocument}'");
-                    Task.Run(() => ProcessLogic.SendToSharepointAsync(baseDocument, 16, Account.GetAccount(User.Identity.GetUserName()).Email));
+                    ProcessLogic.SendToSharepointAsync(baseDocument, 16, Account.GetAccount(User.Identity.GetUserName()).Email);
                     //ProcessLogic.SendToSharepoint(baseDocument, 16, Account.GetAccount(User.Identity.GetUserName()).Email, ref xStatus);
                 }
                 xStatus = "OK";
@@ -929,7 +929,7 @@ namespace Seaboard.Intranet.Web
                 _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIPM10000 SET Status = 6 WHERE RequestId = '{equipmentRepair.BaseDocumentNumber}'");
                 if (postType == 1)
                 {
-                    Task.Run(() => ProcessLogic.SendToSharepointAsync(equipmentRepair.RequestId, 15, Account.GetAccount(User.Identity.GetUserName()).Email));
+                    ProcessLogic.SendToSharepointAsync(equipmentRepair.RequestId, 15, Account.GetAccount(User.Identity.GetUserName()).Email);
                     //ProcessLogic.SendToSharepoint(equipmentRepair.RequestId, 15, Account.GetAccount(User.Identity.GetUserName()).Email, ref xStatus);
                     _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIPM10300 SET Status = 2 WHERE RequestId = '{equipmentRepair.RequestId}'");
                 }
@@ -1060,7 +1060,7 @@ namespace Seaboard.Intranet.Web
                 if (type == "20")
                 {
                     _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EIPM10000 SET Status = 7 WHERE RequestId = '{baseDocument}'");
-                    Task.Run(() => ProcessLogic.SendToSharepointAsync(baseDocument, 16, Account.GetAccount(User.Identity.GetUserName()).Email));
+                    ProcessLogic.SendToSharepointAsync(baseDocument, 16, Account.GetAccount(User.Identity.GetUserName()).Email);
                     //ProcessLogic.SendToSharepoint(baseDocument, 16, Account.GetAccount(User.Identity.GetUserName()).Email, ref xStatus);
                 }
                 xStatus = "OK";

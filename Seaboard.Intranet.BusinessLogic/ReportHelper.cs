@@ -204,6 +204,15 @@ namespace Seaboard.Intranet.BusinessLogic
                     case 62:
                         reporte = "AgingAccountReceivablesCustomSummary.rpt";
                         break;
+                    case 63:
+                        reporte = "CustomerStatementReport.rpt";
+                        break;
+                    case 64:
+                        reporte = "CollectionsProtocolReport.rpt";
+                        break;
+                    case 65:
+                        reporte = "CollectionsRelationSummaryReport.rpt";
+                        break;
                 }
 
                 const string reportHeader = "SELECT '' CompName, '' Titulo, '' Parametro1, '' Parametro2, '' Parametro3, '' Parametro4, '' Parametro5, '' Parametro6, '' Usuario, 1 Marca";

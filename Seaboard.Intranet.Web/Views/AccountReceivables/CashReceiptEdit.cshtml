@@ -145,6 +145,18 @@
                                                 @Html.TextBoxFor(model => model.Amount, new { @class = "form-control" })
                                             </div>
                                         </div>
+
+                                        <div class="form-group">
+                                            <label class="col-sm-4 control-label">Banco:</label>
+                                            <div class="col-sm-8 input-group">
+                                                @Html.TextBoxFor(model => model.BankId, new { @class = "form-control", @readonly = "" })
+                                                <span class="input-group-btn">
+                                                    <button id="lookupBanco" type="button" class="btn btn-primary">
+                                                        <i class="fa fa-search"></i>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -287,6 +299,7 @@
     @Styles.Render("~/plugins/toastrStyles")
     @Styles.Render("~/plugins/jasnyBootstrapStyles")
     @Styles.Render("~/plugins/textSpinnersStyles")
+    @Styles.Render("~/plugins/sweetAlertStyles")
     <link href="@Url.Content("~/Content/plugins/datatables/datatables.min.css")" rel="stylesheet" type="text/css" />
     @Styles.Render("~/plugins/footableStyles")
     <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
@@ -300,6 +313,7 @@
     @Scripts.Render("~/plugins/toastr")
     @Scripts.Render("~/Scripts/plugins/datatables/datatables.min.js")
     @Scripts.Render("~/plugins/footable")
+    @Scripts.Render("~/plugins/sweetAlert")
     @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
 
 <script type="text/javascript">
@@ -320,6 +334,18 @@
                 },
                 tableHeader: ['Id. de cliente', 'Nombre'],
                 hiddenFields: ['DataExtended']
+            });
+            $("#lookupBanco").lookupbox({
+                title: 'Busqueda:',
+                url: '@Url.Action("ListLookup", "Home")?tipo=53&consulta=',
+                imgLoader: '<img src="~/Images/ajaxloader.gif">',
+                width: 800,
+                height: 1000,
+                onItemSelected: function(data) {
+                    $('input[name=BankId]').val(data.Id);
+                },
+                tableHeader: ['Id. de cliente', 'Nombre'],
+                hiddenFields: ['DataExtended', 'DataPlus']
             });
             $('#Amount').focusout(function() {
                 if (($('#Amount').val().trim().replace(/,/g, "") != '' &&
@@ -586,6 +612,11 @@
                 isAllValid = false;
             }
 
+            if ($('#BankId').val().val().trim() == '') {
+                toastr.error('El banco es requerido', 'Campos requeridos')
+                isAllValid = false;
+            }
+
             if (isAllValid) {
                 $('#buttonPanel').children('.ibox-content').toggleClass('sk-loading');
                 var data = {
@@ -599,6 +630,7 @@
                     Amount: parseFloat($('#Amount').val().replace(/,/g, "")).toFixed(2),
                     ApplyAmount: parseFloat($('#montoAplicado').text().replace(/,/g, "")).toFixed(2),
                     BatchNumber: $('#BatchNumber').val().trim(),
+                    BankId: $('#BankId').val().trim(),
                     InvoiceLines: invoiceApplied
                 }
 
@@ -860,23 +892,48 @@
 
         function imprimirMoneda() {
             if ($('#CashReceiptId').val().trim() !== '') {
-                var url = '@Url.Content("~/PDF/Reportes/")CashReceiptReport.pdf';
-                toastr.info('Estamos procesando su solicitud', 'Por favor espere');
-                $.ajax({
-                    url: '@Url.Action("PrintCashReceipt", "AccountReceivables")?cashReceiptId=' + $('#CashReceiptId').val() + '&amount=' + $('#PrintAmount').val(),
-                    type: "POST",
-                    data: "",
-                    cache: false,
-                    dataType: "JSON",
-                    contentType: "application/json",
-                    success: function (d) {
-                        if (d.status === "OK") {
-                            window.open(url);
-                            $('#modal-Print').modal('hide');
-                        } else {
-                            alert(d.status);
+                swal({
+                    title: "Monto",
+                    text: "Quiere insertar este monto para presentacion en el reporte de Collections ?",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Si, proceder!",
+                    cancelButtonText: "No!",
+                    closeOnConfirm: true
+                }, function (confirm) {
+                    if (confirm) {
+                        var data = {
+                            id: $('#CashReceiptId').val().trim(),
+                            amount: $('#PrintAmount').val().trim()
                         }
+                        $.ajax({
+                            url: '@Url.Action("SaveCashReceiptForeignAmount", "AccountReceivables")',
+                            type: "POST",
+                            data: JSON.stringify(data),
+                            dataType: "JSON",
+                            contentType: "application/json",
+                            success: function (d) { }
+                        });
                     }
+                    var url = '@Url.Content("~/PDF/Reportes/")CashReceiptReport.pdf';
+                    toastr.info('Estamos procesando su solicitud', 'Por favor espere');
+                    $.ajax({
+                        url: '@Url.Action("PrintCashReceipt", "AccountReceivables")?cashReceiptId=' + $('#CashReceiptId').val() + '&amount=' + $('#PrintAmount').val(),
+                        type: "POST",
+                        data: "",
+                        cache: false,
+                        dataType: "JSON",
+                        contentType: "application/json",
+                        success: function (d) {
+                            if (d.status === "OK") {
+                                window.open(url);
+                                $('#modal-Print').modal('hide');
+                            } else {
+                                alert(d.status);
+                            }
+                        }
+                    });
                 });
             }
         }

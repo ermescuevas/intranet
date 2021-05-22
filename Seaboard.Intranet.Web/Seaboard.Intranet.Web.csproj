@@ -1077,6 +1077,9 @@
     <Content Include="Views\HumanResources\EmployeePhoto.cshtml" />
     <Content Include="Views\AccountReceivables\AccountReceivablesNetMulticurrencyReport.cshtml" />
     <Content Include="Views\AccountReceivables\AccountReceivablesCustomReport.cshtml" />
+    <Content Include="Views\AccountReceivables\CustomerStatementReport.cshtml" />
+    <Content Include="Views\AccountReceivables\CollectionsProtocolReport.cshtml" />
+    <Content Include="Views\AccountReceivables\CollectionsRelationSummaryReport.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

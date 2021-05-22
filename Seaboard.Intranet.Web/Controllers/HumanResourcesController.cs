@@ -345,7 +345,7 @@ namespace Seaboard.Intranet.Web.Controllers
                 Thread.Sleep(2000);
                 string requestId = _repository.ExecuteScalarQuery<string>($"SELECT RequestId FROM {Helpers.InterCompanyId}.dbo.EFUPR30100 WHERE RowId = {newRowId}");
                 //ProcessLogic.SendToSharepoint(newRowId.ToString(), 5, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
-                Task.Run(() => ProcessLogic.SendToSharepointAsync(requestId, 5, Account.GetAccount(User.Identity.GetUserName()).Email));
+                ProcessLogic.SendToSharepointAsync(requestId, 5, Account.GetAccount(User.Identity.GetUserName()).Email);
                 
                 if (status != "OK")
                     if (newRowId != 0)
@@ -391,7 +391,7 @@ namespace Seaboard.Intranet.Web.Controllers
             {
                 status = "OK";
                 string requestId = _repository.ExecuteScalarQuery<string>($"SELECT RequestId FROM {Helpers.InterCompanyId}.dbo.EFUPR30100 WHERE RowId = {rowId}");
-                Task.Run(() => ProcessLogic.SendToSharepointAsync(requestId, 5, Account.GetAccount(User.Identity.GetUserName()).Email));
+                ProcessLogic.SendToSharepointAsync(requestId, 5, Account.GetAccount(User.Identity.GetUserName()).Email);
                 //ProcessLogic.SendToSharepoint(rowId.ToString(), 5, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
             }
             catch (Exception ex)
@@ -606,7 +606,7 @@ namespace Seaboard.Intranet.Web.Controllers
                 status = "OK";
                 string requestId = _repository.ExecuteScalarQuery<string>($"SELECT RequestId FROM {Helpers.InterCompanyId}.dbo.EFUPR30400 WHERE RowId = {newRowId}");
                 if (send)
-                    Task.Run(() => ProcessLogic.SendToSharepointAsync(requestId, 6, Account.GetAccount(User.Identity.GetUserName()).Email));
+                    ProcessLogic.SendToSharepointAsync(requestId, 6, Account.GetAccount(User.Identity.GetUserName()).Email);
                 //ProcessLogic.SendToSharepoint(newRowId.ToString(), 6, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
             }
             catch (Exception ex)
@@ -781,7 +781,7 @@ namespace Seaboard.Intranet.Web.Controllers
                 newRowId = request.RowId == 0 ? _repository.ExecuteScalarQuery<int>($"SELECT RowId FROM {Helpers.InterCompanyId}.dbo.EFUPR30500 ORDER BY RowId DESC") : request.RowId;
                 status = "OK";
                 string requestId = _repository.ExecuteScalarQuery<string>($"SELECT RequestId FROM {Helpers.InterCompanyId}.dbo.EFUPR30500 WHERE RowId = {newRowId}");
-                Task.Run(() => ProcessLogic.SendToSharepointAsync(requestId, 7, Account.GetAccount(User.Identity.GetUserName()).Email));
+                ProcessLogic.SendToSharepointAsync(requestId, 7, Account.GetAccount(User.Identity.GetUserName()).Email);
                 //ProcessLogic.SendToSharepoint(newRowId.ToString(), 7, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
 
             }
@@ -1091,7 +1091,7 @@ namespace Seaboard.Intranet.Web.Controllers
                         Helpers.InterCompanyId, "Overtime" + newRowId, fileName, "0x" + BitConverter.ToString(fileStream).Replace("-", String.Empty),
                         fileType, Account.GetAccount(User.Identity.GetUserName()).UserId, "REQ"));
                 }
-                Task.Run(() => ProcessLogic.SendToSharepointAsync(requestId, 8, Account.GetAccount(User.Identity.GetUserName()).Email));
+                ProcessLogic.SendToSharepointAsync(requestId, 8, Account.GetAccount(User.Identity.GetUserName()).Email);
                 //ProcessLogic.SendToSharepoint(newRowId.ToString(), 8, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
             }
             catch (Exception ex)
@@ -1110,7 +1110,7 @@ namespace Seaboard.Intranet.Web.Controllers
             {
                 status = "OK";
                 string requestId = _repository.ExecuteScalarQuery<string>($"SELECT BatchNumber FROM {Helpers.InterCompanyId}.dbo.EFUPR30300 WHERE RowId = {rowId}");
-                Task.Run(() => ProcessLogic.SendToSharepointAsync(requestId, 8, Account.GetAccount(User.Identity.GetUserName()).Email));
+                ProcessLogic.SendToSharepointAsync(requestId, 8, Account.GetAccount(User.Identity.GetUserName()).Email);
                 //ProcessLogic.SendToSharepoint(rowId.ToString(), 8, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
             }
             catch (Exception ex)
@@ -2328,7 +2328,7 @@ namespace Seaboard.Intranet.Web.Controllers
                     _repository.ExecuteCommand($"INSERT INTO {Helpers.InterCompanyId}.dbo.EHUPR10200 ([BatchNumber], [Description], [NumberOfEmployee], [SendDate], [LastUserId]) " +
                     $"VALUES ('{batchNumber}', 'Envio de documentos a empleados', '{count}', GETDATE(), '{Account.GetAccount(User.Identity.GetUserName()).UserId}')");
                     status = "OK";
-                    Task.Run(() => ProcessLogic.SendToSharepointAsync(batchNumber, 17, Account.GetAccount(User.Identity.GetUserName()).Email));
+                    ProcessLogic.SendToSharepointAsync(batchNumber, 17, Account.GetAccount(User.Identity.GetUserName()).Email);
                     //ProcessLogic.SendToSharepoint(batchNumber, 17, "", ref status);
                     if (status != "OK")
                     {

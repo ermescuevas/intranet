@@ -20,6 +20,7 @@ namespace Seaboard.Intranet.Domain.Models
         public bool Posted { get; set; }
         public bool Voided { get; set; }
         public string Note { get; set; }
+        public string BankId { get; set; }
         public IEnumerable<CashReceiptInvoice> InvoiceLines { get; set; }
     }
 

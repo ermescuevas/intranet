@@ -314,7 +314,7 @@ namespace Seaboard.Intranet.Web.Controllers
                                 Helpers.InterCompanyId, request.PurchaseRequestId,
                                 Account.GetAccount(User.Identity.GetUserName()).UserId, "", 4));
 
-                        Task.Run(() => ProcessLogic.SendToSharepointAsync(request.PurchaseRequestId, 1, Account.GetAccount(User.Identity.GetUserName()).Email));
+                        ProcessLogic.SendToSharepointAsync(request.PurchaseRequestId, 1, Account.GetAccount(User.Identity.GetUserName()).Email);
                         //ProcessLogic.SendToSharepoint(request.PurchaseRequestId, 1, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
                     }
                 }
@@ -379,7 +379,7 @@ namespace Seaboard.Intranet.Web.Controllers
 
                         _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.LLIF10100 SET DOCSTTS = 2 WHERE DOCNUMBR = '" + request.PurchaseRequestId + "'");
                         _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.LLIF10110 SET ITEMSTTS = 2 WHERE DOCNUMBR = '" + request.PurchaseRequestId + "'");
-                        Task.Run(() => ProcessLogic.SendToSharepointAsync(request.PurchaseRequestId, 4, Account.GetAccount(User.Identity.GetUserName()).Email));
+                        ProcessLogic.SendToSharepointAsync(request.PurchaseRequestId, 4, Account.GetAccount(User.Identity.GetUserName()).Email);
                         //ProcessLogic.SendToSharepoint(request.PurchaseRequestId, 4, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
                     }
                 }
@@ -662,7 +662,7 @@ namespace Seaboard.Intranet.Web.Controllers
                 _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.LLIF10100 SET DOCSTTS = 2 WHERE DOCNUMBR = '" + purchaseRequestId + "'");
                 _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.LLIF10110 SET ITEMSTTS = 2 WHERE DOCNUMBR = '" + purchaseRequestId + "'");
 
-                Task.Run(() => ProcessLogic.SendToSharepointAsync(purchaseRequestId, 4, Account.GetAccount(User.Identity.GetUserName()).Email));
+                ProcessLogic.SendToSharepointAsync(purchaseRequestId, 4, Account.GetAccount(User.Identity.GetUserName()).Email);
                 //ProcessLogic.SendToSharepoint(purchaseRequestId, 4, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
             }
             catch (Exception ex)

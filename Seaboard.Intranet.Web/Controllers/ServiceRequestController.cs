@@ -297,7 +297,7 @@ namespace Seaboard.Intranet.Web.Controllers
                     var purchaseRequest = _repository.ExecuteScalarQuery<string>(sqlQuery);
                     _repository.ExecuteCommand($"LODYNDEV.dbo.LPWF00101SI '{Helpers.InterCompanyId}','{request.PurchaseRequestId}','{request.Description}','{1}','{1}'");
                     _repository.ExecuteCommand($"LODYNDEV.dbo.LPWF00201SI '{Helpers.InterCompanyId}','{request.PurchaseRequestId}','{Account.GetAccount(User.Identity.GetUserName()).UserId}','','{1}'");
-                    Task.Run(() => ProcessLogic.SendToSharepointAsync(request.PurchaseRequestId, 1, Account.GetAccount(User.Identity.GetUserName()).Email));
+                    ProcessLogic.SendToSharepointAsync(request.PurchaseRequestId, 1, Account.GetAccount(User.Identity.GetUserName()).Email);
                     //ProcessLogic.SendToSharepoint(request.PurchaseRequestId, 1, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
                 }
             }
@@ -372,7 +372,7 @@ namespace Seaboard.Intranet.Web.Controllers
                 _repository.ExecuteCommand(string.Format("LODYNDEV.dbo.LPWF00101SI '{0}','{1}','{2}','{3}','{4}'", Helpers.InterCompanyId, purchaseRequestId, "", 1, 1));
                 _repository.ExecuteCommand(string.Format("LODYNDEV.dbo.LPWF00201SI '{0}','{1}','{2}','{3}','{4}'", Helpers.InterCompanyId, purchaseRequestId, Account.GetAccount(User.Identity.GetUserName()).UserId, "", 4));
 
-                Task.Run(() => ProcessLogic.SendToSharepointAsync(purchaseRequestId, 1, Account.GetAccount(User.Identity.GetUserName()).Email));
+                ProcessLogic.SendToSharepointAsync(purchaseRequestId, 1, Account.GetAccount(User.Identity.GetUserName()).Email);
                 //ProcessLogic.SendToSharepoint(purchaseRequestId, 1, Account.GetAccount(User.Identity.GetUserName()).Email, ref xStatus);
             }
             catch (Exception ex)

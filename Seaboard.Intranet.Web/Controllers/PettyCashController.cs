@@ -134,7 +134,7 @@ namespace Seaboard.Intranet.Web.Controllers
                         Helpers.InterCompanyId, pettyCashRequest.RequestId,
                         DateTime.Now.ToString("yyyy-MM-ddThh:mm:ss"), 1,
                         Account.GetAccount(User.Identity.GetUserName()).UserId));
-                    Task.Run(() => ProcessLogic.SendToSharepointAsync(pettyCashRequest.RequestId, 2, Account.GetAccount(User.Identity.GetUserName()).Email));
+                    ProcessLogic.SendToSharepointAsync(pettyCashRequest.RequestId, 2, Account.GetAccount(User.Identity.GetUserName()).Email);
                     //ProcessLogic.SendToSharepoint(pettyCashRequest.RequestId, 2, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
                 }
 
@@ -202,7 +202,7 @@ namespace Seaboard.Intranet.Web.Controllers
                     _repository.ExecuteCommand(String.Format("LODYNDEV.dbo.LPPOP30600P1 '{0}','{1}','{2:yyyy-MM-ddThh:mm:ss}','{3}','{4}'",
                         Helpers.InterCompanyId, pettyCashRequest.RequestId, DateTime.Now, 1,
                         Account.GetAccount(User.Identity.GetUserName()).UserId));
-                    Task.Run(() => ProcessLogic.SendToSharepointAsync(pettyCashRequest.RequestId, 2, Account.GetAccount(User.Identity.GetUserName()).Email));
+                    ProcessLogic.SendToSharepointAsync(pettyCashRequest.RequestId, 2, Account.GetAccount(User.Identity.GetUserName()).Email);
                     //ProcessLogic.SendToSharepoint(pettyCashRequest.RequestId, 2, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
                 }
 
@@ -302,7 +302,7 @@ namespace Seaboard.Intranet.Web.Controllers
                     Helpers.InterCompanyId, requestId, DateTime.Now.ToString("yyyy-MM-ddThh:mm:ss"), 1,
                     Account.GetAccount(User.Identity.GetUserName()).UserId));
                 status = "OK";
-                Task.Run(() => ProcessLogic.SendToSharepointAsync(requestId, 2, Account.GetAccount(User.Identity.GetUserName()).Email));
+                ProcessLogic.SendToSharepointAsync(requestId, 2, Account.GetAccount(User.Identity.GetUserName()).Email);
                 //ProcessLogic.SendToSharepoint(requestId, 2, Account.GetAccount(User.Identity.GetUserName()).Email, ref status);
             }
             catch(Exception ex)

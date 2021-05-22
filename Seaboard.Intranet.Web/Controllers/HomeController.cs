@@ -769,6 +769,12 @@ namespace Seaboard.Intranet.Web.Controllers
                             "WHERE A.SUPERVISORCODE_I LIKE '%" + consulta + "%' OR A.SUPERVISOR LIKE '%" + consulta + "%' OR B.FRSTNAME LIKE '%" + consulta + "%' OR B.LASTNAME LIKE '%" + consulta + "%' " +
                             "ORDER BY A.SUPERVISORCODE_I";
                         break;
+                    case 53:
+                        sqlQuery = "SELECT RTRIM(BANKID) Id, RTRIM(BANKNAME) Descripción, '' DataExtended, '' DataPlus " +
+                            "FROM " + Helpers.InterCompanyId + ".dbo.SY04100 " +
+                            "WHERE BANKID LIKE '%" + consulta + "%' OR BANKNAME LIKE '%" + consulta + "%' " +
+                            "ORDER BY BANKID";
+                        break;
                 }
 
                 switch (tipo)
@@ -823,7 +829,7 @@ namespace Seaboard.Intranet.Web.Controllers
             {
                 xStatus = "OK";
                 //ProcessLogic.SendToSharepoint(id, Convert.ToInt32(type), Account.GetAccount(User.Identity.GetUserName()).Email, ref xStatus);
-                Task.Run(() => ProcessLogic.SendToSharepointAsync(id, Convert.ToInt32(type), Account.GetAccount(User.Identity.GetUserName()).Email));
+                ProcessLogic.SendToSharepointAsync(id, Convert.ToInt32(type), Account.GetAccount(User.Identity.GetUserName()).Email);
             }
             catch (Exception ex)
             {
@@ -871,7 +877,7 @@ namespace Seaboard.Intranet.Web.Controllers
                 _repository.ExecuteCommand(String.Format("LODYNDEV.dbo.LPIV00101P1 '{0}','{1}','{2:yyyy-MM-ddThh:mm:ss}','{3}','{4}'",
                     Helpers.InterCompanyId, secuence, DateTime.Now, 1,Account.GetAccount(User.Identity.GetUserName()).UserId));
 
-                Task.Run(() => ProcessLogic.SendToSharepointAsync(secuence, 3, Account.GetAccount(User.Identity.GetUserName()).Email));
+                ProcessLogic.SendToSharepointAsync(secuence, 3, Account.GetAccount(User.Identity.GetUserName()).Email);
                 //ProcessLogic.SendToSharepoint(secuence, 3, Account.GetAccount(User.Identity.GetUserName()).Email, ref xStatus);
                 HelperLogic.DesbloqueoSecuencia(secuence, "LPIV00101", Account.GetAccount(User.Identity.GetUserName()).UserId);
                 
