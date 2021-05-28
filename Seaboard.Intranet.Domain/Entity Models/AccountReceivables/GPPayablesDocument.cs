@@ -19,6 +19,7 @@ namespace Seaboard.Intranet.Domain.Models
         public decimal TradeDiscountAmount { get; set; }
         public string Currency { get; set; }
         public DateTime DocumentDate { get; set; }
+        public DateTime DueDate { get; set; }
         public string TaxDetail { get; set; }
         public string Note { get; set; }
 

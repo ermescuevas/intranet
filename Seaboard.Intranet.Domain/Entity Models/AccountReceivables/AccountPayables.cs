@@ -21,6 +21,7 @@ namespace Seaboard.Intranet.Domain.Models
         public string Currency { get; set; }
         public string Note { get; set; }
         public DateTime DocumentDate { get; set; }
+        public DateTime DueDate { get; set; }
         public int PostType { get; set; }
     }
 }

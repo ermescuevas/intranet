@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Seaboard.Intranet.Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,5 +17,7 @@ namespace Seaboard.Intranet.Domain.ViewModels
         public decimal Amount { get; set; }
         public string Currency { get; set; }
         public string Description { get; set; }
+        public AccountPayablesModule Module { get; set; }
+        public AccountPayablesType Type { get; set; }
     }
 }

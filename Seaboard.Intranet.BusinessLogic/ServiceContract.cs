@@ -18,134 +18,6 @@ namespace Seaboard.Intranet.BusinessLogic
     {
         #region Contract Methods
 
-        public bool CreatePayablesInvoice(GpPayablesDocument invoice)
-        {
-            try
-            {
-                var payableTax = new List<PayablesTax>();
-                var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
-                //var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("ermes", "netico24") } } };
-                var context = new Context { OrganizationKey = new CompanyKey { Id = Helpers.CompanyIdWebServices } };
-                var invoiceCurrency = new CurrencyKey();
-                var payablesInvoice = new PayablesInvoice
-                {
-                    Key = new PayablesDocumentKey { Id = invoice.VoucherNumber },
-                    VendorKey = new VendorKey { Id = invoice.VendorId },
-                    PurchasesAmount = new MoneyAmount { Value = invoice.PurchaseAmount },
-                    TradeDiscountAmount = new MoneyAmount { Value = invoice.TradeDiscountAmount },
-                    MiscellaneousAmount = new MoneyAmount { Value = invoice.MiscellaneousAmount },
-                    FreightAmount = new MoneyAmount { Value = invoice.FreightAmount },
-                    Description = invoice.Description,
-                    BatchKey = new BatchKey { Id = invoice.DocumentNumber },
-                    VendorDocumentNumber = invoice.DocumentNumber
-                };
-                if (invoice.TaxAmount > 0)
-                {
-                    var payablesTax = new PayablesTax
-                    {
-                        Key = new PayablesTaxKey
-                        {
-                            PayablesDocumentKey = new PayablesDocumentKey { Id = invoice.VoucherNumber },
-                            TaxDetailKey = new TaxDetailKey { Id = invoice.TaxDetail }
-                        },
-                        TaxAmount = new MoneyAmount { Value = invoice.TaxAmount }
-                    };
-                    payableTax.Add(payablesTax);
-                    payablesInvoice.Taxes = payableTax.ToArray();
-                }
-
-                if (invoice.Currency != null)
-                {
-                    if (invoice.Currency != "")
-                    {
-                        if (invoice.Currency.Trim() == "RDPESO")
-                            invoiceCurrency.ISOCode = "DOP";
-                        else
-                        {
-                            invoiceCurrency.ISOCode = "USD";
-                            payablesInvoice.ExchangeRate = 1;
-                            payablesInvoice.ExchangeDate = new DateTime(invoice.DocumentDate.Year, invoice.DocumentDate.Month, invoice.DocumentDate.Day, 0, 0, 0);
-                        }
-
-                        payablesInvoice.CurrencyKey = invoiceCurrency;
-                    }
-                }
-
-                payablesInvoice.Date = new DateTime(invoice.DocumentDate.Year, invoice.DocumentDate.Month, invoice.DocumentDate.Day, 0, 0, 0, 0);
-                var payablesInvoiceCreatePolicy = wsDynamicsGp.GetPolicyByOperation("CreatePayablesInvoice", context);
-                wsDynamicsGp.CreatePayablesInvoice(payablesInvoice, context, payablesInvoiceCreatePolicy);
-
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-        public bool CreatePayablesCreditNote(GpPayablesDocument creditNote)
-        {
-            try
-            {
-                var payableTax = new List<PayablesTax>();
-                var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
-                //var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("ermes", "netico24") } } };
-                var context = new Context { OrganizationKey = new CompanyKey { Id = Helpers.CompanyIdWebServices } };
-                var creditNoteCurrency = new CurrencyKey();
-                var payablesCreditNote = new PayablesCreditMemo
-                {
-                    Key = new PayablesDocumentKey { Id = creditNote.VoucherNumber },
-                    VendorKey = new VendorKey { Id = creditNote.VendorId },
-                    PurchasesAmount = new MoneyAmount { Value = creditNote.PurchaseAmount },
-                    TradeDiscountAmount = new MoneyAmount { Value = creditNote.TradeDiscountAmount },
-                    MiscellaneousAmount = new MoneyAmount { Value = creditNote.MiscellaneousAmount },
-                    FreightAmount = new MoneyAmount { Value = creditNote.FreightAmount },
-                    Description = creditNote.Description,
-                    BatchKey = new BatchKey { Id = creditNote.DocumentNumber },
-                    VendorDocumentNumber = creditNote.DocumentNumber
-                };
-
-                if (creditNote.TaxAmount > 0)
-                {
-                    var payablesTax = new PayablesTax
-                    {
-                        Key = new PayablesTaxKey
-                        {
-                            PayablesDocumentKey = new PayablesDocumentKey { Id = creditNote.VoucherNumber },
-                            TaxDetailKey = new TaxDetailKey { Id = creditNote.TaxDetail }
-                        },
-                        TaxAmount = new MoneyAmount { Value = creditNote.TaxAmount }
-                    };
-                    payableTax.Add(payablesTax);
-                    payablesCreditNote.Taxes = payableTax.ToArray();
-                }
-
-                if (creditNote.Currency != null)
-                {
-                    if (creditNote.Currency != "")
-                    {
-                        if (creditNote.Currency.Trim() == "RDPESO")
-                            creditNoteCurrency.ISOCode = "DOP";
-                        else
-                        {
-                            creditNoteCurrency.ISOCode = "USD";
-                            payablesCreditNote.ExchangeRate = 1;
-                            payablesCreditNote.ExchangeDate = new DateTime(creditNote.DocumentDate.Year, creditNote.DocumentDate.Month, creditNote.DocumentDate.Day, 0, 0, 0, 0);
-                        }
-
-                        payablesCreditNote.CurrencyKey = creditNoteCurrency;
-                    }
-                }
-
-                payablesCreditNote.Date = new DateTime(creditNote.DocumentDate.Year, creditNote.DocumentDate.Month, creditNote.DocumentDate.Day, 0, 0, 0, 0);
-                var payablesCreditNoteCreatePolicy = wsDynamicsGp.GetPolicyByOperation("CreatePayablesCreditMemo", context);
-                wsDynamicsGp.CreatePayablesCreditMemo(payablesCreditNote, context, payablesCreditNoteCreatePolicy);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
         public void CreateInvoice(List<GPInvoice> invoices, GenericRepository repository, string userId, ref List<string[]> invoiceNumbers, ref string message)
         {
             if (invoices != null && invoices.Count() > 0)
@@ -308,6 +180,135 @@ namespace Seaboard.Intranet.BusinessLogic
                 }
             }
         }
+        public bool CreatePayablesInvoice(GpPayablesDocument invoice)
+        {
+            try
+            {
+                var payableTax = new List<PayablesTax>();
+                var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
+                //var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("ermes", "netico24") } } };
+                var context = new Context { OrganizationKey = new CompanyKey { Id = Helpers.CompanyIdWebServices } };
+                var invoiceCurrency = new CurrencyKey();
+                var payablesInvoice = new PayablesInvoice
+                {
+                    Key = new PayablesDocumentKey { Id = invoice.VoucherNumber },
+                    VendorKey = new VendorKey { Id = invoice.VendorId },
+                    PurchasesAmount = new MoneyAmount { Value = invoice.PurchaseAmount },
+                    TradeDiscountAmount = new MoneyAmount { Value = invoice.TradeDiscountAmount },
+                    MiscellaneousAmount = new MoneyAmount { Value = invoice.MiscellaneousAmount },
+                    FreightAmount = new MoneyAmount { Value = invoice.FreightAmount },
+                    Description = invoice.Description,
+                    BatchKey = new BatchKey { Id = invoice.DocumentNumber },
+                    VendorDocumentNumber = invoice.DocumentNumber,
+                    Terms = new PayablesTerms { DueDate = invoice.DueDate }
+                };
+                if (invoice.TaxAmount > 0)
+                {
+                    var payablesTax = new PayablesTax
+                    {
+                        Key = new PayablesTaxKey
+                        {
+                            PayablesDocumentKey = new PayablesDocumentKey { Id = invoice.VoucherNumber },
+                            TaxDetailKey = new TaxDetailKey { Id = invoice.TaxDetail }
+                        },
+                        TaxAmount = new MoneyAmount { Value = invoice.TaxAmount }
+                    };
+                    payableTax.Add(payablesTax);
+                    payablesInvoice.Taxes = payableTax.ToArray();
+                }
+
+                if (invoice.Currency != null)
+                {
+                    if (invoice.Currency != "")
+                    {
+                        if (invoice.Currency.Trim() == "RDPESO")
+                            invoiceCurrency.ISOCode = "DOP";
+                        else
+                        {
+                            invoiceCurrency.ISOCode = "USD";
+                            payablesInvoice.ExchangeRate = 1;
+                            payablesInvoice.ExchangeDate = new DateTime(invoice.DocumentDate.Year, invoice.DocumentDate.Month, invoice.DocumentDate.Day, 0, 0, 0);
+                        }
+
+                        payablesInvoice.CurrencyKey = invoiceCurrency;
+                    }
+                }
+
+                payablesInvoice.Date = new DateTime(invoice.DocumentDate.Year, invoice.DocumentDate.Month, invoice.DocumentDate.Day, 0, 0, 0, 0);
+                var payablesInvoiceCreatePolicy = wsDynamicsGp.GetPolicyByOperation("CreatePayablesInvoice", context);
+                wsDynamicsGp.CreatePayablesInvoice(payablesInvoice, context, payablesInvoiceCreatePolicy);
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        public bool CreatePayablesCreditNote(GpPayablesDocument creditNote)
+        {
+            try
+            {
+                var payableTax = new List<PayablesTax>();
+                var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
+                //var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("ermes", "netico24") } } };
+                var context = new Context { OrganizationKey = new CompanyKey { Id = Helpers.CompanyIdWebServices } };
+                var creditNoteCurrency = new CurrencyKey();
+                var payablesCreditNote = new PayablesCreditMemo
+                {
+                    Key = new PayablesDocumentKey { Id = creditNote.VoucherNumber },
+                    VendorKey = new VendorKey { Id = creditNote.VendorId },
+                    PurchasesAmount = new MoneyAmount { Value = creditNote.PurchaseAmount },
+                    TradeDiscountAmount = new MoneyAmount { Value = creditNote.TradeDiscountAmount },
+                    MiscellaneousAmount = new MoneyAmount { Value = creditNote.MiscellaneousAmount },
+                    FreightAmount = new MoneyAmount { Value = creditNote.FreightAmount },
+                    Description = creditNote.Description,
+                    BatchKey = new BatchKey { Id = creditNote.DocumentNumber },
+                    VendorDocumentNumber = creditNote.DocumentNumber
+                };
+
+                if (creditNote.TaxAmount > 0)
+                {
+                    var payablesTax = new PayablesTax
+                    {
+                        Key = new PayablesTaxKey
+                        {
+                            PayablesDocumentKey = new PayablesDocumentKey { Id = creditNote.VoucherNumber },
+                            TaxDetailKey = new TaxDetailKey { Id = creditNote.TaxDetail }
+                        },
+                        TaxAmount = new MoneyAmount { Value = creditNote.TaxAmount }
+                    };
+                    payableTax.Add(payablesTax);
+                    payablesCreditNote.Taxes = payableTax.ToArray();
+                }
+
+                if (creditNote.Currency != null)
+                {
+                    if (creditNote.Currency != "")
+                    {
+                        if (creditNote.Currency.Trim() == "RDPESO")
+                            creditNoteCurrency.ISOCode = "DOP";
+                        else
+                        {
+                            creditNoteCurrency.ISOCode = "USD";
+                            payablesCreditNote.ExchangeRate = 1;
+                            payablesCreditNote.ExchangeDate = new DateTime(creditNote.DocumentDate.Year, creditNote.DocumentDate.Month, creditNote.DocumentDate.Day, 0, 0, 0, 0);
+                        }
+
+                        payablesCreditNote.CurrencyKey = creditNoteCurrency;
+                    }
+                }
+
+                payablesCreditNote.Date = new DateTime(creditNote.DocumentDate.Year, creditNote.DocumentDate.Month, creditNote.DocumentDate.Day, 0, 0, 0, 0);
+                var payablesCreditNoteCreatePolicy = wsDynamicsGp.GetPolicyByOperation("CreatePayablesCreditMemo", context);
+                wsDynamicsGp.CreatePayablesCreditMemo(payablesCreditNote, context, payablesCreditNoteCreatePolicy);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
         public void CreateReceivablesCreditNote(GpCreditNote creditNote)
         {
             var wsDynamicsGp = new DynamicsGPClient { ClientCredentials = { Windows = { ClientCredential = new NetworkCredential("wservices1", "@rioOzama0101") } } };
@@ -322,7 +323,9 @@ namespace Seaboard.Intranet.BusinessLogic
                 SalesAmount = new MoneyAmount { Value = creditNote.Monto },
                 TradeDiscountAmount = new MoneyAmount { Value = creditNote.Descuento },
                 BatchKey = new BatchKey { Id = creditNote.Lote },
-                CustomerPONumber = creditNote.Ncf
+                Description = creditNote.Descripción,
+                CustomerPONumber = creditNote.Ncf,
+                InvoicePaidOffDate = creditNote.DueDate
             };
 
             if (creditNote.Moneda != null)
@@ -359,7 +362,9 @@ namespace Seaboard.Intranet.BusinessLogic
                 CustomerKey = new CustomerKey { Id = debitNote.Cliente },
                 SalesAmount = new MoneyAmount { Value = debitNote.Monto },
                 TradeDiscountAmount = new MoneyAmount { Value = debitNote.Descuento },
-                BatchKey = new BatchKey { Id = debitNote.Lote }
+                Description = debitNote.Descripción,
+                BatchKey = new BatchKey { Id = debitNote.Lote },
+                Terms = new ReceivablesTerms { DueDate = debitNote.DueDate }
             };
 
             if (debitNote.Moneda != null)
@@ -395,6 +400,7 @@ namespace Seaboard.Intranet.BusinessLogic
                 VendorKey = new VendorKey { Id = creditNote.Cliente },
                 PurchasesAmount = new MoneyAmount { Value = creditNote.Monto },
                 TradeDiscountAmount = new MoneyAmount { Value = creditNote.Descuento },
+                Description = creditNote.Descripción,
                 BatchKey = new BatchKey { Id = creditNote.Lote },
                 VendorDocumentNumber = creditNote.Ncf
             };

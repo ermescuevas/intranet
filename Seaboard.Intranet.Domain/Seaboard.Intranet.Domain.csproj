@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entity Models\AccountReceivables\NetProtocolMem.cs" />
     <Compile Include="Entity Models\Computing\EarnedPoint.cs" />
     <Compile Include="Entity Models\Computing\Case.cs" />
     <Compile Include="Entity Models\Computing\EquipmentDelivery.cs" />

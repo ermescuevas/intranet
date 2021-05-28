@@ -1,17 +1,18 @@
 ﻿@model IEnumerable<Seaboard.Intranet.Domain.ViewModels.AccountPayablesViewModel>
 @{
-    ViewBag.Title = "Transacciones de cuentas por pagar";
+    ViewBag.Title = "Transacciones de CXP & CXC";
+    Layout = "~/Views/Shared/_BillingLayout.cshtml";
 }
 
 <div class="row wrapper border-bottom white-bg page-heading">
     <div class="col-lg-10">
-        <h2>Solicitudes de almacen</h2>
+        <h2>Transacciones de CXP & CXC</h2>
         <ol class="breadcrumb">
             <li>
                 <a href="@Url.Action("Index", "Home")">Inicio</a>
             </li>
             <li class="active">
-                <strong>Listado de transacciones de cuentas por pagar</strong>
+                <strong>Transacciones de CXP & CXC</strong>
             </li>
         </ol>
     </div>
@@ -24,7 +25,7 @@
         <div class="col-lg-12">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
-                    <h5>Listado de transacciones de cuentas por pagar</h5>
+                    <h5>Transacciones de CXP & CXC</h5>
                     <div class="ibox-tools">
                         <a class="collapse-link">
                             <i class="fa fa-chevron-up"></i>
@@ -37,11 +38,13 @@
                     <table class="table table-striped table-bordered table-hover informationTable">
                         <thead>
                             <tr>
-                                <th style="width:12%">Num de comprobante</th>
-                                <th style="width:12%">Num de documento</th>
-                                <th style="width:8%">Id de proveedor</th>
-                                <th style="width:20%">Nombre</th>
-                                <th style="width:8%">Fecha</th>
+                                <th style="width:10%">Num comprobante</th>
+                                <th style="width:10%">Num documento</th>
+                                <th style="width:5%">Modulo</th>
+                                <th style="width:5%">Tipo</th>
+                                <th style="width:8%">Cliente/Proveedor</th>
+                                <th style="width:15%">Nombre</th>
+                                <th style="width:7%">Fecha</th>
                                 <th style="width:20%">Descripción</th>
                                 <th style="width:5%">Moneda</th>
                                 <th style="width:10%">Monto</th>
@@ -53,6 +56,8 @@
                                 <tr>
                                     <td>@Html.ActionLink(item.VoucherNumber, "Edit", new { id = @item.VoucherNumber })</td>
                                     <td>@item.DocumentNumber</td>
+                                    <td>@item.Module.ToString()</td>
+                                    <td>@item.Type.ToString()</td>
                                     <td>@item.VendorId</td>
                                     <td>@item.VendName</td>
                                     <td>@item.DocumentDate.ToShortDateString()</td>

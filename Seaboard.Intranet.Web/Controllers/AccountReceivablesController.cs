@@ -70,7 +70,7 @@ namespace Seaboard.Intranet.Web.Controllers
                     xStatus = "Ya se ha procesado este mes por favor buscar los datos por id de lote";
                 else
                 {
-                    var lista = OfficeLogic.MemDebtProcess(DateTime.ParseExact(mes, "dd/MM/yyyy", null), ref xStatus);
+                    var lista = OfficeLogic.MemDebtProcess(DateTime.ParseExact(mes, "dd/MM/yyyy", null), "", ref xStatus);
 
                     if (lista.Count > 0)
                     {
@@ -1837,6 +1837,207 @@ namespace Seaboard.Intranet.Web.Controllers
 
                 ReportHelper.Export(Helpers.ReportPath + "Reportes", Server.MapPath("~/PDF/Reportes/") + reportName,
                     string.Format("INTRANET.dbo.CollectionsRelationSummaryReport '{0}', '{1}', '{2}'", Helpers.InterCompanyId, fromPeriod, toPeriod), 65, ref xStatus, printOption == 10 ? 0 : 1);
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = xStatus } };
+        }
+
+        public ActionResult NetProtocolMemReport()
+        {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "AccountReceivables", "AccountReceivablesReport"))
+                return RedirectToAction("NotPermission", "Home");
+            return View();
+        }
+
+        [OutputCache(Duration = 0)]
+        [HttpPost]
+        public ActionResult NetProtocolMemReport(string billingMonth, bool isPreliminar, int printOption)
+        {
+            string xStatus;
+            try
+            {
+                xStatus = "OK";
+                var reportName = "NetProtocolMemReport";
+                if (printOption == 10)
+                    reportName += ".pdf";
+                else
+                    reportName += ".xls";
+
+                ReportHelper.Export(Helpers.ReportPath + "Reportes", Server.MapPath("~/PDF/Reportes/") + reportName,
+                    string.Format("INTRANET.dbo.NetProtocolMemReport '{0}', '{1}', '{2}'", Helpers.InterCompanyId, DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null).ToString("yyyyMMdd"), isPreliminar), 66, ref xStatus, printOption == 10 ? 0 : 1);
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = xStatus } };
+        }
+
+        [HttpPost]
+        public JsonResult GetNetProtocolMemData(HttpPostedFileBase fileData, string billingMonth, string dueDate, string resolutionNumber, bool isPreliminar, bool transferData = false)
+        {
+            string xStatus = "";
+            int count = 0;
+            try
+            {
+                if (isPreliminar)
+                {
+                    var filePath = "";
+                    if (fileData != null)
+                    {
+                        filePath = Path.Combine(Server.MapPath("~/Content/File/"), fileData.FileName);
+                        if (!Directory.Exists(Server.MapPath("~/Content/File/")))
+                            Directory.CreateDirectory(Server.MapPath("~/Content/File/"));
+                        if (System.IO.File.Exists(filePath))
+                            System.IO.File.Delete(filePath);
+                        fileData.SaveAs(filePath);
+                    }
+
+                    _repository.ExecuteCommand($"DELETE {Helpers.InterCompanyId}.dbo.EFRM30301 " +
+                                    $"WHERE MONTH(BillingMonth) = MONTH('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') " +
+                                    $"AND YEAR(BillingMonth) = YEAR('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') AND IsPreliminar = '{isPreliminar}'");
+                    var listInvoice = OfficeLogic.MEMBillingProcess(DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null), filePath, ref xStatus);
+                    if (listInvoice != null && listInvoice.Count > 0)
+                    {
+                        foreach (var item in listInvoice)
+                        {
+                            count = _repository.ExecuteScalarQuery<int>("SELECT COUNT(*) FROM " + Helpers.InterCompanyId + ".dbo.EFRM30301 " +
+                            $"WHERE MONTH(BillingMonth) = MONTH('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') " +
+                            $"AND YEAR(BillingMonth) = YEAR('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') AND CustomerExternalNumber = '{item.Debtor}' AND IsPreliminar = '{isPreliminar}'");
+                            var customerNumber = _repository.ExecuteScalarQuery<string>($"SELECT RTRIM(CUSTNMBR) FROM {Helpers.InterCompanyId}.dbo.EFRM40201 WHERE CUSTIDEXT = '{item.Debtor}'") ?? "";
+                            if (count == 0)
+                                _repository.ExecuteCommand($"INSERT INTO {Helpers.InterCompanyId}.dbo.EFRM30301 (CustomerNumber, CustomerExternalNumber, BillingMonth, DueDate, ResolutionNumber, InvoiceAmount, DebtAmount, InvoiceNumber, IsPreliminar, Status) " +
+                                    $"VALUES ('{customerNumber}', '{item.Debtor}', '{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}', '{dueDate}', '{resolutionNumber}', '{item.TotalAmount}', 0, '', '{isPreliminar}', 0)");
+                            else
+                                _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EFRM30301 SET InvoiceAmount = '{item.TotalAmount}' " +
+                                    $"WHERE MONTH(BillingMonth) = MONTH('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') " +
+                                    $"AND YEAR(BillingMonth) = YEAR('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') AND CustomerExternalNumber = '{item.Debtor}'");
+                        }
+
+                        xStatus = "OK";
+                    }
+                    else
+                        xStatus += "No se encontraron transacciones de CXC para este periodo";
+
+                    var listDebt = OfficeLogic.MemDebtProcess(DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null), filePath, ref xStatus);
+                    if (listDebt.Count > 0)
+                    {
+                        foreach (var item in listDebt)
+                        {
+                            var totalAmount = item.Producto1 + item.Producto2 + item.Producto3 + item.Producto4 + item.Producto5 + item.Producto6 + item.Producto7;
+                            count = _repository.ExecuteScalarQuery<int>("SELECT COUNT(*) FROM " + Helpers.InterCompanyId + ".dbo.EFRM30301 " +
+                            $"WHERE MONTH(BillingMonth) = MONTH('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') " +
+                            $"AND YEAR(BillingMonth) = YEAR('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') AND CustomerExternalNumber = '{item.Suplidor}' AND IsPreliminar = '{isPreliminar}'");
+                            var customerNumber = _repository.ExecuteScalarQuery<string>($"SELECT RTRIM(CUSTNMBR) FROM {Helpers.InterCompanyId}.dbo.EFRM40201 WHERE CUSTIDEXT = '{item.Suplidor}'") ?? "";
+                            if (count == 0)
+                                _repository.ExecuteCommand($"INSERT INTO {Helpers.InterCompanyId}.dbo.EFRM30301 (CustomerNumber, CustomerExternalNumber, BillingMonth, DueDate, ResolutionNumber, InvoiceAmount, DebtAmount, InvoiceNumber, IsPreliminar, Status) " +
+                                    $"VALUES ('{customerNumber}', '{item.Suplidor}', '{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}', '{dueDate}', '{resolutionNumber}', 0, {totalAmount}, '', '{isPreliminar}', 0)");
+                            else
+                                _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EFRM30301 SET DebtAmount = '{totalAmount}' " +
+                                    $"WHERE MONTH(BillingMonth) = MONTH('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') " +
+                                    $"AND YEAR(BillingMonth) = YEAR('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') AND CustomerExternalNumber = '{item.Suplidor}'");
+                        }
+                    }
+                    else
+                        xStatus += "No se encontraron transacciones de CXP para este periodo";
+                }
+                else
+                {
+                    var billingHead = _repository.ExecuteScalarQuery<MemBillingHead>($"SELECT BillingMonth, DueDate, BatchNumber, ResolutionNumber FROM {Helpers.InterCompanyId}.dbo.EFSOP10100 WHERE BillingMonth = '{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}'");
+                    _repository.ExecuteCommand($"DELETE {Helpers.InterCompanyId}.dbo.EFRM30301 " +
+                                    $"WHERE MONTH(BillingMonth) = MONTH('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') " +
+                                    $"AND YEAR(BillingMonth) = YEAR('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') AND IsPreliminar = '{isPreliminar}'");
+
+                    if (billingHead != null)
+                    {
+                        var listInvoice = _repository.ExecuteQuery<MEMData>($"SELECT CustomerId, CustomerExternalId Debtor, TotalAmount FROM {Helpers.InterCompanyId}.dbo.EFSOP10110 WHERE BatchNumber = '{billingHead.BatchNumber}'");
+                        foreach (var item in listInvoice)
+                        {
+                            count = _repository.ExecuteScalarQuery<int>("SELECT COUNT(*) FROM " + Helpers.InterCompanyId + ".dbo.EFRM30301 " +
+                            $"WHERE MONTH(BillingMonth) = MONTH('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') " +
+                            $"AND YEAR(BillingMonth) = YEAR('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') AND CustomerExternalNumber = '{item.Debtor}' AND IsPreliminar = '{isPreliminar}'");
+                            var invoiceNumber = _repository.ExecuteScalarQuery<string>($"SELECT RTRIM(SopNumber) FROM {Helpers.InterCompanyId}.dbo.EFSOP20100 WHERE BatchNumber = '{billingHead.BatchNumber}' AND CustomerNumber = '{item.CustomerId}'") ?? "";
+                            if (count == 0)
+                                _repository.ExecuteCommand($"INSERT INTO {Helpers.InterCompanyId}.dbo.EFRM30301 (CustomerNumber, CustomerExternalNumber, BillingMonth, DueDate, ResolutionNumber, InvoiceAmount, DebtAmount, InvoiceNumber, IsPreliminar, Status) " +
+                                    $"VALUES ('{item.CustomerId}', '{item.Debtor}', '{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}', '{billingHead.DueDate}', '{billingHead.ResolutionNumber}', '{item.TotalAmount}', 0, '{invoiceNumber}', '{isPreliminar}', 0)");
+                            else
+                                _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EFRM30301 SET InvoiceAmount = '{item.TotalAmount}', InvoiceNumber = '{invoiceNumber}' " +
+                                    $"WHERE MONTH(BillingMonth) = MONTH('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') " +
+                                    $"AND YEAR(BillingMonth) = YEAR('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') AND CustomerExternalNumber = '{item.Debtor}'");
+                        }
+
+                        var listDebt = _repository.ExecuteQuery<MEMData>($"SELECT A.SUPLIDOR Debtor, A.ENERGIA + A.POTENCIA + A.DC + A.PRODUCTO4 + A.PRODUCTO5 + A.PRODUCTO6 + A.PRODUCTO7 TotalAmount FROM (" +
+                            $"SELECT SUPLIDOR, ENERGIA, POTENCIA, DC, PRODUCTO4, PRODUCTO5, PRODUCTO6, PRODUCTO7, DOCDATE FROM {Helpers.InterCompanyId}.dbo.SESOP30302 WHERE DOCDATE = '{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}' " +
+                            $"UNION ALL " +
+                            $"SELECT SUPLIDOR, ENERGIA, POTENCIA, DC, PRODUCTO4, PRODUCTO5, PRODUCTO6, PRODUCTO7, DOCDATE FROM {Helpers.InterCompanyId}.dbo.SESOP30402 WHERE DOCDATE = '{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') A ");
+                        foreach (var item in listDebt)
+                        {
+                            count = _repository.ExecuteScalarQuery<int>("SELECT COUNT(*) FROM " + Helpers.InterCompanyId + ".dbo.EFRM30301 " +
+                            $"WHERE MONTH(BillingMonth) = MONTH('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') " +
+                            $"AND YEAR(BillingMonth) = YEAR('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') AND CustomerExternalNumber = '{item.Debtor}' AND IsPreliminar = '{isPreliminar}'");
+                            var customerNumber = _repository.ExecuteScalarQuery<string>($"SELECT RTRIM(CUSTNMBR) FROM {Helpers.InterCompanyId}.dbo.EFRM40201 WHERE CUSTIDEXT = '{item.Debtor}'") ?? "";
+                            if (count == 0)
+                                _repository.ExecuteCommand($"INSERT INTO {Helpers.InterCompanyId}.dbo.EFRM30301 (CustomerNumber, CustomerExternalNumber, BillingMonth, DueDate, ResolutionNumber, InvoiceAmount, DebtAmount, InvoiceNumber, IsPreliminar, Status) " +
+                                    $"VALUES ('{customerNumber}', '{item.Debtor}', '{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}', '{billingHead.DueDate}', '{billingHead.ResolutionNumber}', 0, '{item.TotalAmount}', '', '{isPreliminar}', 0)");
+                            else
+                                _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EFRM30301 SET DebtAmount = '{item.TotalAmount}' " +
+                                    $"WHERE MONTH(BillingMonth) = MONTH('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') " +
+                                    $"AND YEAR(BillingMonth) = YEAR('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') AND CustomerExternalNumber = '{item.Debtor}'");
+                        }
+
+                        if (transferData)
+                        {
+                            var list = _repository.ExecuteQuery<NetProtocolMem>($"SELECT CustomerNumber, CustomerExternalNumber, Status FROM {Helpers.InterCompanyId}.dbo.EFRM30301 " +
+                            $"WHERE MONTH(BillingMonth) = MONTH('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') " +
+                            $"AND YEAR(BillingMonth) = YEAR('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') AND IsPreliminar = 1");
+                            foreach (var item in list)
+                            {
+                                _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EFRM30301 SET Status = '{Convert.ToInt32(item.Status)}' " +
+                                   $"WHERE MONTH(BillingMonth) = MONTH('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') " +
+                                   $"AND YEAR(BillingMonth) = YEAR('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') " +
+                                   $"AND CustomerExternalNumber = '{item.CustomerExternalNumber}' AND CustomerNumber = '{item.CustomerNumber}' AND IsPreliminar = '{isPreliminar}'");
+                            }
+                        }
+                    }
+
+                    xStatus = "OK";
+                }
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = xStatus } };
+        }
+
+        public ActionResult NetProtocolMemList(string billingMonth, bool isPreliminar)
+        {
+            var sqlQuery = "SELECT CustomerNumber, CustomerExternalNumber, BillingMonth, DueDate, ResolutionNumber, InvoiceAmount, DebtAmount, InvoiceAmount - DebtAmount NetAmount, InvoiceNumber, IsPreliminar, Status " +
+                $"FROM {Helpers.InterCompanyId}.dbo.EFRM30301 "+
+                $"WHERE BillingMonth = '{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}' AND IsPreliminar = '{isPreliminar}'";
+
+            var trans = _repository.ExecuteQuery<NetProtocolMem>(sqlQuery).ToList();
+            return PartialView(trans);
+        }
+
+        [HttpPost]
+        public JsonResult SaveNetProtocolMem(string billingMonth, bool isPreliminar, string customerId, int status)
+        {
+            string xStatus = "";
+
+            try
+            {
+                _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EFRM30301 SET Status = '{status}' " +
+                    $"WHERE MONTH(BillingMonth) = MONTH('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') " +
+                    $"AND YEAR(BillingMonth) = YEAR('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') AND CustomerExternalNumber = '{customerId}'");
+
+                xStatus = "OK";
             }
             catch (Exception ex)
             {

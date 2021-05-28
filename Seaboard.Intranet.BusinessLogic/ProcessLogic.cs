@@ -5,16 +5,11 @@ using Seaboard.Intranet.Domain.ViewModels;
 using Seaboard.Intranet.Domain.Models;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Text;
 using Seaboard.Intranet.Data.Repository;
 using System.Security;
 using System.Data;
-using System.Web;
-using System.Threading.Tasks;
-using System.Threading;
 using System.Web.Hosting;
 
 namespace Seaboard.Intranet.BusinessLogic
@@ -23,8 +18,6 @@ namespace Seaboard.Intranet.BusinessLogic
     {
         private static SeaboContext _db;
         private static GenericRepository _repository;
-        private static List<Attachments> _attachments;
-        private static DataTable Attachments;
 
         public static List<ApprovalHistory> GetListSharepoint(int modulo, string id, ref string status, ref string pendingApprover, ref string documentDate)
         {

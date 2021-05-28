@@ -18,7 +18,7 @@ namespace Seaboard.Intranet.BusinessLogic
 
         #region Public Methods
 
-        public static List<MemDebtData> MemDebtProcess(DateTime mes, ref string message)
+        public static List<MemDebtData> MemDebtProcess(DateTime mes, string filePath, ref string message)
         {
             try
             {
@@ -31,9 +31,14 @@ namespace Seaboard.Intranet.BusinessLogic
                     "PRODUCTO4 Producto4, PRODUCTO5 Producto5, PRODUCTO6 Producto6, PRODUCTO7 Producto7 FROM " +
                     Helpers.InterCompanyId + ".dbo.SESY01502");
 
-                var ruta = celdas.FilePath + "RTE " + mes.ToString("MMyy") + ".xls";
+                string ruta = "";
+                if (!string.IsNullOrEmpty(filePath))
+                    ruta = filePath;
+                else
+                    ruta = celdas.FilePath + "RTE " + mes.ToString("MMyy") + ".xls";
                 var isValid = false;
-
+                if (File.Exists(ruta))
+                    isValid = true;
                 if (File.Exists(ruta +".xlsx"))
                 {
                     isValid = true;
@@ -153,7 +158,6 @@ namespace Seaboard.Intranet.BusinessLogic
                 return new List<MemDebtData>();
             }
         }
-
         public static List<MEMData> MEMBillingProcess(DateTime mes, string filePath, ref string message)
         {
             List<MEMData> memData = new List<MEMData>();
@@ -271,7 +275,6 @@ namespace Seaboard.Intranet.BusinessLogic
                 return null;
             }
         }
-
         public static List<MEMData> GetTransactionsFile(string filePath, int tipo, BillingType billingType, ref string message)
         {
             var listTransaction = new List<MEMData>();
@@ -393,7 +396,6 @@ namespace Seaboard.Intranet.BusinessLogic
                 return null;
             }
         }
-
         public static List<MEMData> GetTransactionsFile(string filePath, BillingType billingType, ref string message)
         {
             var listTransaction = new List<MEMData>();
@@ -502,7 +504,6 @@ namespace Seaboard.Intranet.BusinessLogic
                 return null;
             }
         }
-
         public static void WriteDataFiscalSalesFile(List<FiscalSalesTransaction> transactions, string filePath, string excelFilePath, string period, string taxRegisterNumber)
         {
             try
@@ -549,7 +550,6 @@ namespace Seaboard.Intranet.BusinessLogic
             }
             catch { }
         }
-
         public static List<Domain.ViewModels.Lookup> OvertimeHours(string path, ref string message)
         {
             try

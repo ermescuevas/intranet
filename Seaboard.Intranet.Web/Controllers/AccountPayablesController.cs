@@ -32,34 +32,23 @@ namespace Seaboard.Intranet.Web.Controllers
         {
             if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "AccountPayables", "Index"))
                 return RedirectToAction("NotPermission", "Home");
-
-            var sqlQuery = "SELECT DISTINCT A.DEPRTMDS FROM " + Helpers.InterCompanyId + ".dbo.LPPOP40100 A "
-                        + "INNER JOIN " + Helpers.InterCompanyId + ".dbo.LPPOP40101 B ON A.DEPRTMID = B.DEPRTMID "
-                        + "WHERE RTRIM(B.USERID) = '" + Account.GetAccount(User.Identity.GetUserName()).UserId + "'";
-
-            var filter = "";
-            var departments = _repository.ExecuteQuery<string>(sqlQuery).ToArray();
-            foreach (var item in departments)
-            {
-                if (filter.Length == 0)
-                    filter = "'" + item + "'";
-                else
-                    filter += ",'" + item + "'";
-            }
-
-            sqlQuery = "SELECT RTRIM(VCHRNMBR) VoucherNumber, VENDORID VendorId, VENDNAME VendName, A.DOCNUMBR DocumentNumber, "
-                    + "A.DOCAMNT Amount, A.DOCDATE DocumentDate, A.CURNCYID Currency, TRXDSCRN Description "
-                    + "FROM (SELECT A.VCHNUMWK VCHRNMBR, A.VENDORID, B.VENDNAME, A.DOCNUMBR, A.DOCAMNT, A.DOCDATE, "
-                    + "A.CURNCYID, A.TRXDSCRN, A.PORDNMBR PONUMBER, A.DEX_ROW_ID "
-                    + "FROM " + Helpers.InterCompanyId + ".dbo.PM10000 A "
-                    + "INNER JOIN " + Helpers.InterCompanyId + ".dbo.PM00200 B ON A.VENDORID = B.VENDORID "
-                    + "UNION ALL "
-                    + "SELECT RTRIM(A.VCHRNMBR), A.VENDORID, B.VENDNAME, A.DOCNUMBR, A.DOCAMNT, A.DOCDATE, A.CURNCYID, "
-                    + "TRXDSCRN, A.PONUMBER, A.DEX_ROW_ID "
-                    + "FROM " + Helpers.InterCompanyId + ".dbo.PM20000 A "
-                    + "INNER JOIN " + Helpers.InterCompanyId + ".dbo.PM00200 B ON A.VENDORID = B.VENDORID) A "
-                    + "WHERE A.PONUMBER IN(" + filter + ")"
-                    + "ORDER BY A.DEX_ROW_ID DESC";
+            var sqlQuery = "SELECT A.MODULE Module, A.VCHRNMBR VoucherNumber, A.VENDORID VendorId, A.VENDNAME VendName, A.DOCNUMBR DocumentNumber, " +
+                $"A.DOCDATE DocumentDate, A.CURNCYID Currency, A.TRXDSCRN Description, CONVERT(NUMERIC(32, 2), A.PRCHAMNT) PurchaseAmount, CONVERT(NUMERIC(32, 2), A.TRDISAMT) DiscountAmount, " +
+                $"CONVERT(NUMERIC(32, 2), A.TAXAMNT) TaxAmount, CONVERT(NUMERIC(32, 2), A.DOCAMNT) Amount, CONVERT(NUMERIC(32, 2), A.MSCCHAMT) MiscellaneousAmount, (CASE A.DOCTYPE WHEN 1 THEN 1 ELSE 2 END) Type, " +
+                $"ISNULL(C.TXTFIELD, '') Note, ISNULL(A.TAXDTLID, '') TaxDetailId FROM ( " +
+                $"SELECT 1 MODULE, RTRIM(A.VCHNUMWK) VCHRNMBR, A.VENDORID, B.VENDNAME, A.DOCNUMBR, A.DOCAMNT, A.DOCDATE, A.CURNCYID, A.TRXDSCRN, PRCHAMNT, TRDISAMT, A.TAXAMNT, FRTAMNT, MSCCHAMT, A.DOCTYPE, A.NOTEINDX, C.TAXDTLID, B.VNDCLSID " +
+                $"FROM {Helpers.InterCompanyId}.dbo.PM10000 A " +
+                $"INNER JOIN {Helpers.InterCompanyId}.dbo.PM00200 B ON A.VENDORID = B.VENDORID " +
+                $"LEFT  JOIN  {Helpers.InterCompanyId}.dbo.PM10500 C ON A.VCHRNMBR = C.VCHRNMBR AND A.VENDORID = C.VENDORID " +
+                $"UNION ALL " +
+                $"SELECT 2 MODULE, RTRIM(A.RMDNUMWK) VCHRNMBR, A.CUSTNMBR VENDORID, B.CUSTNAME VENDNAME, A.DOCNUMBR, A.DOCAMNT, A.DOCDATE, A.CURNCYID, A.DOCDESCR TRXDSCRN, A.SLSAMNT PRCHAMNT, A.TRDISAMT, " +
+                $"A.TAXAMNT, A.FRTAMNT, A.MISCAMNT MSCCHAMT, CASE A.DOCTYPE WHEN 2 THEN 1 ELSE 2 END DOCTYPE, A.NOTEINDX, C.TAXDTLID, B.CUSTCLAS VNDCLSID " +
+                $"FROM {Helpers.InterCompanyId}.dbo.RM10301 A " +
+                $"INNER JOIN {Helpers.InterCompanyId}.dbo.RM00101 B ON A.CUSTNMBR = B.CUSTNMBR " +
+                $"LEFT  JOIN {Helpers.InterCompanyId}.dbo.RM10601 C ON A.CUSTNMBR = C.CUSTNMBR AND A.DOCNUMBR = C.DOCNUMBR) A " +
+                $"LEFT  JOIN {Helpers.InterCompanyId}.dbo.SY03900 C ON A.NOTEINDX = C.NOTEINDX " +
+                $"LEFT  JOIN {Helpers.InterCompanyId}.dbo.PM10500 D ON A.VCHRNMBR = D.VCHRNMBR AND A.VENDORID = D.VENDORID " +
+                $"WHERE A.VNDCLSID IN ('LOCALSPOT', 'LOCALUNR')";
 
             var accountPayablesList = _repository.ExecuteQuery<AccountPayablesViewModel>(sqlQuery);
 
@@ -82,7 +71,7 @@ namespace Seaboard.Intranet.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Module,Type,Description,VendorId,VendName,DocumentNumber,TaxDetailId,PurchaseAmount,DiscountAmount,FreightAmount,MiscellaneousAmount,TaxAmount,Currency,Note,DocumentDate,PostType")] AccountPayables accountPayables)
+        public ActionResult Create([Bind(Include = "Module,Type,Description,VendorId,VendName,DocumentNumber,TaxDetailId,PurchaseAmount,DiscountAmount,FreightAmount,MiscellaneousAmount,TaxAmount,Currency,Note,DocumentDate,DueDate,PostType")] AccountPayables accountPayables)
         {
             var isValid = false;
             string voucherNumber;
@@ -112,7 +101,8 @@ namespace Seaboard.Intranet.Web.Controllers
                     VendorId = accountPayables.VendorId,
                     VoucherNumber = voucherNumber,
                     Note = accountPayables.Note,
-                    Description = accountPayables.Description
+                    Description = accountPayables.Description,
+                    DueDate = accountPayables.DueDate
                 };
                 if (accountPayables.Type == AccountPayablesType.NC)
                 {
@@ -141,7 +131,8 @@ namespace Seaboard.Intranet.Web.Controllers
                     CompanyId = Helpers.CompanyIdWebServices,
                     Fecha = accountPayables.DocumentDate,
                     Descuento = accountPayables.DiscountAmount,
-                    Lote = accountPayables.DocumentNumber
+                    Lote = accountPayables.DocumentNumber,
+                    DueDate = accountPayables.DueDate
                 };
                 if (accountPayables.Type == AccountPayablesType.NC)
                     service.CreateReceivablesCreditNote(receivablesDocument);
@@ -151,18 +142,7 @@ namespace Seaboard.Intranet.Web.Controllers
             }
 
             if (isValid)
-            {
-                if (accountPayables.PostType == 1)
-                {
-                    string batchSource;
-                    if (accountPayables.Module == AccountPayablesModule.Compras)
-                        batchSource = "PM_Trxent";
-                    else
-                        batchSource = "RM_Sales";
-                    service.PostBatch(batchSource, accountPayables.DocumentNumber, ref voucherNumber);
-                }
-                return RedirectToAction("Create");
-            }
+                return RedirectToAction("Index");
             
             ViewBag.Discount = accountPayables.DiscountAmount;
             ViewBag.Freight = accountPayables.FreightAmount;
@@ -178,21 +158,24 @@ namespace Seaboard.Intranet.Web.Controllers
             if (id == null)
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
 
-            var sqlQuery = "SELECT TOP 1 A.VCHRNMBR VoucherNumber, A.VENDORID VendorId, A.VENDNAME VendName, A.DOCNUMBR DocumentNumber, "
-                    + "A.DOCDATE DocumentDate, A.CURNCYID Currency, A.TRXDSCRN Description, "
-                    + "CONVERT(NUMERIC(32, 2), A.PRCHAMNT) PurchaseAmount, "
-                    + "CONVERT(NUMERIC(32, 2), A.TRDISAMT) DiscountAmount, CONVERT(NUMERIC(32, 2), A.TAXAMNT) TaxAmount, "
-                    + "CONVERT(NUMERIC(32, 2), A.FRTAMNT) FreightAmount, CONVERT(NUMERIC(32, 2), A.MSCCHAMT) MiscellaneousAmount, "
-                    + "(CASE A.DOCTYPE WHEN 1 THEN 1 ELSE 2 END) Type, ISNULL(C.TXTFIELD, '') Note, ISNULL(D.TAXDTLID, '') TaxDetailId "
-                    + "FROM (SELECT RTRIM(A.VCHNUMWK) VCHRNMBR, A.VENDORID, B.VENDNAME, A.DOCNUMBR, A.DOCAMNT, A.DOCDATE, "
-                    + "A.CURNCYID, A.TRXDSCRN, PRCHAMNT, TRDISAMT, TAXAMNT, FRTAMNT, MSCCHAMT, DOCTYPE, A.NOTEINDX "
-                    + "FROM " + Helpers.InterCompanyId + ".dbo.PM10000 A "
-                    + "INNER JOIN " + Helpers.InterCompanyId + ".dbo.PM00200 B ON A.VENDORID = B.VENDORID) A "
-                    + "LEFT JOIN " + Helpers.InterCompanyId + ".dbo.SY03900 C "
-                    + "ON A.NOTEINDX = C.NOTEINDX "
-                    + "LEFT JOIN " + Helpers.InterCompanyId + ".dbo.PM10500 D "
-                    + "ON A.VCHRNMBR = D.VCHRNMBR AND A.VENDORID = D.VENDORID "
-                    + "WHERE A.VCHRNMBR = '" + id + "'";
+            var sqlQuery = "SELECT TOP 1 A.MODULE Module, A.VCHRNMBR VoucherNumber, A.VENDORID VendorId, A.VENDNAME VendName, A.DOCNUMBR DocumentNumber, " +
+                $"A.DOCDATE DocumentDate, A.CURNCYID Currency, A.TRXDSCRN Description, CONVERT(NUMERIC(32, 2), A.PRCHAMNT) PurchaseAmount, CONVERT(NUMERIC(32, 2), A.TRDISAMT) DiscountAmount, " +
+                $"CONVERT(NUMERIC(32, 2), A.TAXAMNT) TaxAmount, CONVERT(NUMERIC(32, 2), A.FRTAMNT) FreightAmount, CONVERT(NUMERIC(32, 2), A.MSCCHAMT) MiscellaneousAmount, (CASE A.DOCTYPE WHEN 1 THEN 1 ELSE 2 END) Type, " +
+                $"ISNULL(C.TXTFIELD, '') Note, ISNULL(A.TAXDTLID, '') TaxDetailId, ISNULL(A.DUEDATE, A.DOCDATE) DueDate FROM ( " +
+                $"SELECT 1 MODULE, RTRIM(A.VCHNUMWK) VCHRNMBR, A.VENDORID, B.VENDNAME, A.DOCNUMBR, A.DOCAMNT, A.DOCDATE, A.CURNCYID, A.TRXDSCRN, PRCHAMNT, TRDISAMT, A.TAXAMNT, FRTAMNT, MSCCHAMT, A.DOCTYPE, " +
+                $"A.NOTEINDX, C.TAXDTLID, B.VNDCLSID, CASE A.DUEDATE WHEN '1900-01-01' THEN A.DOCDATE ELSE A.DUEDATE END DUEDATE " +
+                $"FROM {Helpers.InterCompanyId}.dbo.PM10000 A " +
+                $"INNER JOIN {Helpers.InterCompanyId}.dbo.PM00200 B ON A.VENDORID = B.VENDORID " +
+                $"LEFT  JOIN  {Helpers.InterCompanyId}.dbo.PM10500 C ON A.VCHRNMBR = C.VCHRNMBR AND A.VENDORID = C.VENDORID " +
+                $"UNION ALL " +
+                $"SELECT 2 MODULE, RTRIM(A.RMDNUMWK) VCHRNMBR, A.CUSTNMBR VENDORID, B.CUSTNAME VENDNAME, A.DOCNUMBR, A.DOCAMNT, A.DOCDATE, A.CURNCYID, A.DOCDESCR TRXDSCRN, A.SLSAMNT PRCHAMNT, A.TRDISAMT, " +
+                $"A.TAXAMNT, A.FRTAMNT, A.MISCAMNT MSCCHAMT, CASE A.DOCTYPE WHEN 2 THEN 1 ELSE 2 END DOCTYPE, A.NOTEINDX, C.TAXDTLID, B.CUSTCLAS VNDCLSID, CASE A.DUEDATE WHEN '1900-01-01' THEN A.DOCDATE ELSE A.DUEDATE END DUEDATE  " +
+                $"FROM {Helpers.InterCompanyId}.dbo.RM10301 A " +
+                $"INNER JOIN {Helpers.InterCompanyId}.dbo.RM00101 B ON A.CUSTNMBR = B.CUSTNMBR " +
+                $"LEFT  JOIN {Helpers.InterCompanyId}.dbo.RM10601 C ON A.CUSTNMBR = C.CUSTNMBR AND A.DOCNUMBR = C.DOCNUMBR) A " +
+                $"LEFT  JOIN {Helpers.InterCompanyId}.dbo.SY03900 C ON A.NOTEINDX = C.NOTEINDX " +
+                $"LEFT  JOIN {Helpers.InterCompanyId}.dbo.PM10500 D ON A.VCHRNMBR = D.VCHRNMBR AND A.VENDORID = D.VENDORID " +
+                $"WHERE A.VCHRNMBR = '{id}'";
 
             var accountPayable = _repository.ExecuteScalarQuery<AccountPayables>(sqlQuery);
             if (accountPayable == null)
@@ -205,54 +188,103 @@ namespace Seaboard.Intranet.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Module,Type,,Description,VendorId,VendName,DocumentNumber,TaxDetailId,PurchaseAmount,DiscountAmount,FreightAmount,MiscellaneousAmount,TaxAmount,Currency,Note,DocumentDate,PostType")] AccountPayables accountPayables)
+        public ActionResult Edit([Bind(Include = "Module,Type,VoucherNumber,Description,VendorId,VendName,DocumentNumber,TaxDetailId,PurchaseAmount,DiscountAmount,FreightAmount,MiscellaneousAmount,TaxAmount,Currency,Note,DocumentDate,DueDate,PostType")] AccountPayables accountPayables)
         {
             var isValid = false;
 
             var service = new ServiceContract();
-            var payablesDocument = new GpPayablesDocument
+            if (accountPayables.Module == AccountPayablesModule.Compras)
             {
-                Currency = accountPayables.Currency,
-                DocumentDate = accountPayables.DocumentDate,
-                DocumentNumber = accountPayables.DocumentNumber,
-                FreightAmount = accountPayables.FreightAmount,
-                MiscellaneousAmount = accountPayables.MiscellaneousAmount,
-                PurchaseAmount = accountPayables.PurchaseAmount,
-                TaxAmount = accountPayables.TaxAmount,
-                TaxDetail = accountPayables.TaxDetailId,
-                TradeDiscountAmount = accountPayables.DiscountAmount,
-                VendorId = accountPayables.VendorId,
-                VoucherNumber = accountPayables.VoucherNumber,
-                Note = accountPayables.Note,
-                Description = accountPayables.Description
-            };
+                var payablesDocument = new GpPayablesDocument
+                {
+                    Currency = accountPayables.Currency,
+                    DocumentDate = accountPayables.DocumentDate,
+                    DocumentNumber = accountPayables.DocumentNumber,
+                    FreightAmount = accountPayables.FreightAmount,
+                    MiscellaneousAmount = accountPayables.MiscellaneousAmount,
+                    PurchaseAmount = accountPayables.PurchaseAmount,
+                    TaxAmount = accountPayables.TaxAmount,
+                    TaxDetail = accountPayables.TaxDetailId,
+                    TradeDiscountAmount = accountPayables.DiscountAmount,
+                    VendorId = accountPayables.VendorId,
+                    VoucherNumber = accountPayables.VoucherNumber,
+                    Note = accountPayables.Note,
+                    Description = accountPayables.Description,
+                    DueDate = accountPayables.DueDate
+                };
+                if (accountPayables.Type == AccountPayablesType.NC)
+                {
+                    var amountDebit = _repository.ExecuteScalarQuery<decimal>("SELECT TOP 1 ISNULL(CURTRXAM, 0) FROM " + Helpers.InterCompanyId + ".dbo.PM10000 WHERE VCHNUMWK = '" + accountPayables.VoucherNumber + "' AND DOCTYPE = 5");
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.PM10000 WHERE VCHNUMWK = '" + accountPayables.VoucherNumber + "' AND DOCTYPE = 5");
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.PM10500 WHERE VCHRNMBR = '" + accountPayables.VoucherNumber + "' AND DOCTYPE = 5");
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.PM00400 WHERE CNTRLNUM = '" + accountPayables.VoucherNumber + "' AND DOCTYPE = 5");
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.PM10100 WHERE VCHRNMBR = '" + accountPayables.VoucherNumber + "' AND PSTGSTUS = 0");
+                    _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.SY00500 SET BCHTOTAL -= '" + amountDebit + "', NUMOFTRX -= 1 WHERE BACHNUMB = '" + accountPayables.DocumentNumber + "'");
+                    if (service.CreatePayablesCreditNote(payablesDocument))
+                        isValid = true;
+                }
+                else
+                {
+                    var amountDebit = _repository.ExecuteScalarQuery<decimal>("SELECT TOP 1 ISNULL(CURTRXAM, 0) FROM " + Helpers.InterCompanyId + ".dbo.PM10000 WHERE VCHNUMWK = '" + accountPayables.VoucherNumber + "' AND DOCTYPE = 1");
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.PM10000 WHERE VCHNUMWK = '" + accountPayables.VoucherNumber + "' AND DOCTYPE = 1");
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.PM10500 WHERE VCHRNMBR = '" + accountPayables.VoucherNumber + "' AND DOCTYPE = 1");
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.PM00400 WHERE CNTRLNUM = '" + accountPayables.VoucherNumber + "' AND DOCTYPE = 1");
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.PM10100 WHERE VCHRNMBR = '" + accountPayables.VoucherNumber + "' AND PSTGSTUS = 0");
+                    _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.SY00500 SET BCHTOTAL -= '" + amountDebit + "', NUMOFTRX -= 1 WHERE BACHNUMB = '" + accountPayables.DocumentNumber + "'");
 
-            if (accountPayables.Type == AccountPayablesType.NC)
-            {
-                if (service.CreatePayablesCreditNote(payablesDocument))
-                    isValid = true;
+                    if (service.CreatePayablesInvoice(payablesDocument))
+                        isValid = true;
+                }
+                if (isValid)
+                {
+                    if (!string.IsNullOrEmpty(payablesDocument.Note))
+                        _repository.ExecuteCommand(String.Format("INTRANET.dbo.AttachPayableNote '{0}','{1}','{2}'", Helpers.InterCompanyId, payablesDocument.VoucherNumber, payablesDocument.Note));
+                }
             }
             else
             {
-                var amountDebit = _repository.ExecuteScalarQuery<decimal>("SELECT TOP 1 ISNULL(CURTRXAM, 0) FROM " + Helpers.InterCompanyId + ".dbo.PM10000 WHERE VCHNUMWK = '" + payablesDocument.VoucherNumber + "' AND DOCTYPE = 1");
-                _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.PM10000 WHERE VCHNUMWK = '" + payablesDocument.VoucherNumber + "' AND DOCTYPE = 1");
-                _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.PM10500 WHERE VCHRNMBR = '" + payablesDocument.VoucherNumber + "' AND DOCTYPE = 1");
-                _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.PM00400 WHERE CNTRLNUM = '" + payablesDocument.VoucherNumber + "' AND DOCTYPE = 1");
-                _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.PM10100 WHERE VCHRNMBR = '" + payablesDocument.VoucherNumber + "' AND PSTGSTUS = 0");
-                _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.SY00500 SET BCHTOTAL -= '" + amountDebit + "', NUMOFTRX -= 1 WHERE BACHNUMB = '" + payablesDocument.DocumentNumber + "'");
-
-                if (service.CreatePayablesInvoice(payablesDocument))
-                    isValid = true;
+                var receivablesDocument = new GpCreditNote
+                {
+                    Cliente = accountPayables.VendorId,
+                    Codigo = accountPayables.VoucherNumber,
+                    Monto = accountPayables.PurchaseAmount,
+                    Moneda = accountPayables.Currency,
+                    CompanyId = Helpers.CompanyIdWebServices,
+                    Descripción = accountPayables.Description,
+                    Fecha = accountPayables.DocumentDate,
+                    Descuento = accountPayables.DiscountAmount,
+                    Lote = accountPayables.DocumentNumber,
+                    DueDate = accountPayables.DueDate
+                };
+                if (accountPayables.Type == AccountPayablesType.NC)
+                {
+                    var amountDebit = _repository.ExecuteScalarQuery<decimal>("SELECT TOP 1 ISNULL(DOCAMNT, 0) FROM " + Helpers.InterCompanyId + ".dbo.RM10301 WHERE DOCNUMBR = '" + accountPayables.DocumentNumber + "' AND RMDTYPAL = 7");
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.RM10301 WHERE DOCNUMBR = '" + accountPayables.DocumentNumber + "' AND RMDTYPAL = 7");
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.RM10601 WHERE DOCNUMBR = '" + accountPayables.DocumentNumber + "' AND RMDTYPAL = 7");
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.RM00401 WHERE DOCNUMBR = '" + accountPayables.DocumentNumber + "' AND RMDTYPAL = 7");
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.RM10101 WHERE DOCNUMBR = '" + accountPayables.DocumentNumber + "' AND DCSTATUS = 1");
+                    _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.SY00500 SET BCHTOTAL -= '" + amountDebit + "', NUMOFTRX -= 1 WHERE BACHNUMB = '" + accountPayables.DocumentNumber + "'");
+                    service.CreateReceivablesCreditNote(receivablesDocument);
+                }
+                else
+                {
+                    var amountDebit = _repository.ExecuteScalarQuery<decimal>("SELECT TOP 1 ISNULL(DOCAMNT, 0) FROM " + Helpers.InterCompanyId + ".dbo.RM10301 WHERE DOCNUMBR = '" + accountPayables.DocumentNumber + "' AND RMDTYPAL = 3");
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.RM10301 WHERE DOCNUMBR = '" + accountPayables.DocumentNumber + "' AND RMDTYPAL = 3");
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.RM10601 WHERE DOCNUMBR = '" + accountPayables.DocumentNumber + "' AND RMDTYPAL = 3");
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.RM00401 WHERE DOCNUMBR = '" + accountPayables.DocumentNumber + "' AND RMDTYPAL = 3");
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.RM10101 WHERE DOCNUMBR = '" + accountPayables.DocumentNumber + "' AND DCSTATUS = 0");
+                    _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.SY00500 SET BCHTOTAL -= '" + amountDebit + "', NUMOFTRX -= 1 WHERE BACHNUMB = '" + accountPayables.DocumentNumber + "'");
+                    service.CreateReceivablesDebitNote(receivablesDocument);
+                }
+                isValid = true;
             }
-
             if (isValid)
-            {
-                if (!string.IsNullOrEmpty(payablesDocument.Note))
-                    _repository.ExecuteCommand(String.Format("INTRANET.dbo.AttachPayableNote '{0}','{1}','{2}'", Helpers.InterCompanyId, payablesDocument.VoucherNumber, payablesDocument.Note));
-                HelperLogic.DesbloqueoSecuencia(payablesDocument.VoucherNumber, "PM10000", Account.GetAccount(User.Identity.GetUserName()).UserId);
                 return RedirectToAction("Index");
-            }
 
+            ViewBag.Discount = accountPayables.DiscountAmount;
+            ViewBag.Freight = accountPayables.FreightAmount;
+            ViewBag.Miscellaneous = accountPayables.MiscellaneousAmount;
+            ViewBag.Tax = accountPayables.TaxAmount;
             return View(accountPayables);
         }
 
@@ -280,6 +312,62 @@ namespace Seaboard.Intranet.Web.Controllers
 
             var accountPayables = _repository.ExecuteScalarQuery<AccountPayables>(sqlQuery);
             return View(accountPayables);
+        }
+
+        [HttpPost]
+        public ActionResult Delete(string id, string documentNumber)
+        {
+            string aStatus;
+            try
+            {
+                var amountDebit = _repository.ExecuteScalarQuery<decimal>("SELECT TOP 1 ISNULL(CURTRXAM, 0) FROM " + Helpers.InterCompanyId + ".dbo.PM10000 WHERE VCHNUMWK = '" + id + "' AND DOCTYPE = 5");
+                if (amountDebit > 0)
+                {
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.PM10000 WHERE VCHNUMWK = '" + id + "' AND DOCTYPE = 5");
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.PM10500 WHERE VCHRNMBR = '" + id + "' AND DOCTYPE = 5");
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.PM00400 WHERE CNTRLNUM = '" + id + "' AND DOCTYPE = 5");
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.PM10100 WHERE VCHRNMBR = '" + id + "' AND PSTGSTUS = 0");
+                    _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.SY00500 SET BCHTOTAL -= '" + amountDebit + "', NUMOFTRX -= 1 WHERE BACHNUMB = '" + documentNumber + "'");
+                }
+
+                amountDebit = _repository.ExecuteScalarQuery<decimal>("SELECT TOP 1 ISNULL(CURTRXAM, 0) FROM " + Helpers.InterCompanyId + ".dbo.PM10000 WHERE VCHNUMWK = '" + id + "' AND DOCTYPE = 1");
+                if (amountDebit > 0)
+                {
+
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.PM10000 WHERE VCHNUMWK = '" + id + "' AND DOCTYPE = 1");
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.PM10500 WHERE VCHRNMBR = '" + id + "' AND DOCTYPE = 1");
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.PM00400 WHERE CNTRLNUM = '" + id + "' AND DOCTYPE = 1");
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.PM10100 WHERE VCHRNMBR = '" + id + "' AND PSTGSTUS = 0");
+                    _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.SY00500 SET BCHTOTAL -= '" + amountDebit + "', NUMOFTRX -= 1 WHERE BACHNUMB = '" + documentNumber + "'");
+                }
+
+                amountDebit = _repository.ExecuteScalarQuery<decimal>("SELECT TOP 1 ISNULL(DOCAMNT, 0) FROM " + Helpers.InterCompanyId + ".dbo.RM10301 WHERE DOCNUMBR = '" + documentNumber + "' AND RMDTYPAL = 7");
+                if (amountDebit > 0)
+                {
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.RM10301 WHERE DOCNUMBR = '" + documentNumber + "' AND RMDTYPAL = 7");
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.RM10601 WHERE DOCNUMBR = '" + documentNumber + "' AND RMDTYPAL = 7");
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.RM00401 WHERE DOCNUMBR = '" + documentNumber + "' AND RMDTYPAL = 7");
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.RM10101 WHERE DOCNUMBR = '" + documentNumber + "' AND DCSTATUS = 1");
+                    _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.SY00500 SET BCHTOTAL -= '" + amountDebit + "', NUMOFTRX -= 1 WHERE BACHNUMB = '" + documentNumber + "'");
+                }
+
+                amountDebit = _repository.ExecuteScalarQuery<decimal>("SELECT TOP 1 ISNULL(DOCAMNT, 0) FROM " + Helpers.InterCompanyId + ".dbo.RM10301 WHERE DOCNUMBR = '" + documentNumber + "' AND RMDTYPAL = 3");
+                if (amountDebit > 0)
+                {
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.RM10301 WHERE DOCNUMBR = '" + documentNumber + "' AND RMDTYPAL = 3");
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.RM10601 WHERE DOCNUMBR = '" + documentNumber + "' AND RMDTYPAL = 3");
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.RM00401 WHERE DOCNUMBR = '" + documentNumber + "' AND RMDTYPAL = 3");
+                    _repository.ExecuteCommand("DELETE " + Helpers.InterCompanyId + ".dbo.RM10101 WHERE DOCNUMBR = '" + documentNumber + "' AND DCSTATUS = 0");
+                    _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.SY00500 SET BCHTOTAL -= '" + amountDebit + "', NUMOFTRX -= 1 WHERE BACHNUMB = '" + documentNumber + "'");
+                }
+                aStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                aStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = aStatus } };
         }
 
         public JsonResult UnblockSecuence(string secuencia, string formulario, string usuario)
