@@ -945,7 +945,10 @@ namespace Seaboard.Intranet.Web.Controllers
                 var aStartDate = DateTime.ParseExact(startDate + " " + startTime, "MM/dd/yyyy HH:mm", null);
                 var aEndDate = DateTime.ParseExact(endDate + " " + endTime, "MM/dd/yyyy HH:mm", null);
                 if (hours == 0)
-                    hours = aEndDate.Subtract(aStartDate).Hours;
+                {
+                    hours += aEndDate.Subtract(aStartDate).Hours;
+                    hours += Convert.ToDecimal(aEndDate.Subtract(aStartDate).Minutes) / Convert.ToDecimal(60);
+                }
                 string sqlQuery;
                 if (rowId == 0)
                     sqlQuery = $"INSERT INTO {Helpers.InterCompanyId}.dbo.EFUPR30200 ([EmployeeId],[StartDate],[EndDate],[OvertimeType],[Hours],[Note],[Status],[Module],[LastUserId]) " +

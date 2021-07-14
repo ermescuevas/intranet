@@ -86,7 +86,7 @@
                                         <div class="form-group">
                                             <label class="col-sm-4 control-label">Id. de lote:</label>
                                             <div class="col-sm-8 input-group">
-                                                @Html.TextBoxFor(model => model.BatchNumber, new { @class = "form-control", @maxlength = "15" })
+                                                @Html.TextBoxFor(model => model.BatchNumber, new { @class = "form-control", @maxlength = "15", @readonly = "" })
                                             </div>
                                         </div>
 
@@ -612,7 +612,7 @@
                 isAllValid = false;
             }
 
-            if ($('#BankId').val().val().trim() == '') {
+            if ($('#BankId').val().trim() == '') {
                 toastr.error('El banco es requerido', 'Campos requeridos')
                 isAllValid = false;
             }

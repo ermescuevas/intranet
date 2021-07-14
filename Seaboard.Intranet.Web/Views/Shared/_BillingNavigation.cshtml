@@ -256,7 +256,7 @@
                         @Html.IsSelected(controller: "AccountPayables", action: "Create", cssClass: "in")
                         @Html.IsSelected(controller: "AccountPayables", action: "Edit", cssClass: "in")">
                             <li class="@Html.IsSelected(action: "TransIndex") @Html.IsSelected(action: "TransEntry") @Html.IsSelected(action: "TransInquiry")">
-                                <a href="@Url.Action("TransIndex", "AccountReceivables")E">Integracion de transacciones</a>
+                                <a href="@Url.Action("TransIndex", "AccountReceivables")">Integracion de transacciones</a>
                             </li>
                             <li class="@Html.IsSelected(action: "TransCreateIndex") @Html.IsSelected(action: "TransCreate") @Html.IsSelected(action: "TransCreateInquiry")">
                                 <a href="@Url.Action("TransCreateIndex", "AccountReceivables")">Generación de documentos</a>
@@ -276,7 +276,7 @@
                             </li>
                             <li class="@Html.IsSelected(action: "Index", controller: "AccountPayables") 
                                 @Html.IsSelected(controller: "AccountPayables", action: "Create")
-                                @Html.IsSelected(controller: "AccountPayables", action: "Edit")"><a href="@Url.Action("Index", "AccountPayables")">Trans. CXP & CXP</a></li>
+                                @Html.IsSelected(controller: "AccountPayables", action: "Edit")"><a href="@Url.Action("Index", "AccountPayables")">Trans. CXP & CXC</a></li>
                             <li class="@Html.IsSelected(action: "ApplyDocuments", controller: "AccountReceivables")"><a href="@Url.Action("ApplyDocuments", "AccountReceivables")">Aplicar docs. CXC</a></li>
                             <li class="@Html.IsSelected(action: "ApplyDocuments", controller: "AccountPayables")"><a href="@Url.Action("ApplyDocuments", "AccountPayables")">Aplicar docs. CXP</a></li>
                             <li class="@Html.IsSelected(action: "PostBatch")"><a href="@Url.Action("PostBatch", "AccountReceivables")">Contabilización lotes</a></li>

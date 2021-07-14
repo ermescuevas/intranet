@@ -131,6 +131,7 @@ namespace Seaboard.Intranet.Web.Controllers
                     CompanyId = Helpers.CompanyIdWebServices,
                     Fecha = accountPayables.DocumentDate,
                     Descuento = accountPayables.DiscountAmount,
+                    Descripción = accountPayables.Description,
                     Lote = accountPayables.DocumentNumber,
                     DueDate = accountPayables.DueDate
                 };

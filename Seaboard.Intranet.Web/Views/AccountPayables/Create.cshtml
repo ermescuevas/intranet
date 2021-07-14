@@ -35,7 +35,7 @@
                     <div class="form-group">
                         <div class="col-sm-12 col-sm-offset-1">
                             @*<button class="btn btn-white" type="button" onclick="contabilizar();"><i class="fa fa-money"></i> Contabilizar</button>*@
-                            <button type="button" class="btn btn-primary" onclick="guardar();"><i class=" fa fa-add"></i>  Guardar</button>
+                            <button type="button" data-style="expand-left" id="postButton" class="ladda-button btn btn-primary" onclick="guardar();"><i class=" fa fa-add"></i>  Guardar</button>
                             <button type="button" class="btn btn-default" onclick="limpiarCampos();"><i class=" fa fa-refresh"></i>  Borrar</button>
                         </div>
                     </div>
@@ -245,6 +245,7 @@
     @Styles.Render("~/plugins/jasnyBootstrapStyles")
     @Styles.Render("~/plugins/toastrStyles")
     @Styles.Render("~/plugins/dataPickerStyles")
+    @Styles.Render("~/plugins/laddaStyles")
 }
 
 @section Scripts {
@@ -253,12 +254,13 @@
     @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
     @Scripts.Render("~/plugins/jasnyBootstrap")
     @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/plugins/ladda")
 
-<script type="text/javascript">
+    <script type="text/javascript">
         var totalAmount = 0;
         $(document).ready(function () {
              @Html.Partial("_Scripts")
-
+            $('.ladda-button').ladda();
             $("#lookupVendor").lookupbox({
                 title: 'Busqueda:',
                 url: '@Url.Action("ListLookup", "Home")?tipo=7&consulta=',
@@ -472,6 +474,7 @@
             }
 
             if (isAllValid) {
+                $('#postButton').ladda('start');
                 $('#PurchaseAmount').val($('#PurchaseAmount').val().replace().replace(/,/g, ""));
                 $('#DiscountAmount').val($('#DiscountAmount').val().replace().replace(/,/g, ""));
                 $('#FreightAmount').val($('#FreightAmount').val().replace().replace(/,/g, ""));
@@ -497,5 +500,5 @@
             $('#total').val('$ 0.00');
             $('#Note').val('');
         }
-</script>
+    </script>
 }

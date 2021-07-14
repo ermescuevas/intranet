@@ -342,9 +342,12 @@
 
                                 @foreach (var item in files)
                                 {
-                                    <div class="file-box">
+                                    <ul class="nav nav-list">
+                                        <li><a href="~/Public/@item.DataExtended" target="_blank" title="@item.DataExtended">@item.Descripción</a></li>
+                                    </ul>
+                                    @*<div class="file-box">
                                         <div class="file">
-                                            <a href="@item.Id" target="_blank" title="@item.DataExtended">
+                                            <a href="~/Public/@item.DataExtended" target="_blank" title="@item.DataExtended">
                                                 <span class="corner"></span>
                                                 <div class="icon">
                                                     <i class="fa fa-file-pdf-o"></i>
@@ -354,7 +357,7 @@
                                                 </div>
                                             </a>
                                         </div>
-                                    </div>
+                                    </div>*@
                                 }
                             </div>
                         </div>

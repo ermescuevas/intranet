@@ -11,7 +11,7 @@ namespace Seaboard.Intranet.Domain.Models
         public DateTime EndDate { get; set; }
         public string StartTime { get; set; }
         public string EndTime { get; set; }
-        public int Hours { get; set; }
+        public decimal Hours { get; set; }
         public string OvertimeTypeDesc { get; set; }
         public int OvertimeType { get; set; }
         public string DepartmentId { get; set; }

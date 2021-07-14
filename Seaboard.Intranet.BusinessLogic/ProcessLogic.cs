@@ -150,7 +150,7 @@ namespace Seaboard.Intranet.BusinessLogic
 
                     return approvalHistory;
                 }
-                catch
+                catch(Exception ex)
                 {
                     status = "En estos momentos no es posible conectar con el servidor, por favor intente de nuevo";
                     retryCount++;

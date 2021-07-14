@@ -1095,6 +1095,7 @@
     <Folder Include="PDF\Requisicion\" />
     <Folder Include="PDF\Transferencia\" />
     <Folder Include="PDF\Volante\" />
+    <Folder Include="Public\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />

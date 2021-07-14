@@ -1133,11 +1133,13 @@ namespace Seaboard.Intranet.Web.Controllers
                         "SELECT RTRIM(DOCNUMBR) Id, CONVERT(NVARCHAR(20), CONVERT(NUMERIC(32,2), ORCTRXAM)) Descripción, "
                     + "CONVERT(nvarchar(20), CONVERT(DATE, DOCDATE, 112)) DataExtended, '0.00' DataPlus FROM " + Helpers.InterCompanyId +
                     ".dbo.MC020102 " + "WHERE CUSTNMBR = '" + customerId + "' AND RTRIM(CURNCYID) = '" + currency +
-                    "' AND ORCTRXAM > 0 AND RMDTYPAL IN(1,3) " +
+                    "' AND ORCTRXAM > 0 AND RMDTYPAL IN(1, 3) " +
                     "UNION ALL " +
                     "SELECT RTRIM(B.DOCNUMBR) Id, CONVERT(NVARCHAR(20), CONVERT(NUMERIC(32,2), B.ORCTRXAM)) Descripción, " +
                     "CONVERT(nvarchar(20), CONVERT(DATE, B.DOCDATE, 112)) DataExtended, CONVERT(NVARCHAR(20), CONVERT(NUMERIC(32,2), A.APPTOAMT)) DataPlus " +
-                    "FROM " + Helpers.InterCompanyId + ".dbo.RM20201 A INNER JOIN " + Helpers.InterCompanyId + ".dbo.MC020102 B ON A.APTODCNM = B.DOCNUMBR WHERE A.APFRDCNM = '" + documentNumber + "') A " +
+                    "FROM " + Helpers.InterCompanyId + ".dbo.RM20201 A " +
+                    "INNER JOIN " + Helpers.InterCompanyId + ".dbo.MC020102 B ON A.APTODCNM = B.DOCNUMBR AND A.CUSTNMBR = B.CUSTNMBR AND APTODCTY = B.RMDTYPAL  " +
+                    "WHERE A.APFRDCNM = '" + documentNumber + "') A " +
                     "GROUP BY Id, Descripción, DataExtended";
                 }
                 else
@@ -1150,7 +1152,9 @@ namespace Seaboard.Intranet.Web.Controllers
                     "UNION ALL " +
                     "SELECT RTRIM(B.DOCNUMBR) Id, CONVERT(NVARCHAR(20), CONVERT(NUMERIC(32,2), B.CURTRXAM)) Descripción, " +
                     "CONVERT(nvarchar(20), CONVERT(DATE, B.DOCDATE, 112)) DataExtended, CONVERT(NVARCHAR(20), CONVERT(NUMERIC(32,2), A.APPTOAMT)) DataPlus " +
-                    "FROM " + Helpers.InterCompanyId + ".dbo.RM20201 A INNER JOIN " + Helpers.InterCompanyId + ".dbo.RM20101 B ON A.APTODCNM = B.DOCNUMBR WHERE A.APFRDCNM = '" + documentNumber + "') A " +
+                    "FROM " + Helpers.InterCompanyId + ".dbo.RM20201 A " +
+                    "INNER JOIN " + Helpers.InterCompanyId + ".dbo.RM20101 B ON A.APTODCNM = B.DOCNUMBR AND A.CUSTNMBR = B.CUSTNMBR AND APTODCTY = B.RMDTYPAL " +
+                    "WHERE A.APFRDCNM = '" + documentNumber + "') A " +
                     "GROUP BY Id, Descripción, DataExtended";
                 }
 
@@ -1187,9 +1191,11 @@ namespace Seaboard.Intranet.Web.Controllers
 
                 if (count > 0)
                 {
-                    foreach (var item in cashReceipt.InvoiceLines)
-                        currentAmount += Convert.ToDecimal(item.DocumentAmount);
-
+                    if (cashReceipt.InvoiceLines != null)
+                    {
+                        foreach (var item in cashReceipt.InvoiceLines)
+                            currentAmount += Convert.ToDecimal(item.DocumentAmount);
+                    }
                     currentAmount -= cashReceipt.Amount;
                     var sqlQuery = "SELECT DOCNUMBR CashReceiptId, BACHNUMB BatchNumber, TRXDSCRN Description, CUSTNMBR CustomerId, " +
                     "CURNCYID CurrencyId, DOCDATE DocumentDate, CONVERT(INT, CSHRCTYP) CashReceiptType, ORTRXAMT Amount, CONVERT(BIT, POSTED) Posted " +
@@ -1945,6 +1951,29 @@ namespace Seaboard.Intranet.Web.Controllers
                     }
                     else
                         xStatus += "No se encontraron transacciones de CXP para este periodo";
+
+                    var sqlQuery = "SELECT CustomerNumber, CustomerExternalNumber, BillingMonth, DueDate, ResolutionNumber, InvoiceAmount, DebtAmount, InvoiceAmount - DebtAmount NetAmount, InvoiceNumber, IsPreliminar, Status " +
+                       $"FROM {Helpers.InterCompanyId}.dbo.EFRM30301 " +
+                       $"WHERE BillingMonth = '{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}' AND IsPreliminar = '{isPreliminar}'";
+                    var trans = _repository.ExecuteQuery<NetProtocolMem>(sqlQuery).ToList();
+
+                    trans.ForEach(p =>
+                    {
+                        if (p.InvoiceAmount > 0 && p.DebtAmount == 0)
+                            p.Status = NetProtocolMemStatus.CXC;
+                        else if (p.InvoiceAmount == 0 && p.DebtAmount > 0)
+                            p.Status = NetProtocolMemStatus.PAYMENT;
+                        else if (p.InvoiceAmount > 0 && p.DebtAmount == 0)
+                            p.Status = NetProtocolMemStatus.CXC;
+                        else if (p.NetAmount > 0)
+                            p.Status = NetProtocolMemStatus.NETEO_CXC;
+                        else
+                            p.Status = NetProtocolMemStatus.NETEO_PAYMENT;
+                        _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EFRM30301 SET Status = '{Convert.ToInt32(p.Status)}' " +
+                                   $"WHERE MONTH(BillingMonth) = MONTH('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') " +
+                                   $"AND YEAR(BillingMonth) = YEAR('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') " +
+                                   $"AND CustomerExternalNumber = '{p.CustomerExternalNumber}' AND CustomerNumber = '{p.CustomerNumber}' AND IsPreliminar = '{isPreliminar}'");
+                    });
                 }
                 else
                 {
@@ -1989,6 +2018,29 @@ namespace Seaboard.Intranet.Web.Controllers
                                     $"WHERE MONTH(BillingMonth) = MONTH('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') " +
                                     $"AND YEAR(BillingMonth) = YEAR('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') AND CustomerExternalNumber = '{item.Debtor}'");
                         }
+
+                        var sqlQuery = "SELECT CustomerNumber, CustomerExternalNumber, BillingMonth, DueDate, ResolutionNumber, InvoiceAmount, DebtAmount, InvoiceAmount - DebtAmount NetAmount, InvoiceNumber, IsPreliminar, Status " +
+                       $"FROM {Helpers.InterCompanyId}.dbo.EFRM30301 " +
+                       $"WHERE BillingMonth = '{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}' AND IsPreliminar = '{isPreliminar}'";
+                        var trans = _repository.ExecuteQuery<NetProtocolMem>(sqlQuery).ToList();
+
+                        trans.ForEach(p =>
+                        {
+                            if (p.InvoiceAmount > 0 && p.DebtAmount == 0)
+                                p.Status = NetProtocolMemStatus.CXC;
+                            else if (p.InvoiceAmount == 0 && p.DebtAmount > 0)
+                                p.Status = NetProtocolMemStatus.PAYMENT;
+                            else if (p.InvoiceAmount > 0 && p.DebtAmount == 0)
+                                p.Status = NetProtocolMemStatus.CXC;
+                            else if (p.NetAmount > 0)
+                                p.Status = NetProtocolMemStatus.NETEO_CXC;
+                            else
+                                p.Status = NetProtocolMemStatus.NETEO_PAYMENT;
+                            _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EFRM30301 SET Status = '{Convert.ToInt32(p.Status)}' " +
+                                       $"WHERE MONTH(BillingMonth) = MONTH('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') " +
+                                       $"AND YEAR(BillingMonth) = YEAR('{DateTime.ParseExact(billingMonth, "dd/MM/yyyy", null):yyyyMMdd}') " +
+                                       $"AND CustomerExternalNumber = '{p.CustomerExternalNumber}' AND CustomerNumber = '{p.CustomerNumber}' AND IsPreliminar = '{isPreliminar}'");
+                        });
 
                         if (transferData)
                         {

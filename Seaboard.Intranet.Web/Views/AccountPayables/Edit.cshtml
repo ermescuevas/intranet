@@ -34,7 +34,7 @@
                     <div class="form-group">
                         <div class="col-sm-12 col-sm-offset-1">
                             @*<button class="btn btn-white" type="button" onclick="contabilizar();"><i class="fa fa-money"></i> Contabilizar</button>*@
-                            <button type="button" class="btn btn-primary" onclick="guardar();"><i class=" fa fa-add"></i>  Guardar</button>
+                            <button type="button" class="ladda-button btn btn-primary" data-style="expand-left" id="postButton"  onclick="guardar();"><i class=" fa fa-add"></i>  Guardar</button>
                             <button type="button" class="btn btn-danger" onclick="eliminar();"><i class="fa fa-remove"></i>  Eliminar</button>
                         </div>
                     </div>
@@ -243,6 +243,7 @@
     @Styles.Render("~/plugins/toastrStyles")
     @Styles.Render("~/plugins/dataPickerStyles")
     @Styles.Render("~/plugins/sweetAlertStyles")
+    @Styles.Render("~/plugins/laddaStyles")
 }
 
 @section Scripts {
@@ -252,6 +253,7 @@
     @Scripts.Render("~/plugins/jasnyBootstrap")
     @Scripts.Render("~/plugins/toastr")
     @Scripts.Render("~/plugins/sweetAlert")
+    @Scripts.Render("~/plugins/ladda")
 
     <script type="text/javascript">
 
@@ -259,7 +261,7 @@
 
         $(document).ready(function () {
              @Html.Partial("_Scripts")
-
+            $('.ladda-button').ladda();
             if (($('#PurchaseAmount').val().trim() != '' && !isNaN($('#PurchaseAmount').val().trim()))) {
                 totalAmount = parseFloat(totalAmount) + parseFloat($('#PurchaseAmount').val());
                 $('#PurchaseAmount').val(parseFloat($('#PurchaseAmount').val().trim()).toFixed(2).replace(/./g, function (c, i, a) {
@@ -474,6 +476,7 @@
             }
 
             if (isAllValid) {
+                $('#postButton').ladda('start');
                 $('#PurchaseAmount').val($('#PurchaseAmount').val().replace().replace(/,/g, ""));
                 $('#DiscountAmount').val($('#DiscountAmount').val().replace().replace(/,/g, ""));
                 $('#FreightAmount').val($('#FreightAmount').val().replace().replace(/,/g, ""));

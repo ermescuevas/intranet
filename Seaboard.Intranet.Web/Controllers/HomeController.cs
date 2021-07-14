@@ -729,7 +729,7 @@ namespace Seaboard.Intranet.Web.Controllers
                     case 46:
                         sqlQuery = "SELECT RTRIM(A.DOCNUMBR) Id, A.CURNCYID Descripción, CONVERT(NVARCHAR(10), A.DOCDATE, 103) DataPlus, CONVERT(NVARCHAR(10), A.DUEDATE, 103) DataExtended " +
                             "FROM " + Helpers.InterCompanyId + ".dbo.RM20101 A " +
-                            "WHERE A.DOCNUMBR LIKE '%" + consulta + "%' AND A.CUSTNMBR = '" + consultaExtra + "' AND A.RMDTYPAL = 1 " +
+                            "WHERE A.DOCNUMBR LIKE '%" + consulta + "%' AND A.CUSTNMBR = '" + consultaExtra + "' AND A.RMDTYPAL IN(1, 3) " +
                             "ORDER BY A.DOCDATE DESC";
                         break;
                     case 47:
@@ -986,8 +986,8 @@ namespace Seaboard.Intranet.Web.Controllers
             return fileEntries.Select(item => new Lookup
             {
                 Id = item,
-                Descripción = item.Split('\\')[item.Split('\\').Count() - 1].Split('.')[0].Length > 36
-                ? item.Split('\\')[item.Split('\\').Count() - 1].Split('.')[0].Substring(0, 36)
+                Descripción = item.Split('\\')[item.Split('\\').Count() - 1].Split('.')[0].Length > 100
+                ? item.Split('\\')[item.Split('\\').Count() - 1].Split('.')[0].Substring(0, 100)
                 : item.Split('\\')[item.Split('\\').Count() - 1].Split('.')[0],
                 DataExtended = item.Split('\\')[item.Split('\\').Count() - 1]
             }).ToList();
