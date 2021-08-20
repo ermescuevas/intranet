@@ -2505,10 +2505,10 @@ namespace Seaboard.Intranet.Web.Controllers
             {
                 var internalCustomerId = _repository.ExecuteScalarQuery<string>($"SELECT RTRIM(CUSTNMBR) FROM {Helpers.InterCompanyId}.dbo.RM00101 WHERE SHRTNAME = '{customerId}'");
                 var sqlQuery =
-                    $"SELECT CustomerId, DocumentNumber, DocumentAmount, PreviousBalance PreviousAmount, AppliedAmount, CurrentAmount, DueDate, CutDate, Days, InterestRate, InterestAmount, Charge, ChargeAmount, TotalAmount, Exclude " +
+                    $"SELECT CustomerId, DocumentNumber, DocumentAmount, DocumentType, PreviousBalance PreviousAmount, AppliedAmount, CurrentAmount, DueDate, CutDate, Days, InterestRate, InterestAmount, Charge, ChargeAmount, TotalAmount, Exclude " +
                     $"FROM {Helpers.InterCompanyId}.dbo.EFRM00120 WHERE BatchNumber = '{batchNumber}' AND CustomerId = '{internalCustomerId}' " +
                     $"UNION ALL " +
-                    $"SELECT CustomerId, DocumentNumber, DocumentAmount, PreviousBalance PreviousAmount, AppliedAmount, CurrentAmount, DueDate, CutDate, Days, InterestRate, InterestAmount, Charge, ChargeAmount, TotalAmount, Exclude " +
+                    $"SELECT CustomerId, DocumentNumber, DocumentAmount, DocumentType, PreviousBalance PreviousAmount, AppliedAmount, CurrentAmount, DueDate, CutDate, Days, InterestRate, InterestAmount, Charge, ChargeAmount, TotalAmount, Exclude " +
                     $"FROM {Helpers.InterCompanyId}.dbo.EFRM10120 WHERE BatchNumber = '{batchNumber}' AND CustomerId = '{internalCustomerId}' ";
                 details = _repository.ExecuteQuery<InterestDetail>(sqlQuery).ToList();
                 xStatus = "OK";
@@ -2520,7 +2520,7 @@ namespace Seaboard.Intranet.Web.Controllers
 
             return Json(new { status = xStatus, registros = details }, JsonRequestBehavior.AllowGet);
         }
-        public JsonResult GetDetailPaymentDetails(string batchNumber, string customerId, string documentNumber, int preliminar)
+        public JsonResult GetDetailPaymentDetails(string batchNumber, string customerId, string documentNumber, int documentType, int preliminar)
         {
             string xStatus;
             List<InterestDetail> details = null;
@@ -2529,7 +2529,7 @@ namespace Seaboard.Intranet.Web.Controllers
                 var internalCustomerId = _repository.ExecuteScalarQuery<string>($"SELECT RTRIM(CUSTNMBR) FROM {Helpers.InterCompanyId}.dbo.RM00101 WHERE SHRTNAME = '{customerId}'");
                 var sqlQuery = $"SELECT DISTINCT A.CustomerId, A.PaymentDocumentNumber DocumentNumber, A.PaymentAmount DocumentAmount, A.PreviousBalance PreviousAmount, A.PendingAmount CurrentAmount, A.DueDate, A.CutDate, A.Days, A.InterestRate, A.InterestAmount, A.Charge, A.ChargeAmount, A.TotalInterestAmount TotalAmount " +
                     $"FROM {Helpers.InterCompanyId}.dbo.EFRM10130 A INNER JOIN {Helpers.InterCompanyId}.dbo.EFRM10100 B ON A.BatchNumber = B.BatchNumber " +
-                    $"WHERE A.BatchNumber = '{batchNumber}' AND A.CustomerId = '{internalCustomerId}' AND A.DocumentNumber = '{documentNumber}' AND B.Preliminar = {preliminar} " +
+                    $"WHERE A.BatchNumber = '{batchNumber}' AND A.CustomerId = '{internalCustomerId}' AND A.DocumentNumber = '{documentNumber}' AND A.DocumentType = '{documentType}' AND B.Preliminar = {preliminar} " +
                     $"ORDER BY A.DueDate ";
                 details = _repository.ExecuteQuery<InterestDetail>(sqlQuery).ToList();
                 xStatus = "OK";
@@ -2644,16 +2644,16 @@ namespace Seaboard.Intranet.Web.Controllers
             return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
         }
         [HttpPost]
-        public JsonResult UpdateInterestTransactionInvoiceExclusion(string batchNumber, string customerId, string documentNumber, bool exclude)
+        public JsonResult UpdateInterestTransactionInvoiceExclusion(string batchNumber, string customerId, string documentNumber, int documentType, bool exclude)
         {
             string xStatus;
             try
             {
                 var internalCustomerId = _repository.ExecuteScalarQuery<string>($"SELECT RTRIM(CUSTNMBR) FROM {Helpers.InterCompanyId}.dbo.RM00101 WHERE SHRTNAME = '{customerId}'");
                 _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EFRM10120 SET Exclude = '{exclude}' " +
-                    $"WHERE BatchNumber = '{batchNumber}' AND CustomerId = '{internalCustomerId}'  AND DocumentNumber = '{documentNumber}'");
+                    $"WHERE BatchNumber = '{batchNumber}' AND CustomerId = '{internalCustomerId}'  AND DocumentNumber = '{documentNumber}' AND DocumentType = '{documentType}'");
                 _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EFRM00120 SET Exclude = '{exclude}' " +
-                    $"WHERE BatchNumber = '{batchNumber}' AND CustomerId = '{internalCustomerId}'  AND DocumentNumber = '{documentNumber}'");
+                    $"WHERE BatchNumber = '{batchNumber}' AND CustomerId = '{internalCustomerId}'  AND DocumentNumber = '{documentNumber}' AND DocumentType = '{documentType}'");
                 xStatus = "OK";
             }
             catch (Exception ex)

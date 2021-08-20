@@ -842,12 +842,12 @@
                             })));
                             $checkInput.click(function () {
                                 if ($(this).is(':checked'))
-                                    updateInterestDocumentExclusion(code, val.DocumentNumber, true);
+                                    updateInterestDocumentExclusion(code, val.DocumentNumber, val.DocumentType, true);
                                 else
-                                    updateInterestDocumentExclusion(code, val.DocumentNumber, false);
+                                    updateInterestDocumentExclusion(code, val.DocumentNumber, val.DocumentType, false);
                             });
                             $applyButton.click(function () {
-                                getDetailInterest(code, val.DocumentNumber);
+                                getDetailInterest(code, val.DocumentNumber, val.DocumentType);
                             });
                             $tbody.append($row);
                         });
@@ -968,10 +968,10 @@
             }
         }
 
-        function getDetailInterest(customerId, documentNumber) {
+        function getDetailInterest(customerId, documentNumber, documentType) {
             $('#modal-InvoiceApply').modal({ backdrop: 'static', keyboard: false, action: 'show' });
             $.ajax({
-                url: '@Url.Action("GetDetailPaymentDetails", "AccountReceivables")?batchNumber=' + $('#BatchNumber').val() +'&customerId=' + customerId + "&documentNumber=" + documentNumber + '&preliminar=' + @preliminar,
+                url: '@Url.Action("GetDetailPaymentDetails", "AccountReceivables")?batchNumber=' + $('#BatchNumber').val() + '&customerId=' + customerId + "&documentNumber=" + documentNumber + '&documentType=' + documentType + '&preliminar=' + @preliminar,
                 type: "POST",
                 data: "",
                 cache: false,
@@ -1189,9 +1189,9 @@
             });
         }
 
-        function updateInterestDocumentExclusion(customerId, code, exclude) {
+        function updateInterestDocumentExclusion(customerId, code, documentType, exclude) {
             $.ajax({
-                url: '@Url.Action("UpdateInterestTransactionInvoiceExclusion", "AccountReceivables")?batchNumber=' + $('#BatchNumber').val() + "&customerId=" + customerId + "&documentNumber=" + code + "&exclude=" + exclude,
+                url: '@Url.Action("UpdateInterestTransactionInvoiceExclusion", "AccountReceivables")?batchNumber=' + $('#BatchNumber').val() + '&customerId=' + customerId + '&documentNumber=' + code + '&documentType=' + documentType + '&exclude=' + exclude,
                 type: "POST",
                 data: "",
                 cache: false,

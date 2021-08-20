@@ -31,7 +31,7 @@ namespace Seaboard.Intranet.BusinessLogic
                     var builder = new StringBuilder();
                     foreach (char c in "Servicios2.4")
                         securePassword.AppendChar(c);
-                    clientContext.Credentials = new SharePointOnlineCredentials("flow@seaboardpower.com.do", securePassword);
+                    clientContext.Credentials = new SharePointOnlineCredentials("mflow@seaboardpower.com.do", securePassword);
                     var listCollection = clientContext.Web.Lists.GetByTitle("Historial Aprobaciones");
                     var approvalHistory = new List<ApprovalHistory>();
                     using (clientContext)
@@ -150,7 +150,7 @@ namespace Seaboard.Intranet.BusinessLogic
 
                     return approvalHistory;
                 }
-                catch(Exception ex)
+                catch
                 {
                     status = "En estos momentos no es posible conectar con el servidor, por favor intente de nuevo";
                     retryCount++;
