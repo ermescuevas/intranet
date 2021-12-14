@@ -276,6 +276,28 @@
                     }
                     form.validate().settings.ignore = ":disabled,:hidden";
                     if (form.valid() === true) {
+                        if (currentIndex === 0) {
+                            var data = {
+                                employeeId: $('#EmployeeId').val().trim()
+                            }
+                            $.ajax({
+                                url: '@Url.Action("GetEmployeeMail", "HumanResources")',
+                                type: "POST",
+                                data: JSON.stringify(data),
+                                dataType: "JSON",
+                                contentType: "application/json",
+                                success: function (result) {
+                                    if (result.status !== "OK") {
+                                        swal({
+                                            title: "INFORMACION",
+                                            text: "En los datos del empleado " + $('#EmployeeId').val().trim() + " no tiene configurado un e-mail valido, debe de contactar a Recursos Humanos para poder continuar",
+                                            type: "error"
+                                        });
+                                        $("#form").steps("previous");
+                                    }
+                                }
+                            });
+                        }
                         if (newIndex === 1) {
                             if ($('#AbsenceType').val() === '1' || $('#AbsenceType').val() === '2' || $('#AbsenceType').val() === '8' || $('#AbsenceType').val() === '9') {
                                 $('#start').css('display', '');
@@ -352,11 +374,7 @@
                 errorPlacement: function (error, element) {
                     element.before(error);
                 },
-                rules: {
-                    confirm: {
-                        equalTo: "#password"
-                    }
-                }
+                rules: { confirm: { equalTo: "#password" } }
             });
             $('#StartDate').datepicker({
                 todayBtn: "linked",

@@ -37,7 +37,7 @@
                 <div class="ibox-content">
                     <div class="form-group">
                         <div class="col-sm-12 col-sm-offset-1">
-                            <button class="btn btn-success" type="button" onclick="contabilizar();"><i class="fa fa-money"></i> Contabilizar</button>
+                            <button class="btn btn-success" type="button" onclick="contabilizar();"><i class="fa fa-money"></i> Guardar</button>
                             <button class="btn btn-white" type="button" onclick="borrar();"><i class="fa fa-eraser"></i> Borrar</button>
                         </div>
                     </div>
@@ -197,7 +197,7 @@
     @Scripts.Render("~/plugins/footable")
     @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
 
-    <script type="text/javascript">
+<script type="text/javascript">
         var amount = 0;
         var invoiceApplied = [];
         $(document).ready(function() {
@@ -255,7 +255,6 @@
                 }
             });
         });
-
         function getDocument() {
             if ($('#customerId').val().trim() != '') {
                 $("#lookupDocument").lookupbox({
@@ -267,24 +266,19 @@
                     onItemSelected: function(data) {
                         $('input[name=documentNumber]').val(data.CustomerId);
                         $('input[name=currencyId]').val(data.CurrencyId);
-                        $('input[name=originalAmount]').val(data.Description);
+                        $('input[name=originalAmount]').val(data.BatchNumber);
                         $('input[name=pendingAmount]').val(data.BatchNumber);
-                        obtenerDetalle($('#customerId', data.CustomerId).val().trim());
+                        obtenerDetalle($('#customerId').val().trim(), data.CustomerId);
                         calcularTotal();
                     },
-                    tableHeader: ['Monto original', 'Monto pendiente', 'Numero de documento'],
-                    hiddenFields: [
-                        'CurrencyId', 'CustomerName', 'VendorId', 'VendorName', 'DocumentDate', 'CloseDate', 'Note',
-                        'Posted'
-                    ]
+                    tableHeader: ['Monto pendiente', 'Monto original', 'Numero de documento'],
+                    hiddenFields: ['CurrencyId', 'CustomerName', 'VendorId', 'VendorName', 'DocumentDate', 'CloseDate', 'Note','Posted', 'DataPlus']
                 });
             }
         }
-
         function setCellValue(tableId, rowId, colNum, newValue) {
             $('#' + tableId + ' tr:eq(' + (rowId + 1) + ') td:eq(' + (colNum - 1) + ')').html(newValue);
         }
-
         function obtenerDetalle(customerId, documentNumber) {
             $.ajax({
                 url: '@Url.Action("GetDocumentsForApply", "AccountReceivables")?customerId=' + customerId + '&documentNumber=' + documentNumber,
@@ -308,8 +302,7 @@
                                 '</tr></thead>';
                         $table.append(thead);
                         var $tbody = $('<tbody/>');
-                        $.each(result.registros,
-                            function(x, item) {
+                        $.each(result.registros,function(x, item) {
                                 var $row = $('<tr/>');
                                 var $inputAppliedAmount = $('<input type="text" style="width:100%" name="appliedAmount"/>');
                                 var $inputCurrentAmount = $('<input type="text" style="width:100%" readonly="readonly" name="currentAmount"/>');
@@ -326,50 +319,27 @@
                                 $check.click(function(e) {
                                     if ($check.is(":checked")) {
                                         $('#transTable tr:eq(' + (x + 1) + ') td:eq(5) input').val(
-                                            parseFloat($(
-                                                    '#transTable tr:eq(' + (x + 1) + ') td:eq(4) input')
-                                                .val()
-                                                .replace(/,/g, "")).toFixed(2)
-                                            .replace(/./g,
-                                                function(c, i, a) {
-                                                    return i && c !== "." && ((a.length - i) % 3 === 0)
-                                                        ? ',' + c
-                                                        : c;
-                                                }));
+                                            parseFloat($('#transTable tr:eq(' + (x + 1) + ') td:eq(4) input').val().replace(/,/g, "")).toFixed(2).replace(/./g,function(c, i, a) {return i && c !== "." && ((a.length - i) % 3 === 0)? ',' + c: c;}));
                                     } else {
                                         $('#transTable tr:eq(' + (x + 1) + ') td:eq(5) input').val("0.00");
                                     }
                                     calcularTotal();
                                 });
                                 $inputAppliedAmount.focus(function(e) {
-                                    amount = parseFloat($('#transTable tr:eq(' + (x + 1) + ') td:eq(5) input')
-                                        .val()
-                                        .replace(/,/g, ""));
+                                    amount = parseFloat($('#transTable tr:eq(' + (x + 1) + ') td:eq(5) input').val().replace(/,/g, ""));
                                 });
                                 $inputAppliedAmount.focusout(function (e) {
-                                    var amountApplied =
-                                        parseFloat($('#transTable tr:eq(' + (x + 1) + ') td:eq(5) input').val()
-                                            .replace(/,/g, "")).toFixed(2);
-                                    var amountPending =
-                                        parseFloat($('#transTable tr:eq(' + (x + 1) + ') td:eq(4) input').val()
-                                            .replace(/,/g, "")).toFixed(2);
+                                    var amountApplied =parseFloat($('#transTable tr:eq(' + (x + 1) + ') td:eq(5) input').val().replace(/,/g, "")).toFixed(2);
+                                    var amountPending =parseFloat($('#transTable tr:eq(' + (x + 1) + ') td:eq(4) input').val().replace(/,/g, "")).toFixed(2);
                                     if (Number(amountApplied) > Number(amountPending)) {
-                                        toastr.error('El monto aplicado no puede exceder el monto pendiente',
-                                            'Campo requerido');
-
-                                        $('#transTable tr:eq(' + (x + 1) + ') td:eq(5) input').val(amount
-                                            .toFixed(2)
-                                            .replace(/./g,
-                                                function(c, i, a) {
+                                        toastr.error('El monto aplicado no puede exceder el monto pendiente','Campo requerido');
+                                        $('#transTable tr:eq(' + (x + 1) + ') td:eq(5) input').val(amount.toFixed(2).replace(/./g,function(c, i, a) {
                                                     return i && c !== "." && ((a.length - i) % 3 === 0)
                                                         ? ',' + c
                                                         : c;
                                                 }));
                                     } else {
-                                        $('#transTable tr:eq(' + (x + 1) + ') td:eq(5) input').val(parseFloat(
-                                            $('#transTable tr:eq(' + (x + 1) + ') td:eq(5) input').val()
-                                            .replace(/,/g, "")).toFixed(2).replace(/./g,
-                                            function(c, i, a) {
+                                        $('#transTable tr:eq(' + (x + 1) + ') td:eq(5) input').val(parseFloat($('#transTable tr:eq(' + (x + 1) + ') td:eq(5) input').val().replace(/,/g, "")).toFixed(2).replace(/./g,function(c, i, a) {
                                                 return i && c !== "." && ((a.length - i) % 3 === 0)
                                                     ? ',' + c
                                                     : c;
@@ -388,7 +358,6 @@
                 }
             });
         }
-
         function contabilizar() {
             if (!confirm("Esta seguro que desea aplicar estos documentos ?")) {
                 return;
@@ -396,9 +365,8 @@
             var isAllValid = true;
 
             if (parseFloat($('#pendingAmount').val().replace(/,/g, "")) < 0) {
-                if (!confirm("El monto aplicado no puede ser mayor al monto pendiente ?")) {
-                    return;
-                }
+                toastr.error('El monto aplicado no puede ser mayor al monto pendiente', 'Campo requerido');
+                isAllValid = false;
             }
 
             if ($('#customerId').val().trim() === '') {
@@ -461,27 +429,15 @@
                 });
             }
         }
-
         function calcularTotal() {
             var total = 0;
             var aTotal = 0;
             $('#transTable > tbody > tr').each(function() {
-                total = parseFloat(total) +
-                    parseFloat($(this).find('td:eq(5) input').val()
-                        .replace(/,/g, ""));
+                total = parseFloat(total) +parseFloat($(this).find('td:eq(5) input').val().replace(/,/g, ""));
             });
-
-            aTotal = parseFloat($('#originalAmount').val().replace(/,/g, "")) - total; 
-
-            $('#pendingAmount').val(parseFloat(aTotal).toFixed(2).replace(/./g,
-                function(c, i, a) {
-                    return i && c !== "." && ((a.length - i) % 3 === 0)
-                        ? ',' + c
-                        : c;
-                }));
-
+            aTotal = parseFloat($('#originalAmount').val().replace(/,/g, "")) - total;
+            $('#pendingAmount').val(parseFloat(aTotal).toFixed(2).replace(/./g,function(c, i, a) {return i && c !== "." && ((a.length - i) % 3 === 0)? ',' + c: c;}));
         }
-
         function borrar() {
             $('input[name=customerId]').val('');
             $('input[name=customerName]').val('');
@@ -492,6 +448,5 @@
             $('input[name=originalAmount]').val('');
             $('#transRows').html('');
         }
-
-    </script>
+</script>
 }

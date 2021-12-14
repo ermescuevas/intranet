@@ -1186,17 +1186,11 @@ namespace Seaboard.Intranet.Web.Controllers
                     Type = cashReceipt.CashReceiptType,
                     Description = cashReceipt.Description
                 };
-                decimal currentAmount = 0;
+                var currentAmount = cashReceipt.Amount;
                 var count = _repository.ExecuteScalarQuery<int>($"SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.RM10201 WHERE DOCNUMBR = '{cashReceipt.CashReceiptId}'");
 
                 if (count > 0)
                 {
-                    if (cashReceipt.InvoiceLines != null)
-                    {
-                        foreach (var item in cashReceipt.InvoiceLines)
-                            currentAmount += Convert.ToDecimal(item.DocumentAmount);
-                    }
-                    currentAmount -= cashReceipt.Amount;
                     var sqlQuery = "SELECT DOCNUMBR CashReceiptId, BACHNUMB BatchNumber, TRXDSCRN Description, CUSTNMBR CustomerId, " +
                     "CURNCYID CurrencyId, DOCDATE DocumentDate, CONVERT(INT, CSHRCTYP) CashReceiptType, ORTRXAMT Amount, CONVERT(BIT, POSTED) Posted " +
                     "FROM " + Helpers.InterCompanyId + ".dbo.RM10201 " +
@@ -1262,6 +1256,8 @@ namespace Seaboard.Intranet.Web.Controllers
                             _repository.ExecuteCommand(string.Format("INTRANET.dbo.ApplyReceivablesDocuments '{0}','{1}','{2}','{3}','{4}','{5}','{6:yyyyMMdd}'",
                                     Helpers.InterCompanyId, item.DocumentNumber, cashReceipt.CashReceiptId, Convert.ToDecimal(item.DocumentAmount).ToString(new CultureInfo("en-US")), 9, docType, cashReceipt.DocumentDate));
                         }
+
+                        currentAmount -= Convert.ToDecimal(item.DocumentAmount);
                     }
 
                     _repository.ExecuteCommand("UPDATE " + Helpers.InterCompanyId + ".dbo.RM10201 SET CURTRXAM = '" + currentAmount + "' WHERE DOCNUMBR = '" + cashReceipt.CashReceiptId + "'");
@@ -1757,7 +1753,7 @@ namespace Seaboard.Intranet.Web.Controllers
 
         [OutputCache(Duration = 0)]
         [HttpPost]
-        public ActionResult CollectionsProtocolReport(string fromDate, string toDate, decimal exchangeRate, int printOption)
+        public ActionResult CollectionsProtocolReport(string fromDate, string toDate, string period, decimal exchangeRate, int printOption)
         {
             string xStatus;
             try
@@ -1770,7 +1766,7 @@ namespace Seaboard.Intranet.Web.Controllers
                     reportName += ".xls";
 
                 ReportHelper.Export(Helpers.ReportPath + "Reportes", Server.MapPath("~/PDF/Reportes/") + reportName,
-                    string.Format("INTRANET.dbo.CollectionsProtocolReport '{0}','{1}','{2}','{3}'", Helpers.InterCompanyId, fromDate, toDate, exchangeRate.ToString(new CultureInfo("en-US"))),
+                    string.Format("INTRANET.dbo.CollectionsProtocolReport '{0}','{1}','{2}','{3}','{4}'", Helpers.InterCompanyId, fromDate, toDate, period, exchangeRate.ToString(new CultureInfo("en-US"))),
                     64, ref xStatus, printOption == 10 ? 0 : 1);
             }
             catch (Exception ex)
@@ -1788,7 +1784,7 @@ namespace Seaboard.Intranet.Web.Controllers
             try
             {
                 var service = new ServiceContract();
-                var detalle = ConnectionDb.GetDt(string.Format("INTRANET.dbo.CollectionsProtocolReport '{0}','{1}','{2}','{3}'", Helpers.InterCompanyId, fromDate, toDate, exchangeRate.ToString(new CultureInfo("en-US"))));
+                var detalle = ConnectionDb.GetDt(string.Format("INTRANET.dbo.CollectionsProtocolReport '{0}','{1}','{2}','{3}','{4}'", Helpers.InterCompanyId, fromDate, toDate, DateTime.ParseExact(monthDate, "dd/MM/yyyy", null).ToString("yyyyMMdd"), exchangeRate.ToString(new CultureInfo("en-US"))));
                 if (detalle.Rows.Count > 0)
                 {
                     decimal totalPesos = 0;
@@ -1802,12 +1798,12 @@ namespace Seaboard.Intranet.Web.Controllers
 
                     grandTotal = (totalPesos / exchangeRate) + totalDolares;
 
-                    var count = _repository.ExecuteScalarQuery<int>($"SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.EFRM30000 WHERE MonthDate = '{monthDate}'");
+                    var count = _repository.ExecuteScalarQuery<int>($"SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.EFRM30000 WHERE MonthDate = '{DateTime.ParseExact(monthDate, "dd/MM/yyyy", null):yyyyMMdd}'");
                     if (count == 0)
                         _repository.ExecuteCommand($"INSERT INTO {Helpers.InterCompanyId}.dbo.EFRM30000 ([MonthDate],[GrandTotal],[TotalAmountUsd],[TotalAmountDop],[ExchangeRate],[FromDate],[ToDate],[CreatedDate],[ModifiedDate],[LastUserId]) " +
-                            $"VALUES ('{monthDate}', '{grandTotal}', '{totalDolares}', '{totalPesos}', '{exchangeRate.ToString(new CultureInfo("en-US"))}', '{fromDate}', '{toDate}', GETDATE(), GETDATE(), '{Account.GetAccount(User.Identity.GetUserName()).UserId}')");
+                            $"VALUES ('{DateTime.ParseExact(monthDate, "dd/MM/yyyy", null):yyyyMMdd}', '{grandTotal}', '{totalDolares}', '{totalPesos}', '{exchangeRate.ToString(new CultureInfo("en-US"))}', '{fromDate}', '{toDate}', GETDATE(), GETDATE(), '{Account.GetAccount(User.Identity.GetUserName()).UserId}')");
                     else
-                        _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EFRM30000 SET GrandTotal = '{grandTotal}', TotalAmountUsd = '{totalDolares}', TotalAmountDop = '{totalPesos}', ExchangeRate = '{exchangeRate}' WHERE MonthDate = '{monthDate}'");
+                        _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EFRM30000 SET GrandTotal = '{grandTotal}', TotalAmountUsd = '{totalDolares}', TotalAmountDop = '{totalPesos}', ExchangeRate = '{exchangeRate}' WHERE MonthDate = '{DateTime.ParseExact(monthDate, "dd/MM/yyyy", null):yyyyMMdd}'");
                 }
 
                 aStatus = "OK";
@@ -2270,11 +2266,22 @@ namespace Seaboard.Intranet.Web.Controllers
                         "WHERE RTRIM(DOCNUMBR) = '" + item.DocumentNumber + "' " +
                         "AND RTRIM(CUSTNMBR) = '" + cashReceipt.CustomerId + "'");
 
-                    _repository.ExecuteCommand(string.Format(
+
+                    if (cashReceipt.Currency != "RDPESO")
+                    {
+                        _repository.ExecuteCommand(string.Format("INTRANET.dbo.ApplyMulticurrencyReceivablesDocument '{0}','{1}','{2}','{3}','{4}','{5:yyyyMMdd}'",
+                                   Helpers.InterCompanyId, cashReceipt.CustomerId, cashReceipt.CashReceiptId, item.DocumentNumber,
+                                   Convert.ToDecimal(item.DocumentAmount).ToString(new CultureInfo("en-US")), docDate));
+                    }
+                    else
+                    {
+                        _repository.ExecuteCommand(string.Format(
                             "INTRANET.dbo.ApplyReceivablesDocuments '{0}','{1}','{2}','{3}','{4}','{5}','{6:yyyyMMdd}'",
                             Helpers.InterCompanyId, item.DocumentNumber, cashReceipt.CashReceiptId,
                             Convert.ToDecimal(item.DocumentAmount).ToString(new CultureInfo("en-US")),
                             toDocType, docType, DateTime.ParseExact(docDate, "dd/MM/yyyy", null)));
+                    }
+                    
                 }
 
                 xStatus = "OK";

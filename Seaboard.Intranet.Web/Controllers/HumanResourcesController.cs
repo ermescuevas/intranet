@@ -506,6 +506,29 @@ namespace Seaboard.Intranet.Web.Controllers
             return new JsonResult { Data = new { status = xStatus } };
         }
 
+        public JsonResult GetEmployeeMail(string employeeId)
+        {
+            string xStatus;
+            try
+            {
+                
+                var sqlQuery = $"SELECT ISNULL(B.INET1, '') FROM {Helpers.InterCompanyId}.dbo.UPR00100 A " +
+                $"INNER JOIN  {Helpers.InterCompanyId}.dbo.SY01200 B ON A.EMPLOYID = B.Master_ID AND B.Master_Type = 'EMP' " +
+                $"WHERE A.EMPLOYID = '{employeeId}'";
+                var mail = _repository.ExecuteScalarQuery<string>(sqlQuery);
+                if (!string.IsNullOrWhiteSpace(mail))
+                    xStatus = "OK";
+                else
+                    xStatus = "ERROR";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status = xStatus } };
+        }
+
         #endregion
 
         #region Solicitud de capacitacion
@@ -2666,7 +2689,6 @@ namespace Seaboard.Intranet.Web.Controllers
                 $"INNER JOIN {Helpers.InterCompanyId}.dbo.UPR40300 C ON B.DEPRTMNT = C.DEPRTMNT ";
             return View(_repository.ExecuteQuery<Lookup>(sqlQuery).ToList());
         }
-
         [HttpPost]
         public JsonResult SaveEmployeePicture(HttpPostedFileBase fileData, string employeeId)
         {
@@ -2693,7 +2715,6 @@ namespace Seaboard.Intranet.Web.Controllers
 
             return new JsonResult { Data = new { status } };
         }
-
         public JsonResult DeleteEmployeePicture(string employeeId)
         {
             string xStatus;
@@ -2736,7 +2757,7 @@ namespace Seaboard.Intranet.Web.Controllers
             using (var sr = new StreamReader(stream))
             {
                 string text = sr.ReadToEnd();
-                Regex regex = new Regex(@"/Type\s*/Page[^s]");
+                var regex = new Regex(@"/Type\s*/Page[^s]");
                 MatchCollection matches = regex.Matches(text);
                 return matches.Count;
             }

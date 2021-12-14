@@ -193,6 +193,7 @@
                 fromdate: $('#FromDate').datepicker('getDate'),
                 todate: $('#ToDate').datepicker('getDate'),
                 exchangeRate: $('#exchangeRate').val(),
+                period: $('#MonthDate').datepicker('getDate'),
                 printOption: parseInt($('#printOption').val())
             };
 
@@ -224,7 +225,7 @@
         }
         function cerrarPeriodo() {
             var data = {
-                monthDate: $('#FromDate').datepicker('getDate'),
+                monthDate: '01/' + $('#MonthDate').datepicker({ dateFormat: 'ddMMyyyy' }).val(),
                 fromdate: $('#FromDate').datepicker('getDate'),
                 todate: $('#ToDate').datepicker('getDate'),
                 exchangeRate: $('#exchangeRate').val()
