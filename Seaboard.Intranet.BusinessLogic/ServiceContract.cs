@@ -33,6 +33,15 @@ namespace Seaboard.Intranet.BusinessLogic
                     try
                     {
                         var ncf = repository.ExecuteScalarQuery<NcfEntity>($"INTRANET.dbo.GetNcfNumber '{Helpers.InterCompanyId}','{invoice.NcfType}'");
+
+                        var countNcf = repository.ExecuteScalarQuery<int>($"SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.EFRM30100 WHERE Ncf = '{ncf.Ncf}'");
+                        if (countNcf > 0)
+                        {
+                            var ncfInvoice = repository.ExecuteScalarQuery<string>($"SELECT DocumentNumber FROM {Helpers.InterCompanyId}.dbo.EFRM30100 WHERE Ncf = '{ncf.Ncf}'");
+                            message += $"Cliente: {invoice.CustomerId}\nEl comprobante fiscal numero {ncf.Ncf} se iba a asignar al cliente {invoice.CustomerId} pero ya esta asignado al documento {ncfInvoice}, por favor verificar la secuencia de comprobantes si esta correcta.";
+                            break;
+                        }
+
                         var accountReceivablesAccount = repository.ExecuteScalarQuery<int?>($"SELECT AccountIndex FROM {Helpers.InterCompanyId}.dbo.EFRM40601 " +
                         $"WHERE CustomerId = '{invoice.CustomerId}' AND AccountType = 1") ?? 0;
                         if (accountReceivablesAccount != 0)
@@ -48,7 +57,7 @@ namespace Seaboard.Intranet.BusinessLogic
                             CurrencyKey = new CurrencyKey { ISOCode = invoice.CurrencyId == "RDPESO" ? "DOP" : "USD" },
                             BatchKey = new BatchKey { Id = invoice.BatchNumber },
                             ExchangeRate = invoice.CurrencyId != "RDPESO" ? invoice.ExchangeRate : 0,
-                            ExchangeDate = invoice.CurrencyId != "RDPESO" ? new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 0) : new DateTime(1900, 1, 1, 0, 0, 0),
+                            ExchangeDate = invoice.CurrencyId != "RDPESO" ? new DateTime(invoice.DocumentDate.Year, invoice.DocumentDate.Month, invoice.DocumentDate.Day, 0, 0, 0) : new DateTime(1900, 1, 1, 0, 0, 0),
                             UserDefined = new SalesUserDefined { Text02 = invoice.NcfType == "B03" ? invoice.ReferenceInvoice : "", Text03 = invoice.NcfType == "B03" ? invoice.ReferenceNcf : "", Text04 = ncf.DueDate.ToString("dd/MM/yyyy"), Text05 = ncf.Ncf },
                             Note = invoice.Note,
                             Lines = ProcessInvoiceLines(invoice, wsDynamicsGp, context, repository, ref taxes).ToArray(),
@@ -95,7 +104,7 @@ namespace Seaboard.Intranet.BusinessLogic
                         var sqlQuery = $"INSERT INTO {Helpers.InterCompanyId}.dbo.EFRM30100 (NCFTypeId, NcfDetailId, NcfTypeDesc, DueDate, Ncf, SequenceNumber, " +
                             $"DocumentNumber, DocumentType, DocumentDate, Status, CustomerNumber, DocumentAmount, TaxAmount, CurrencyId, LastUserId, ApplyInvoice, ApplyNcf) " +
                             $"VALUES ('{ncf.HeaderDocumentNumber}','{ncf.DetailDocumentNumber}', '{ncf.NcfDescription}','{ncf.DueDate.ToString("yyyyMMdd")}', '{ncf.Ncf}', '{ncf.SecuenceNumber}'," +
-                            $"'{invoiceNumber}', 3, '{invoice.DocumentDate.ToString("yyyyMMdd")}', 10, '{invoice.CustomerId}','{invoice.Lines.Sum(p => p.Price * p.Quantity)}'," +
+                            $"'{invoiceNumber}', 3, '{invoice.DocumentDate:yyyyMMdd}', 10, '{invoice.CustomerId}','{invoice.Lines.Sum(p => p.Price * p.Quantity)}'," +
                             $"{invoice.Lines.Sum(p => p.TaxAmount * p.Quantity)}, '{invoice.CurrencyId}', '{userId}', '{(string.IsNullOrEmpty(invoice.ReferenceInvoice) ? "" : invoice.ReferenceInvoice)}'," +
                             $"'{(string.IsNullOrEmpty(invoice.ReferenceNcf) ? "" : invoice.ReferenceNcf)}')";
                         repository.ExecuteCommand(sqlQuery);
@@ -129,6 +138,13 @@ namespace Seaboard.Intranet.BusinessLogic
                     try
                     {
                         var ncf = repository.ExecuteScalarQuery<NcfEntity>($"INTRANET.dbo.GetNcfNumber '{Helpers.InterCompanyId}','{invoice.NcfType}'");
+                        var countNcf = repository.ExecuteScalarQuery<int>($"SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.EFRM30100 WHERE Ncf = '{ncf.Ncf}'");
+                        if (countNcf > 0)
+                        {
+                            var ncfInvoice = repository.ExecuteScalarQuery<string>($"SELECT DocumentNumber FROM {Helpers.InterCompanyId}.dbo.EFRM30100 WHERE Ncf = '{ncf.Ncf}'");
+                            message += $"Cliente: {invoice.CustomerId}\nEl comprobante fiscal numero {ncf.Ncf} se iba a asignar al cliente {invoice.CustomerId} pero ya esta asignado al documento {ncfInvoice}, por favor verificar la secuencia de comprobantes si esta correcta.";
+                            break;
+                        }
                         var salesReturn = new SalesReturn
                         {
                             Key = new SalesDocumentKey { Id = string.IsNullOrEmpty(invoice.SopNumber) ? "" : invoice.SopNumber },
@@ -138,7 +154,7 @@ namespace Seaboard.Intranet.BusinessLogic
                             CurrencyKey = new CurrencyKey { ISOCode = invoice.CurrencyId == "RDPESO" ? "DOP" : "USD" },
                             BatchKey = new BatchKey { Id = invoice.BatchNumber },
                             ExchangeRate = invoice.CurrencyId != "RDPESO" ? invoice.ExchangeRate : 0,
-                            ExchangeDate = invoice.CurrencyId != "RDPESO" ? new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 0) : new DateTime(1900, 1, 1, 0, 0, 0),
+                            ExchangeDate = invoice.CurrencyId != "RDPESO" ? new DateTime(invoice.DocumentDate.Year, invoice.DocumentDate.Month, invoice.DocumentDate.Day, 0, 0, 0) : new DateTime(1900, 1, 1, 0, 0, 0),
                             UserDefined = new SalesUserDefined { Text02 = invoice.ReferenceInvoice, Text03 = invoice.ReferenceNcf, Text04 = ncf.DueDate.ToString("dd/MM/yyyy"), Text05 = ncf.Ncf },
                             Note = invoice.Note,
                             Lines = ProcessReturnLines(invoice, wsDynamicsGp, context).ToArray()

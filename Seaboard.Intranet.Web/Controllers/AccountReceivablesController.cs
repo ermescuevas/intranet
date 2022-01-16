@@ -416,8 +416,9 @@ namespace Seaboard.Intranet.Web.Controllers
             {
                 var receipt = new GpPurchaseReceipt { Lines = new List<GpPurchaseReceiptLine>() };
                 var aHeader = _repository.ExecuteScalarQuery<Lookup>(string.Format(
-                            "SELECT VENDORGP Id, DOCNUMBE Descripción, CONVERT(NVARCHAR(10), DOCDATE, 103) DataExtended FROM " +
-                            Helpers.InterCompanyId + ".dbo.SESOP30301 WHERE BACHNMBR = '{0}' AND VENDORID = '{1}'", item.Id, item.Descripción));
+                    "SELECT VENDORGP Id, DOCNUMBE Descripción, CONVERT(NVARCHAR(10), DOCDATE, 103) DataExtended " +
+                    "FROM " +Helpers.InterCompanyId + ".dbo.SESOP30301 " +
+                    "WHERE BACHNMBR = '{0}' AND VENDORID = '{1}'", item.Id, item.Descripción));
 
                 var aDetail = _repository.ExecuteScalarQuery<MemDebtData>(string.Format(
                             "SELECT '' Acreedor, VENDINVC Suplidor, CONVERT(FLOAT, ENERGIA) Producto1, CONVERT(FLOAT, POTENCIA) Producto2, CONVERT(FLOAT, DC) Producto3, CONVERT(FLOAT, PRODUCTO4) Producto4, " +
@@ -1348,6 +1349,24 @@ namespace Seaboard.Intranet.Web.Controllers
             return Json(new { status = xStatus, registros = xRegistros }, JsonRequestBehavior.AllowGet);
         }
 
+        public JsonResult GetCustomerData(string customerId)
+        {
+            string xStatus;
+            string xRegistros = "";
+            try
+            {
+                string sqlQuery = $"SELECT RTRIM(CURNCYID) FROM {Helpers.InterCompanyId}.dbo.RM00101 WHERE CUSTNMBR = '{customerId}'";
+                xRegistros = _repository.ExecuteScalarQuery<string>(sqlQuery);
+                xStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return Json(new { status = xStatus, currency = xRegistros }, JsonRequestBehavior.AllowGet);
+        }
+
         #endregion
 
         #region Reports
@@ -1591,7 +1610,7 @@ namespace Seaboard.Intranet.Web.Controllers
             try
             {
                 xStatus = "OK";
-                var reportName = "AccountReceivablesReport";
+                var reportName = "AccountReceivablesSummaryReport";
                 if (printOption == 10)
                     reportName += ".pdf";
                 else
@@ -1625,7 +1644,7 @@ namespace Seaboard.Intranet.Web.Controllers
             try
             {
                 xStatus = "OK";
-                var reportName = "AccountPayablesReport";
+                var reportName = "AccountPayablesSummaryReport";
                 if (printOption == 10)
                     reportName += ".pdf";
                 else

@@ -14,6 +14,7 @@ namespace Seaboard.Intranet.Domain.Models
         public string VendorId { get; set; }
         public string CurrencyId { get; set; }
         public string BatchNumber { get; set; }
+        public string VendorDocumentNumber { get; set; }
         public List<GpPurchaseReceiptLine> Lines { get; set; }
     }
 }

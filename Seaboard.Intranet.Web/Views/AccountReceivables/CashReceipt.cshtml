@@ -294,7 +294,7 @@
     @Scripts.Render("~/plugins/sweetAlert")
     @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
 
-    <script type="text/javascript">
+<script type="text/javascript">
         var editor;
         var name = "";
         $(document).ready(function () {
@@ -308,6 +308,7 @@
                 onItemSelected: function(data) {
                     $('input[name=CustomerId]').val(data.Id);
                     $('input[name=CustomerName]').val(data.Descripción);
+                    getCustomerData(data.Id);
                 },
                 tableHeader: ['Id. de cliente', 'Nombre'],
                 hiddenFields: ['DataExtended']
@@ -348,6 +349,14 @@
         var invoiceItems = [];
         var chargeItems = [];
         var invoiceApplied = [];
+
+        function getCustomerData(customerId) {
+             $.ajax({
+                 url: '@Url.Action("GetCustomerData", "AccountReceivables")?customerId=' + customerId
+             }).done(function (data) {
+                 $('#Currency').val(data.currency);
+             });
+        }
 
         window.onbeforeunload = function () {
             $.ajax({
@@ -836,5 +845,5 @@
                 });
             }
         }
-    </script>
+</script>
 }

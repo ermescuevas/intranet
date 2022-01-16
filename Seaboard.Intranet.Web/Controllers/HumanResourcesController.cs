@@ -2077,7 +2077,7 @@ namespace Seaboard.Intranet.Web.Controllers
             htmlToPdfConverter.Document.Margins = new PdfMargins((float)63.49606);
 
             string htmlCode = _repository.ExecuteScalarQuery<string>($"SELECT PersonalizedContent FROM {Helpers.InterCompanyId}.dbo.EHUPR10100 A INNER JOIN {Helpers.InterCompanyId}.dbo.EHUPR20100 B ON A.DocumentId = B.DocumentId WHERE A.DocumentId = '{documentId}' AND B.EmployeeId = '{employeeId}' AND B.BatchNumber = '{batchNumber}'");
-            _repository.ExecuteQuery<string>($"SELECT FieldId FROM {Helpers.InterCompanyId}.dbo.EHUPR50100").ToList().ForEach(p => { if (htmlCode.Contains(p)) htmlCode = htmlCode.Replace(p, GetFieldData(p, employeeId)); });
+            _repository.ExecuteQuery<string>($"SELECT FieldId FROM {Helpers.InterCompanyId}.dbo.EHUPR50100").ToList().ForEach(p => { if (htmlCode.Contains(p)) htmlCode = htmlCode.Replace(p, GetFieldData(p, employeeId, batchNumber, documentId)); });
             _repository.ExecuteQuery<string>($"SELECT FieldId FROM {Helpers.InterCompanyId}.dbo.EHUPR20101 WHERE BatchNumber = '{batchNumber}' AND DocumentId = '{documentId}' AND EmployeeId = '{employeeId}'").ToList().ForEach(p =>
             {
                 if (htmlCode.Contains(p)) htmlCode = htmlCode.Replace(p, GetPersonalizedFieldData(p, documentId, batchNumber, employeeId));
@@ -2162,7 +2162,7 @@ namespace Seaboard.Intranet.Web.Controllers
             htmlToPdfConverter.Document.Margins = new PdfMargins((float)63.49606);
 
             string htmlCode = _repository.ExecuteScalarQuery<string>($"SELECT PersonalizedContent FROM {Helpers.InterCompanyId}.dbo.EHUPR10100 A INNER JOIN {Helpers.InterCompanyId}.dbo.EHUPR20100 B ON A.DocumentId = B.DocumentId WHERE A.DocumentId = '{documentId}' AND B.EmployeeId = '{employeeId}' AND B.BatchNumber = '{batchNumber}'");
-            _repository.ExecuteQuery<string>($"SELECT FieldId FROM {Helpers.InterCompanyId}.dbo.EHUPR50100").ToList().ForEach(p => { if (htmlCode.Contains(p)) htmlCode = htmlCode.Replace(p, GetFieldData(p, employeeId)); });
+            _repository.ExecuteQuery<string>($"SELECT FieldId FROM {Helpers.InterCompanyId}.dbo.EHUPR50100").ToList().ForEach(p => { if (htmlCode.Contains(p)) htmlCode = htmlCode.Replace(p, GetFieldData(p, employeeId, batchNumber, documentId)); });
             _repository.ExecuteQuery<string>($"SELECT FieldId FROM {Helpers.InterCompanyId}.dbo.EHUPR20101 WHERE DocumentId = '{documentId}' AND EmployeeId = '{employeeId}' AND BatchNumber = '{batchNumber}'").ToList().ForEach(p =>
             {
                 if (htmlCode.Contains(p)) htmlCode = htmlCode.Replace(p, GetPersonalizedFieldData(p, documentId, batchNumber, employeeId));
@@ -2205,11 +2205,18 @@ namespace Seaboard.Intranet.Web.Controllers
             fileStream.Close();
             return File(data, "application/pdf");
         }
-        private string GetFieldData(string fieldId, string employeeId)
+        //private string GetFieldData(string fieldId, string employeeId)
+        //{
+        //    var query = _repository.ExecuteScalarQuery<string>($"SELECT FieldSearch FROM {Helpers.InterCompanyId}.dbo.EHUPR50100 WHERE FieldId = '{fieldId}'");
+        //    return _repository.ExecuteScalarQuery<string>(query.Replace("^^Parametros^^", employeeId));
+        //}
+
+        private string GetFieldData(string fieldId, string employeeId, string batchNumber = "", string documentId = "")
         {
             var query = _repository.ExecuteScalarQuery<string>($"SELECT FieldSearch FROM {Helpers.InterCompanyId}.dbo.EHUPR50100 WHERE FieldId = '{fieldId}'");
-            return _repository.ExecuteScalarQuery<string>(query.Replace("^^Parametros^^", employeeId));
+            return _repository.ExecuteScalarQuery<string>(query.Replace("^^Parametros^^", employeeId).Replace("^^ParametrosLote^^", batchNumber).Replace("^^ParametrosDocumento^^", documentId));
         }
+
         private string GetPersonalizedFieldData(string fieldId, string documentId, string batchNumber, string employeeId)
         {
             var fieldValue = _repository.ExecuteScalarQuery<string>($"SELECT FieldValue FROM {Helpers.InterCompanyId}.dbo.EHUPR20101 " +
