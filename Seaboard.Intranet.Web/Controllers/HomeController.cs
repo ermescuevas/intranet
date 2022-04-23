@@ -393,12 +393,12 @@ namespace Seaboard.Intranet.Web.Controllers
                         if (Account.GetAccount(User.Identity.GetUserName()).Department == "NEGOCIOS")
                             sqlQuery = "SELECT VENDORID [Id], VENDNAME [Descripción] FROM " + Helpers.InterCompanyId +
                                        ".dbo.PM00200 WITH (NOLOCK, READUNCOMMITTED) WHERE (VENDORID LIKE '%" + consulta + "%' OR VENDNAME " +
-                                       "LIKE '%" + consulta + "%') AND VNDCLSID IN ('LOCALSPOT', 'LOCSLUNR', 'LOCALGEN') ORDER BY VENDORID";
+                                       "LIKE '%" + consulta + "%') AND VNDCLSID IN ('LOCALSPOT', 'LOCSLUNR', 'LOCALUNR', 'LOCALGEN') ORDER BY VENDORID";
                         else
                             sqlQuery = "SELECT VENDORID [Id], VENDNAME [Descripción] FROM " + Helpers.InterCompanyId +
                                        ".dbo.PM00200 WITH (NOLOCK, READUNCOMMITTED) WHERE " +
                                        "(VENDORID LIKE '%" + consulta + "%' OR VENDNAME LIKE '%" + consulta + "%') " +
-                                       "AND VNDCLSID NOT IN ('LOCALSPOT', 'LOCSLUNR', 'LOCALGEN') ORDER BY VENDORID";
+                                       "AND VNDCLSID NOT IN ('LOCALSPOT', 'LOCSLUNR', 'LOCALUNR', 'LOCALGEN') ORDER BY VENDORID";
                         break;
                     case 8:
                         sqlQuery = "SELECT 'CHEQUE' [Id], 'CHEQUE' [Descripción] UNION ALL SELECT 'TRANSF' [Id], 'TRANSFERENCIA' [Descripción] ";

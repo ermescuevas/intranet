@@ -319,6 +319,14 @@
                                     });
                                     return false;
                                 }
+                                if ($('#AbsenceType').val() === '1' && parseInt($('#availableFractions').html()) <= 0) {
+                                    swal({
+                                        title: "ERROR",
+                                        text: "Usted ha excedido la cantidad de veces a tomar sus vacaciones",
+                                        type: "error"
+                                    });
+                                    return false;
+                                }
                                 if (parseInt($('#VacationDays').val()) < parseInt($('#minimunDays').html())) {
                                     swal({
                                         title: "ERROR",

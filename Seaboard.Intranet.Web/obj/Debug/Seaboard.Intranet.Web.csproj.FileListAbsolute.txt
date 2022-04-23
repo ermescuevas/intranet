@@ -246,10 +246,10 @@ C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\in
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Web\bin\Antlr3.Runtime.pdb
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Web\bin\System.ValueTuple.xml
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Web\bin\HiQPdf.dep
-C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Web\obj\Debug\Seaboard.Intranet.Web.csprojAssemblyReference.cache
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Web\obj\Debug\Seaboard.Intranet.Web.Properties.Resources.resources
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Web\obj\Debug\Seaboard.Intranet.Web.csproj.GenerateResource.cache
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Web\obj\Debug\Seaboard.Intranet.Web.csproj.CoreCompileInputs.cache
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Web\obj\Debug\Seaboard.Intranet.Web.csproj.CopyComplete
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Web\obj\Debug\Seaboard.Intranet.Web.dll
 C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Web\obj\Debug\Seaboard.Intranet.Web.pdb
+C:\Users\ermes\OneDrive\Documentos\PERSONAL\DESAROLLO\Proyectos .NET\Intranet\intranet\Seaboard.Intranet.Web\obj\Debug\Seaboard.Intranet.Web.csproj.AssemblyReference.cache

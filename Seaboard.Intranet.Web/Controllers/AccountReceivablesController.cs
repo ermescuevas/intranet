@@ -1385,32 +1385,38 @@ namespace Seaboard.Intranet.Web.Controllers
         [HttpPost]
         public ActionResult AgingReport(bool detailReport, string filterFrom, string filterTo, int typeFilter,
             int methodCalc, decimal exchangeRate, int printCurrency, string date, int excludeNoActivity, int excludeZeroBalance, 
-            int excludeFullyPaidTrx, int excludeCreditBalance, int excludeUnpostedAppldCrDocs)
+            int excludeFullyPaidTrx, int excludeCreditBalance, int excludeUnpostedAppldCrDocs, int printOption)
         {
             string xStatus;
             try
             {
+                string reportName = "";
+                if (printOption == 10)
+                    reportName += ".pdf";
+                else
+                    reportName += ".xls";
                 xStatus = "OK";
                 if (detailReport)
                 {
-                    ReportHelper.Export(Helpers.ReportPath + "Reportes", Server.MapPath("~/PDF/Reportes/") + "AgingAccountReceivablesDetail.pdf",
+                    
+                    ReportHelper.Export(Helpers.ReportPath + "Reportes", Server.MapPath("~/PDF/Reportes/") + "AgingAccountReceivablesDetail" + reportName,
                         string.Format("INTRANET.dbo.AccountReceivablesAgingReportDetail '{0}','{1}','{2}','{3}','{4}','{5}',{6},{7},'{8}','{9}','{10}','{11}','{12}','{13}'",
                             Helpers.InterCompanyId, date, typeFilter == 0 ? filterFrom : "",
                             typeFilter == 0 ? filterTo : "", typeFilter == 1 ? filterFrom : "",
                             typeFilter == 1 ? filterTo : "", printCurrency,
                             exchangeRate.ToString(new CultureInfo("en-US")), methodCalc, excludeNoActivity, 
-                            excludeZeroBalance, excludeFullyPaidTrx, excludeCreditBalance, excludeUnpostedAppldCrDocs), 15, ref xStatus);
+                            excludeZeroBalance, excludeFullyPaidTrx, excludeCreditBalance, excludeUnpostedAppldCrDocs), 15, ref xStatus, printOption == 10 ? 0 : 1);
                 }
                 else
                 {
                     ReportHelper.Export(Helpers.ReportPath + "Reportes",
-                        Server.MapPath("~/PDF/Reportes/") + "AgingAccountReceivablesSummary.pdf",
+                        Server.MapPath("~/PDF/Reportes/") + "AgingAccountReceivablesSummary" + reportName,
                         string.Format("INTRANET.dbo.AccountReceivablesAgingReportSummary '{0}','{1}','{2}','{3}','{4}','{5}',{6},{7},{8},'{9}','{10}','{11}','{12}','{13}'",
                             Helpers.InterCompanyId, date, typeFilter == 0 ? filterFrom : "",
                             typeFilter == 0 ? filterTo : "", typeFilter == 1 ? filterFrom : "",
                             typeFilter == 1 ? filterTo : "", printCurrency,
                             exchangeRate.ToString(new CultureInfo("en-US")), methodCalc, excludeNoActivity,
-                            excludeZeroBalance, excludeFullyPaidTrx, excludeCreditBalance, excludeUnpostedAppldCrDocs), 14, ref xStatus);
+                            excludeZeroBalance, excludeFullyPaidTrx, excludeCreditBalance, excludeUnpostedAppldCrDocs), 14, ref xStatus, printOption == 10 ? 0 : 1);
                 }
             }
             catch (Exception ex)
