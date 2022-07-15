@@ -2772,6 +2772,23 @@ namespace Seaboard.Intranet.Web.Controllers
 
             return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
         }
+        [HttpPost]
+        public JsonResult ValidateInterestBatchNumber(string batchNumber)
+        {
+            string xStatus;
+            int count = 0;
+            try
+            {
+                count = _repository.ExecuteScalarQuery<int>($"SELECT COUNT(*) FROM {Helpers.InterCompanyId}.dbo.EFRM10100 WHERE BatchNumber = '{batchNumber}'");
+                xStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return Json(new { status = xStatus, count }, JsonRequestBehavior.AllowGet);
+        }
 
         #endregion
 

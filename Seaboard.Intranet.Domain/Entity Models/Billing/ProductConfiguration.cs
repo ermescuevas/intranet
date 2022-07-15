@@ -6,5 +6,6 @@
         public string ProductName { get; set; }
         public string ColumnIndex { get; set; }
         public string ExternalLabel { get; set; }
+        public int LineOrder { get; set; }
     }
 }

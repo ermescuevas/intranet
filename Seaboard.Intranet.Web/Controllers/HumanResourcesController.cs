@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -414,7 +415,7 @@ namespace Seaboard.Intranet.Web.Controllers
             List<AbsenceInquiry> list = null;
             try
             {
-                string sqlQuery = "SELECT A.RowId, A.EmployeeId, RTRIM(B.FRSTNAME) + ' ' + RTRIM(B.LASTNAME) EmployeeName, StartDate, EndDate, UnitDays DaysTaken, Note Comment, " +
+                string sqlQuery = "SELECT A.RequestId Department, A.RowId, A.EmployeeId, RTRIM(B.FRSTNAME) + ' ' + RTRIM(B.LASTNAME) EmployeeName, StartDate, EndDate, UnitDays DaysTaken, Note Comment, " +
                     $"RTRIM(C.FirstName) + ' ' + RTRIM(C.LastName) Requester, " +
                     "CASE A.AbsenceType WHEN 1 THEN 'Vacaciones' WHEN 2 THEN 'Permiso' WHEN 3 THEN 'Duelo' WHEN 4 THEN 'Paternidad' " +
                     "WHEN 5 THEN 'Maternidad' WHEN 6 THEN 'Matrimonio' WHEN 7 THEN 'Cumpleaños' WHEN 8 THEN 'Licencia Medica' " +
@@ -1391,6 +1392,77 @@ namespace Seaboard.Intranet.Web.Controllers
             }
 
             return new JsonResult { Data = new { status } };
+        }
+        [HttpPost]
+        public JsonResult CreateFileOvertimePayroll(string batchNumber, string description, string payrollDate, string note, List<string> detailBatches)
+        {
+            string status;
+            try
+            {
+                var count = detailBatches.Count;
+                var aPayrollDate = DateTime.ParseExact(payrollDate, "MM/dd/yyyy", null);
+                string sqlQuery;
+
+                sqlQuery = $"INSERT INTO {Helpers.InterCompanyId}.dbo.EFUPR30600 ([BatchNumber],[Description],[PayrollDate],[Note],[NumberOfTransactions],[Status],[LastUserId]) " +
+               $"VALUES ('{batchNumber}','{description}','{aPayrollDate.ToString("yyyyMMdd")}','{note}','{count}',4,'{Account.GetAccount(User.Identity.GetUserName()).UserId}') ";
+                _repository.ExecuteCommand(sqlQuery);
+                foreach (var item in detailBatches)
+                {
+                    sqlQuery = $"INSERT INTO {Helpers.InterCompanyId}.dbo.EFUPR30610 (BatchNumber, OvertimeBatchNumber, LastUserId) " +
+                        $"VALUES ('{batchNumber}','{item}','{Account.GetAccount(User.Identity.GetUserName()).UserId}')";
+                    _repository.ExecuteCommand(sqlQuery);
+                }
+                _repository.ExecuteCommand($"UPDATE {Helpers.InterCompanyId}.dbo.EFUPR30600 SET [Status] = 4 WHERE BatchNumber = '{batchNumber}'");
+                _repository.ExecuteCommand($"UPDATE A SET A.[Status] = 4 FROM {Helpers.InterCompanyId}.dbo.EFUPR30300 A " +
+                    $"INNER JOIN {Helpers.InterCompanyId}.dbo.EFUPR30610 B ON B.OvertimeBatchNumber = A.BatchNumber WHERE B.BatchNumber = '{batchNumber}'");
+                _repository.ExecuteCommand($"UPDATE A SET A.[Status] = 4 FROM {Helpers.InterCompanyId}.dbo.EFUPR30200 A " +
+                    $"INNER JOIN {Helpers.InterCompanyId}.dbo.EFUPR30310 B ON A.RowId = B.OvertimeRowId " +
+                    $"INNER JOIN {Helpers.InterCompanyId}.dbo.EFUPR30610 C ON C.OvertimeBatchNumber = B.BatchNumber " +
+                    $"WHERE C.BatchNumber = '{batchNumber}'");
+                
+                status = "OK";
+            }
+            catch (Exception ex)
+            {
+                status = ex.Message;
+            }
+
+            return new JsonResult { Data = new { status } };
+        }
+
+        public ActionResult DownloadFileOvertimePayroll(string batchNumber, string payrollDate)
+        {
+            byte[] contents = null;
+            var aPayrollDate = DateTime.ParseExact(payrollDate, "MM/dd/yyyy", null);
+            var sqlQuery = "SELECT A.EmployeeId Id, CASE A.OvertimeType WHEN 1 THEN 'HORA100' WHEN 2 THEN 'HORA35' WHEN 3 THEN 'HORA15' ELSE 'HORFER' END Descripción, CONVERT(NVARCHAR(20), A.Hours) DataExtended " +
+                    $"FROM {Helpers.InterCompanyId}.dbo.EFUPR30200 A " +
+                    $"INNER JOIN {Helpers.InterCompanyId}.dbo.EFUPR30310 B ON A.RowId = B.OvertimeRowId " +
+                    $"INNER JOIN {Helpers.InterCompanyId}.dbo.EFUPR30610 C ON C.OvertimeBatchNumber = B.BatchNumber " +
+                    $"WHERE C.BatchNumber = '{batchNumber}'";
+
+            var detail = _repository.ExecuteQuery<Lookup>(sqlQuery).ToList();
+
+            var csv = new StringBuilder();
+            var headerLine = $"Codigo de trabajador, Codigo de ingreso, Frecuencia, Formula, Fecha Validez, Fecha de expiracion"; ;
+            csv.AppendLine(headerLine);
+            foreach (var item in detail)
+            {
+                var newline = $"{item.Id.Trim()},{item.Descripción},All,{item.DataExtended},{aPayrollDate:yyyy/MM/dd},{aPayrollDate:yyyy/MM/dd}";
+                csv.AppendLine(newline);
+            }
+
+            using (var ms = new MemoryStream())
+            {
+                using (TextWriter tw = new StreamWriter(ms))
+                {
+                    tw.Write(csv.ToString());
+                    tw.Flush();
+                    ms.Position = 0;
+                    contents = ms.ToArray();
+                }
+            }
+
+            return File(contents, "csv", $"{batchNumber}.csv");
         }
 
         #endregion

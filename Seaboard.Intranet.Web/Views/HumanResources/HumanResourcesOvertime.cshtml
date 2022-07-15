@@ -13,6 +13,7 @@
     .clockpicker-popover {
         z-index: 999999;
     }
+
     .modal-lg {
         width: 1200px;
     }
@@ -79,41 +80,41 @@
                                                 <tbody>
                                                     @foreach (var item in Model)
                                                     {
-                                                    <tr>
-                                                        <td>@item.BatchNumber</td>
-                                                        <td>@item.Description</td>
-                                                        <td>@item.NumberOfTransactions</td>
-                                                        <td>@item.CreatedDate.ToString("dd/MM/yyyy")</td>
-                                                        <td>@item.Note</td>
-                                                        <td>
-                                                            @if (item.Status == 0)
-                                                            {
-                                                                <i class="badge badge-danger">Creado</i>
-                                                            }
-                                                            else if (item.Status == 1)
-                                                            {
-                                                                <i class="badge badge-primary">Enviado</i>
-                                                            }
-                                                            else if (item.Status == 2)
-                                                            {
-                                                                <i class="badge badge-info">Aprobado</i>
-                                                            }
-                                                            else if (item.Status == 3)
-                                                            {
-                                                                <i class="badge badge-info">Anulado</i>
-                                                            }
-                                                            else
-                                                            {
-                                                                <i class="badge badge-success">Procesado</i>
-                                                            }
-                                                        </td>
-                                                        <td>
-                                                            <div class="btn-group-xs">
-                                                                <button onclick="choosePrint('@item.BatchNumber');" class="btn btn-success btn-xs">Imprimir</button>
-                                                                @*<button onclick="deleteOvertime(@item.BatchNumber);" class="btn btn-danger btn-xs">Anular</button>*@
-                                                            </div>
-                                                        </td>
-                                                    </tr>
+                                                        <tr>
+                                                            <td>@item.BatchNumber</td>
+                                                            <td>@item.Description</td>
+                                                            <td>@item.NumberOfTransactions</td>
+                                                            <td>@item.CreatedDate.ToString("dd/MM/yyyy")</td>
+                                                            <td>@item.Note</td>
+                                                            <td>
+                                                                @if (item.Status == 0)
+                                                                {
+                                                                    <i class="badge badge-danger">Creado</i>
+                                                                }
+                                                                else if (item.Status == 1)
+                                                                {
+                                                                    <i class="badge badge-primary">Enviado</i>
+                                                                }
+                                                                else if (item.Status == 2)
+                                                                {
+                                                                    <i class="badge badge-info">Aprobado</i>
+                                                                }
+                                                                else if (item.Status == 3)
+                                                                {
+                                                                    <i class="badge badge-info">Anulado</i>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <i class="badge badge-success">Procesado</i>
+                                                                }
+                                                            </td>
+                                                            <td>
+                                                                <div class="btn-group-xs">
+                                                                    <button onclick="choosePrint('@item.BatchNumber');" class="btn btn-success btn-xs">Imprimir</button>
+                                                                    @*<button onclick="deleteOvertime(@item.BatchNumber);" class="btn btn-danger btn-xs">Anular</button>*@
+                                                                </div>
+                                                            </td>
+                                                        </tr>
                                                     }
                                                 </tbody>
                                             </table>
@@ -168,15 +169,18 @@
                         </div>
                     </div>
 
-                    <div class="btn-group">
-                        <button class="btn btn-info" onclick="marcarTodo();"><i class="fa fa-check"></i> Marcar todo</button>
-                        <button class="btn btn-success" onclick="desmarcarTodo();"><i class="fa fa-remove"></i> Desmarcar todo</button>
-                    </div>
+                    <button class="btn btn-info" onclick="marcarTodo();"><i class="fa fa-check"></i> Marcar todo</button>
+                    <button class="btn btn-success" onclick="desmarcarTodo();"><i class="fa fa-remove"></i> Desmarcar todo</button>
+
                     <hr />
-                    <div class="table-responsive" style="height:400px;overflow:auto" id="overtimeRows"></div>
+                    <div class="table-responsive" id="overtimeRows">
+
+                    </div>
                 </div>
 
+
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-info" onclick="createFileOvertime();">Crear planilla nomina</button>
                     <button type="button" class="btn btn-danger" data-dismiss="modal" aria-hidden="true">Cancelar</button>
                     <button type="button" class="btn btn-success" onclick="saveOvertime();">Someter</button>
                 </div>
@@ -216,6 +220,7 @@
 
 @section Styles {
     @Styles.Render("~/Content/plugins/dataTables/dataTablesStyles")
+    @Styles.Render("~/plugins/jasnyBootstrapStyles")
     @Styles.Render("~/plugins/toastrStyles")
     @Styles.Render("~/plugins/wizardStepsStyles")
     @Styles.Render("~/plugins/dataPickerStyles")
@@ -229,6 +234,7 @@
 @section Scripts {
     @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
     @Scripts.Render("~/plugins/dataTables")
+    @Scripts.Render("~/plugins/jasnyBootstrap")
     @Scripts.Render("~/plugins/toastr")
     @Scripts.Render("~/plugins/wizardSteps")
     @Scripts.Render("~/plugins/validate")
@@ -413,6 +419,78 @@
                         success: function (result) {
                             if (result.status === "OK") {
                                 window.location.reload();
+                            }
+                            else {
+                                swal({
+                                    title: "ERROR",
+                                    text: result.status,
+                                    type: "error"
+                                });
+                            }
+                        }
+                    });
+                });
+            }
+        }
+
+        function createFileOvertime() {
+            var isAllValid = true;
+            var items = [];
+            if ($('#BatchNumber').val() === '') {
+                toastr.error('Por favor debe de especificar un id. de lote para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#Description').val() === '') {
+                toastr.error('Por favor debe de especificar una descripcion para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            if ($('#PayrollDate').val() === '') {
+                toastr.error('Por favor debe de especificar la fecha de nomina para procesar', 'Campos requeridos')
+                isAllValid = false;
+            }
+
+            $('#itemTable > tbody > tr').each(function () {
+                if ($(this).find('td:eq(0) input').is(':checked')) {
+                    items.push($(this).find('td:eq(1)').html());
+                }
+            });
+
+            if (isAllValid) {
+                var data = {
+                    batchNumber: $('#BatchNumber').val(),
+                    description: $('#Description').val(),
+                    payrollDate: $('#PayrollDate').datepicker({ dateFormat: 'ddMMyyyy' }).val(),
+                    note: $('#Note').val(),
+                    rowId: $('#RowId').val(),
+                    detailBatches: items
+                }
+                swal({
+                    title: "Someter",
+                    text: "Esta seguro que desea hacer esta accion ?, esto creara la planilla de nomina y cerrara los lotes ",
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Si, proceder!",
+                    cancelButtonText: "No, cancelar!",
+                    closeOnConfirm: true
+                }, function () {
+                    $.ajax({
+                        url: '@Url.Action("CreateFileOvertimePayroll", "HumanResources")',
+                        type: "POST",
+                        data: JSON.stringify(data),
+                        dataType: "JSON",
+                        contentType: "application/json",
+                        success: function (result) {
+                            if (result.status === "OK") {
+                                window.location = '@Url.Action("DownloadFileOvertimePayroll", "HumanResources")?batchNumber=' + $('#BatchNumber').val() + '&payrollDate=' + $('#PayrollDate').datepicker({ dateFormat: 'ddMMyyyy' }).val();
+                                swal({
+                                    title: "INFORMACION",
+                                    text: "Se ha creado el archivo " + $('#BatchNumber').val() + ".csv",
+                                    type: "info"
+                                });
+                                $('#modal-CreateHeader').modal('hide');
                             }
                             else {
                                 swal({

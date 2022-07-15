@@ -1972,7 +1972,7 @@ namespace Seaboard.Intranet.Web.Controllers
 
         public ActionResult GetProductConfigurations()
         {
-            var sqlQuery = "SELECT A.ITEMNMBR ProductId, RTRIM(B.ITEMDESC) ProductName, A.COLNINDX ColumnIndex, A.EXTNLABL ExternalLabel " +
+            var sqlQuery = "SELECT A.ITEMNMBR ProductId, RTRIM(B.ITEMDESC) ProductName, A.COLNINDX ColumnIndex, A.EXTNLABL ExternalLabel, LINEORDER LineOrder  " +
                 "FROM " + Helpers.InterCompanyId + ".dbo.EFRM40102 A INNER JOIN " + Helpers.InterCompanyId + ".dbo.IV00101 B ON A.ITEMNMBR = B.ITEMNMBR " +
                 "ORDER BY A.ITEMNMBR";
 
@@ -2040,13 +2040,13 @@ namespace Seaboard.Intranet.Web.Controllers
 
                 if (count == 0)
                 {
-                    sqlQuery = "INSERT INTO " + Helpers.InterCompanyId + ".dbo.EFRM40102 (ITEMNMBR, ITEMDESC, COLNINDX, EXTNLABL)" +
-                        $"VALUES ('{product.ProductId}', '{product.ProductName}', '{product.ColumnIndex}', '{product.ExternalLabel}')";
+                    sqlQuery = "INSERT INTO " + Helpers.InterCompanyId + ".dbo.EFRM40102 (ITEMNMBR, ITEMDESC, COLNINDX, EXTNLABL, LINEORDER)" +
+                        $"VALUES ('{product.ProductId}', '{product.ProductName}', '{product.ColumnIndex}', '{product.ExternalLabel}', '{product.LineOrder}')";
                     _repository.ExecuteCommand(sqlQuery);
                 }
                 else
                 {
-                    sqlQuery = $"UPDATE {Helpers.InterCompanyId}.dbo.EFRM40102 SET COLNINDX = '{product.ColumnIndex}', EXTNLABL = '{product.ExternalLabel}' " +
+                    sqlQuery = $"UPDATE {Helpers.InterCompanyId}.dbo.EFRM40102 SET LINEORDER = '{product.LineOrder}', COLNINDX = '{product.ColumnIndex}', EXTNLABL = '{product.ExternalLabel}' " +
                         $"WHERE ITEMNMBR = '{product.ProductId}'";
                     _repository.ExecuteCommand(sqlQuery);
                 }

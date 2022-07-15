@@ -209,6 +209,7 @@
                                                             <th>Descripción</th>
                                                             <th>Columna Archivo OC</th>
                                                             <th>Etiqueta producto</th>
+                                                            <th>Orden</th>
                                                             <th>#</th>
                                                         </tr>
                                                     </thead>
@@ -410,6 +411,11 @@
                             <label>Etiqueta producto:</label>
                             <input name="ExternalLabel" id="ExternalLabel" class="form-control" />
                         </div>
+
+                        <div class="form-group">
+                            <label>Orden:</label>
+                            <input name="LineOrder" id="LineOrder" class="form-control" />
+                        </div>
                     </div>
                 </div>
 
@@ -569,6 +575,7 @@
                         '<th>Descripción</th>' +
                         '<th>Columna Archivo OC</th>' +
                         '<th>Etiqueta producto</th>' +
+                        '<th>Orden</th>' +
                         '<th>#</th>' +
                         '</tr>' +
                         '</thead>');
@@ -580,6 +587,7 @@
                             $row.append($('<td/>').html(val.ProductName));
                             $row.append($('<td/>').html(val.ColumnIndex));
                             $row.append($('<td/>').html(val.ExternalLabel));
+                            $row.append($('<td/>').html(val.LineOrder));
                             var $btnGroup = $('<div class="btn-group"/>')
 
                             var $edit = $('<button href="#" class="btn btn-success btn-xs">Editar</button>');
@@ -850,12 +858,18 @@
                 isAllValid = false;
             }
 
+            if ($('#LineOrder').val() === '') {
+                toastr.error('Por favor debe de especificar un orden', 'Campos requeridos')
+                isAllValid = false;
+            }
+
             if (isAllValid) {
                 var data = {
                     ProductId: $('#ItemId').val().trim(),
                     ProductName: '',
                     ColumnIndex: $('#ColumnIndex').val().trim(),
-                    ExternalLabel: $('#ExternalLabel').val().trim()
+                    ExternalLabel: $('#ExternalLabel').val().trim(),
+                    LineOrder: $('#LineOrder').val().trim()
                 }
                 $.ajax({
                     url: '@Url.Action("SaveProductConfiguration", "Billing")',

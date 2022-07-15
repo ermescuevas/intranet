@@ -481,14 +481,52 @@
                      $('#Charge').val(parseFloat($('#Charge').val()).toFixed(4));
                 }
             });
+            $('#BatchNumber').focusout(function () {
+                if ($('#BatchNumber').val() !== '') {
+                    validarLote($('#BatchNumber').val());
+                }
+            });
             if (($('#InterestRate').val().trim().replace(/,/g, "") != '' && !isNaN($('#InterestRate').val().trim().replace(/,/g, "")))) {
                 $('#InterestRate').val(parseFloat($('#InterestRate').val()).toFixed(4));
             }
             if (($('#Charge').val().trim().replace(/,/g, "") != '' && !isNaN($('#Charge').val().trim().replace(/,/g, "")))) {
                 $('#Charge').val(parseFloat($('#Charge').val()).toFixed(4));
             }
+            if ($('#BatchNumber').val() !== '') {
+                $('#BatchNumber').attr("readonly", "readonly");
+            }
             generateHeader($('#BatchNumber').val());
         });
+
+        function validarLote(code) {
+            $.ajax({
+                url: '@Url.Action("ValidateInterestBatchNumber", "AccountReceivables")?batchNumber=' + code,
+                type: "POST",
+                data: "",
+                cache: false,
+                dataType: "JSON",
+                contentType: "application/json",
+                success: function (result) {
+                    if (result.status === "OK") {
+                        if (result.count > 0) {
+                            swal({
+                                title: "ERROR",
+                                text: "Ya existe un lote de intereses con el mismo id, debe de especificar uno diferente",
+                                type: "error"
+                            });
+                            $('#BatchNumber').val('');
+                            $('#BatchNumber').focus();
+                        }
+                    } else {
+                        swal({
+                            title: "ERROR",
+                            text: result.status,
+                            type: "error"
+                        });
+                    }
+                }
+            });
+        }
 
         function actualizar() {
             var isAllValid = true;
@@ -564,9 +602,9 @@
                         cache: false,
                         contentType: "application/json",
                         success: function (result) {
-                            if (result.status === "OK") 
+                            if (result.status === "OK")
                                 generateHeader($('#BatchNumber').val().trim());
-                             else 
+                             else
                                 swal({
                                     title: "ERROR",
                                     text: result.status,
@@ -654,9 +692,9 @@
                         cache: false,
                         contentType: "application/json",
                         success: function (result) {
-                            if (result.status === "OK") 
+                            if (result.status === "OK")
                                 generateHeader($('#BatchNumber').val().trim());
-                             else 
+                             else
                                 swal({
                                     title: "ERROR",
                                     text: result.status,
