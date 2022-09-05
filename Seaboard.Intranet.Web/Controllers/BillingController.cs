@@ -1379,8 +1379,7 @@ namespace Seaboard.Intranet.Web.Controllers
                 $"FROM {Helpers.InterCompanyId}.dbo.EFSOP20100 WHERE BatchNumber = '{id}' AND Posted = 0 AND BillingType = {billingType} ORDER BY SopNumber";
             var invoices = _repository.ExecuteQuery<MemInvoiceHead>(sqlQuery).ToList();
             ViewBag.Invoices = invoices;
-            ViewBag.Products = _repository.ExecuteQuery<Lookup>("SELECT ITEMNMBR Id, ITEMDESC Descripción, '' DataExtended FROM " +
-                "" + Helpers.InterCompanyId + ".dbo.IV00101 WHERE ITMCLSCD = 'FACT'").ToList();
+            ViewBag.Products = _repository.ExecuteQuery<Lookup>("SELECT ITEMNMBR Id, ITEMDESC Descripción, '' DataExtended FROM " + "" + Helpers.InterCompanyId + ".dbo.IV00101 WHERE ITMCLSCD = 'FACT'").ToList();
             ViewBag.BillingType = billingType;
             return View(batch);
         }
