@@ -1334,7 +1334,7 @@ namespace Seaboard.Intranet.Web.Controllers
             try
             {
                 string sqlQuery = $"SELECT RTRIM(APFRDCNM) DocumentNumber, CONVERT(nvarchar(20), CONVERT(DATE, DATE1, 112)) DocumentDate, " +
-                $"CONVERT(NUMERIC(32,2), ISNULL(APFRMAPLYAMT, 0))  AppliedAmount, " +
+                $"CONVERT(NUMERIC(32,2), ISNULL(APPTOAMT, 0))  AppliedAmount, " +
                 $"CASE APFRDCTY WHEN 9 THEN 'Recibo de ingresos' WHEN 7 THEN 'Neteo' WHEN 8 THEN 'Nota de Credito' ELSE 'Otros' END Module " +
                 $"FROM {Helpers.InterCompanyId}.dbo.RM20201 " +
                 $"WHERE CUSTNMBR = '{customerId}' AND APTODCNM = '{documentNumber}'";
@@ -2118,6 +2118,33 @@ namespace Seaboard.Intranet.Web.Controllers
             }
 
             return new JsonResult { Data = new { status = xStatus } };
+        }
+
+        public ActionResult EstimatedSummaryInterestReport()
+        {
+            if (!HelperLogic.GetPermission(Account.GetAccount(User.Identity.GetUserName()).UserId, "AccountReceivables", "EstimatedSummaryInterestReport"))
+                return RedirectToAction("NotPermission", "Home");
+            return View();
+        }
+
+        [OutputCache(Duration = 0)]
+        [HttpPost]
+        public ActionResult EstimatedSummaryInterestReport(int marketType, string fromDate, string toDate, int estimated)
+        {
+            string xStatus;
+            try
+            {
+                var list = _repository.ExecuteQuery<InterestSummaryViewModel>(string.Format("INTRANET.dbo.EstimatedSummaryInterestReport '{0}','{1}','{2}','{3}','{4}'", Helpers.InterCompanyId, marketType, DateTime.ParseExact(fromDate, "dd/MM/yyyy", null).ToString("yyyyMMdd"), DateTime.ParseExact(toDate, "dd/MM/yyyy", null).ToString("yyyyMMdd"), estimated));
+                OfficeLogic.CreateInterestSummaryReport(list, marketType, Server.MapPath("~/PDF/Excel/") + "EstimatedSummaryInterestReport.xls");
+               
+                xStatus = "OK";
+            }
+            catch (Exception ex)
+            {
+                xStatus = ex.Message;
+            }
+
+            return Json(new { status = xStatus }, JsonRequestBehavior.AllowGet);
         }
 
         #endregion

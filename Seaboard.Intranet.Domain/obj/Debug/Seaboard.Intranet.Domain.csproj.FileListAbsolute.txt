@@ -57,3 +57,12 @@ C:\PERSONAL Projects\intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intran
 C:\PERSONAL Projects\intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.csproj.CopyComplete
 C:\PERSONAL Projects\intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.dll
 C:\PERSONAL Projects\intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.pdb
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.Domain\bin\Debug\Seaboard.Intranet.Domain.dll
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.Domain\bin\Debug\Seaboard.Intranet.Domain.pdb
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.Domain\bin\Debug\Newtonsoft.Json.dll
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.Domain\bin\Debug\Newtonsoft.Json.xml
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.csproj.AssemblyReference.cache
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.csproj.CoreCompileInputs.cache
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.csproj.CopyComplete
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.dll
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.Domain\obj\Debug\Seaboard.Intranet.Domain.pdb

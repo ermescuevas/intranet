@@ -2587,9 +2587,9 @@ namespace Seaboard.Intranet.Web.Controllers
                 sqlQuery += $"AND A.EmployeeId = '{employee}' ";
                 if (!string.IsNullOrEmpty(dateRange))
                     if (conditionType == 0)
-                        sqlQuery += $"AND CONVERT(DATE, B.SendDate) BETWEEN CONVERT(DATE, '{DateTime.ParseExact(dateRange.Split('-')[0].Trim(), "MM/dd/yyyy", null)}') AND CONVERT(DATE, '{DateTime.ParseExact(dateRange.Split('-')[1].Trim(), "MM/dd/yyyy", null)}') ";
+                        sqlQuery += $"AND CONVERT(DATE, A.SendDate) BETWEEN CONVERT(DATE, '{DateTime.ParseExact(dateRange.Split('-')[0].Trim(), "MM/dd/yyyy", null)}') AND CONVERT(DATE, '{DateTime.ParseExact(dateRange.Split('-')[1].Trim(), "MM/dd/yyyy", null)}') ";
                     else
-                        sqlQuery += $"AND CONVERT(DATE, B.SignDate) BETWEEN CONVERT(DATE, '{DateTime.ParseExact(dateRange.Split('-')[0].Trim(), "MM/dd/yyyy", null)}') AND CONVERT(DATE, '{DateTime.ParseExact(dateRange.Split('-')[1].Trim(), "MM/dd/yyyy", null)}') ";
+                        sqlQuery += $"AND CONVERT(DATE, A.SignDate) BETWEEN CONVERT(DATE, '{DateTime.ParseExact(dateRange.Split('-')[0].Trim(), "MM/dd/yyyy", null)}') AND CONVERT(DATE, '{DateTime.ParseExact(dateRange.Split('-')[1].Trim(), "MM/dd/yyyy", null)}') ";
                 if (includeDocuments != null && includeDocuments.Length > 0)
                 {
                     var documents = includeDocuments.Aggregate("", (current, m) => current + ("'" + m.Trim() + "',"));

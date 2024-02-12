@@ -292,6 +292,12 @@ namespace Seaboard.Intranet.Web.Controllers
                             $"WHERE (A.RequestId LIKE '%{consulta}%' OR A.EmployeeId LIKE '%{consulta}%' OR (RTRIM(B.FRSTNAME) + ' ' + RTRIM(B.LASTNAME)) LIKE '%{consulta}%' OR CONVERT(NVARCHAR(10), A.CreatedDate, 103) LIKE '%{consulta}%') " +
                             $"ORDER BY A.RequestId DESC";
                         break;
+                    case 13:
+                        sqlQuery = $"SELECT TOP 100 A.RequestId Id, A.Requester Descripción, A.DepartmentId DataExtended, CONVERT(NVARCHAR(10), A.DocumentDate, 103) DataPlus " +
+                            $"FROM {Helpers.InterCompanyId}.dbo.EIPM10000 A " +
+                            $"WHERE (A.RequestId LIKE '%{consulta}%' OR A.Requester LIKE '%{consulta}%' OR CONVERT(NVARCHAR(10), A.DocumentDate, 103) LIKE '%{consulta}%') " +
+                            $"ORDER BY A.RequestId DESC";
+                        break;
                 }
 
                 var lookup = _repository.ExecuteQuery<Lookup>(sqlQuery).ToList();

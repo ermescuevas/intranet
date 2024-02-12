@@ -1,0 +1,171 @@
+﻿@{
+    Layout = "~/Views/Shared/_BillingLayout.cshtml";
+    ViewBag.Title = "Reporte de estimado y acumulados historicos de intereses";
+}
+
+<div class="row wrapper border-bottom white-bg page-heading">
+    <div class="col-sm-6">
+        <h2>Reporte de estimado y acumulados historicos de intereses</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="@Url.Action("Index", "Home")">Inicio</a>
+            </li>
+            <li class="active">
+                <strong>Reporte de estimado y acumulados historicos de intereses</strong>
+            </li>
+        </ol>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="wrapper wrapper-content animated fadeInUp">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="ibox float-e-margins">
+                        <div class="ibox-title">
+                            <h3>Reporte de estimado y acumulados historicos de intereses</h3>
+                        </div>
+                        <div class="ibox-content">
+                            <div class="col-sm-12 col-sm-offset-1">
+                                <button class="ladda-button btn btn-primary" data-style="expand-right" type="button" id="print" onclick="imprimir();" id="btn-print"><i class="fa fa-print"></i> Imprimir</button>
+                                <br />
+                            </div>
+                            <br />
+                            <br />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ibox">
+                <div class="ibox-content">
+                    <div class="hr-line-dashed"></div>
+                    <br />
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="col-sm-6 control-label">Fecha desde:</label>
+                                <div class="col-sm-6 input-group">
+                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                    <input id="FromDate" name="FromDate" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="col-sm-6 control-label">Fecha hasta:</label>
+                                <div class="col-sm-6 input-group">
+                                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                                    <input id="ToDate" name="ToDate" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="checkbox-inline i-checks"> <input type="checkbox" name="estimatedReport"> Estimado </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hr-line-dashed"></div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">Tipo:</label>
+                                <div class="col-sm-8 input-group">
+                                    <div class="col-sm-12 input-group">
+                                        <select id="type" name="type" data-placeholder="Seleccione un tipo..." class="form-control" tabindex="2">
+                                            <option value="">Seleccione un tipo</option>
+                                            <option value="0">SPOT</option>
+                                            <option value="1">CONTRATO</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles{
+    @Styles.Render("~/Content/plugins/iCheck/iCheckStyles")
+    @Styles.Render("~/plugins/dataPickerStyles")
+    <link href="@Url.Content("~/Content/plugins/lookupbox/lookupbox.css")" rel="stylesheet" type="text/css" />
+    @Styles.Render("~/plugins/toastrStyles")
+    @Styles.Render("~/plugins/awesomeCheckboxStyles")
+    @Styles.Render("~/plugins/laddaStyles")
+}
+
+@section Scripts {
+    @Scripts.Render("~/plugins/iCheck")
+    @Scripts.Render("~/Scripts/plugins/jquery-ui/jquery-ui.min.js")
+    @Scripts.Render("~/plugins/dataPicker")
+    @Scripts.Render("~/plugins/toastr")
+    @Scripts.Render("~/Scripts/plugins/lookupbox/jquery.lookupbox.js")
+    @Scripts.Render("~/plugins/ladda")
+
+    <script>
+        $(document).ready(function () {
+            $('.ladda-button').ladda();
+            $('.i-checks').iCheck({
+                checkboxClass: 'icheckbox_square-green',
+                radioClass: 'iradio_square-green',
+            });
+            $('#FromDate').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true,
+                format: 'dd/mm/yyyy'
+            });
+            $('#ToDate').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                calendarWeeks: true,
+                autoclose: true,
+                format: 'dd/mm/yyyy'
+            });
+        });
+
+        function imprimir() {
+            var estimated = 1;
+            if ($('input[name="estimatedReport"]').is(":checked"))
+                estimated = 0;
+            var data = {
+                marketType: parseInt($('#type').val()),
+                fromDate: $('#FromDate').datepicker({ dateFormat: 'ddMMyyyy' }).val(),
+                toDate: $('#ToDate').datepicker({ dateFormat: 'ddMMyyyy' }).val(),
+                estimated: estimated
+            };
+
+            var reportName = 'EstimatedSummaryInterestReport.xls';
+            var url = '@Url.Content("~/PDF/Excel/")' + reportName;
+
+            toastr.info('Estamos procesando su solicitud', 'Por favor espere');
+            $('#print').ladda('start');
+            $.ajax({
+                url: '@Url.Action("EstimatedSummaryInterestReport", "AccountReceivables")',
+                type: "POST",
+                data: JSON.stringify(data),
+                dataType: "JSON",
+                cache: false,
+                contentType: "application/json",
+                success: function (d) {
+                    if (d.status === "OK") {
+                        window.open(url);
+                    }
+                    else {
+                        alert(d.status);
+                    }
+                    $('#print').ladda('stop');
+                }
+            });
+        }
+    </script>
+}

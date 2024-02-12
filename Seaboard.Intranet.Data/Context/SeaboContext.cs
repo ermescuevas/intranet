@@ -5,7 +5,7 @@ namespace Seaboard.Intranet.Data
 {
     public class SeaboContext : DbContext
     {
-        public SeaboContext() { Database.CommandTimeout = 180; }
+        public SeaboContext() { Database.CommandTimeout = 600; }
         public DbSet<FoodMenu> FoodMenus { get; set; }
         public DbSet<EmployeeExtension> EmployeeExtensions { get; set; }
         public DbSet<Department> Departments { get; set; }

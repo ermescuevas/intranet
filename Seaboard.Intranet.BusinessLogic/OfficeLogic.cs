@@ -8,6 +8,10 @@ using System.IO;
 using Seaboard.Intranet.Data.Repository;
 using Microsoft.Office.Interop.Excel;
 using System.Linq;
+using System.Data;
+using System.Web.Util;
+using System.Drawing;
+using Seaboard.Intranet.Domain.ViewModels;
 
 namespace Seaboard.Intranet.BusinessLogic
 {
@@ -164,6 +168,7 @@ namespace Seaboard.Intranet.BusinessLogic
             _db = new SeaboContext();
             _repository = new GenericRepository(_db);
             List<MemDataDetail> details;
+            string ruta = "";
             try
             {
                 var configuration = _repository.ExecuteScalarQuery<MemConfiguration>(
@@ -171,12 +176,14 @@ namespace Seaboard.Intranet.BusinessLogic
                      Helpers.InterCompanyId + ".dbo.EFRM40101");
                 var products = _repository.ExecuteQuery<MemConfigurationDetail>($"SELECT ITEMNMBR ItemNumber, ITEMDESC ItemDescription, COLNINDX ColumnIndex, EXTNLABL ExternalLabel " +
                     $"FROM {Helpers.InterCompanyId}.dbo.EFRM40102 ORDER BY COLNINDX ").ToList();
-                string ruta;
                 if (!string.IsNullOrEmpty(filePath))
                     ruta = filePath;
                 else
                     ruta = configuration.FilePath + mes.Year.ToString() + "\\RTE\\RTE " + mes.ToString("MMyy") + ".xls";
                 var isValid = false;
+
+                if (string.IsNullOrEmpty(ruta))
+                    ruta = "ESTA VACIO";
 
                 if (products == null || products.Count == 0)
                 {
@@ -271,7 +278,7 @@ namespace Seaboard.Intranet.BusinessLogic
             }
             catch (Exception ex)
             {
-                message += "\n" + ex.Message + "\n" + ex.StackTrace;
+                message += "\n" + ex.Message + "\n" + ex.StackTrace + "\n" + ruta;
                 return null;
             }
         }
@@ -550,7 +557,223 @@ namespace Seaboard.Intranet.BusinessLogic
             }
             catch { }
         }
-        public static List<Domain.ViewModels.Lookup> OvertimeHours(string path, ref string message)
+        public static void CreateInterestSummaryReport(IEnumerable<InterestSummaryViewModel> list, int marketType, string excelFilePath)
+        {
+            try
+            {
+                var xlApp = new Application { DisplayAlerts = false };
+                Workbook xlWorkbook = null;
+                xlWorkbook = xlApp.Workbooks.Add(XlWBATemplate.xlWBATWorksheet);
+                int sheetNumber = 0;
+                DateTime billingMonth = DateTime.Now;
+                Worksheet xlWorksheet = null;
+                int rowNumber = 1;
+                string customerId = "";
+                decimal totalInterestAmount = 0;
+                foreach (var item in list.Select(x => x.BillingMonth).Distinct())
+                {
+                    if (item != billingMonth)
+                    {
+                        billingMonth = item;
+                        sheetNumber++;
+                        xlWorksheet = xlWorkbook.Sheets.Add(After: xlWorkbook.Sheets[xlWorkbook.Sheets.Count]);
+                        xlWorksheet = xlWorkbook.Worksheets[sheetNumber];
+                        xlWorksheet.Columns.AutoFit();
+                        xlWorksheet.Name = GetDateDescription(billingMonth);
+
+                        xlWorksheet.Cells[1, "A"] = "SEABOARD";
+                        xlWorksheet.Cells[1, "A"].Font.Color = XlRgbColor.rgbBlue;
+                        xlWorksheet.Cells[2, "A"] = "TRANSCONTINENTAL CAPITAL CORPORATION (BERMUDA LTD)";
+                        xlWorksheet.Cells[2, "A"].Font.Color = XlRgbColor.rgbBlue;
+                        xlWorksheet.Cells[3, "A"] = marketType == 0 ? "(VALORES EN RD$)" : "(VALORES EN US$)";
+                        xlWorksheet.Range[xlWorksheet.Cells[2, 1], xlWorksheet.Cells[2, 5]].Merge();
+                        rowNumber = 4;
+
+                        xlWorksheet.Cells[rowNumber, "A"] = "CLIENTE";
+                        xlWorksheet.Cells[rowNumber, "A"].Interior.Color = XlRgbColor.rgbDarkGray;
+                        xlWorksheet.Cells[rowNumber, "B"] = "FACTURA NUMERO";
+                        xlWorksheet.Cells[rowNumber, "B"].Interior.Color = XlRgbColor.rgbDarkGray;
+                        xlWorksheet.Cells[rowNumber, "C"] = "MONTO FACTURA";
+                        xlWorksheet.Cells[rowNumber, "C"].Interior.Color = XlRgbColor.rgbDarkGray;
+                        xlWorksheet.Cells[rowNumber, "D"] = "FECHA DOCUMENTO";
+                        xlWorksheet.Cells[rowNumber, "D"].Interior.Color = XlRgbColor.rgbDarkGray;
+                        xlWorksheet.Cells[rowNumber, "E"] = "CH/TR NO.";
+                        xlWorksheet.Cells[rowNumber, "E"].Interior.Color = XlRgbColor.rgbDarkGray;
+                        xlWorksheet.Cells[rowNumber, "F"] = "MONTO APLICADO";
+                        xlWorksheet.Cells[rowNumber, "F"].Interior.Color = XlRgbColor.rgbDarkGray;
+                        xlWorksheet.Cells[rowNumber, "G"] = "BALANCE PENDIENTE";
+                        xlWorksheet.Cells[rowNumber, "G"].Interior.Color = XlRgbColor.rgbDarkGray;
+                        xlWorksheet.Cells[rowNumber, "H"] = "FECHA LIMITE";
+                        xlWorksheet.Cells[rowNumber, "H"].Interior.Color = XlRgbColor.rgbDarkGray;
+                        xlWorksheet.Cells[rowNumber, "I"] = "FECHA CORTE";
+                        xlWorksheet.Cells[rowNumber, "I"].Interior.Color = XlRgbColor.rgbDarkGray;
+                        xlWorksheet.Cells[rowNumber, "J"] = "DIAS";
+                        xlWorksheet.Cells[rowNumber, "J"].Interior.Color = XlRgbColor.rgbDarkGray;
+                        xlWorksheet.Cells[rowNumber, "K"] = "TASA ACTIVA";
+                        xlWorksheet.Cells[rowNumber, "K"].Interior.Color = XlRgbColor.rgbDarkGray;
+                        xlWorksheet.Cells[rowNumber, "L"] = "INTERES";
+                        xlWorksheet.Cells[rowNumber, "L"].Interior.Color = XlRgbColor.rgbDarkGray;
+                        xlWorksheet.Cells[rowNumber, "M"] = "TASA RECARGO";
+                        xlWorksheet.Cells[rowNumber, "M"].Interior.Color = XlRgbColor.rgbDarkGray;
+                        xlWorksheet.Cells[rowNumber, "N"] = "INTERES RECARGO";
+                        xlWorksheet.Cells[rowNumber, "N"].Interior.Color = XlRgbColor.rgbDarkGray;
+                        xlWorksheet.Cells[rowNumber, "O"] = "TOTAL INTERESES";
+                        xlWorksheet.Cells[rowNumber, "O"].Interior.Color = XlRgbColor.rgbDarkGray;
+                    }
+
+                    foreach (var row in list)
+                    {
+                        if (!string.IsNullOrEmpty(customerId) && totalInterestAmount > 0 && customerId != row.CustomerId)
+                        {
+                            rowNumber++;
+                            xlWorksheet.Cells[rowNumber, "N"] = "TOTAL POR CLIENTE";
+                            xlWorksheet.Cells[rowNumber, "N"].Interior.Color = XlRgbColor.rgbYellow;
+                            xlWorksheet.Cells[rowNumber, "O"] = totalInterestAmount;
+                            xlWorksheet.Cells[rowNumber, "O"].Interior.Color = XlRgbColor.rgbYellow;
+                            xlWorksheet.Range["O" + rowNumber].NumberFormat = "$#,##0.00";
+                            totalInterestAmount = 0;
+                        }
+
+                        if (row.BillingMonth == billingMonth)
+                        {
+                            customerId = row.CustomerId;
+                            totalInterestAmount += row.TotalInterestAmount;
+                            rowNumber++;
+                            xlWorksheet.Cells[rowNumber, "A"] = row.CustomerId;
+                            xlWorksheet.Cells[rowNumber, "B"] = row.DocumentNumber;
+                            xlWorksheet.Cells[rowNumber, "C"] = row.DocumentAmount;
+                            xlWorksheet.Range["C" + rowNumber].NumberFormat = "$#,##0.00";
+                            if (row.DocumentDate != new DateTime(1900, 1, 1))
+                                xlWorksheet.Cells[rowNumber, "D"] = row.DocumentDate;
+                            xlWorksheet.Cells[rowNumber, "E"] = row.PaymentDocumentNumber;
+                            xlWorksheet.Cells[rowNumber, "F"] = row.PaymentAmount;
+                            xlWorksheet.Range["F" + rowNumber].NumberFormat = "$#,##0.00";
+                            xlWorksheet.Cells[rowNumber, "G"] = row.CurrentAmount;
+                            xlWorksheet.Range["G" + rowNumber].NumberFormat = "$#,##0.00";
+                            xlWorksheet.Cells[rowNumber, "H"] = row.DueDate;
+                            xlWorksheet.Cells[rowNumber, "I"] = row.CutDate;
+
+                            if (row.Days > 0)
+                            {
+                                xlWorksheet.Cells[rowNumber, "J"] = row.Days;
+                                xlWorksheet.Cells[rowNumber, "K"] = row.InterestRate / 100;
+                                xlWorksheet.Range["K" + rowNumber].NumberFormat = "0.0000%";
+                                xlWorksheet.Cells[rowNumber, "L"] = row.InterestAmount;
+                                xlWorksheet.Range["L" + rowNumber].NumberFormat = "$#,##0.00";
+                                xlWorksheet.Cells[rowNumber, "M"] = row.Charge / 100;
+                                xlWorksheet.Range["M" + rowNumber].NumberFormat = "0.00%";
+                                xlWorksheet.Cells[rowNumber, "N"] = row.ChargeAmount;
+                                xlWorksheet.Range["N" + rowNumber].NumberFormat = "$#,##0.00";
+                                xlWorksheet.Cells[rowNumber, "O"] = row.TotalInterestAmount;
+                                xlWorksheet.Range["O" + rowNumber].NumberFormat = "$#,##0.00";
+                            }
+                        }
+                    }
+
+                    if (!string.IsNullOrEmpty(customerId) && totalInterestAmount > 0)
+                    {
+                        rowNumber++;
+                        xlWorksheet.Cells[rowNumber, "N"] = "TOTAL POR CLIENTE";
+                        xlWorksheet.Cells[rowNumber, "N"].Interior.Color = XlRgbColor.rgbYellow;
+                        xlWorksheet.Cells[rowNumber, "O"] = totalInterestAmount;
+                        xlWorksheet.Cells[rowNumber, "O"].Interior.Color = XlRgbColor.rgbYellow;
+                        xlWorksheet.Range["O" + rowNumber].NumberFormat = "$#,##0.00";
+                        totalInterestAmount = 0;
+                    }
+                }
+
+                sheetNumber++;
+                xlWorksheet = xlWorkbook.Worksheets[sheetNumber];
+                xlWorksheet.Columns.AutoFit();
+                xlWorksheet.Name = "RESUMEN INT";
+
+                rowNumber = 4;
+                billingMonth = DateTime.Now;
+
+                xlWorksheet.Cells[1, "A"] = "SEABOARD";
+                xlWorksheet.Cells[1, "A"].Font.Color = XlRgbColor.rgbBlue;
+                xlWorksheet.Cells[2, "A"] = "TRANSCONTINENTAL CAPITAL CORPORATION (BERMUDA LTD)";
+                xlWorksheet.Cells[2, "A"].Font.Color = XlRgbColor.rgbBlue;
+                xlWorksheet.Cells[3, "A"] = marketType == 0 ? "(VALORES EN RD$)" : "(VALORES EN US$)";
+                xlWorksheet.Range[xlWorksheet.Cells[2, 1], xlWorksheet.Cells[2, 5]].Merge();
+
+                int columnIndex = 1;
+                xlWorksheet.Cells[rowNumber, "A"] = "";
+                xlWorksheet.Cells[rowNumber, "A"].Interior.Color = XlRgbColor.rgbAquamarine;
+
+                foreach (var item in list.Select(x => x.BillingMonth).Distinct())
+                {
+                    columnIndex++;
+                    xlWorksheet.Cells[rowNumber, columnIndex] = GetDateDescription(item);
+                    xlWorksheet.Cells[rowNumber, columnIndex].Interior.Color = XlRgbColor.rgbAquamarine;
+                }
+
+                columnIndex++;
+                xlWorksheet.Cells[rowNumber, columnIndex] = "TOTAL";
+                xlWorksheet.Cells[rowNumber, columnIndex].Interior.Color = XlRgbColor.rgbAquamarine;
+
+                columnIndex = 1;
+                customerId = "";
+                foreach (var item in list.Select(x => x.CustomerId).Distinct())
+                {
+                    if (columnIndex > 1)
+                    {
+                        xlWorksheet.Cells[rowNumber, columnIndex + 1] = list.Where(x => x.CustomerId == customerId).Sum(x => x.TotalInterestAmount);
+                        xlWorksheet.Cells[rowNumber, columnIndex + 1].NumberFormat = "$#,##0.00";
+                    }
+
+                    customerId = item;
+                    rowNumber++;
+                    columnIndex = 1;
+                    foreach (var month in list.Select(x => x.BillingMonth).Distinct())
+                    {
+                        columnIndex++;
+                        xlWorksheet.Cells[rowNumber, 1] = item;
+                        xlWorksheet.Cells[rowNumber, columnIndex] = list.Where(x => x.BillingMonth == month && x.CustomerId == item).Sum(x=> x.TotalInterestAmount);
+                        xlWorksheet.Cells[rowNumber, columnIndex].NumberFormat = "$#,##0.00";
+                    }
+                }
+
+                xlWorksheet.Cells[rowNumber, columnIndex + 1] = list.Where(x => x.CustomerId == customerId).Sum(x => x.TotalInterestAmount);
+                xlWorksheet.Cells[rowNumber, columnIndex + 1].NumberFormat = "$#,##0.00";
+
+                rowNumber++;
+                columnIndex = 1;
+
+                xlWorksheet.Cells[rowNumber, 1] = "TOTAL GENERAL";
+                xlWorksheet.Cells[rowNumber, 1].Interior.Color = XlRgbColor.rgbYellow;
+
+                foreach (var item in list.Select(x => x.BillingMonth).Distinct())
+                {
+                    columnIndex++;
+                    xlWorksheet.Cells[rowNumber, columnIndex] = list.Where(x => x.BillingMonth == item).Sum(x => x.TotalInterestAmount);
+                    xlWorksheet.Cells[rowNumber, columnIndex].NumberFormat = "$#,##0.00";
+                    xlWorksheet.Cells[rowNumber, columnIndex].Interior.Color = XlRgbColor.rgbYellow;
+                }
+
+                xlWorksheet.Cells[rowNumber, columnIndex + 1] = list.Sum(x => x.TotalInterestAmount);
+                xlWorksheet.Cells[rowNumber, columnIndex + 1].NumberFormat = "$#,##0.00";
+                xlWorksheet.Cells[rowNumber, columnIndex + 1].Interior.Color = XlRgbColor.rgbYellow;
+
+                if (File.Exists(excelFilePath))
+                    File.Delete(excelFilePath);
+
+                xlWorkbook.SaveAs(excelFilePath, System.Reflection.Missing.Value, System.Reflection.Missing.Value, System.Reflection.Missing.Value,
+                                           System.Reflection.Missing.Value, System.Reflection.Missing.Value, XlSaveAsAccessMode.xlNoChange,
+                                           System.Reflection.Missing.Value, System.Reflection.Missing.Value, System.Reflection.Missing.Value,
+                                           System.Reflection.Missing.Value, System.Reflection.Missing.Value);
+
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                if (xlWorksheet != null) Marshal.ReleaseComObject(xlWorksheet);
+                xlWorkbook.Close(false, System.Reflection.Missing.Value, System.Reflection.Missing.Value);
+                Marshal.ReleaseComObject(xlWorkbook);
+                xlApp.Quit();
+                Marshal.ReleaseComObject(xlApp);
+            }
+            catch(Exception ex) { }
+        }
+        public static List<Lookup> OvertimeHours(string path, ref string message)
         {
             try
             {
@@ -623,7 +846,7 @@ namespace Seaboard.Intranet.BusinessLogic
 
         #region Private Methods
 
-        public static string NumberFromExcelColumn(string column)
+        private static string NumberFromExcelColumn(string column)
         {
             return column;
             //var number = 0;
@@ -635,6 +858,38 @@ namespace Seaboard.Intranet.BusinessLogic
             //}
             //number = number - 1;
             //return number;
+        }
+        private static string GetDateDescription(DateTime billingMonth)
+        {
+            switch (billingMonth.Month)
+            {
+                case 1:
+                    return "Jan - " + billingMonth.Year;
+                case 2:
+                    return "Feb - " + billingMonth.Year;
+                case 3:
+                    return "Mar - " + billingMonth.Year;
+                case 4:
+                    return "Apr - " + billingMonth.Year;
+                case 5:
+                    return "May - " + billingMonth.Year;
+                case 6:
+                    return "Jun - " + billingMonth.Year;
+                case 7:
+                    return "Jul - " + billingMonth.Year;
+                case 8:
+                    return "Aug - " + billingMonth.Year;
+                case 9:
+                    return "Sep - " + billingMonth.Year;
+                case 10:
+                    return "Oct - " + billingMonth.Year;
+                case 11:
+                    return "Nov - " + billingMonth.Year;
+                case 12:
+                    return "Dec - " + billingMonth.Year;
+                default:
+                    return "Jan - " + billingMonth.Year;
+            }
         }
 
         #endregion

@@ -285,20 +285,19 @@ namespace Seaboard.Intranet.Web.Controllers
                             }
                         }
                         xRegistros = lista;
+                        xTotal = lista.Sum(x => x.TotalAmount);
+                        xQuantity = lista.Count();
                         xStatus = "OK";
                     }
                     else
                     {
                         xStatus += "No se encontraron transacciones para este periodo";
                     }
-
-                    xTotal = lista.Sum(x => x.TotalAmount);
-                    xQuantity = lista.Count();
                 }
             }
             catch (Exception ex)
             {
-                xStatus = ex.Message;
+                xStatus = ex.Message + "\n" + ex.StackTrace;
             }
 
             return new JsonResult { Data = new { status = xStatus, registros = xRegistros, total = xTotal, cantidad = xQuantity } };

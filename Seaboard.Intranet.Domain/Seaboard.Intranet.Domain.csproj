@@ -160,6 +160,7 @@
     <Compile Include="ViewModels\FoodMenuLineViewModel.cs" />
     <Compile Include="ViewModels\GenericViewModel.cs" />
     <Compile Include="ViewModels\HollidayPersonViewModel.cs" />
+    <Compile Include="ViewModels\InterestSummaryViewModel.cs" />
     <Compile Include="ViewModels\InventoryRequestDetail.cs" />
     <Compile Include="ViewModels\Item.cs" />
     <Compile Include="ViewModels\ItemLookup.cs" />

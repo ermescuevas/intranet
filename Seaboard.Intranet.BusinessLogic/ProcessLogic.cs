@@ -29,9 +29,9 @@ namespace Seaboard.Intranet.BusinessLogic
                     var clientContext = new ClientContext("https://seaboardpowercomdo.sharepoint.com");
                     var securePassword = new SecureString();
                     var builder = new StringBuilder();
-                    foreach (char c in "Servicios2.4")
+                    foreach (char c in "qlbpbcdrxsfxqkpx")
                         securePassword.AppendChar(c);
-                    clientContext.Credentials = new SharePointOnlineCredentials("mflow@seaboardpower.com.do", securePassword);
+                    clientContext.Credentials = new SharePointOnlineCredentials("digitalapprovals@seaboardpower.com.do", securePassword);
                     var listCollection = clientContext.Web.Lists.GetByTitle("Historial Aprobaciones");
                     var approvalHistory = new List<ApprovalHistory>();
                     using (clientContext)
@@ -121,6 +121,10 @@ namespace Seaboard.Intranet.BusinessLogic
                             break;
                         case 12:
                             listCollection = clientContext.Web.Lists.GetByTitle("Usuario");
+                            builder.Append("<Where><Eq><FieldRef Name='Solicitud'/>");
+                            break;
+                        case 13:
+                            listCollection = clientContext.Web.Lists.GetByTitle("Equipo");
                             builder.Append("<Where><Eq><FieldRef Name='Solicitud'/>");
                             break;
                     }

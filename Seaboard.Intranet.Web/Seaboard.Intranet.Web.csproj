@@ -1082,6 +1082,7 @@
     <Content Include="Views\AccountReceivables\CollectionsRelationSummaryReport.cshtml" />
     <Content Include="Views\AccountReceivables\NetProtocolMemReport.cshtml" />
     <Content Include="Views\AccountReceivables\NetProtocolMemList.cshtml" />
+    <Content Include="Views\AccountReceivables\EstimatedSummaryInterestReport.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

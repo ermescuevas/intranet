@@ -125,3 +125,19 @@ C:\PERSONAL Projects\intranet\Seaboard.Intranet.Data\obj\Debug\Seaboard.Intranet
 C:\PERSONAL Projects\intranet\Seaboard.Intranet.Data\obj\Debug\Seaboard.Intranet.Data.csproj.CopyComplete
 C:\PERSONAL Projects\intranet\Seaboard.Intranet.Data\obj\Debug\Seaboard.Intranet.Data.dll
 C:\PERSONAL Projects\intranet\Seaboard.Intranet.Data\obj\Debug\Seaboard.Intranet.Data.pdb
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.Data\bin\Debug\Seaboard.Intranet.Data.dll.config
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.Data\bin\Debug\Seaboard.Intranet.Data.dll
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.Data\bin\Debug\Seaboard.Intranet.Data.pdb
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.Data\bin\Debug\EntityFramework.dll
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.Data\bin\Debug\EntityFramework.SqlServer.dll
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.Data\bin\Debug\Seaboard.Intranet.Domain.dll
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.Data\bin\Debug\Newtonsoft.Json.dll
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.Data\bin\Debug\Seaboard.Intranet.Domain.pdb
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.Data\bin\Debug\EntityFramework.xml
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.Data\bin\Debug\EntityFramework.SqlServer.xml
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.Data\bin\Debug\Newtonsoft.Json.xml
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.Data\obj\Debug\Seaboard.Intranet.Data.csproj.AssemblyReference.cache
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.Data\obj\Debug\Seaboard.Intranet.Data.csproj.CoreCompileInputs.cache
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.Data\obj\Debug\Seaboard.Intranet.Data.csproj.CopyComplete
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.Data\obj\Debug\Seaboard.Intranet.Data.dll
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.Data\obj\Debug\Seaboard.Intranet.Data.pdb

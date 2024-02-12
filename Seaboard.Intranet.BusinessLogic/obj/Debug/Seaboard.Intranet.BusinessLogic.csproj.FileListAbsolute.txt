@@ -246,3 +246,27 @@ C:\PERSONAL Projects\intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard
 C:\PERSONAL Projects\intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csproj.CopyComplete
 C:\PERSONAL Projects\intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.dll
 C:\PERSONAL Projects\intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.pdb
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.BusinessLogic.dll.config
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.BusinessLogic.dll
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.BusinessLogic.pdb
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\itextsharp.dll
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Newtonsoft.Json.dll
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\RestSharp.dll
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Data.dll
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Domain.dll
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\System.ValueTuple.dll
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Data.pdb
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Data.dll.config
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Seaboard.Intranet.Domain.pdb
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\itextsharp.xml
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\Newtonsoft.Json.xml
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.BusinessLogic\bin\Debug\System.ValueTuple.xml
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csproj.AssemblyReference.cache
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.Properties.Resources.resources
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csproj.GenerateResource.cache
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csproj.CoreCompileInputs.cache
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.csproj.CopyComplete
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.dll
+C:\NET Projects\PERSONAL Projects\intranet\Seaboard.Intranet.BusinessLogic\obj\Debug\Seaboard.Intranet.BusinessLogic.pdb
